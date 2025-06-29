@@ -1,0 +1,91 @@
+{
+  "hypergraph": {
+    "class": [
+      {
+        "id": 1,
+        "name": "Human",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Last name",
+          "First name",
+          "Middle name",
+          "Age",
+          "Weight",
+          "Height",
+          "Sex",
+          "Date of birth",
+          "Place of birth",
+          "Nationality",
+          "Marital status",
+          "Occupation",
+          "Education level",
+          "Address",
+          "Phone number",
+          "Email"
+        ],
+        "position": { "x": 20, "y": 5, "z": 0 },
+        "size": { "width": 2, "height": 2 },
+        "rendering": {
+          "class": {
+            "color": "#FFD700",
+            "material": "metallic",
+            "borderColor": "#000080",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#A9A9A9",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Car",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Make",
+          "Model",
+          "Year",
+          "VIN",
+          "Color",
+          "Mileage",
+          "Engine type",
+          "Fuel type",
+          "Transmission",
+          "License plate",
+          "Owner"
+        ],
+        "position": { "x": 24, "y": 5, "z": 0 },
+        "size": { "width": 2, "height": 2 },
+        "rendering": {
+          "class": {
+            "color": "#00BFFF",
+            "material": "metallic",
+            "borderColor": "#000080",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#A9A9A9",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      }
+    ]
+  }
+}
