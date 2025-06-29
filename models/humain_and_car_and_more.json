@@ -24,7 +24,7 @@
           "Email"
         ],
         "position": { "x": 19, "y": 5, "z": 0 },
-        "size": { "width": 3, "height": 3 },
+        "size": { "width": 1, "height": 3 },
         "rendering": {
           "class": {
             "color": "#FFD700",
@@ -64,7 +64,7 @@
           "Owner"
         ],
         "position": { "x": 24, "y": 5, "z": 0 },
-        "size": { "width": 3, "height": 3 },
+        "size": { "width": 1, "height": 2 },
         "rendering": {
           "class": {
             "color": "#00BFFF",
@@ -105,7 +105,7 @@
           "Longitude"
         ],
         "position": { "x": 20, "y": 0, "z": 0 },
-        "size": { "width": 3, "height": 3 },
+        "size": { "width": 1, "height": 2 },
         "rendering": {
           "class": {
             "color": "#32CD32",

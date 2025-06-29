@@ -1,0 +1,96 @@
+/* ---------- General Setup ---------- */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #333;
+  overflow: hidden;
+}
+
+#container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  display: block;
+}
+
+/* ---------- Controls Panel ---------- */
+#controls-panel {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 260px;
+  background: rgba(255, 255, 255, .9);
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-group label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.control-group select, .control-group .checkbox-wrapper {
+  width: 100%;
+}
+
+select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-size: 14px;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.checkbox-wrapper:hover {
+  background: #f0f0f0;
+}
+
+.checkbox-wrapper input {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- CSS2D Labels ---------- */
+.label {
+  color: #000;
+  font-family: Arial, sans-serif;
+  text-shadow: 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff;
+  pointer-events: none;
+  user-select: none;
+}
+
+.class-label {
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.attribute-label {
+  font-size: 12px;
+}
