@@ -34,11 +34,11 @@ This project requires no special installations or package managers like npm. You
 
 1.  **Clone the repo**
     ```sh
-    git clone [https://github.com/](https://github.com/)[your_github_username]/[your_repository_name].git
+    git clone https://github.com/arcazj/openbexi_hbds.git
     ```
 2.  **Navigate to the project directory**
     ```sh
-    cd [your_repository_name]
+    cd openbexi_hbds
     ```
 3.  **Run a local web server**
     Because the simulator uses ES Modules (`import`), you must serve the `index.html` file. You cannot open it directly via the `file://` protocol. A simple built-in Python server works perfectly:
@@ -76,7 +76,7 @@ To add new models, simply place your `.json` files in the `/models` directory an
 * [ ] Implement a search or filter feature for attributes.
 * [ ] Allow real-time editing of class properties from the UI.
 
-See the [open issues](https://github.com/[your_github_username]/[your_repository_name]/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/arcazj/openbexi_hbds/issues) for a full list of proposed features (and known issues).
 
 ---
 
