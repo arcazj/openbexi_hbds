@@ -4,6 +4,10 @@
 
 This project provides an interactive visualization tool for **Hypergraph-Based Data Structures (HBDS)**. Built entirely with web technologies, it allows users to load, view, and manipulate complex data models in both 2D and 3D space directly in the browser. It's designed to be a lightweight, single-file solution for easy deployment and use.
 
+### Live Demo
+
+[Live Demo](https://arcazj.github.io/openbexi_hbds/index.html)
+
 ### Key Features:
 
 * **Interactive 2D & 3D Views**: Seamlessly switch between a 2D pannable layout and a full 3D orbital view.
