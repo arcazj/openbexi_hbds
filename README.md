@@ -95,15 +95,6 @@ If you have a suggestion that would make this better, please fork the repo and c
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 ---
-
-## Contact
-
-Your Name - [@your_twitter_handle](https://twitter.com/your_twitter_handle) - email@example.com
-
-Project Link: [https://github.com/[your_github_username]/[your_repository_name]](https://github.com/[your_github_username]/[your_repository_name])
-
----
-
 ## Acknowledgments
 
 * [Three.js](https://threejs.org/)
