@@ -8,6 +8,8 @@ This project provides an interactive visualization tool for **Hypergraph-Based D
 
 [Live Demo](https://arcazj.github.io/openbexi_hbds/index.html)
 
+![HBDS Human class](pictures/HBDS_Model.JPG)
+
 ### Key Features:
 
 * **Interactive 2D & 3D Views**: Seamlessly switch between a 2D pannable layout and a full 3D orbital view.
