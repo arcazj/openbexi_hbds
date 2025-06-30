@@ -2,7 +2,7 @@
 
 ## About The Project
 
-This project provides an interactive visualization tool for **Hypergraph-Based Data Structures (HBDS)**. Built entirely with web technologies, it allows users to load, view, and manipulate complex data models in both 2D and 3D space directly in the browser. It's designed to be a lightweight, single-file solution for easy deployment and use.
+This project provides an interactive visualization tool for **Hypergraph-Based Data Structures (HBDS)**. Built entirely with web technologies, it allows users to load, view, and manipulate complex data models in both 2D and 3D space directly in the browser.
 
 ### Live Demo
 
@@ -13,7 +13,6 @@ This project provides an interactive visualization tool for **Hypergraph-Based D
 * **Interactive 2D & 3D Views**: Seamlessly switch between a 2D pannable layout and a full 3D orbital view.
 * **Dynamic Model Loading**: Load different HBDS models on-the-fly from external JSON files.
 * **Direct Manipulation**: Drag and drop class entities to organize your diagram in 2D view.
-* **Self-Contained & Portable**: Runs from a single HTML file with no build process required.
 * **Fallback Gracefully**: Automatically loads a default model if a specified one isn't found.
 
 ### Built With
@@ -72,7 +71,8 @@ To add new models, simply place your `.json` files in the `/models` directory an
 
 ## Roadmap
 
-* [ ] Add support for defining relationships between classes.
+* [ ] Add support for hyperclasses.
+* [ ] Add support for defining relationships between hyperclasses and classes.
 * [ ] Implement a search or filter feature for attributes.
 * [ ] Allow real-time editing of class properties from the UI.
 
