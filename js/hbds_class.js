@@ -1,6 +1,6 @@
 /* ─────────────────────────────── Imports ─────────────────────────────── */
 import * as THREE from 'three';
-import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
 /* ─────────────────────────────── Loader ──────────────────────────────── */
 export const Loader = {
@@ -17,8 +17,8 @@ export const Loader = {
                         'Marital status', 'Occupation', 'Education level',
                         'Address', 'Phone number', 'Email'
                     ],
-                    position: { x: 0, y: 0, z: 0 },
-                    size:     { width: 2.2, height: 3.8 },
+                    position: {x: 0, y: 0, z: 0},
+                    size: {width: 2.2, height: 3.8},
                     rendering: {
                         class: {
                             color: '#FFD700',
@@ -27,7 +27,7 @@ export const Loader = {
                         },
                         attributes: {
                             checkboxColor: '#A9A9A9',
-                            size: { width: 0.1, height: 0.1 }
+                            size: {width: 0.1, height: 0.1}
                         },
                         connections: {
                             lineColor: '#000000',
@@ -60,10 +60,10 @@ export const Loader = {
  * to `classMesh` but add the entire `group` to the scene.
  */
 export function createClass(classData) {
-    const cfg   = classData.rendering;
-    const sz    = classData.size;
+    const cfg = classData.rendering;
+    const sz = classData.size;
 
-    const Z_BASE    = 0;
+    const Z_BASE = 0;
     const Z_OVERLAY = 0.06;
 
     /* — Rounded rectangle mesh (draggable) — */
@@ -84,34 +84,36 @@ export function createClass(classData) {
     const titleDiv = document.createElement('div');
     titleDiv.className = 'label class-label';
     titleDiv.style.color = cfg.textColor;
-    titleDiv.style.font  = 'bold 16px Arial';
+    titleDiv.style.font = 'bold 16px Arial';
     titleDiv.textContent = classData.name;
     const titleObj = new CSS2DObject(titleDiv);
     titleObj.position.set(0, sz.height / 2 - 0.25, Z_OVERLAY);
 
     /* — Central red hub — */
     const hubPos = new THREE.Vector3(
-        (sz.width  * 0.9) / 2,
+        (sz.width * 0.9) / 2,
         (sz.height * 0.9) / 2,
         Z_OVERLAY
     );
     const hub = new THREE.Mesh(
         new THREE.CircleGeometry(0.04, 32),
-        new THREE.MeshBasicMaterial({ color: '#FF0000' })
+        new THREE.MeshBasicMaterial({color: '#FF0000'})
     );
     hub.position.copy(hubPos);
-    hub.raycast = () => {};
-    titleObj.raycast = () => {};
+    hub.raycast = () => {
+    };
+    titleObj.raycast = () => {
+    };
     classMesh.add(hub);
     classMesh.add(titleObj);
 
 
     /* — Attributes: cube + line + label — */
-    const cbW   = cfg.attributes.size.width;
-    const cbH   = cfg.attributes.size.height ?? cbW;
-    const gapY  = 0.15;                                           // vertical spacing
+    const cbW = cfg.attributes.size.width;
+    const cbH = cfg.attributes.size.height ?? cbW;
+    const gapY = 0.15;                                           // vertical spacing
     const startY = sz.height / 2 - 0.1;
-    const colX   = sz.width / 2 + 0.25 + cbW;                  // cube centre X
+    const colX = sz.width / 2 + 0.25 + cbW;                  // cube centre X
 
     classData.attributes.forEach((attrName, idx) => {
         const y = startY - idx * gapY;
@@ -126,7 +128,8 @@ export function createClass(classData) {
             })
         );
         cube.position.set(colX, y, Z_OVERLAY);
-        cube.raycast = () => {};
+        cube.raycast = () => {
+        };
         classMesh.add(cube);
 
         // connecting line
@@ -137,14 +140,15 @@ export function createClass(classData) {
                 linewidth: cfg.connections.lineWidth
             })
         );
-        line.raycast = () => {};
+        line.raycast = () => {
+        };
         classMesh.add(line);
 
         // attribute label
         const aDiv = document.createElement('div');
         aDiv.className = 'label attribute-label';
         aDiv.style.color = cfg.textColor;
-        aDiv.style.font  = '12px Arial';
+        aDiv.style.font = '12px Arial';
         aDiv.textContent = attrName;
         const aLbl = new CSS2DObject(aDiv);
         aLbl.position.set(colX + cbW + 0.12, y, Z_OVERLAY);
@@ -152,7 +156,7 @@ export function createClass(classData) {
         classMesh.add(aLbl);
     });
 
-    return {classMesh };
+    return {classMesh};
 }
 
 /* ───────────────────────── roundedRect helper ───────────────────────── */
