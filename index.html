@@ -122,6 +122,9 @@
             renderer.render(scene, camera);
             css2DRenderer.render(scene, camera);
         });
+        updateLabelFontSizes(camera);   // <-- your distance-based font fix
+        renderer.render(scene, camera);
+        css2DRenderer.render(scene, camera);
     }
 
     function setupDragControls() {
