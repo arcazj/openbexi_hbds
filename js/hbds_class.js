@@ -106,6 +106,7 @@ export function createClass(classData) {
     };
     classMesh.add(hub);
     classMesh.add(titleObj);
+    labels.push(titleObj);
 
 
     /* — Attributes: cube + line + label — */
@@ -154,9 +155,47 @@ export function createClass(classData) {
         aLbl.position.set(colX + cbW + 0.12, y, Z_OVERLAY);
         aLbl.center.set(0, 0.5);
         classMesh.add(aLbl);
+        labels.push(aLbl);
     });
 
     return {classMesh};
+}
+/**
+ * NEW: Dynamically scales CSS2D labels based on camera distance.
+ * @param {THREE.Camera} camera - The scene camera.
+ */
+const labels = []; // Store all labels for easy access
+export function updateLabelFontSizes(camera) {
+    const tempVec = new THREE.Vector3();
+    const cameraPos = new THREE.Vector3();
+    camera.getWorldPosition(cameraPos);
+
+    labels.forEach(label => {
+        if (!label.element) return;
+
+        label.getWorldPosition(tempVec);
+        const distance = tempVec.distanceTo(cameraPos);
+
+        let scaleFactor, minSize, maxSize;
+
+        // Differentiate between class and attribute labels
+        if (label.element.classList.contains('class-label')) {
+            scaleFactor = 150; // Larger base size for class names
+            minSize = 14;
+            maxSize = 32;
+        } else {
+            scaleFactor = 100; // Smaller base size for attributes
+            minSize = 8;
+            maxSize = 16;
+        }
+
+        // Calculate font size and clamp it within the defined range
+        const fontSize = THREE.MathUtils.clamp(scaleFactor / distance, minSize, maxSize);
+
+        label.element.style.fontSize = `${fontSize.toFixed(1)}px`;
+        // Force hardware acceleration for smoother scaling and crisp text
+        label.element.style.transform = 'translateZ(0)';
+    });
 }
 
 /* ───────────────────────── roundedRect helper ───────────────────────── */

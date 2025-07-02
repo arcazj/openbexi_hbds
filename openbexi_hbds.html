@@ -4,18 +4,44 @@
     <title>HDBS Graphic Simulator</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ---------- General Setup ---------- */
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #333; overflow: hidden; }
+        #container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+        canvas { display: block; }
+
+        /* ---------- Controls Panel ---------- */
+        #controls-panel { position: absolute; top: 15px; right: 15px; width: 260px; background: rgba(255, 255, 255, .9);
+            border-radius: 8px; padding: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, .15); border: 1px solid #ddd;
+            display: flex; flex-direction: column; gap: 15px; }
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        .control-group label { font-weight: 600; font-size: 14px; }
+        .control-group select, .control-group .checkbox-wrapper { width: 100%; }
+        select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; background: #fff; font-size: 14px; }
+        .checkbox-wrapper { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px;
+            border: 1px solid transparent; border-radius: 4px; }
+        .checkbox-wrapper:hover { background: #f0f0f0; }
+        .checkbox-wrapper input { margin: 0; width: 18px; height: 18px; }
+
+        /* ---------- CSS2D Labels ---------- */
+        .label { color: #000; font-family: Arial, sans-serif;
+            text-shadow: 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff; pointer-events: none; user-select: none;
+            /* New rule to prevent text wrapping */
+            white-space: nowrap; }
+        .class-label { font-weight: bold; font-size: 24px; }
+        .attribute-label { font-size: 12px; }
+    </style>
 </head>
 <body>
 <div id="container"></div>
+
 <div id="controls-panel">
     <div class="control-group">
         <label for="model-select">Select HDBS Model</label>
         <select id="model-select">
             <option value="human">human</option>
-            <option value="human_and_car">human_and_car</option>
-            <option value="human_and_car_and_more">human_and_car_and_more</option>
-            <option value="transportation">transportation</option>
+            <option value="humain_and_car">humain_and_car</option>
+            <option value="humain_and_car_and_more">humain_and_car_and_more</option>
         </select>
     </div>
     <div class="control-group">
@@ -25,6 +51,7 @@
         </label>
     </div>
 </div>
+
 <script type="importmap">
     {
       "imports": {
@@ -32,20 +59,145 @@
         "three/addons/": "https://unpkg.com/three@0.176.0/examples/jsm/"
       }
     }
-
 </script>
+
 <script type="module">
     /* ---------- Imports ---------- */
     import * as THREE from 'three';
-    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-    import {DragControls} from 'three/addons/controls/DragControls.js';
-    import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {Loader, createClass} from './js/hbds_class.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { DragControls } from 'three/addons/controls/DragControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
     let diagramGroup = new THREE.Group();
     const draggableObjects = [];
+    const labels = []; // Store all labels for easy access
+
+    /* ---------- DATA LOADER ---------- */
+    const Loader = {
+        fallbackHumanModel: {
+            "hypergraph": {
+                "class": [{
+                    "id": 1, "name": "Human", "type": "roundedRectangle",
+                    "attributes": ["Last name", "First name", "Middle name", "Age", "Weight",
+                        "Height", "Sex", "Date of birth", "Place of birth",
+                        "Nationality", "Marital status", "Occupation",
+                        "Education level", "Address", "Phone number", "Email"],
+                    "position": { "x": 0, "y": 0, "z": 0 },
+                    "size": { "width": 2.2, "height": 3.8 },
+                    "rendering": {
+                        "class": { "color": "#FFD700", "borderColor": "#000080", "cornerRadius": 0.1 },
+                        "attributes": { "checkboxColor": "#A9A9A9", "size": { "width": 0.1, "height": 0.1 } },
+                        "connections": { "lineColor": "#000000", "lineWidth": 0.01 },
+                        "textColor": "#000000"
+                    }
+                }]
+            }
+        },
+        async load(modelName) {
+            try {
+                const res = await fetch(`./models/${modelName}.json`);
+                if (!res.ok) throw new Error(`Model not found: ${modelName}`);
+                return await res.json();
+            } catch (err) {
+                console.warn(`Failed to load '${modelName}'. Using fallback.`, err.message);
+                return this.fallbackHumanModel;
+            }
+        }
+    };
+
+    /* ---------- HDBS ENTITY BUILDER ---------- */
+    const HDBSEntityBuilder = {
+        create(classData) {
+            const group = new THREE.Group();
+            const cfg = classData.rendering;
+            const sz = classData.size;
+
+            const Z_BASE = 0, Z_BORDER = 0.051, Z_OVERLAY = 0.06;
+
+            // Rounded rectangle mesh (draggable part)
+            const shape = this.roundedRect(sz.width, sz.height, cfg.class.cornerRadius);
+            const geom = new THREE.ExtrudeGeometry(shape, { depth: 0.05, bevelEnabled: false });
+            const mat = new THREE.MeshStandardMaterial({ color: cfg.class.color, metalness: 1, roughness: 0.25 });
+            const classMesh = new THREE.Mesh(geom, mat);
+            classMesh.position.z = Z_BASE;
+            group.add(classMesh);
+
+            // Border
+            const lineGeom = new THREE.BufferGeometry().setFromPoints(shape.getPoints(100));
+            const lineMat = new THREE.LineBasicMaterial({ color: cfg.class.borderColor });
+            const border = new THREE.LineLoop(lineGeom, lineMat);
+            border.position.z = Z_BORDER;
+            group.add(border);
+
+            // Class name label
+            const lblDiv = document.createElement('div');
+            lblDiv.className = 'label class-label';
+            lblDiv.textContent = classData.name;
+            lblDiv.style.color = cfg.textColor;
+            const lbl = new CSS2DObject(lblDiv);
+            lbl.position.set(0, sz.height / 2 - 0.25, Z_OVERLAY);
+            group.add(lbl);
+            labels.push(lbl); // Add to global labels array
+
+            // Central connection point
+            const center = new THREE.Vector3(sz.width / 2 * 0.9, sz.height / 2 * 0.9, Z_OVERLAY);
+            const circG = new THREE.CircleGeometry(0.04, 32);
+            const circM = new THREE.MeshBasicMaterial({ color: '#FF0000' });
+            const hub = new THREE.Mesh(circG, circM);
+            hub.position.copy(center);
+            group.add(hub);
+
+            // Attributes (checkbox, line, label)
+            const attrX = sz.width / 2 + 0.1;
+            const startY = sz.height / 2 - 0.2;
+            const gap = 0.15;
+            const cbW = cfg.attributes.size.width;
+
+            classData.attributes.forEach((name, i) => {
+                const y = startY - i * gap;
+                const cbGeom = new THREE.BoxGeometry(cbW, cfg.attributes.size.height, cbW);
+                const cbMat = new THREE.MeshStandardMaterial({
+                    color: cfg.attributes.checkboxColor, metalness: 1, roughness: 0.25
+                });
+                const cb = new THREE.Mesh(cbGeom, cbMat);
+                cb.position.set(attrX + cbW / 2 + 0.1, y, Z_OVERLAY);
+                group.add(cb);
+
+                const pts = [center, cb.position];
+                const lnGeom = new THREE.BufferGeometry().setFromPoints(pts);
+                const lnMat = new THREE.LineBasicMaterial({
+                    color: cfg.connections.lineColor,
+                    linewidth: cfg.connections.lineWidth
+                });
+                group.add(new THREE.Line(lnGeom, lnMat));
+
+                const aDiv = document.createElement('div');
+                aDiv.className = 'label attribute-label';
+                aDiv.textContent = name;
+                aDiv.style.color = cfg.textColor;
+                const aLbl = new CSS2DObject(aDiv);
+                aLbl.position.set(cb.position.x + cbW, y, Z_OVERLAY);
+                aLbl.center.set(0, 0.5);
+                group.add(aLbl);
+                labels.push(aLbl); // Add to global labels array
+            });
+
+            return { group, classMesh };
+        },
+
+        roundedRect(w, h, r) {
+            const s = new THREE.Shape();
+            const x = -w / 2, y = -h / 2;
+            s.moveTo(x, y + r);
+            s.lineTo(x, y + h - r); s.quadraticCurveTo(x, y + h, x + r, y + h);
+            s.lineTo(x + w - r, y + h); s.quadraticCurveTo(x + w, y + h, x + w, y + h - r);
+            s.lineTo(x + w, y + r); s.quadraticCurveTo(x + w, y, x + w - r, y);
+            s.lineTo(x + r, y); s.quadraticCurveTo(x, y, x, y + r);
+            return s;
+        }
+    };
 
     /* ---------- MAIN APPLICATION ---------- */
     function init() {
@@ -56,7 +208,7 @@
         camera.position.set(0, 0, 10);
 
         const container = document.getElementById('container');
-        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         container.appendChild(renderer.domElement);
 
@@ -68,11 +220,9 @@
 
         scene.add(new THREE.AmbientLight(0xffffff, 0.9));
         const keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
-        keyLight.position.set(1, 2.5, 6);
-        scene.add(keyLight);
+        keyLight.position.set(1, 2.5, 6); scene.add(keyLight);
         const rim = new THREE.DirectionalLight(0xffffff, 0.6);
-        rim.position.set(-1, -4, -2);
-        scene.add(rim);
+        rim.position.set(-1, -4, -2); scene.add(rim);
 
         orbitControls = new OrbitControls(camera, css2DRenderer.domElement);
         orbitControls.enableRotate = false;
@@ -89,6 +239,7 @@
         if (diagramGroup) {
             scene.remove(diagramGroup);
             draggableObjects.length = 0;
+            labels.length = 0; // Clear labels array
             diagramGroup.traverse(c => {
                 if ((c.isMesh || c.isLine) && c.geometry) c.geometry.dispose();
                 if ((c.isMesh || c.isLine) && c.material) c.material.dispose();
@@ -102,9 +253,9 @@
         scene.add(diagramGroup);
 
         data.hypergraph.class.forEach(cd => {
-            const {classMesh} = createClass(cd);
-            classMesh.position.set(cd.position.x, cd.position.y, cd.position.z);
-            diagramGroup.add(classMesh);
+            const { group, classMesh } = HDBSEntityBuilder.create(cd);
+            group.position.set(cd.position.x, cd.position.y, cd.position.z);
+            diagramGroup.add(group);
             draggableObjects.push(classMesh);  // only the rectangle is the handle
         });
 
@@ -119,22 +270,29 @@
     }
 
     function setupDragControls() {
-        dragControls = new DragControls(draggableObjects, camera, css2DRenderer.domElement); // unified target
-        dragControls.transformGroup = false;
+        dragControls = new DragControls(draggableObjects, camera, css2DRenderer.domElement);
+        dragControls.transformGroup = true;
 
         dragControls.addEventListener('dragstart', ev => {
             orbitControls.enabled = false;
+            // When dragging, we move the entire card group, not just the mesh
+            ev.object.parent.userData.isDragging = true;
         });
 
         dragControls.addEventListener('drag', ev => {
+            // Find the parent group and update its position
+            const group = ev.object.parent;
+            if (group) {
+                group.position.copy(ev.object.position);
+            }
         });
 
-        dragControls.addEventListener('dragend', () => {
-            const is3D = document.getElementById('view-toggle').checked;
-            orbitControls.enabled = !is3D;
+        dragControls.addEventListener('dragend', ev => {
+            orbitControls.enabled = true;
+            ev.object.parent.userData.isDragging = false;
         });
 
-        toggleView({target: document.getElementById('view-toggle')});
+        toggleView({ target: document.getElementById('view-toggle') });
     }
 
     /* ---------- Utility functions ---------- */
@@ -164,15 +322,58 @@
         }
         const fovR = camera.fov * Math.PI / 180;
         const dist = Math.abs(sphere.radius / Math.sin(fovR / 2));
-        camera.position.set(0, 0, dist * 1.2);
-        camera.lookAt(0, 0, 0);
-        orbitControls.target.set(0, 0, 0);
+        camera.position.set(sphere.center.x, sphere.center.y, sphere.center.z + dist * 1.5);
+        camera.lookAt(sphere.center);
+        orbitControls.target.copy(sphere.center);
         orbitControls.update();
     }
 
+    /**
+     * NEW: Dynamically scales CSS2D labels based on camera distance.
+     * @param {THREE.Camera} camera - The scene camera.
+     */
+    function updateLabelFontSizes(camera) {
+        const tempVec = new THREE.Vector3();
+        const cameraPos = new THREE.Vector3();
+        camera.getWorldPosition(cameraPos);
+
+        labels.forEach(label => {
+            if (!label.element) return;
+
+            label.getWorldPosition(tempVec);
+            const distance = tempVec.distanceTo(cameraPos);
+
+            let scaleFactor, minSize, maxSize;
+
+            // Differentiate between class and attribute labels
+            if (label.element.classList.contains('class-label')) {
+                scaleFactor = 150; // Larger base size for class names
+                minSize = 14;
+                maxSize = 32;
+            } else {
+                scaleFactor = 100; // Smaller base size for attributes
+                minSize = 8;
+                maxSize = 16;
+            }
+
+            // Calculate font size and clamp it within the defined range
+            const fontSize = THREE.MathUtils.clamp(scaleFactor / distance, minSize, maxSize);
+
+            label.element.style.fontSize = `${fontSize.toFixed(1)}px`;
+            // Force hardware acceleration for smoother scaling and crisp text
+            label.element.style.transform = 'translateZ(0)';
+        });
+    }
+
+
     function animate() {
         requestAnimationFrame(animate);
+
+        // Call the new label scaling function each frame
+        updateLabelFontSizes(camera);
+
         if (orbitControls.enabled) orbitControls.update();
+
         renderer.render(scene, camera);
         css2DRenderer.render(scene, camera);
     }

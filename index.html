@@ -40,7 +40,7 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {Loader, createClass} from './js/hbds_class.js';
+    import {Loader, createClass, updateLabelFontSizes} from './js/hbds_class.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
@@ -116,6 +116,12 @@
 
         setCamera2D();
         setupDragControls();
+        //updateLabelFontSizes(camera);
+        orbitControls.addEventListener('change', () => {
+            updateLabelFontSizes(camera);   // <-- your distance-based font fix
+            renderer.render(scene, camera);
+            css2DRenderer.render(scene, camera);
+        });
     }
 
     function setupDragControls() {
@@ -140,9 +146,12 @@
     /* ---------- Utility functions ---------- */
     function onResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
         css2DRenderer.setSize(window.innerWidth, window.innerHeight);
+        updateLabelFontSizes(camera);   // <-- your distance-based font fix
+        renderer.render(scene, camera);
+        css2DRenderer.render(scene, camera);
+        camera.updateProjectionMatrix();
     }
 
     function toggleView(e) {
@@ -172,6 +181,7 @@
 
     function animate() {
         requestAnimationFrame(animate);
+
         if (orbitControls.enabled) orbitControls.update();
         renderer.render(scene, camera);
         css2DRenderer.render(scene, camera);
