@@ -1,0 +1,230 @@
+{
+  "hypergraph": {
+    "class": [
+      {
+        "id": 1,
+        "name": "Car",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Make", "Model", "Year", "VIN", "Color", "Engine type",
+          "Fuel type", "Transmission", "Mileage", "License plate"
+        ],
+        "position": { "x": 0, "y": 0, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#00BFFF", "borderColor": "#000080", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Motorcycle",
+        "type": "roundedRectangle",
+        "attributes": ["Brand", "Model", "Year", "Engine size", "Type", "License plate"],
+        "position": { "x": 5, "y": 0, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#FF4500", "borderColor": "#8B0000", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Bicycle",
+        "type": "roundedRectangle",
+        "attributes": ["Type", "Brand", "Frame size", "Gears", "Color"],
+        "position": { "x": 10, "y": 0, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#32CD32", "borderColor": "#006400", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Bus",
+        "type": "roundedRectangle",
+        "attributes": ["Operator", "Route number", "Capacity", "Fuel type", "Length", "License plate"],
+        "position": { "x": 0, "y": -5, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#FFA500", "borderColor": "#FF8C00", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 5,
+        "name": "Train",
+        "type": "roundedRectangle",
+        "attributes": ["Train type", "Operator", "Route", "Number of carriages", "Power source"],
+        "position": { "x": 5, "y": -5, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#A52A2A", "borderColor": "#800000", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 6,
+        "name": "Airplane",
+        "type": "roundedRectangle",
+        "attributes": ["Airline", "Flight number", "Aircraft type", "Seat capacity", "Engine type"],
+        "position": { "x": 10, "y": -5, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#87CEEB", "borderColor": "#4682B4", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 7,
+        "name": "Boat",
+        "type": "roundedRectangle",
+        "attributes": ["Boat type", "Operator", "Capacity", "Length", "Engine type"],
+        "position": { "x": 0, "y": -10, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#20B2AA", "borderColor": "#008B8B", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 8,
+        "name": "Ferry",
+        "type": "roundedRectangle",
+        "attributes": ["Operator", "Route", "Passenger capacity", "Vehicle capacity"],
+        "position": { "x": 5, "y": -10, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#40E0D0", "borderColor": "#008080", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Helicopter",
+        "type": "roundedRectangle",
+        "attributes": ["Operator", "Helicopter type", "Capacity", "Tail number"],
+        "position": { "x": 10, "y": -10, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#708090", "borderColor": "#2F4F4F", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 10,
+        "name": "Subway",
+        "type": "roundedRectangle",
+        "attributes": ["Operator", "Line name", "Capacity", "Station"],
+        "position": { "x": 0, "y": -15, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#800080", "borderColor": "#4B0082", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 11,
+        "name": "Tram",
+        "type": "roundedRectangle",
+        "attributes": ["Operator", "Route", "Capacity"],
+        "position": { "x": 5, "y": -15, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#FFD700", "borderColor": "#B8860B", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 12,
+        "name": "Spaceship",
+        "type": "roundedRectangle",
+        "attributes": ["Operator", "Mission type", "Launch site", "Payload capacity"],
+        "position": { "x": 10, "y": -15, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#DC143C", "borderColor": "#8B0000", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 13,
+        "name": "Skateboard",
+        "type": "roundedRectangle",
+        "attributes": ["Type", "Deck length", "Brand"],
+        "position": { "x": 15, "y": -15, "z": 0 },
+        "size": { "width": 1, "height": 2 },
+        "rendering": {
+          "class": { "color": "#FF69B4", "borderColor": "#C71585", "borderWidth": 1, "cornerRadius": 1 },
+          "attributes": {
+            "checkboxColor": "#A9A9A9", "checkboxMaterial": "metallic",
+            "shape": "square", "size": { "width": 0.1, "height": 0.1 }
+          },
+          "connections": { "lineColor": "#000000", "lineWidth": 1 },
+          "textColor": "#000000"
+        }
+      }
+    ]
+  }
+}
