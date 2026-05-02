@@ -4,49 +4,189 @@
       {
         "id": 1,
         "name": "Bridge",
-        "type": "ellipse",
-        "attributes": [],
-        "position": { "x": 6, "y": 8, "z": 0 },
-        "size": { "width": 1.8, "height": 0.9 },
+        "type": "roundedRectangle",
+        "attributes": [
+          "Name",
+          "Type",
+          "Span length",
+          "Deck width",
+          "Load capacity",
+          "Material",
+          "Construction year",
+          "Condition"
+        ],
+        "position": {
+          "x": 6,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 2.15
+        },
         "rendering": {
-          "class": { "color": "#000000", "borderColor": "#FFFF00", "cornerRadius": 0.2 },
-          "textColor": "#FFFF00"
+          "class": {
+            "color": "#FFD700",
+            "material": "metallic",
+            "borderColor": "#000080",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#A9A9A9",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
         }
       },
       {
         "id": 2,
         "name": "River",
-        "type": "ellipse",
-        "attributes": [],
-        "position": { "x": 14, "y": 8.1, "z": 0 },
-        "size": { "width": 2.0, "height": 0.9 },
+        "type": "roundedRectangle",
+        "attributes": [
+          "Name",
+          "Length",
+          "Width",
+          "Depth",
+          "Flow direction",
+          "Average flow",
+          "Flood risk",
+          "Waterway type"
+        ],
+        "position": {
+          "x": 14,
+          "y": 8.1,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 2.15
+        },
         "rendering": {
-          "class": { "color": "#000000", "borderColor": "#FFFF00", "cornerRadius": 0.2 },
-          "textColor": "#FFFF00"
+          "class": {
+            "color": "#00BFFF",
+            "material": "metallic",
+            "borderColor": "#000080",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#A9A9A9",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
         }
       },
       {
         "id": 3,
         "name": "Footbridge",
-        "type": "ellipse",
-        "attributes": [],
-        "position": { "x": 22, "y": 8.2, "z": 0 },
-        "size": { "width": 2.2, "height": 0.9 },
+        "type": "roundedRectangle",
+        "attributes": [
+          "Name",
+          "Type",
+          "Span length",
+          "Deck width",
+          "Load capacity",
+          "Material",
+          "Accessibility",
+          "Condition"
+        ],
+        "position": {
+          "x": 22,
+          "y": 8.2,
+          "z": 0
+        },
+        "size": {
+          "width": 1.55,
+          "height": 2.15
+        },
         "rendering": {
-          "class": { "color": "#000000", "borderColor": "#FFFF00", "cornerRadius": 0.2 },
-          "textColor": "#FFFF00"
+          "class": {
+            "color": "#FFE082",
+            "material": "metallic",
+            "borderColor": "#000080",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#A9A9A9",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
         }
       },
       {
         "id": 4,
         "name": "Road",
-        "type": "ellipse",
-        "attributes": [],
-        "position": { "x": 14, "y": 3.2, "z": 0 },
-        "size": { "width": 2.0, "height": 0.9 },
+        "type": "roundedRectangle",
+        "attributes": [
+          "Name",
+          "Road type",
+          "Number of lanes",
+          "Surface material",
+          "Speed limit",
+          "Direction",
+          "Traffic capacity",
+          "Condition"
+        ],
+        "position": {
+          "x": 14,
+          "y": 3.2,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 2.15
+        },
         "rendering": {
-          "class": { "color": "#000000", "borderColor": "#FFFF00", "cornerRadius": 0.2 },
-          "textColor": "#FFFF00"
+          "class": {
+            "color": "#B0BEC5",
+            "material": "metallic",
+            "borderColor": "#000080",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#A9A9A9",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
         }
       }
     ],
@@ -55,160 +195,168 @@
         "sourceClassId": 1,
         "targetClassId": 2,
         "rendering": {
-          "lineColor": "#FFFF00",
+          "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.9,
+          "curveOffset": 0.55,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
-          "arrowheadSize": 0.26,
+          "arrowheadSize": 0.22,
           "labelText": "crosses",
-          "labelFontSize": 12,
-          "labelColor": "#FFFF00",
+          "labelFontSize": 13,
+          "labelColor": "#0d1321",
           "labelPositionAlongPath": 0.35,
-          "labelOffsetFromPath": 0.25,
+          "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "labelBackgroundColor": "rgba(255,255,255,0.95)"
         }
       },
       {
         "sourceClassId": 2,
         "targetClassId": 1,
         "rendering": {
-          "lineColor": "#FFFF00",
+          "lineColor": "#2e7d32",
           "lineWidth": 2,
-          "lineStyle": "solid",
-          "curveOffset": -0.5,
+          "lineStyle": "dashed",
+          "curveOffset": -0.55,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
-          "arrowheadSize": 0.26,
+          "arrowheadSize": 0.22,
           "labelText": "crossed by",
-          "labelFontSize": 12,
-          "labelColor": "#FFFF00",
+          "labelFontSize": 13,
+          "labelColor": "#0b3d02",
           "labelPositionAlongPath": 0.65,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "labelBackgroundColor": "rgba(255,255,255,0.95)"
         }
       },
       {
         "sourceClassId": 2,
         "targetClassId": 3,
         "rendering": {
-          "lineColor": "#FFFF00",
+          "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.8,
+          "curveOffset": 0.55,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
-          "arrowheadSize": 0.26,
+          "arrowheadSize": 0.22,
           "labelText": "crosses",
-          "labelFontSize": 12,
-          "labelColor": "#FFFF00",
+          "labelFontSize": 13,
+          "labelColor": "#0d1321",
           "labelPositionAlongPath": 0.55,
-          "labelOffsetFromPath": 0.25,
+          "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "labelBackgroundColor": "rgba(255,255,255,0.95)"
         }
       },
       {
         "sourceClassId": 3,
         "targetClassId": 2,
         "rendering": {
-          "lineColor": "#FFFF00",
+          "lineColor": "#2e7d32",
           "lineWidth": 2,
-          "lineStyle": "solid",
-          "curveOffset": -0.5,
+          "lineStyle": "dashed",
+          "curveOffset": -0.55,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
-          "arrowheadSize": 0.26,
+          "arrowheadSize": 0.22,
           "labelText": "crossed by",
-          "labelFontSize": 12,
-          "labelColor": "#FFFF00",
+          "labelFontSize": 13,
+          "labelColor": "#0b3d02",
           "labelPositionAlongPath": 0.45,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "labelBackgroundColor": "rgba(255,255,255,0.95)"
         }
       },
       {
         "sourceClassId": 1,
         "targetClassId": 4,
         "rendering": {
-          "lineColor": "#FFFF00",
+          "lineColor": "#6a1b9a",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": 0.9,
+          "curveOffset": 0.55,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
-          "arrowheadSize": 0.26,
+          "arrowheadSize": 0.22,
           "labelText": "supports",
-          "labelFontSize": 12,
-          "labelColor": "#FFFF00",
+          "labelFontSize": 13,
+          "labelColor": "#3b0a57",
           "labelPositionAlongPath": 0.4,
-          "labelOffsetFromPath": 0.25,
+          "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "labelBackgroundColor": "rgba(255,255,255,0.95)"
         }
       },
       {
         "sourceClassId": 4,
         "targetClassId": 1,
         "rendering": {
-          "lineColor": "#FFFF00",
+          "lineColor": "#ef6c00",
           "lineWidth": 2,
-          "lineStyle": "solid",
-          "curveOffset": 0.45,
+          "lineStyle": "dashed",
+          "curveOffset": -0.55,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
-          "arrowheadSize": 0.26,
+          "arrowheadSize": 0.22,
           "labelText": "supported by",
-          "labelFontSize": 12,
-          "labelColor": "#FFFF00",
+          "labelFontSize": 13,
+          "labelColor": "#4a2500",
           "labelPositionAlongPath": 0.55,
-          "labelOffsetFromPath": -0.25,
+          "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "labelBackgroundColor": "rgba(255,255,255,0.95)"
         }
       },
       {
         "sourceClassId": 4,
         "targetClassId": 3,
         "rendering": {
-          "lineColor": "#FFFF00",
+          "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.8,
+          "curveOffset": 0.55,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
-          "arrowheadSize": 0.26,
+          "arrowheadSize": 0.22,
           "labelText": "crosses",
-          "labelFontSize": 12,
-          "labelColor": "#FFFF00",
+          "labelFontSize": 13,
+          "labelColor": "#0d1321",
           "labelPositionAlongPath": 0.45,
-          "labelOffsetFromPath": 0.22,
+          "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "labelBackgroundColor": "rgba(255,255,255,0.95)"
         }
       },
       {
         "sourceClassId": 3,
         "targetClassId": 4,
         "rendering": {
-          "lineColor": "#FFFF00",
+          "lineColor": "#2e7d32",
           "lineWidth": 2,
-          "lineStyle": "solid",
-          "curveOffset": -0.45,
+          "lineStyle": "dashed",
+          "curveOffset": -0.55,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
-          "arrowheadSize": 0.26,
+          "arrowheadSize": 0.22,
           "labelText": "crossed by",
-          "labelFontSize": 12,
-          "labelColor": "#FFFF00",
+          "labelFontSize": 13,
+          "labelColor": "#0b3d02",
           "labelPositionAlongPath": 0.6,
-          "labelOffsetFromPath": -0.22,
+          "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "labelBackgroundColor": "rgba(255,255,255,0.95)"
         }
       }
     ]
