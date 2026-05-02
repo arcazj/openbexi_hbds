@@ -1,0 +1,216 @@
+{
+  "hypergraph": {
+    "class": [
+      {
+        "id": 1,
+        "name": "Bridge",
+        "type": "ellipse",
+        "attributes": [],
+        "position": { "x": 6, "y": 8, "z": 0 },
+        "size": { "width": 1.8, "height": 0.9 },
+        "rendering": {
+          "class": { "color": "#000000", "borderColor": "#FFFF00", "cornerRadius": 0.2 },
+          "textColor": "#FFFF00"
+        }
+      },
+      {
+        "id": 2,
+        "name": "River",
+        "type": "ellipse",
+        "attributes": [],
+        "position": { "x": 14, "y": 8.1, "z": 0 },
+        "size": { "width": 2.0, "height": 0.9 },
+        "rendering": {
+          "class": { "color": "#000000", "borderColor": "#FFFF00", "cornerRadius": 0.2 },
+          "textColor": "#FFFF00"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Footbridge",
+        "type": "ellipse",
+        "attributes": [],
+        "position": { "x": 22, "y": 8.2, "z": 0 },
+        "size": { "width": 2.2, "height": 0.9 },
+        "rendering": {
+          "class": { "color": "#000000", "borderColor": "#FFFF00", "cornerRadius": 0.2 },
+          "textColor": "#FFFF00"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Road",
+        "type": "ellipse",
+        "attributes": [],
+        "position": { "x": 14, "y": 3.2, "z": 0 },
+        "size": { "width": 2.0, "height": 0.9 },
+        "rendering": {
+          "class": { "color": "#000000", "borderColor": "#FFFF00", "cornerRadius": 0.2 },
+          "textColor": "#FFFF00"
+        }
+      }
+    ],
+    "link": [
+      {
+        "sourceClassId": 1,
+        "targetClassId": 2,
+        "rendering": {
+          "lineColor": "#FFFF00",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.9,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.26,
+          "labelText": "crosses",
+          "labelFontSize": 12,
+          "labelColor": "#FFFF00",
+          "labelPositionAlongPath": 0.35,
+          "labelOffsetFromPath": 0.25,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 2,
+        "targetClassId": 1,
+        "rendering": {
+          "lineColor": "#FFFF00",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.5,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.26,
+          "labelText": "crossed by",
+          "labelFontSize": 12,
+          "labelColor": "#FFFF00",
+          "labelPositionAlongPath": 0.65,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 2,
+        "targetClassId": 3,
+        "rendering": {
+          "lineColor": "#FFFF00",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.8,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.26,
+          "labelText": "crosses",
+          "labelFontSize": 12,
+          "labelColor": "#FFFF00",
+          "labelPositionAlongPath": 0.55,
+          "labelOffsetFromPath": 0.25,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 3,
+        "targetClassId": 2,
+        "rendering": {
+          "lineColor": "#FFFF00",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.5,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.26,
+          "labelText": "crossed by",
+          "labelFontSize": 12,
+          "labelColor": "#FFFF00",
+          "labelPositionAlongPath": 0.45,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 1,
+        "targetClassId": 4,
+        "rendering": {
+          "lineColor": "#FFFF00",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.9,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.26,
+          "labelText": "supports",
+          "labelFontSize": 12,
+          "labelColor": "#FFFF00",
+          "labelPositionAlongPath": 0.4,
+          "labelOffsetFromPath": 0.25,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 4,
+        "targetClassId": 1,
+        "rendering": {
+          "lineColor": "#FFFF00",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.26,
+          "labelText": "supported by",
+          "labelFontSize": 12,
+          "labelColor": "#FFFF00",
+          "labelPositionAlongPath": 0.55,
+          "labelOffsetFromPath": -0.25,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 4,
+        "targetClassId": 3,
+        "rendering": {
+          "lineColor": "#FFFF00",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.8,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.26,
+          "labelText": "crosses",
+          "labelFontSize": 12,
+          "labelColor": "#FFFF00",
+          "labelPositionAlongPath": 0.45,
+          "labelOffsetFromPath": 0.22,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 3,
+        "targetClassId": 4,
+        "rendering": {
+          "lineColor": "#FFFF00",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.26,
+          "labelText": "crossed by",
+          "labelFontSize": 12,
+          "labelColor": "#FFFF00",
+          "labelPositionAlongPath": 0.6,
+          "labelOffsetFromPath": -0.22,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      }
+    ]
+  }
+}
