@@ -44,7 +44,6 @@ export function createLinkBetweenClass(linkData, classById) {
 
   const geometry = new THREE.BufferGeometry();
   const line = new THREE.Line(geometry, mat);
-  if (lineStyle !== 'solid') line.computeLineDistances();
   line.renderOrder = rendering.zIndex ?? 5;
 
   const arrow = new THREE.Mesh(
