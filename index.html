@@ -16,6 +16,7 @@
             <option value="human_and_car">human_and_car</option>
             <option value="human_and_car_and_more">human_and_car_and_more</option>
             <option value="transportation">transportation</option>
+            <option value="human_and_car_links">human_and_car_links</option>
         </select>
     </div>
     <div class="control-group">
@@ -40,7 +41,9 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {Loader, createClass, updateLabelFontSizes} from './js/hbds_class.js';
+    import {Loader as ClassLoader, createClass, updateLabelFontSizes} from './js/hbds_class.js';
+    import { Loader, createLinkBetweenClass, updateLinkFontSizes } from './js/hbds_class_link.js';
+    import { recalculateAllLinks } from './js/hbds_class_link.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
@@ -97,15 +100,22 @@
         }
         if (dragControls) dragControls.dispose();
 
-        const data = await Loader.load(modelName);
+        const data = await ClassLoader.load(modelName);
         diagramGroup = new THREE.Group();
         scene.add(diagramGroup);
 
+        const classById = new Map();
         data.hypergraph.class.forEach(cd => {
             const {classMesh} = createClass(cd);
             classMesh.position.set(cd.position.x, cd.position.y, cd.position.z);
             diagramGroup.add(classMesh);
             draggableObjects.push(classMesh);  // only the rectangle is the handle
+            classById.set(cd.id, classMesh);
+        });
+
+        (data.hypergraph.link || []).forEach(ld => {
+            const link = createLinkBetweenClass(ld, classById);
+            if (link) diagramGroup.add(link.linkGroup);
         });
 
         // Center diagram
@@ -118,11 +128,15 @@
         setupDragControls();
         //updateLabelFontSizes(camera);
         orbitControls.addEventListener('change', () => {
-            updateLabelFontSizes(camera);   // <-- your distance-based font fix
+            updateLabelFontSizes(camera);
+            updateLinkFontSizes(camera);
+            recalculateAllLinks();
             renderer.render(scene, camera);
             css2DRenderer.render(scene, camera);
         });
-        updateLabelFontSizes(camera);   // <-- your distance-based font fix
+        updateLabelFontSizes(camera);
+        updateLinkFontSizes(camera);
+        recalculateAllLinks();
         renderer.render(scene, camera);
         css2DRenderer.render(scene, camera);
     }
@@ -135,7 +149,8 @@
             orbitControls.enabled = false;
         });
 
-        dragControls.addEventListener('drag', ev => {
+        dragControls.addEventListener('drag', () => {
+            recalculateAllLinks();
         });
 
         dragControls.addEventListener('dragend', () => {
@@ -151,7 +166,9 @@
         camera.aspect = window.innerWidth / window.innerHeight;
         renderer.setSize(window.innerWidth, window.innerHeight);
         css2DRenderer.setSize(window.innerWidth, window.innerHeight);
-        updateLabelFontSizes(camera);   // <-- your distance-based font fix
+        updateLabelFontSizes(camera);
+        updateLinkFontSizes(camera);
+        recalculateAllLinks();
         renderer.render(scene, camera);
         css2DRenderer.render(scene, camera);
         camera.updateProjectionMatrix();

@@ -1,0 +1,78 @@
+{
+  "hypergraph": {
+    "class": [
+      {
+        "id": 1,
+        "name": "Human",
+        "type": "roundedRectangle",
+        "attributes": ["Last name", "First name", "Age", "Occupation"],
+        "position": { "x": 20, "y": 5, "z": 0 },
+        "size": { "width": 1, "height": 2.2 },
+        "rendering": {
+          "class": { "color": "#FFD700", "borderColor": "#000080", "cornerRadius": 0.1 },
+          "attributes": { "checkboxColor": "#A9A9A9", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#000000", "lineWidth": 0.01 },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Car",
+        "type": "roundedRectangle",
+        "attributes": ["Make", "Model", "VIN", "Owner"],
+        "position": { "x": 24, "y": 5, "z": 0 },
+        "size": { "width": 1, "height": 2.2 },
+        "rendering": {
+          "class": { "color": "#00BFFF", "borderColor": "#000080", "cornerRadius": 0.1 },
+          "attributes": { "checkboxColor": "#A9A9A9", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#000000", "lineWidth": 0.01 },
+          "textColor": "#000000"
+        }
+      }
+    ],
+    "link": [
+      {
+        "sourceClassId": 1,
+        "targetClassId": 2,
+        "rendering": {
+          "lineColor": "#1a237e",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.5,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "drive",
+          "labelFontSize": 13,
+          "labelColor": "#0d1321",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.43,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 1,
+        "targetClassId": 2,
+        "rendering": {
+          "lineColor": "#2e7d32",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "curveOffset": 0.5,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "own",
+          "labelFontSize": 13,
+          "labelColor": "#0b3d02",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.58,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      }
+    ]
+  }
+}
