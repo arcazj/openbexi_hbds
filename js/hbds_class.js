@@ -60,8 +60,30 @@ export const Loader = {
  * to `classMesh` but add the entire `group` to the scene.
  */
 export function createClass(classData) {
-    const cfg = classData.rendering;
-    const sz = classData.size;
+    const defaults = {
+        size: {width: 1, height: 2},
+        rendering: {
+            class: {color: '#FFD700', cornerRadius: 0.1},
+            attributes: {checkboxColor: '#A9A9A9', size: {width: 0.1, height: 0.1}},
+            connections: {lineColor: '#000000', lineWidth: 0.01},
+            textColor: '#000000'
+        }
+    };
+
+    const sz = classData.size ?? defaults.size;
+    const cfg = {
+        class: {...defaults.rendering.class, ...(classData.rendering?.class ?? {})},
+        attributes: {
+            ...defaults.rendering.attributes,
+            ...(classData.rendering?.attributes ?? {}),
+            size: {
+                ...defaults.rendering.attributes.size,
+                ...(classData.rendering?.attributes?.size ?? {})
+            }
+        },
+        connections: {...defaults.rendering.connections, ...(classData.rendering?.connections ?? {})},
+        textColor: classData.rendering?.textColor ?? defaults.rendering.textColor
+    };
 
     const Z_BASE = 0;
     const Z_OVERLAY = 0.06;
@@ -118,7 +140,7 @@ export function createClass(classData) {
     const startY = sz.height / 2 - 0.1;
     const colX = sz.width / 2 + 0.25 + cbW;                  // cube centre X
 
-    classData.attributes.forEach((attrName, idx) => {
+    (classData.attributes ?? []).forEach((attrName, idx) => {
         const y = startY - idx * gapY;
 
         // checkbox cube
