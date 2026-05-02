@@ -12,10 +12,13 @@ export const Loader = {
   }
 };
 
-function getHubWorldPosition(classMesh) {
+function getHubPositionInParentSpace(classMesh, parentObject) {
   const hub = classMesh.getObjectByName('class-hub');
-  if (!hub) return classMesh.getWorldPosition(new THREE.Vector3());
-  return hub.getWorldPosition(new THREE.Vector3());
+  const worldPos = hub
+    ? hub.getWorldPosition(new THREE.Vector3())
+    : classMesh.getWorldPosition(new THREE.Vector3());
+
+  return parentObject ? parentObject.worldToLocal(worldPos.clone()) : worldPos;
 }
 
 function pathPoint(p0, p1, c, t) {
@@ -84,8 +87,9 @@ export function recalculateAllLinks() {
   for (const bucket of pairBuckets.values()) {
     const count = bucket.length;
     bucket.forEach((l, idx) => {
-      const p0 = getHubWorldPosition(l.sourceClass);
-      const p1 = getHubWorldPosition(l.targetClass);
+      const parent = l.linkGroup.parent;
+      const p0 = getHubPositionInParentSpace(l.sourceClass, parent);
+      const p1 = getHubPositionInParentSpace(l.targetClass, parent);
       const mid = new THREE.Vector3().addVectors(p0, p1).multiplyScalar(0.5);
       const dir = new THREE.Vector3().subVectors(p1, p0);
       const n = new THREE.Vector3(-dir.y, dir.x, 0).normalize();
