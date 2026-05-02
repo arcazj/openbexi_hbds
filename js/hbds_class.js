@@ -79,6 +79,7 @@ export function createClass(classData) {
     });
     const classMesh = new THREE.Mesh(extrudeGeom, classMat);
     classMesh.position.z = Z_BASE;
+    classMesh.userData.classId = classData.id;
 
     /* — Class name label (CSS2D) — */
     const titleDiv = document.createElement('div');
@@ -99,6 +100,7 @@ export function createClass(classData) {
         new THREE.CircleGeometry(0.04, 32),
         new THREE.MeshBasicMaterial({color: '#FF0000'})
     );
+    hub.name = 'class-hub';
     hub.position.copy(hubPos);
     hub.raycast = () => {
     };
