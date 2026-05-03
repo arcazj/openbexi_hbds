@@ -90,32 +90,44 @@ export function recalculateAllLinks() {
       const parent = l.linkGroup.parent;
       const p0 = getHubPositionInParentSpace(l.sourceClass, parent);
       const p1 = getHubPositionInParentSpace(l.targetClass, parent);
-      const mid = new THREE.Vector3().addVectors(p0, p1).multiplyScalar(0.5);
-      const dir = new THREE.Vector3().subVectors(p1, p0);
-      const n = new THREE.Vector3(-dir.y, dir.x, 0).normalize();
-
-      const spacing = l.linkData.rendering?.curveOffset ?? 0.35;
-      const offsetIndex = idx - (count - 1) / 2;
-      const bidirectional = l.linkData.sourceClassId > l.linkData.targetClassId ? -1 : 1;
-      const control = mid.clone().addScaledVector(n, spacing * offsetIndex * bidirectional);
-
+      const routePts = Array.isArray(l.linkData.rendering?.routePoints) ? l.linkData.rendering.routePoints : null;
       const points = [];
-      const seg = 40;
-      for (let i = 0; i <= seg; i++) points.push(pathPoint(p0, p1, control, i / seg));
-      l.line.geometry.setFromPoints(points);
-      l.line.computeLineDistances();
-
-      const arrowT = 0.93;
-      const arrowPos = pathPoint(p0, p1, control, arrowT);
-      const prev = pathPoint(p0, p1, control, arrowT - 0.03);
-      l.arrow.position.copy(arrowPos);
-      l.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), arrowPos.clone().sub(prev).normalize());
-
-      const labelT = l.linkData.rendering?.labelPositionAlongPath ?? 0.5;
-      const lp = pathPoint(p0, p1, control, labelT);
-      const tangent = pathPoint(p0, p1, control, Math.min(labelT + 0.03, 1)).sub(pathPoint(p0, p1, control, Math.max(labelT - 0.03, 0))).normalize();
-      const labelOffset = l.linkData.rendering?.labelOffsetFromPath ?? 0.15;
-      lp.addScaledVector(n, labelOffset);
+      let tangent = new THREE.Vector3(1, 0, 0);
+      let lp;
+      if (routePts && routePts.length) {
+        points.push(p0.clone(), ...routePts.map(p => new THREE.Vector3(p.x, p.y, p.z ?? 0)), p1.clone());
+        l.line.geometry.setFromPoints(points);
+        l.line.computeLineDistances();
+        const last = points[points.length - 1];
+        const prev = points[Math.max(0, points.length - 2)];
+        tangent = last.clone().sub(prev).normalize();
+        l.arrow.position.copy(last);
+        l.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
+        const labelIndex = Math.max(1, Math.floor((points.length - 1) * (l.linkData.rendering?.labelPositionAlongPath ?? 0.5)));
+        lp = points[labelIndex].clone();
+      } else {
+        const mid = new THREE.Vector3().addVectors(p0, p1).multiplyScalar(0.5);
+        const dir = new THREE.Vector3().subVectors(p1, p0);
+        const n = new THREE.Vector3(-dir.y, dir.x, 0).normalize();
+        const spacing = l.linkData.rendering?.curveOffset ?? 0.35;
+        const offsetIndex = idx - (count - 1) / 2;
+        const bidirectional = l.linkData.sourceClassId > l.linkData.targetClassId ? -1 : 1;
+        const control = mid.clone().addScaledVector(n, spacing * offsetIndex * bidirectional);
+        const seg = 40;
+        for (let i = 0; i <= seg; i++) points.push(pathPoint(p0, p1, control, i / seg));
+        l.line.geometry.setFromPoints(points);
+        l.line.computeLineDistances();
+        const arrowT = 0.93;
+        const arrowPos = pathPoint(p0, p1, control, arrowT);
+        const prev = pathPoint(p0, p1, control, arrowT - 0.03);
+        tangent = arrowPos.clone().sub(prev).normalize();
+        l.arrow.position.copy(arrowPos);
+        l.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
+        const labelT = l.linkData.rendering?.labelPositionAlongPath ?? 0.5;
+        lp = pathPoint(p0, p1, control, labelT);
+        const labelOffset = l.linkData.rendering?.labelOffsetFromPath ?? 0.15;
+        lp.addScaledVector(n, labelOffset);
+      }
       l.labelObj.position.copy(lp);
       if (l.linkData.rendering?.labelRotationBehavior === 'follow') {
         const angle = Math.atan2(tangent.y, tangent.x);
