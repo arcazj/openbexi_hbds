@@ -18,6 +18,7 @@
             <option value="transportation">transportation</option>
             <option value="human_and_car_links">human_and_car_links</option>
             <option value="bridge_road_links">bridge_road_links</option>
+            <option value="models/hyperclass_mail_Carrier.json">Hyperclass Mail Carrier</option>
         </select>
     </div>
     <div class="control-group">
@@ -43,8 +44,9 @@
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
     import {Loader as ClassLoader, createClass, updateLabelFontSizes} from './js/hbds_class.js';
-    import { Loader, createLinkBetweenClass, updateLinkFontSizes } from './js/hbds_class_link.js';
-    import { recalculateAllLinks } from './js/hbds_class_link.js';
+    import {Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js';
+    import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
+    import { Loader as HyperClassLinkLoader, createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
@@ -101,21 +103,27 @@
         }
         if (dragControls) dragControls.dispose();
 
-        const data = await ClassLoader.load(modelName);
+        const data = await HyperClassLoader.load(modelName);
         diagramGroup = new THREE.Group();
         scene.add(diagramGroup);
 
         const classById = new Map();
         data.hypergraph.class.forEach(cd => {
-            const {classMesh} = createClass(cd);
-            classMesh.position.set(cd.position.x, cd.position.y, cd.position.z);
+            const factory = cd.type === 'hyperclass' ? createHyperClass : createClass;
+            const { classMesh } = factory(null, cd);
+            if (cd.type !== 'hyperclass') classMesh.position.set(cd.position.x, cd.position.y, cd.position.z);
             diagramGroup.add(classMesh);
-            draggableObjects.push(classMesh);  // only the rectangle is the handle
+            draggableObjects.push(classMesh);
             classById.set(cd.id, classMesh);
         });
 
         (data.hypergraph.link || []).forEach(ld => {
-            const link = createLinkBetweenClass(ld, classById);
+            const sourceObject = classById.get(ld.sourceClassId);
+            const targetObject = classById.get(ld.targetClassId);
+            const hasHyperEndpoint = sourceObject?.userData?.isHyperClass || targetObject?.userData?.isHyperClass;
+            const link = hasHyperEndpoint
+                ? createLinkBetweenHyperClass(diagramGroup, sourceObject, targetObject, ld)
+                : createLinkBetweenClass(ld, classById);
             if (link) diagramGroup.add(link.linkGroup);
         });
 
@@ -130,13 +138,17 @@
         //updateLabelFontSizes(camera);
         orbitControls.addEventListener('change', () => {
             updateLabelFontSizes(camera);
+            updateHyperClassLabelFontSizes(camera, renderer);
             updateLinkFontSizes(camera);
+            updateHyperClassLinkFontSizes(camera, renderer);
             recalculateAllLinks();
             renderer.render(scene, camera);
             css2DRenderer.render(scene, camera);
         });
         updateLabelFontSizes(camera);
+        updateHyperClassLabelFontSizes(camera, renderer);
         updateLinkFontSizes(camera);
+        updateHyperClassLinkFontSizes(camera, renderer);
         recalculateAllLinks();
         renderer.render(scene, camera);
         css2DRenderer.render(scene, camera);
@@ -168,7 +180,9 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         css2DRenderer.setSize(window.innerWidth, window.innerHeight);
         updateLabelFontSizes(camera);
+        updateHyperClassLabelFontSizes(camera, renderer);
         updateLinkFontSizes(camera);
+        updateHyperClassLinkFontSizes(camera, renderer);
         recalculateAllLinks();
         renderer.render(scene, camera);
         css2DRenderer.render(scene, camera);
