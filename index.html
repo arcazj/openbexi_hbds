@@ -29,6 +29,9 @@
             <span>Enable 3-D View</span>
         </label>
     </div>
+    <div class="control-group">
+        <button id="save-model-button">Save Model</button>
+    </div>
 </div>
 <script type="importmap">
     {
@@ -45,10 +48,11 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {Loader as ClassLoader, createClass, updateLabelFontSizes} from './js/hbds_class.js';
-    import {Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js';
-    import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
-    import { Loader as HyperClassLinkLoader, createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
+    import {updateLabelFontSizes} from './js/hbds_class.js';
+    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js';
+    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
+    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
+    import { loadAndRenderScene, saveScene } from './js/hbds_model.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
@@ -87,91 +91,40 @@
 
         window.addEventListener('resize', onResize);
         document.getElementById('view-toggle').addEventListener('change', toggleView);
-        document.getElementById('model-select').addEventListener('change', e => loadAndRenderScene(e.target.value));
+        document.getElementById('save-model-button').addEventListener('click', () => {
+            saveScene(getModelContext(), {
+                fileName: 'hbds_saved_model.json'
+            });
+        });
+        document.getElementById('model-select').addEventListener('change', e => {
+            loadAndRenderScene(e.target.value, getModelContext());
+        });
 
-        loadAndRenderScene('human');
+        loadAndRenderScene('human', getModelContext());
     }
 
-    async function loadAndRenderScene(modelName) {
-        /* ----- clear previous ----- */
-        if (diagramGroup) {
-            scene.remove(diagramGroup);
-            draggableObjects.length = 0;
-            diagramGroup.traverse(c => {
-                if ((c.isMesh || c.isLine) && c.geometry) c.geometry.dispose();
-                if ((c.isMesh || c.isLine) && c.material) c.material.dispose();
-                if (c.isCSS2DObject) c.element.remove();
-            });
-        }
-        if (dragControls) dragControls.dispose();
 
-        const data = await HyperClassLoader.load(modelName);
-        diagramGroup = new THREE.Group();
-        scene.add(diagramGroup);
-
-        const classById = new Map();
-        data.hypergraph.class.forEach(cd => {
-            const isHyperClass = cd.type === 'hyperclass';
-            const { classMesh } = isHyperClass
-                ? createHyperClass(null, cd)
-                : createClass(cd);
-            if (!isHyperClass) classMesh.position.set(cd.position.x, cd.position.y, cd.position.z);
-            diagramGroup.add(classMesh);
-            classById.set(cd.id, classMesh);
-        });
-
-        data.hypergraph.class.forEach(cd => {
-            if (!cd.parentClassId) return;
-            const parent = classById.get(cd.parentClassId);
-            const child = classById.get(cd.id);
-            if (!parent || !child) return;
-
-            const childWorld = child.getWorldPosition(new THREE.Vector3());
-            parent.worldToLocal(childWorld);
-            diagramGroup.remove(child);
-            child.position.copy(childWorld);
-            parent.add(child);
-        });
-
-        data.hypergraph.class.forEach(cd => {
-            if (!cd.parentClassId) draggableObjects.push(classById.get(cd.id));
-        });
-
-        (data.hypergraph.link || []).forEach(ld => {
-            const sourceObject = classById.get(ld.sourceClassId);
-            const targetObject = classById.get(ld.targetClassId);
-            const hasHyperEndpoint = sourceObject?.userData?.isHyperClass || targetObject?.userData?.isHyperClass;
-            const link = hasHyperEndpoint
-                ? createLinkBetweenHyperClass(diagramGroup, sourceObject, targetObject, ld)
-                : createLinkBetweenClass(ld, classById);
-            if (link) diagramGroup.add(link.linkGroup);
-        });
-
-        // Center diagram
-        const box = new THREE.Box3().setFromObject(diagramGroup);
-        const center = box.getCenter(new THREE.Vector3());
-        diagramGroup.position.sub(center);
-        box.getBoundingSphere(diagramGroup.userData.boundingSphere = new THREE.Sphere());
-
-        setCamera2D();
-        setupDragControls();
-        //updateLabelFontSizes(camera);
-        orbitControls.addEventListener('change', () => {
-            updateLabelFontSizes(camera);
-            updateHyperClassLabelFontSizes(camera, renderer);
-            updateLinkFontSizes(camera);
-            updateHyperClassLinkFontSizes(camera, renderer);
-            recalculateAllLinks();
-            renderer.render(scene, camera);
-            css2DRenderer.render(scene, camera);
-        });
-        updateLabelFontSizes(camera);
-        updateHyperClassLabelFontSizes(camera, renderer);
-        updateLinkFontSizes(camera);
-        updateHyperClassLinkFontSizes(camera, renderer);
-        recalculateAllLinks();
+    function renderOnce() {
         renderer.render(scene, camera);
         css2DRenderer.render(scene, camera);
+    }
+
+    function getModelContext() {
+        return {
+            scene,
+            camera,
+            renderer,
+            css2DRenderer,
+            orbitControls,
+            dragControls,
+            diagramGroup,
+            draggableObjects,
+            setDiagramGroup: group => { diagramGroup = group; },
+            setDragControls: controls => { dragControls = controls; },
+            setupDragControls,
+            setCamera2D,
+            renderOnce
+        };
     }
 
     function setupDragControls() {
@@ -204,8 +157,7 @@
         updateLinkFontSizes(camera);
         updateHyperClassLinkFontSizes(camera, renderer);
         recalculateAllLinks();
-        renderer.render(scene, camera);
-        css2DRenderer.render(scene, camera);
+        renderOnce();
         camera.updateProjectionMatrix();
     }
 
@@ -238,8 +190,7 @@
         requestAnimationFrame(animate);
 
         if (orbitControls.enabled) orbitControls.update();
-        renderer.render(scene, camera);
-        css2DRenderer.render(scene, camera);
+        renderOnce();
     }
 
     /* ---------- START ---------- */
