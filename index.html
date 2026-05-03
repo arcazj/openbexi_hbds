@@ -155,8 +155,24 @@
     function setupDragControls() {
         dragControls = new DragControls(draggableObjects, camera, css2DRenderer.domElement); // unified target
         dragControls.transformGroup = false;
+        let selectedObject = null;
+        let selectedOrder = 1;
+
+        const setObjectRenderOrder = (object, order) => {
+            object.traverse?.(child => {
+                if (child.isMesh || child.isLine) {
+                    child.renderOrder = order;
+                }
+            });
+        };
 
         dragControls.addEventListener('dragstart', ev => {
+            if (selectedObject && selectedObject !== ev.object) {
+                setObjectRenderOrder(selectedObject, 1);
+            }
+            selectedObject = ev.object;
+            selectedOrder += 1;
+            setObjectRenderOrder(selectedObject, selectedOrder);
             orbitControls.enabled = false;
         });
 

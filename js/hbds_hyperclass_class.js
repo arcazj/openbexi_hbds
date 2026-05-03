@@ -45,6 +45,8 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
 
   const titleDiv = document.createElement('div');
   titleDiv.className = 'label class-label hyperclass-label';
+  titleDiv.setAttribute('data-class', hyperClassData.name ?? '');
+  titleDiv.setAttribute('data-hyperclass', 'true');
   titleDiv.style.font = 'bold 18px Arial';
   titleDiv.style.color = textColor;
   titleDiv.textContent = hyperClassData.name ?? 'Hyperclass';

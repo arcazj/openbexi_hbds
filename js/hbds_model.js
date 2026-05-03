@@ -34,6 +34,7 @@ function stampNodeMetadata(classMesh, classData) {
   classMesh.userData.modelData = cloneModelData(classData);
   classMesh.userData.hbdsId = classData.id;
   classMesh.userData.isHyperClass = classData.type === 'hyperclass';
+  classMesh.userData.classType = classData.type === 'hyperclass' ? 'hyperclass' : 'class';
   classMesh.userData.isHbdsClass = true;
 }
 
