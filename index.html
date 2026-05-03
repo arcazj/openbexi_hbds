@@ -115,8 +115,24 @@
                 : createClass(cd);
             if (!isHyperClass) classMesh.position.set(cd.position.x, cd.position.y, cd.position.z);
             diagramGroup.add(classMesh);
-            draggableObjects.push(classMesh);
             classById.set(cd.id, classMesh);
+        });
+
+        data.hypergraph.class.forEach(cd => {
+            if (!cd.parentClassId) return;
+            const parent = classById.get(cd.parentClassId);
+            const child = classById.get(cd.id);
+            if (!parent || !child) return;
+
+            const childWorld = child.getWorldPosition(new THREE.Vector3());
+            parent.worldToLocal(childWorld);
+            diagramGroup.remove(child);
+            child.position.copy(childWorld);
+            parent.add(child);
+        });
+
+        data.hypergraph.class.forEach(cd => {
+            if (!cd.parentClassId) draggableObjects.push(classById.get(cd.id));
         });
 
         (data.hypergraph.link || []).forEach(ld => {

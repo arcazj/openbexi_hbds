@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { attachAttributesToMesh } from './hbds_class.js';
 
 const hyperclassLabels = [];
 
@@ -75,21 +76,27 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
     draggable: true
   };
 
-  if (Array.isArray(hyperClassData.attributes)) {
-    const startY = sz.height / 2 - 0.45;
-    hyperClassData.attributes.forEach((attr, i) => {
-      const div = document.createElement('div');
-      div.className = 'label attribute-label hyperclass-attribute-label';
-      div.style.color = textColor;
-      div.style.font = '12px Arial';
-      div.textContent = attr;
-      const lbl = new CSS2DObject(div);
-      lbl.center.set(0, 0.5);
-      lbl.position.set(sz.width / 2 + 0.28, startY - i * 0.16, 0.08);
-      hyperMesh.add(lbl);
-      hyperclassLabels.push(lbl);
-    });
-  }
+  attachAttributesToMesh(hyperMesh, hyperClassData.attributes ?? [], {
+    size: sz,
+    attributes: {
+      checkboxColor: hyperClassData.rendering?.attributes?.checkboxColor ?? '#A9A9A9',
+      size: {
+        width: hyperClassData.rendering?.attributes?.size?.width ?? 0.1,
+        height: hyperClassData.rendering?.attributes?.size?.height ?? hyperClassData.rendering?.attributes?.size?.width ?? 0.1
+      }
+    },
+    connections: {
+      lineColor: hyperClassData.rendering?.connections?.lineColor ?? '#000000',
+      lineWidth: hyperClassData.rendering?.connections?.lineWidth ?? 0.01
+    },
+    textColor,
+    startY: sz.height / 2 - 0.45,
+    gapY: 0.16,
+    colX: sz.width / 2 + 0.28,
+    hubPosition: hub.position.clone(),
+    z: 0.08
+  });
+
 
   if (scene) scene.add(hyperMesh);
   return { classMesh: hyperMesh };
