@@ -109,9 +109,11 @@
 
         const classById = new Map();
         data.hypergraph.class.forEach(cd => {
-            const factory = cd.type === 'hyperclass' ? createHyperClass : createClass;
-            const { classMesh } = factory(null, cd);
-            if (cd.type !== 'hyperclass') classMesh.position.set(cd.position.x, cd.position.y, cd.position.z);
+            const isHyperClass = cd.type === 'hyperclass';
+            const { classMesh } = isHyperClass
+                ? createHyperClass(null, cd)
+                : createClass(cd);
+            if (!isHyperClass) classMesh.position.set(cd.position.x, cd.position.y, cd.position.z);
             diagramGroup.add(classMesh);
             draggableObjects.push(classMesh);
             classById.set(cd.id, classMesh);
