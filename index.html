@@ -115,8 +115,9 @@
                 modelName: document.getElementById('model-select').value
             });
         });
-        document.getElementById('model-select').addEventListener('change', e => {
-            loadAndRenderScene(e.target.value, getModelContext());
+        document.getElementById('model-select').addEventListener('change', async e => {
+            await loadAndRenderScene(e.target.value, getModelContext());
+            refreshDiagramBoundsAndCamera(getModelContext(), { fitToView: true, padding: 1.25 });
         });
         document.getElementById('fit-model-button').addEventListener('click', () => {
             refreshDiagramBoundsAndCamera(getModelContext(), { fitToView: true, padding: 1.25 });

@@ -567,8 +567,50 @@ export function initModelOverview(context) {
 export function drawOverviewNodes(ctx, layout, t) { layout.nodes.forEach(n=>{ const x=t.x(n.position.x)-t.w(n.size.width)/2; const y=t.y(n.position.y)-t.h(n.size.height)/2; ctx.fillStyle=n.isHyperClass?"#cde3ff":"#d8f2d8"; ctx.fillRect(x,y,t.w(n.size.width),t.h(n.size.height)); ctx.strokeStyle="#666"; ctx.strokeRect(x,y,t.w(n.size.width),t.h(n.size.height));}); }
 export function drawOverviewLinks(ctx, layout, t) { ctx.strokeStyle="#8a8a8a"; layout.links.forEach(l=>{ ctx.beginPath(); ctx.moveTo(t.x(l.sourceNode.position.x),t.y(l.sourceNode.position.y)); ctx.lineTo(t.x(l.targetNode.position.x),t.y(l.targetNode.position.y)); ctx.stroke(); }); }
 export function updateOverviewViewport(context, t) { const el=document.getElementById("model-overview-viewport"); if(!el||!context?.camera) return; const d=context.camera.position.distanceTo(context.orbitControls.target); const f=context.camera.fov*Math.PI/180; const wh=2*Math.tan(f/2)*d, ww=wh*context.camera.aspect; const cx=context.orbitControls.target.x, cy=context.orbitControls.target.y; const left=t.x(cx-ww/2), right=t.x(cx+ww/2), top=t.y(cy+wh/2), bottom=t.y(cy-wh/2); el.style.left=`${Math.min(left,right)}px`; el.style.top=`${Math.min(top,bottom)}px`; el.style.width=`${Math.abs(right-left)}px`; el.style.height=`${Math.abs(bottom-top)}px`; }
-export function updateModelOverview(context) { const canvas=document.getElementById("model-overview-canvas"); if(!canvas||!context?.diagramGroup) return; const rect=canvas.getBoundingClientRect(); canvas.width=rect.width; canvas.height=rect.height; const ctx=canvas.getContext("2d"); ctx.clearRect(0,0,canvas.width,canvas.height); const sceneModel=collectSceneModel(context); const layout=buildLayoutGraph(context, sceneModel, {}); const xs=layout.nodes.map(n=>[n.bounds.minX,n.bounds.maxX]).flat(); const ys=layout.nodes.map(n=>[n.bounds.minY,n.bounds.maxY]).flat(); const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys); const sx=(v)=>((v-minX)/(maxX-minX||1))*canvas.width; const sy=(v)=>canvas.height-((v-minY)/(maxY-minY||1))*canvas.height; const transform={x:sx,y:sy,w:(v)=>v/(maxX-minX||1)*canvas.width,h:(v)=>v/(maxY-minY||1)*canvas.height}; drawOverviewLinks(ctx, layout, transform); drawOverviewNodes(ctx, layout, transform); updateOverviewViewport(context, transform);}
+export function updateModelOverview(context) { const canvas=document.getElementById("model-overview-canvas"); if(!canvas||!context?.diagramGroup) return; const rect=canvas.getBoundingClientRect(); canvas.width=rect.width; canvas.height=rect.height; const ctx=canvas.getContext("2d"); ctx.clearRect(0,0,canvas.width,canvas.height); const sceneModel=collectSceneModel(context); const layout=buildLayoutGraph(context, sceneModel, {}); const xs=layout.nodes.map(n=>[n.bounds.minX,n.bounds.maxX]).flat(); const ys=layout.nodes.map(n=>[n.bounds.minY,n.bounds.maxY]).flat(); const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys); context.diagramGroup.userData.overviewExtents = { minX, maxX, minY, maxY }; const sx=(v)=>((v-minX)/(maxX-minX||1))*canvas.width; const sy=(v)=>canvas.height-((v-minY)/(maxY-minY||1))*canvas.height; const transform={x:sx,y:sy,w:(v)=>v/(maxX-minX||1)*canvas.width,h:(v)=>v/(maxY-minY||1)*canvas.height}; drawOverviewLinks(ctx, layout, transform); drawOverviewNodes(ctx, layout, transform); updateOverviewViewport(context, transform);}
 
-export function setupCanvasPanControls(context) { const dom=context.css2DRenderer?.domElement; if (!dom || dom.dataset.panInit) return; dom.dataset.panInit = "1"; const state={active:false,x:0,y:0}; dom.addEventListener("pointerdown",e=>{ if(isPointerOverInteractiveObject(e,context)) return; state.active=true; state.x=e.clientX; state.y=e.clientY; }); window.addEventListener("pointermove",e=>{ if(!state.active) return; panCameraByScreenDelta(context,e.clientX-state.x,e.clientY-state.y); state.x=e.clientX; state.y=e.clientY; updateModelOverview(context); context.renderOnce?.(); }); window.addEventListener("pointerup",()=>{ state.active=false; }); }
+export function setupCanvasPanControls(context) { const dom=context.css2DRenderer?.domElement; if (!dom || dom.dataset.panInit) return; dom.dataset.panInit = "1"; const state={active:false,x:0,y:0}; dom.addEventListener("pointerdown",e=>{ if(isPointerOverInteractiveObject(e,context)) return; state.active=true; state.x=e.clientX; state.y=e.clientY; }); window.addEventListener("pointermove",e=>{ if(!state.active) return; panCameraByScreenDelta(context,e.clientX-state.x,e.clientY-state.y); state.x=e.clientX; state.y=e.clientY; updateModelOverview(context); context.renderOnce?.(); }); window.addEventListener("pointerup",()=>{ state.active=false; }); setupOverviewNavigation(context); }
+
+
+function setupOverviewNavigation(context) {
+  const panel = document.getElementById("model-overview");
+  const canvas = document.getElementById("model-overview-canvas");
+  if (!panel || !canvas || panel.dataset.navInit) return;
+  panel.dataset.navInit = "1";
+  const state = { dragging: false };
+
+  function panToOverviewPoint(event) {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    const u = (event.clientX - rect.left) / rect.width;
+    const v = (event.clientY - rect.top) / rect.height;
+    const extents = context.diagramGroup?.userData?.overviewExtents;
+    if (!extents) return;
+
+    const x = extents.minX + Math.max(0, Math.min(1, u)) * (extents.maxX - extents.minX || 1);
+    const y = extents.minY + (1 - Math.max(0, Math.min(1, v))) * (extents.maxY - extents.minY || 1);
+    const deltaX = x - context.orbitControls.target.x;
+    const deltaY = y - context.orbitControls.target.y;
+
+    context.camera.position.x += deltaX;
+    context.camera.position.y += deltaY;
+    context.orbitControls.target.x = x;
+    context.orbitControls.target.y = y;
+    context.orbitControls.update();
+    updateModelOverview(context);
+    context.renderOnce?.();
+  }
+
+  panel.addEventListener("pointerdown", event => {
+    state.dragging = true;
+    panToOverviewPoint(event);
+  });
+  window.addEventListener("pointermove", event => {
+    if (!state.dragging) return;
+    panToOverviewPoint(event);
+  });
+  window.addEventListener("pointerup", () => { state.dragging = false; });
+}
+
 function isPointerOverInteractiveObject(event, context) { const rect=context.renderer.domElement.getBoundingClientRect(); const mouse=new THREE.Vector2(((event.clientX-rect.left)/rect.width)*2-1,-((event.clientY-rect.top)/rect.height)*2+1); const ray=new THREE.Raycaster(); ray.setFromCamera(mouse,context.camera); const hits=ray.intersectObjects(context.draggableObjects,true); return hits.length>0; }
 function panCameraByScreenDelta(context, dx, dy) { const distance = context.camera.position.distanceTo(context.orbitControls.target); const fov = context.camera.fov * Math.PI / 180; const worldHeight = 2 * Math.tan(fov / 2) * distance; const worldWidth = worldHeight * context.camera.aspect; const dxWorld = -dx / context.renderer.domElement.clientWidth * worldWidth; const dyWorld = dy / context.renderer.domElement.clientHeight * worldHeight; context.camera.position.x += dxWorld; context.camera.position.y += dyWorld; context.orbitControls.target.x += dxWorld; context.orbitControls.target.y += dyWorld; context.orbitControls.update(); }
