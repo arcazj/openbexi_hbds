@@ -134,35 +134,55 @@ export function createClass(classData) {
 
 
     /* — Attributes: cube + line + label — */
-    const cbW = cfg.attributes.size.width;
-    const cbH = cfg.attributes.size.height ?? cbW;
-    const gapY = 0.15;                                           // vertical spacing
-    const startY = sz.height / 2 - 0.1;
-    const colX = sz.width / 2 + 0.25 + cbW;                  // cube centre X
+    attachAttributesToMesh(classMesh, classData.attributes ?? [], {
+        size: sz,
+        attributes: cfg.attributes,
+        connections: cfg.connections,
+        textColor: cfg.textColor,
+        hubPosition: hubPos,
+        z: Z_OVERLAY
+    });
 
-    (classData.attributes ?? []).forEach((attrName, idx) => {
+    return {classMesh};
+}
+
+export function attachAttributesToMesh(classMesh, attributes, options = {}) {
+    const size = options.size ?? {width: 1, height: 2};
+    const attrCfg = options.attributes ?? {checkboxColor: "#A9A9A9", size: {width: 0.1, height: 0.1}};
+    const connCfg = options.connections ?? {lineColor: "#000000", lineWidth: 0.01};
+    const textColor = options.textColor ?? "#000000";
+
+    const cbW = attrCfg.size.width;
+    const cbH = attrCfg.size.height ?? cbW;
+    const gapY = options.gapY ?? 0.15;
+    const startY = options.startY ?? (size.height / 2 - 0.1);
+    const colX = options.colX ?? (size.width / 2 + 0.25 + cbW);
+    const hubPos = options.hubPosition ?? new THREE.Vector3((size.width * 0.9) / 2, (size.height * 0.9) / 2, options.z ?? 0.06);
+    const z = options.z ?? 0.06;
+
+    attributes.forEach((attrName, idx) => {
         const y = startY - idx * gapY;
 
         // checkbox cube
         const cube = new THREE.Mesh(
             new THREE.BoxGeometry(cbW, cbH, cbW),
             new THREE.MeshStandardMaterial({
-                color: cfg.attributes.checkboxColor,
+                color: attrCfg.checkboxColor,
                 metalness: 1,
                 roughness: 0.25
             })
         );
-        cube.position.set(colX, y, Z_OVERLAY);
+        cube.position.set(colX, y, z);
         cube.raycast = () => {
         };
         classMesh.add(cube);
 
         // connecting line
         const line = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints([hubPos, cube.position]),
+            new THREE.BufferGeometry().setFromPoints([hubPos, cube.position.clone()]),
             new THREE.LineBasicMaterial({
-                color: cfg.connections.lineColor,
-                linewidth: cfg.connections.lineWidth
+                color: connCfg.lineColor,
+                linewidth: connCfg.lineWidth
             })
         );
         line.raycast = () => {
@@ -172,17 +192,15 @@ export function createClass(classData) {
         // attribute label
         const aDiv = document.createElement('div');
         aDiv.className = 'label attribute-label';
-        aDiv.style.color = cfg.textColor;
+        aDiv.style.color = textColor;
         aDiv.style.font = '12px Arial';
         aDiv.textContent = attrName;
         const aLbl = new CSS2DObject(aDiv);
-        aLbl.position.set(colX + cbW + 0.12, y, Z_OVERLAY);
+        aLbl.position.set(colX + cbW + 0.12, y, z);
         aLbl.center.set(0, 0.5);
         classMesh.add(aLbl);
         labels.push(aLbl);
     });
-
-    return {classMesh};
 }
 /**
  * NEW: Dynamically scales CSS2D labels based on camera distance.
