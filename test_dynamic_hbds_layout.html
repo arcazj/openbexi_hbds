@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HBDS Dynamic Layout Test</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; font-family: Arial, sans-serif; }
+    #container { position: fixed; inset: 0; background: #f4f6f8; }
+    #model-overview { position: fixed; top: 10px; left: 10px; width: 220px; height: 150px; border: 1px solid #999; background: rgba(255,255,255,.95); z-index: 20; }
+    #model-overview-canvas { width: 100%; height: 100%; display: block; }
+    #model-overview-viewport { position: absolute; border: 1px dashed #d00; pointer-events: none; }
+    #dynamic-test-panel { position: fixed; top: 0; right: 0; width: 360px; height: 100%; overflow: auto; background: rgba(255,255,255,0.97); border-left: 1px solid #ccc; padding: 12px; z-index: 30; }
+    .control-group { margin-bottom: 10px; display: grid; gap: 6px; }
+    .control-group button { padding: 7px 8px; }
+    select, textarea, button { width: 100%; box-sizing: border-box; }
+    textarea { min-height: 160px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    #layout-status { background: #111; color: #e7ffe7; padding: 8px; min-height: 130px; white-space: pre-wrap; }
+    .label { pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="model-overview"><canvas id="model-overview-canvas"></canvas><div id="model-overview-viewport"></div></div>
+  <div id="dynamic-test-panel">
+    <h2>HBDS Dynamic Layout Test</h2>
+    <div class="control-group">
+      <button id="add-hyperclass-button">Add Hyperclass</button>
+      <button id="add-class-button">Add Class</button>
+      <button id="add-attribute-button">Add Attribute</button>
+      <button id="add-link-button">Add Link</button>
+    </div>
+    <div class="control-group"><label><input type="checkbox" id="auto-optimize-toggle" checked> Auto Optimize After Add</label><label><input type="checkbox" id="auto-fit-toggle" checked> Auto Fit After Add</label></div>
+    <div class="control-group"><label for="selected-element">Selected Element</label><select id="selected-element"></select></div>
+    <div class="control-group"><label for="parent-hyperclass-select">Parent Hyperclass</label><select id="parent-hyperclass-select"><option value="">None / Top Level</option></select></div>
+    <div class="control-group"><label for="attribute-owner-select">Attribute Owner</label><select id="attribute-owner-select"></select></div>
+    <div class="control-group"><label for="link-source-select">Link Source</label><select id="link-source-select"></select><label for="link-target-select">Link Target</label><select id="link-target-select"></select></div>
+    <div class="control-group"><button id="delete-selected-button">Delete Selected</button><button id="optimize-layout-button">Optimize Layout</button><button id="fit-model-button">Fit Model</button><button id="save-model-button">Save Model</button><button id="reset-model-button">Reset Test Model</button></div>
+    <div class="control-group"><button id="export-json-button">Export JSON</button><button id="import-json-button">Import JSON</button></div>
+    <details open><summary>Current JSON</summary><textarea id="json-preview"></textarea></details>
+    <pre id="layout-status"></pre>
+  </div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { DragControls } from 'three/addons/controls/DragControls.js';
+import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
+import { createClass, updateLabelFontSizes } from './js/hbds_class.js';
+import { createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes } from './js/hbds_hyperclass_class.js';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
+import { optimizeAndRefreshLayout, saveScene } from './js/hbds_model.js';
+
+let applyModelDefaults = (m)=>m;
+let loadDefaultSettings = async ()=>({});
+try { const mod = await import('./js/hbds_setting.js'); applyModelDefaults = mod.applyModelDefaults ?? applyModelDefaults; loadDefaultSettings = mod.loadDefaultSettings ?? loadDefaultSettings; } catch {}
+
+let dynamicModel = createEmptyDynamicModel();
+let nextClassId = 1, nextHyperclassNumber = 1, nextClassNumber = 1, nextAttributeNumber = 1, nextLinkNumber = 1;
+let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
+const draggableObjects = []; const nodeMeshById = new Map();
+
+function createEmptyDynamicModel(){ return { hypergraph: { class: [], link: [] } }; }
+function getNextNodeId(){ return nextClassId++; }
+function getModelContext(){ return { scene, camera, renderer, css2DRenderer: labelRenderer, orbitControls, dragControls, diagramGroup, draggableObjects, renderOnce: renderOnce }; }
+
+function createGenericHyperclass(parentHyperclassId = null){
+  const id = getNextNodeId();
+  const hc = { id, name:`hyperclass${nextHyperclassNumber++}`, type:'hyperclass', attributes:[], children:[], parentClassId: parentHyperclassId || null, position:{x:Math.random()*2-1,y:Math.random()*2-1,z:0}, size:{width:4,height:3.2}, rendering:{} };
+  dynamicModel.hypergraph.class.push(hc);
+  if(parentHyperclassId){ const p = dynamicModel.hypergraph.class.find(c=>c.id===Number(parentHyperclassId)); if(p){ p.children = p.children || []; p.children.push(id);} }
+}
+function createGenericClass(parentHyperclassId = null){
+  const id = getNextNodeId();
+  const c = { id, name:`class${nextClassNumber++}`, type:'roundedRectangle', attributes:[], parentClassId: parentHyperclassId || null, position:{x:Math.random()*2-1,y:Math.random()*2-1,z:0}, size:{width:1.8,height:2.2}, rendering:{} };
+  dynamicModel.hypergraph.class.push(c);
+  if(parentHyperclassId){ const p = dynamicModel.hypergraph.class.find(n=>n.id===Number(parentHyperclassId)); if(p){ p.children = p.children || []; p.children.push(id); } }
+}
+function addGenericAttribute(ownerId){ const owner = dynamicModel.hypergraph.class.find(c=>c.id===Number(ownerId)); if(!owner) return; if(!Array.isArray(owner.attributes)) owner.attributes=[]; owner.attributes.push(`att${nextAttributeNumber++}`); }
+function createGenericLink(sourceId, targetId){ if(!sourceId || !targetId || sourceId===targetId) return false; dynamicModel.hypergraph.link.push({ id:`link${nextLinkNumber}`, sourceClassId:Number(sourceId), targetClassId:Number(targetId), rendering:{ labelText:`link${nextLinkNumber++}` } }); return true; }
+
+function clearDynamicScene(){ if(diagramGroup) scene.remove(diagramGroup); diagramGroup = new THREE.Group(); scene.add(diagramGroup); nodeMeshById.clear(); draggableObjects.length=0; if(dragControls) dragControls.dispose(); }
+
+function renderDynamicModel(){
+  clearDynamicScene();
+  dynamicModel = applyModelDefaults(dynamicModel) || dynamicModel;
+  dynamicModel.hypergraph.class.forEach(cd=>{
+    const built = cd.type==='hyperclass' ? createHyperClass(null, cd) : createClass(cd);
+    const mesh = built.classMesh; if(cd.type!=='hyperclass') mesh.position.set(cd.position?.x||0, cd.position?.y||0, cd.position?.z||0);
+    mesh.userData.hbdsId = cd.id; mesh.userData.isHyperClass = cd.type==='hyperclass'; mesh.userData.modelData = cd; mesh.userData.parentClassId = cd.parentClassId || null; mesh.userData.isHbdsClass = true;
+    nodeMeshById.set(cd.id, mesh); diagramGroup.add(mesh);
+  });
+  dynamicModel.hypergraph.class.forEach(cd=>{ if(!cd.parentClassId) return; const p=nodeMeshById.get(cd.parentClassId), ch=nodeMeshById.get(cd.id); if(!p||!ch) return; const wp=ch.getWorldPosition(new THREE.Vector3()); p.worldToLocal(wp); diagramGroup.remove(ch); ch.position.copy(wp); p.add(ch); });
+  dynamicModel.hypergraph.class.forEach(cd=>{ if(!cd.parentClassId){ const m=nodeMeshById.get(cd.id); if(m) draggableObjects.push(m); } });
+  dynamicModel.hypergraph.link.forEach(ld=>{ const src=nodeMeshById.get(ld.sourceClassId), tgt=nodeMeshById.get(ld.targetClassId); if(!src||!tgt) return; const handle=(src.userData.isHyperClass||tgt.userData.isHyperClass)?createLinkBetweenHyperClass(diagramGroup,src,tgt,ld):createLinkBetweenClass(ld,nodeMeshById); if(handle){ handle.linkGroup.userData={isHbdsLink:true,linkData:ld,sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId}; diagramGroup.add(handle.linkGroup);} });
+  setupDrag(); refreshDynamicScene();
+}
+function setupDrag(){ dragControls = new DragControls(draggableObjects, camera, renderer.domElement); dragControls.addEventListener('dragstart', ()=> orbitControls.enabled=false); dragControls.addEventListener('dragend', ()=> { orbitControls.enabled=true; recalculateAllLinks(); updateJsonPreview(); refreshDynamicScene();}); }
+function fitDynamicModelToView(){ const box=new THREE.Box3().setFromObject(diagramGroup); if(box.isEmpty()) return; const size=box.getSize(new THREE.Vector3()); const center=box.getCenter(new THREE.Vector3()); const max=Math.max(size.x,size.y,1); camera.position.set(center.x, center.y, max*1.8); camera.lookAt(center); orbitControls.target.copy(center); orbitControls.update(); updateMinimap(); }
+function refreshDynamicScene(){ recalculateAllLinks(); updateLabelFontSizes(camera); updateHyperClassLabelFontSizes(camera, renderer); updateLinkFontSizes(camera); updateHyperClassLinkFontSizes(camera, renderer); updateJsonPreview(); updateSmartMenus(); updateStatus(); updateMinimap(); renderOnce(); }
+function updateSmartMenus(){
+  const selected=document.getElementById('selected-element'), parent=document.getElementById('parent-hyperclass-select'), owner=document.getElementById('attribute-owner-select'), src=document.getElementById('link-source-select'), tgt=document.getElementById('link-target-select');
+  [selected,owner,src,tgt].forEach(el=>el.innerHTML=''); parent.innerHTML='<option value="">None / Top Level</option>';
+  dynamicModel.hypergraph.class.forEach(n=>{ const txt=`${n.name} (#${n.id})`; [selected,owner,src,tgt].forEach(el=>el.add(new Option(txt,n.id))); if(n.type==='hyperclass') parent.add(new Option(txt,n.id)); });
+  dynamicModel.hypergraph.link.forEach(l=>selected.add(new Option(`${l.rendering?.labelText||l.id} [link]`, `link:${l.id}`)));
+}
+function updateJsonPreview(){ document.getElementById('json-preview').value = JSON.stringify(dynamicModel,null,2); }
+function exportJsonToPreview(){ updateJsonPreview(); navigator.clipboard?.writeText(document.getElementById('json-preview').value).catch(()=>{}); }
+function rebuildCountersFromModel(model){ nextClassId = Math.max(0,...model.hypergraph.class.map(c=>Number(c.id)||0))+1; const findMax=(re,dflt)=>Math.max(dflt,...model.hypergraph.class.flatMap(c=>[c.name,...(c.attributes||[])]).concat(model.hypergraph.link.map(l=>l.rendering?.labelText||l.id)).map(s=>{const m=String(s).match(re); return m?Number(m[1]):0;})); nextHyperclassNumber=findMax(/^hyperclass(\d+)$/,1)+1; nextClassNumber=findMax(/^class(\d+)$/,1)+1; nextAttributeNumber=findMax(/^att(\d+)$/,1)+1; nextLinkNumber=Math.max(1,...model.hypergraph.link.map(l=>Number((l.rendering?.labelText||l.id||'').match(/(\d+)/)?.[1]||0)))+1; }
+function validateDynamicModel(model){ const errs=[]; const ids=new Set(); const byId=new Map(model.hypergraph.class.map(c=>[c.id,c])); for(const c of model.hypergraph.class){ if(ids.has(c.id)) errs.push(`Duplicate ID: ${c.id}`); ids.add(c.id); if(c.parentClassId && !byId.has(c.parentClassId)) errs.push(`Missing parent for node ${c.id}`); if(!Array.isArray(c.attributes)) errs.push(`attributes is not array for ${c.id}`); if(c.type==='hyperclass'){ for(const child of (c.children||[])){ if(!byId.has(child)) errs.push(`Missing child ${child} in parent ${c.id}`); else if(byId.get(child).parentClassId!==c.id) errs.push(`Child ${child} parentClassId mismatch for parent ${c.id}`); } } }
+  for(const l of model.hypergraph.link){ if(!l.sourceClassId||!l.targetClassId) errs.push(`Invalid link endpoints ${l.id}`); if(!byId.has(l.sourceClassId)||!byId.has(l.targetClassId)) errs.push(`Missing link endpoint for ${l.id}`); }
+  return errs;
+}
+function updateStatus(extra=''){ const m=dynamicModel.hypergraph.class; const links=dynamicModel.hypergraph.link; const attrs=m.reduce((a,c)=>a+(Array.isArray(c.attributes)?c.attributes.length:0),0); const hyper=m.filter(c=>c.type==='hyperclass').length; const cls=m.length-hyper; const errs=validateDynamicModel(dynamicModel); document.getElementById('layout-status').textContent=`Nodes: ${m.length}\nHyperclasses: ${hyper}\nClasses: ${cls}\nAttributes: ${attrs}\nLinks: ${links.length}\nValidation: ${errs.length?'FAILED':'OK'}\n${errs.join('\n')}${extra?`\n${extra}`:''}`; }
+function updateMinimap(){ const canvas=document.getElementById('model-overview-canvas'); const ctx=canvas.getContext('2d'); canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; ctx.clearRect(0,0,canvas.width,canvas.height); const nodes=[...nodeMeshById.values()]; if(!nodes.length) return; const box=new THREE.Box3().setFromObject(diagramGroup); const w=box.max.x-box.min.x||1,h=box.max.y-box.min.y||1; const sx=canvas.width/w, sy=canvas.height/h;
+  dynamicModel.hypergraph.link.forEach(l=>{ const s=nodeMeshById.get(l.sourceClassId), t=nodeMeshById.get(l.targetClassId); if(!s||!t) return; const sp=s.getWorldPosition(new THREE.Vector3()), tp=t.getWorldPosition(new THREE.Vector3()); ctx.strokeStyle='#777'; ctx.beginPath(); ctx.moveTo((sp.x-box.min.x)*sx,canvas.height-(sp.y-box.min.y)*sy); ctx.lineTo((tp.x-box.min.x)*sx,canvas.height-(tp.y-box.min.y)*sy); ctx.stroke(); });
+  dynamicModel.hypergraph.class.forEach(c=>{ const p=nodeMeshById.get(c.id)?.getWorldPosition(new THREE.Vector3()); if(!p) return; ctx.fillStyle=c.type==='hyperclass'?'rgba(100,149,237,.35)':'rgba(255,165,0,.6)'; const ww=(c.size?.width||1)*sx, hh=(c.size?.height||1)*sy; ctx.fillRect((p.x-box.min.x)*sx-ww/2, canvas.height-((p.y-box.min.y)*sy)-hh/2, ww, hh); });
+}
+async function importJsonFromPreview(){ try{ const parsed=JSON.parse(document.getElementById('json-preview').value); dynamicModel=applyModelDefaults(parsed)||parsed; rebuildCountersFromModel(dynamicModel); renderDynamicModel(); if(document.getElementById('auto-fit-toggle').checked) fitDynamicModelToView(); updateStatus('Import: OK'); } catch(e){ updateStatus(`Import JSON error: ${e.message}`); } }
+function deleteSelectedElement(){ const value=document.getElementById('selected-element').value; if(!value) return; if(value.startsWith('link:')){ const id=value.split(':')[1]; dynamicModel.hypergraph.link=dynamicModel.hypergraph.link.filter(l=>l.id!==id); renderDynamicModel(); return; } const nodeId=Number(value); const toDelete=new Set(); const collect=(id)=>{ toDelete.add(id); dynamicModel.hypergraph.class.filter(c=>c.parentClassId===id).forEach(ch=>collect(ch.id)); }; collect(nodeId); dynamicModel.hypergraph.class=dynamicModel.hypergraph.class.filter(c=>!toDelete.has(c.id)); dynamicModel.hypergraph.class.forEach(c=>{ c.children=(c.children||[]).filter(id=>!toDelete.has(id)); if(toDelete.has(c.parentClassId)) c.parentClassId=null; }); dynamicModel.hypergraph.link=dynamicModel.hypergraph.link.filter(l=>!toDelete.has(l.sourceClassId)&&!toDelete.has(l.targetClassId)); renderDynamicModel(); }
+async function maybeOptimize(){ if(!document.getElementById('auto-optimize-toggle').checked) return; await optimizeAndRefreshLayout(getModelContext(), { modelName:'dynamic-test-model', source:'dynamic' }); updateJsonPreview(); updateStatus('Optimized'); }
+
+function renderOnce(){ renderer.render(scene,camera); labelRenderer.render(scene,camera); }
+
+async function initDynamicTestPage(){ await loadDefaultSettings().catch(()=>{}); scene=new THREE.Scene(); scene.background=new THREE.Color('#edf1f4'); camera=new THREE.PerspectiveCamera(52,(window.innerWidth-360)/window.innerHeight,0.1,2000); camera.position.set(0,0,12); renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(window.innerWidth-360,window.innerHeight); document.getElementById('container').appendChild(renderer.domElement); labelRenderer=new CSS2DRenderer(); labelRenderer.setSize(window.innerWidth-360,window.innerHeight); labelRenderer.domElement.style.position='fixed'; labelRenderer.domElement.style.top='0'; labelRenderer.domElement.style.left='0'; labelRenderer.domElement.style.pointerEvents='none'; document.body.appendChild(labelRenderer.domElement); orbitControls=new OrbitControls(camera, renderer.domElement); orbitControls.enableDamping=true; scene.add(new THREE.AmbientLight(0xffffff,1)); const dir=new THREE.DirectionalLight(0xffffff,0.65); dir.position.set(7,7,10); scene.add(dir); clearDynamicScene();
+  document.getElementById('add-hyperclass-button').onclick=async()=>{ createGenericHyperclass(document.getElementById('parent-hyperclass-select').value||null); renderDynamicModel(); await maybeOptimize(); if(document.getElementById('auto-fit-toggle').checked) fitDynamicModelToView(); };
+  document.getElementById('add-class-button').onclick=async()=>{ createGenericClass(document.getElementById('parent-hyperclass-select').value||null); renderDynamicModel(); await maybeOptimize(); if(document.getElementById('auto-fit-toggle').checked) fitDynamicModelToView(); };
+  document.getElementById('add-attribute-button').onclick=async()=>{ addGenericAttribute(document.getElementById('attribute-owner-select').value); renderDynamicModel(); await maybeOptimize(); };
+  document.getElementById('add-link-button').onclick=async()=>{ if(createGenericLink(document.getElementById('link-source-select').value,document.getElementById('link-target-select').value)){ renderDynamicModel(); await maybeOptimize(); } else updateStatus('Link rejected: missing endpoints or self-link'); };
+  document.getElementById('delete-selected-button').onclick=()=>deleteSelectedElement();
+  document.getElementById('optimize-layout-button').onclick=async()=>{ await optimizeAndRefreshLayout(getModelContext(), { modelName:'dynamic-test-model', source:'dynamic' }); refreshDynamicScene(); fitDynamicModelToView(); };
+  document.getElementById('fit-model-button').onclick=()=>fitDynamicModelToView();
+  document.getElementById('save-model-button').onclick=()=>saveScene(getModelContext(), { fileName:'dynamic_hbds_test_model.json' });
+  document.getElementById('reset-model-button').onclick=()=>{ dynamicModel=createEmptyDynamicModel(); nextClassId=1; nextHyperclassNumber=1; nextClassNumber=1; nextAttributeNumber=1; nextLinkNumber=1; renderDynamicModel(); document.getElementById('json-preview').value=''; updateStatus('Reset complete'); };
+  document.getElementById('export-json-button').onclick=()=>exportJsonToPreview();
+  document.getElementById('import-json-button').onclick=()=>importJsonFromPreview();
+  window.addEventListener('resize', ()=>{ renderer.setSize(window.innerWidth-360,window.innerHeight); labelRenderer.setSize(window.innerWidth-360,window.innerHeight); camera.aspect=(window.innerWidth-360)/window.innerHeight; camera.updateProjectionMatrix(); renderOnce(); updateMinimap(); });
+  (function animate(){ requestAnimationFrame(animate); orbitControls.update(); refreshDynamicScene(); })();
+  updateSmartMenus(); updateStatus('Ready'); updateJsonPreview();
+}
+initDynamicTestPage();
+</script>
+</body>
+</html>
