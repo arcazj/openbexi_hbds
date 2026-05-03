@@ -102,10 +102,14 @@ export function createClass(classData) {
     const classMesh = new THREE.Mesh(extrudeGeom, classMat);
     classMesh.position.z = Z_BASE;
     classMesh.userData.classId = classData.id;
+    classMesh.userData.classType = 'class';
+    classMesh.userData.isHyperClass = false;
 
     /* — Class name label (CSS2D) — */
     const titleDiv = document.createElement('div');
     titleDiv.className = 'label class-label';
+    titleDiv.setAttribute('data-class', classData.name ?? '');
+    titleDiv.setAttribute('data-hyperclass', 'false');
     titleDiv.style.color = cfg.textColor;
     titleDiv.style.font = 'bold 16px Arial';
     titleDiv.textContent = classData.name;
