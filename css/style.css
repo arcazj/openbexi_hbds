@@ -94,3 +94,29 @@ select {
 .attribute-label {
   font-size: 12px;
 }
+#model-overview {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 220px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #999;
+  border-radius: 6px;
+  z-index: 20;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+#model-overview-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#model-overview-viewport {
+  position: absolute;
+  border: 2px solid #ff3300;
+  background: rgba(255, 51, 0, 0.08);
+  pointer-events: none;
+}
