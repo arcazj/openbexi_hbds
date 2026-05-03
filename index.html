@@ -8,6 +8,10 @@
 </head>
 <body>
 <div id="container"></div>
+<div id="model-overview">
+    <canvas id="model-overview-canvas"></canvas>
+    <div id="model-overview-viewport"></div>
+</div>
 <div id="controls-panel">
     <div class="control-group">
         <label for="model-select">Select HDBS Model</label>
@@ -35,6 +39,9 @@
     <div class="control-group">
         <button id="optimize-layout-button">Optimize Layout</button>
     </div>
+    <div class="control-group">
+        <button id="fit-model-button">Fit Model</button>
+    </div>
 </div>
 <script type="importmap">
     {
@@ -55,7 +62,7 @@
     import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js';
     import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
     import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
-    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout } from './js/hbds_model.js';
+    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, refreshDiagramBoundsAndCamera, updateModelOverview, setupCanvasPanControls } from './js/hbds_model.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
@@ -110,7 +117,11 @@
         document.getElementById('model-select').addEventListener('change', e => {
             loadAndRenderScene(e.target.value, getModelContext());
         });
+        document.getElementById('fit-model-button').addEventListener('click', () => {
+            refreshDiagramBoundsAndCamera(getModelContext(), { fitToView: true, padding: 1.25 });
+        });
 
+        setupCanvasPanControls(getModelContext());
         loadAndRenderScene('human', getModelContext());
     }
 
@@ -170,6 +181,7 @@
         recalculateAllLinks();
         renderOnce();
         camera.updateProjectionMatrix();
+        updateModelOverview(getModelContext());
     }
 
     function toggleView(e) {
@@ -178,6 +190,7 @@
         orbitControls.enabled = true;
         if (dragControls) dragControls.enabled = !is3D;
         if (!is3D) setCamera2D();
+        updateModelOverview(getModelContext());
     }
 
     function setCamera2D() {
