@@ -1,0 +1,1282 @@
+{
+  "hypergraph": {
+    "class": [
+      {
+        "id": 1,
+        "name": "Mail Carrier",
+        "type": "ellipse",
+        "attributes": [
+          "Last name",
+          "First name",
+          "Employee ID",
+          "Delivery route",
+          "Post office",
+          "Phone number",
+          "Shift",
+          "Certification level",
+          "Assigned vehicle",
+          "Supervisor"
+        ],
+        "position": { "x": 4.5, "y": 11.2, "z": 0 },
+        "size": { "width": 3.2, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Person",
+        "type": "ellipse",
+        "attributes": [
+          "Last name",
+          "First name",
+          "Address",
+          "Phone number",
+          "Email",
+          "Preferred delivery method",
+          "Delivery instructions",
+          "Identity verification status"
+        ],
+        "position": { "x": 16.5, "y": 11.2, "z": 0 },
+        "size": { "width": 3.2, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Mail",
+        "type": "hyperclass",
+        "attributes": [
+          "Mail ID",
+          "Sent date",
+          "Received date",
+          "Status",
+          "Weight",
+          "Priority",
+          "Tracking code",
+          "Service level",
+          "Postage amount",
+          "Declared value",
+          "Delivery deadline"
+        ],
+        "children": [4, 5, 6, 7],
+        "position": { "x": 10.5, "y": 6.4, "z": 0 },
+        "size": { "width": 7.6, "height": 6.8 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.3,
+            "opacity": 0.12
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Letter",
+        "type": "ellipse",
+        "attributes": [
+          "Format",
+          "Weight",
+          "Stamp",
+          "Sender address",
+          "Recipient address",
+          "Envelope type",
+          "Confidential flag"
+        ],
+        "parentClassId": 3,
+        "position": { "x": 8.6, "y": 7.6, "z": 0 },
+        "size": { "width": 2.1, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 5,
+        "name": "Package",
+        "type": "ellipse",
+        "attributes": [
+          "Dimensions",
+          "Weight",
+          "Contents",
+          "Fragile",
+          "Insurance",
+          "Tracking code",
+          "Signature required",
+          "Hazardous material flag"
+        ],
+        "parentClassId": 3,
+        "position": { "x": 8.6, "y": 5.4, "z": 0 },
+        "size": { "width": 2.1, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 6,
+        "name": "Registered Mail",
+        "type": "ellipse",
+        "attributes": [
+          "Registration ID",
+          "Chain of custody",
+          "Signature status",
+          "Proof of delivery",
+          "Declared value",
+          "Security handling code"
+        ],
+        "parentClassId": 3,
+        "position": { "x": 12.3, "y": 7.6, "z": 0 },
+        "size": { "width": 2.4, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 7,
+        "name": "Express Mail",
+        "type": "ellipse",
+        "attributes": [
+          "Express ID",
+          "Guaranteed delivery date",
+          "Cutoff time",
+          "Expedited fee",
+          "Tracking code",
+          "Delivery exception"
+        ],
+        "parentClassId": 3,
+        "position": { "x": 12.3, "y": 5.4, "z": 0 },
+        "size": { "width": 2.4, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 8,
+        "name": "Postal Operations",
+        "type": "hyperclass",
+        "attributes": [
+          "Operation ID",
+          "Operating region",
+          "Service window",
+          "Daily volume",
+          "Staff count",
+          "SLA target",
+          "Exception count"
+        ],
+        "children": [9, 10, 11, 12],
+        "position": { "x": 10.5, "y": -1.6, "z": 0 },
+        "size": { "width": 8.2, "height": 5.8 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.3,
+            "opacity": 0.12
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Route",
+        "type": "ellipse",
+        "attributes": [
+          "Route ID",
+          "Route name",
+          "Coverage area",
+          "Stop count",
+          "Estimated duration",
+          "Distance",
+          "Assigned carrier"
+        ],
+        "parentClassId": 8,
+        "position": { "x": 7.7, "y": -0.6, "z": 0 },
+        "size": { "width": 2.2, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 10,
+        "name": "Sorting Task",
+        "type": "ellipse",
+        "attributes": [
+          "Task ID",
+          "Sort code",
+          "Destination bin",
+          "Machine ID",
+          "Operator",
+          "Start time",
+          "End time",
+          "Error count"
+        ],
+        "parentClassId": 8,
+        "position": { "x": 10.5, "y": -0.6, "z": 0 },
+        "size": { "width": 2.4, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 11,
+        "name": "Delivery Attempt",
+        "type": "ellipse",
+        "attributes": [
+          "Attempt ID",
+          "Attempt date",
+          "Attempt time",
+          "Result",
+          "Reason code",
+          "GPS location",
+          "Photo evidence",
+          "Customer note"
+        ],
+        "parentClassId": 8,
+        "position": { "x": 7.7, "y": -2.6, "z": 0 },
+        "size": { "width": 2.6, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 12,
+        "name": "Delivery Exception",
+        "type": "ellipse",
+        "attributes": [
+          "Exception ID",
+          "Exception type",
+          "Description",
+          "Detected time",
+          "Resolution status",
+          "Responsible team",
+          "Customer notified"
+        ],
+        "parentClassId": 8,
+        "position": { "x": 10.9, "y": -2.6, "z": 0 },
+        "size": { "width": 2.7, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 13,
+        "name": "Facilities",
+        "type": "hyperclass",
+        "attributes": [
+          "Facility network ID",
+          "Region",
+          "Operating hours",
+          "Capacity",
+          "Staffing level",
+          "Automation level"
+        ],
+        "children": [14, 15, 16],
+        "position": { "x": 1.5, "y": 2.8, "z": 0 },
+        "size": { "width": 5.8, "height": 5.8 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.3,
+            "opacity": 0.12
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 14,
+        "name": "Post Office",
+        "type": "ellipse",
+        "attributes": [
+          "Office ID",
+          "Name",
+          "Address",
+          "Manager",
+          "Phone number",
+          "Opening hours",
+          "Service counters"
+        ],
+        "parentClassId": 13,
+        "position": { "x": 1.5, "y": 4.1, "z": 0 },
+        "size": { "width": 2.4, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 15,
+        "name": "Sorting Center",
+        "type": "ellipse",
+        "attributes": [
+          "Center ID",
+          "Name",
+          "Location",
+          "Throughput per hour",
+          "Machine count",
+          "Dock count",
+          "Operating shift"
+        ],
+        "parentClassId": 13,
+        "position": { "x": 1.5, "y": 2.4, "z": 0 },
+        "size": { "width": 2.6, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 16,
+        "name": "Parcel Locker",
+        "type": "ellipse",
+        "attributes": [
+          "Locker ID",
+          "Location",
+          "Compartment count",
+          "Available compartments",
+          "Access code",
+          "Temperature control",
+          "Pickup deadline"
+        ],
+        "parentClassId": 13,
+        "position": { "x": 1.5, "y": 0.7, "z": 0 },
+        "size": { "width": 2.5, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 17,
+        "name": "Transportation",
+        "type": "hyperclass",
+        "attributes": [
+          "Transport network ID",
+          "Fleet size",
+          "Fuel policy",
+          "Maintenance status",
+          "Dispatch region",
+          "Daily mileage"
+        ],
+        "children": [18, 19, 20],
+        "position": { "x": 19.5, "y": 2.8, "z": 0 },
+        "size": { "width": 5.8, "height": 5.8 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.3,
+            "opacity": 0.12
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 18,
+        "name": "Delivery Vehicle",
+        "type": "ellipse",
+        "attributes": [
+          "Vehicle ID",
+          "License plate",
+          "Vehicle type",
+          "Capacity",
+          "Fuel type",
+          "Mileage",
+          "Inspection date",
+          "Assigned carrier"
+        ],
+        "parentClassId": 17,
+        "position": { "x": 19.5, "y": 4.1, "z": 0 },
+        "size": { "width": 2.7, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 19,
+        "name": "Dispatch Plan",
+        "type": "ellipse",
+        "attributes": [
+          "Plan ID",
+          "Dispatch date",
+          "Vehicle assignment",
+          "Route assignment",
+          "Departure time",
+          "Return time",
+          "Load manifest"
+        ],
+        "parentClassId": 17,
+        "position": { "x": 19.5, "y": 2.4, "z": 0 },
+        "size": { "width": 2.6, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 20,
+        "name": "Load Manifest",
+        "type": "ellipse",
+        "attributes": [
+          "Manifest ID",
+          "Mail count",
+          "Package count",
+          "Total weight",
+          "Route ID",
+          "Vehicle ID",
+          "Sealed status"
+        ],
+        "parentClassId": 17,
+        "position": { "x": 19.5, "y": 0.7, "z": 0 },
+        "size": { "width": 2.6, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 21,
+        "name": "Delivery Events",
+        "type": "hyperclass",
+        "attributes": [
+          "Event group ID",
+          "Tracking code",
+          "Current status",
+          "Last updated",
+          "Event count",
+          "Exception flag"
+        ],
+        "children": [22, 23, 24],
+        "position": { "x": 10.5, "y": -7.8, "z": 0 },
+        "size": { "width": 7.2, "height": 4.6 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.3,
+            "opacity": 0.12
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 22,
+        "name": "Tracking Event",
+        "type": "ellipse",
+        "attributes": [
+          "Event ID",
+          "Tracking code",
+          "Timestamp",
+          "Location",
+          "Event type",
+          "Status message",
+          "Recorded by"
+        ],
+        "parentClassId": 21,
+        "position": { "x": 8.2, "y": -7.3, "z": 0 },
+        "size": { "width": 2.7, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 23,
+        "name": "Proof of Delivery",
+        "type": "ellipse",
+        "attributes": [
+          "Proof ID",
+          "Recipient name",
+          "Signature image",
+          "Delivery photo",
+          "Delivery timestamp",
+          "GPS location",
+          "Carrier ID"
+        ],
+        "parentClassId": 21,
+        "position": { "x": 12.8, "y": -7.3, "z": 0 },
+        "size": { "width": 2.8, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": 24,
+        "name": "Notification",
+        "type": "ellipse",
+        "attributes": [
+          "Notification ID",
+          "Channel",
+          "Recipient contact",
+          "Message template",
+          "Sent timestamp",
+          "Delivery status",
+          "Retry count"
+        ],
+        "parentClassId": 21,
+        "position": { "x": 10.5, "y": -9.0, "z": 0 },
+        "size": { "width": 2.6, "height": 1.25 },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": { "width": 0.14, "height": 0.14 }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      }
+    ],
+    "link": [
+      {
+        "sourceClassId": 1,
+        "targetClassId": 3,
+        "rendering": {
+          "lineColor": "#000000",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.65,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "delivers",
+          "labelFontSize": 13,
+          "labelColor": "#000000",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.42,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 3,
+        "targetClassId": 2,
+        "rendering": {
+          "lineColor": "#000000",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.65,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "received by",
+          "labelFontSize": 13,
+          "labelColor": "#000000",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.42,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 2,
+        "targetClassId": 3,
+        "rendering": {
+          "lineColor": "#2e7d32",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "curveOffset": -0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "sends",
+          "labelFontSize": 13,
+          "labelColor": "#0b3d02",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.58,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 14,
+        "targetClassId": 1,
+        "rendering": {
+          "lineColor": "#1a237e",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "employs",
+          "labelFontSize": 13,
+          "labelColor": "#0d1321",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.45,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 1,
+        "targetClassId": 9,
+        "rendering": {
+          "lineColor": "#6a1b9a",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.55,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "assigned to",
+          "labelFontSize": 13,
+          "labelColor": "#3b0a57",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 9,
+        "targetClassId": 11,
+        "rendering": {
+          "lineColor": "#000000",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.35,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "contains stops for",
+          "labelFontSize": 13,
+          "labelColor": "#000000",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 15,
+        "targetClassId": 10,
+        "rendering": {
+          "lineColor": "#1a237e",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.35,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "performs",
+          "labelFontSize": 13,
+          "labelColor": "#0d1321",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 10,
+        "targetClassId": 3,
+        "rendering": {
+          "lineColor": "#000000",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "sorts",
+          "labelFontSize": 13,
+          "labelColor": "#000000",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.44,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 18,
+        "targetClassId": 1,
+        "rendering": {
+          "lineColor": "#ef6c00",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "curveOffset": 0.4,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "used by",
+          "labelFontSize": 13,
+          "labelColor": "#4a2500",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.55,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 19,
+        "targetClassId": 18,
+        "rendering": {
+          "lineColor": "#000000",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.35,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "assigns vehicle",
+          "labelFontSize": 13,
+          "labelColor": "#000000",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.52,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 19,
+        "targetClassId": 9,
+        "rendering": {
+          "lineColor": "#000000",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "assigns route",
+          "labelFontSize": 13,
+          "labelColor": "#000000",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.48,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 20,
+        "targetClassId": 3,
+        "rendering": {
+          "lineColor": "#6a1b9a",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.55,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "contains",
+          "labelFontSize": 13,
+          "labelColor": "#3b0a57",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.45,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 3,
+        "targetClassId": 22,
+        "rendering": {
+          "lineColor": "#000000",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.35,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "generates",
+          "labelFontSize": 13,
+          "labelColor": "#000000",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 11,
+        "targetClassId": 23,
+        "rendering": {
+          "lineColor": "#2e7d32",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.35,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "produces",
+          "labelFontSize": 13,
+          "labelColor": "#0b3d02",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.55,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 12,
+        "targetClassId": 24,
+        "rendering": {
+          "lineColor": "#ef6c00",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "curveOffset": 0.35,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "triggers",
+          "labelFontSize": 13,
+          "labelColor": "#4a2500",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.52,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 24,
+        "targetClassId": 2,
+        "rendering": {
+          "lineColor": "#1a237e",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "notifies",
+          "labelFontSize": 13,
+          "labelColor": "#0d1321",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      },
+      {
+        "sourceClassId": 16,
+        "targetClassId": 2,
+        "rendering": {
+          "lineColor": "#6a1b9a",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelText": "used by",
+          "labelFontSize": 13,
+          "labelColor": "#3b0a57",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        }
+      }
+    ]
+  }
+}
