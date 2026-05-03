@@ -13,8 +13,15 @@
           "Post office",
           "Phone number"
         ],
-        "position": { "x": 5.5, "y": 8.2, "z": 0 },
-        "size": { "width": 3.2, "height": 1.25 },
+        "position": {
+          "x": 4.6906674878449515,
+          "y": 10.111402315940646,
+          "z": 0
+        },
+        "size": {
+          "width": 3.2,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -28,7 +35,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -48,8 +58,15 @@
           "Phone number",
           "Email"
         ],
-        "position": { "x": 13.5, "y": 8.2, "z": 0 },
-        "size": { "width": 3.2, "height": 1.25 },
+        "position": {
+          "x": 12.001873860478952,
+          "y": 9.28484996310145,
+          "z": 0
+        },
+        "size": {
+          "width": 3.2,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -63,7 +80,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -85,9 +105,19 @@
           "Priority",
           "Tracking code"
         ],
-        "children": [4, 5],
-        "position": { "x": 9.5, "y": 4.8, "z": 0 },
-        "size": { "width": 4.1, "height": 5.3 },
+        "children": [
+          4,
+          5
+        ],
+        "position": {
+          "x": 9.1900428676853,
+          "y": 4.6450214338426505,
+          "z": 0
+        },
+        "size": {
+          "width": 4.1,
+          "height": 5.3
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -101,7 +131,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -122,8 +155,15 @@
           "Recipient address"
         ],
         "parentClassId": 3,
-        "position": { "x": 8.9, "y": 5.4, "z": 0 },
-        "size": { "width": 2.1, "height": 1.25 },
+        "position": {
+          "x": 8.3145254167389,
+          "y": 5.158922230421902,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -137,7 +177,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -159,8 +202,15 @@
           "Tracking code"
         ],
         "parentClassId": 3,
-        "position": { "x": 8.9, "y": 3.1, "z": 0 },
-        "size": { "width": 2.1, "height": 1.25 },
+        "position": {
+          "x": 8.331745257423051,
+          "y": 3.220538884789051,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -174,7 +224,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
