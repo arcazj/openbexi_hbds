@@ -17,8 +17,15 @@
           "Assigned vehicle",
           "Supervisor"
         ],
-        "position": { "x": 4.5, "y": 11.2, "z": 0 },
-        "size": { "width": 3.2, "height": 1.25 },
+        "position": {
+          "x": 7.850006334328413,
+          "y": 11.15533324887562,
+          "z": 0
+        },
+        "size": {
+          "width": 3.2,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -32,7 +39,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -55,8 +65,15 @@
           "Delivery instructions",
           "Identity verification status"
         ],
-        "position": { "x": 16.5, "y": 11.2, "z": 0 },
-        "size": { "width": 3.2, "height": 1.25 },
+        "position": {
+          "x": 16.5,
+          "y": 11.2,
+          "z": 0
+        },
+        "size": {
+          "width": 3.2,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -70,7 +87,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -96,9 +116,21 @@
           "Declared value",
           "Delivery deadline"
         ],
-        "children": [4, 5, 6, 7],
-        "position": { "x": 10.5, "y": 6.4, "z": 0 },
-        "size": { "width": 7.6, "height": 6.8 },
+        "children": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "position": {
+          "x": 9.182330841830826,
+          "y": 5.484331601950233,
+          "z": 0
+        },
+        "size": {
+          "width": 7.6,
+          "height": 6.8
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -112,7 +144,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -135,8 +170,15 @@
           "Confidential flag"
         ],
         "parentClassId": 3,
-        "position": { "x": 8.6, "y": 7.6, "z": 0 },
-        "size": { "width": 2.1, "height": 1.25 },
+        "position": {
+          "x": 6.545329448278572,
+          "y": 7.622333375562189,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -150,7 +192,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -174,8 +219,15 @@
           "Hazardous material flag"
         ],
         "parentClassId": 3,
-        "position": { "x": 8.6, "y": 5.4, "z": 0 },
-        "size": { "width": 2.1, "height": 1.25 },
+        "position": {
+          "x": 6.589996199402954,
+          "y": 3.2113291949054372,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -189,7 +241,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -211,8 +266,15 @@
           "Security handling code"
         ],
         "parentClassId": 3,
-        "position": { "x": 12.3, "y": 7.6, "z": 0 },
-        "size": { "width": 2.4, "height": 1.25 },
+        "position": {
+          "x": 9.374327801353187,
+          "y": 6.371664344079581,
+          "z": 0
+        },
+        "size": {
+          "width": 2.4,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -226,7 +288,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -248,8 +313,15 @@
           "Delivery exception"
         ],
         "parentClassId": 3,
-        "position": { "x": 12.3, "y": 5.4, "z": 0 },
-        "size": { "width": 2.4, "height": 1.25 },
+        "position": {
+          "x": 8.99466041679597,
+          "y": 4.662998606447751,
+          "z": 0
+        },
+        "size": {
+          "width": 2.4,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -263,7 +335,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -285,9 +360,21 @@
           "SLA target",
           "Exception count"
         ],
-        "children": [9, 10, 11, 12],
-        "position": { "x": 10.5, "y": -1.6, "z": 0 },
-        "size": { "width": 8.2, "height": 5.8 },
+        "children": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "position": {
+          "x": 9.472664724139287,
+          "y": -1.9350006334328431,
+          "z": 0
+        },
+        "size": {
+          "width": 8.2,
+          "height": 5.8
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -301,7 +388,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -324,8 +414,15 @@
           "Assigned carrier"
         ],
         "parentClassId": 8,
-        "position": { "x": 7.7, "y": -0.6, "z": 0 },
-        "size": { "width": 2.2, "height": 1.25 },
+        "position": {
+          "x": 6.672664724139288,
+          "y": -0.287332742129349,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -339,7 +436,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -363,8 +463,15 @@
           "Error count"
         ],
         "parentClassId": 8,
-        "position": { "x": 10.5, "y": -0.6, "z": 0 },
-        "size": { "width": 2.4, "height": 1.25 },
+        "position": {
+          "x": 9.919332235383076,
+          "y": -1.4486682713632,
+          "z": 0
+        },
+        "size": {
+          "width": 2.4,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -378,7 +485,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -402,8 +512,15 @@
           "Customer note"
         ],
         "parentClassId": 8,
-        "position": { "x": 7.7, "y": -2.6, "z": 0 },
-        "size": { "width": 2.6, "height": 1.25 },
+        "position": {
+          "x": 6.806664977512423,
+          "y": -4.0516694115423135,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -417,7 +534,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -440,8 +560,15 @@
           "Customer notified"
         ],
         "parentClassId": 8,
-        "position": { "x": 10.9, "y": -2.6, "z": 0 },
-        "size": { "width": 2.7, "height": 1.25 },
+        "position": {
+          "x": 10.073665104198993,
+          "y": -2.7786670044975192,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -455,7 +582,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -476,9 +606,20 @@
           "Staffing level",
           "Automation level"
         ],
-        "children": [14, 15, 16],
-        "position": { "x": 1.5, "y": 2.8, "z": 0 },
-        "size": { "width": 5.8, "height": 5.8 },
+        "children": [
+          14,
+          15,
+          16
+        ],
+        "position": {
+          "x": -1.4703389497711932,
+          "y": 0.9016630772139003,
+          "z": 0
+        },
+        "size": {
+          "width": 5.8,
+          "height": 5.8
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -492,7 +633,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -515,8 +659,15 @@
           "Service counters"
         ],
         "parentClassId": 13,
-        "position": { "x": 1.5, "y": 4.1, "z": 0 },
-        "size": { "width": 2.4, "height": 1.25 },
+        "position": {
+          "x": -2.4753408500697187,
+          "y": 2.156996326089521,
+          "z": 0
+        },
+        "size": {
+          "width": 2.4,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -530,7 +681,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -553,8 +707,15 @@
           "Operating shift"
         ],
         "parentClassId": 13,
-        "position": { "x": 1.5, "y": 2.4, "z": 0 },
-        "size": { "width": 2.6, "height": 1.25 },
+        "position": {
+          "x": -2.4976742256319078,
+          "y": 0.7026634572736057,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -568,7 +729,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -591,8 +755,15 @@
           "Pickup deadline"
         ],
         "parentClassId": 13,
-        "position": { "x": 1.5, "y": 0.7, "z": 0 },
-        "size": { "width": 2.5, "height": 1.25 },
+        "position": {
+          "x": -2.542340976756279,
+          "y": -0.9080030404776369,
+          "z": 0
+        },
+        "size": {
+          "width": 2.5,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -606,7 +777,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -627,9 +801,20 @@
           "Dispatch region",
           "Daily mileage"
         ],
-        "children": [18, 19, 20],
-        "position": { "x": 19.5, "y": 2.8, "z": 0 },
-        "size": { "width": 5.8, "height": 5.8 },
+        "children": [
+          18,
+          19,
+          20
+        ],
+        "position": {
+          "x": 21.55467055172143,
+          "y": 0.5889958193432483,
+          "z": 0
+        },
+        "size": {
+          "width": 5.8,
+          "height": 5.8
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -643,7 +828,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -667,8 +855,15 @@
           "Assigned carrier"
         ],
         "parentClassId": 17,
-        "position": { "x": 19.5, "y": 4.1, "z": 0 },
-        "size": { "width": 2.7, "height": 1.25 },
+        "position": {
+          "x": 20.750669031482612,
+          "y": 2.0229960727163836,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -682,7 +877,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -705,8 +903,15 @@
           "Load manifest"
         ],
         "parentClassId": 17,
-        "position": { "x": 19.5, "y": 2.4, "z": 0 },
-        "size": { "width": 2.6, "height": 1.25 },
+        "position": {
+          "x": 20.79533578260699,
+          "y": 0.3453294482785729,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -720,7 +925,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -743,8 +951,15 @@
           "Sealed status"
         ],
         "parentClassId": 17,
-        "position": { "x": 19.5, "y": 0.7, "z": 0 },
-        "size": { "width": 2.6, "height": 1.25 },
+        "position": {
+          "x": 20.92933603598013,
+          "y": -1.4216706784079962,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -758,7 +973,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -779,9 +997,20 @@
           "Event count",
           "Exception flag"
         ],
-        "children": [22, 23, 24],
-        "position": { "x": 10.5, "y": -7.8, "z": 0 },
-        "size": { "width": 7.2, "height": 4.6 },
+        "children": [
+          22,
+          23,
+          24
+        ],
+        "position": {
+          "x": 17.557346677651857,
+          "y": -7.241665610945265,
+          "z": 0
+        },
+        "size": {
+          "width": 7.2,
+          "height": 4.6
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -795,7 +1024,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -818,8 +1050,15 @@
           "Recorded by"
         ],
         "parentClassId": 21,
-        "position": { "x": 8.2, "y": -7.3, "z": 0 },
-        "size": { "width": 2.7, "height": 1.25 },
+        "position": {
+          "x": 17.37901735605985,
+          "y": -6.116331095203962,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -833,7 +1072,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -856,8 +1098,15 @@
           "Carrier ID"
         ],
         "parentClassId": 21,
-        "position": { "x": 12.8, "y": -7.3, "z": 0 },
-        "size": { "width": 2.8, "height": 1.25 },
+        "position": {
+          "x": 17.512342243621973,
+          "y": -7.501000380059702,
+          "z": 0
+        },
+        "size": {
+          "width": 2.8,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -871,7 +1120,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -894,8 +1146,15 @@
           "Retry count"
         ],
         "parentClassId": 21,
-        "position": { "x": 10.5, "y": -9.0, "z": 0 },
-        "size": { "width": 2.6, "height": 1.25 },
+        "position": {
+          "x": 15.324009121432914,
+          "y": -8.88833312218905,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -909,7 +1168,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -927,7 +1189,7 @@
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.65,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -938,7 +1200,19 @@
           "labelPositionAlongPath": 0.42,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": -6.174999952465296,
+              "y": 7.937499976158143,
+              "z": 0
+            },
+            {
+              "x": -0.17499995246529565,
+              "y": 7.937499976158143,
+              "z": 0
+            }
+          ]
         }
       },
       {
@@ -948,7 +1222,7 @@
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": 0.65,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -959,7 +1233,19 @@
           "labelPositionAlongPath": 0.42,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": -0.17499995246529565,
+              "y": 7.937499976158143,
+              "z": 0
+            },
+            {
+              "x": 5.825000047534704,
+              "y": 7.937499976158143,
+              "z": 0
+            }
+          ]
         }
       },
       {
@@ -969,7 +1255,7 @@
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "dashed",
-          "curveOffset": -0.45,
+          "curveOffset": -0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -980,7 +1266,19 @@
           "labelPositionAlongPath": 0.58,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": 5.825000047534704,
+              "y": 7.937499976158143,
+              "z": 0
+            },
+            {
+              "x": -0.17499995246529565,
+              "y": 7.937499976158143,
+              "z": 0
+            }
+          ]
         }
       },
       {
@@ -990,7 +1288,7 @@
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": 0.45,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1001,7 +1299,8 @@
           "labelPositionAlongPath": 0.45,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": []
         }
       },
       {
@@ -1011,7 +1310,7 @@
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.55,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1022,7 +1321,19 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": -6.174999952465296,
+              "y": 4.268750000000001,
+              "z": 0
+            },
+            {
+              "x": -2.3499999406188725,
+              "y": 4.268750000000001,
+              "z": 0
+            }
+          ]
         }
       },
       {
@@ -1043,7 +1354,8 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": []
         }
       },
       {
@@ -1053,7 +1365,7 @@
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.35,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1064,7 +1376,8 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": []
         }
       },
       {
@@ -1074,7 +1387,7 @@
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": 0.45,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1085,7 +1398,8 @@
           "labelPositionAlongPath": 0.44,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": []
         }
       },
       {
@@ -1095,7 +1409,7 @@
           "lineColor": "#ef6c00",
           "lineWidth": 2,
           "lineStyle": "dashed",
-          "curveOffset": 0.4,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1106,7 +1420,19 @@
           "labelPositionAlongPath": 0.55,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": 7.250000023618341,
+              "y": 6.46875,
+              "z": 0
+            },
+            {
+              "x": -6.174999952465296,
+              "y": 6.46875,
+              "z": 0
+            }
+          ]
         }
       },
       {
@@ -1116,7 +1442,7 @@
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.35,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1127,7 +1453,8 @@
           "labelPositionAlongPath": 0.52,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": []
         }
       },
       {
@@ -1137,7 +1464,7 @@
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": 0.45,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1148,7 +1475,19 @@
           "labelPositionAlongPath": 0.48,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": 8.750000071451067,
+              "y": 0.40000002384185873,
+              "z": 0
+            },
+            {
+              "x": -2.3499999406188725,
+              "y": 0.40000002384185873,
+              "z": 0
+            }
+          ]
         }
       },
       {
@@ -1158,7 +1497,7 @@
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.55,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1169,7 +1508,19 @@
           "labelPositionAlongPath": 0.45,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": 7.250000023618341,
+              "y": 3.131249952316285,
+              "z": 0
+            },
+            {
+              "x": -0.17499995246529565,
+              "y": 3.131249952316285,
+              "z": 0
+            }
+          ]
         }
       },
       {
@@ -1190,7 +1541,8 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": []
         }
       },
       {
@@ -1200,7 +1552,7 @@
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.35,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1211,7 +1563,8 @@
           "labelPositionAlongPath": 0.55,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": []
         }
       },
       {
@@ -1232,7 +1585,19 @@
           "labelPositionAlongPath": 0.52,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": 0.3500000356882804,
+              "y": -6.6250000357627865,
+              "z": 0
+            },
+            {
+              "x": -2.1649999585002657,
+              "y": -6.6250000357627865,
+              "z": 0
+            }
+          ]
         }
       },
       {
@@ -1242,7 +1607,7 @@
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
-          "curveOffset": -0.45,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1253,7 +1618,19 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": 1.8300000445172193,
+              "y": -9.575,
+              "z": 0
+            },
+            {
+              "x": 1.8300000445172193,
+              "y": 10.337499976158142,
+              "z": 0
+            }
+          ]
         }
       },
       {
@@ -1263,7 +1640,7 @@
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
           "lineStyle": "dashed",
-          "curveOffset": 0.45,
+          "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
@@ -1274,7 +1651,19 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "routePoints": [
+            {
+              "x": -2.4624999644234773,
+              "y": 0.7249999284744266,
+              "z": 0
+            },
+            {
+              "x": -2.4624999644234773,
+              "y": 10.337499976158142,
+              "z": 0
+            }
+          ]
         }
       }
     ]
