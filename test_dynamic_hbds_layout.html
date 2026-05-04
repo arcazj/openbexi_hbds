@@ -16,7 +16,7 @@
     select, textarea, button { width: 100%; box-sizing: border-box; }
     textarea { min-height: 160px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     #layout-status { background: #111; color: #e7ffe7; padding: 8px; min-height: 130px; white-space: pre-wrap; }
-    .label { pointer-events: none; }
+    .label { pointer-events: auto; cursor: pointer; }
   </style>
 <script type="importmap">
 {
@@ -69,6 +69,14 @@ let dynamicModel = createEmptyDynamicModel();
 let nextClassId = 1, nextHyperclassNumber = 1, nextClassNumber = 1, nextAttributeNumber = 1, nextLinkNumber = 1;
 let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
 const draggableObjects = []; const nodeMeshById = new Map();
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let selectedElementId = null;
+let pendingLinkSourceId = null;
+let pendingLinkTargetId = null;
+let linkPickMode = 'source';
+let selectedMesh = null;
+let suppressClickUntil = 0;
 
 function createEmptyDynamicModel(){ return { hypergraph: { class: [], link: [] } }; }
 function getNextNodeId(){ return nextClassId++; }
@@ -89,6 +97,19 @@ function createGenericClass(parentHyperclassId = null){
 function addGenericAttribute(ownerId){ const owner = dynamicModel.hypergraph.class.find(c=>c.id===Number(ownerId)); if(!owner) return; if(!Array.isArray(owner.attributes)) owner.attributes=[]; owner.attributes.push(`att${nextAttributeNumber++}`); }
 function createGenericLink(sourceId, targetId){ if(!sourceId || !targetId || sourceId===targetId) return false; dynamicModel.hypergraph.link.push({ id:`link${nextLinkNumber}`, sourceClassId:Number(sourceId), targetClassId:Number(targetId), rendering:{ labelText:`link${nextLinkNumber++}` } }); return true; }
 
+
+function findClassDataById(elementId){ return dynamicModel.hypergraph.class.find(c=>c.id===Number(elementId)) || null; }
+function setSelectValue(selectId, value){ const el=document.getElementById(selectId); if(!el) return; if(value===null||value===undefined||value===''){ el.value=''; return; } const v=String(value); if([...el.options].some(o=>o.value===v)) el.value=v; }
+function updateLinkSourceSelect(elementId){ setSelectValue('link-source-select', elementId); }
+function updateLinkTargetSelect(elementId){ setSelectValue('link-target-select', elementId); }
+function clearSelectionHighlight(){ if(!selectedMesh) return; selectedMesh.traverse(o=>{ if(o.material?.emissive && o.userData?.__prevEmissiveHex!==undefined){ o.material.emissive.setHex(o.userData.__prevEmissiveHex); o.material.emissiveIntensity = o.userData.__prevEmissiveIntensity ?? 1; delete o.userData.__prevEmissiveHex; delete o.userData.__prevEmissiveIntensity; } }); selectedMesh=null; }
+function highlightSelectedElement(elementId){ clearSelectionHighlight(); const mesh=nodeMeshById.get(Number(elementId)); if(!mesh) return; selectedMesh=mesh; mesh.traverse(o=>{ if(!o.material?.emissive) return; if(o.userData.__prevEmissiveHex===undefined){ o.userData.__prevEmissiveHex=o.material.emissive.getHex(); o.userData.__prevEmissiveIntensity=o.material.emissiveIntensity ?? 1; } o.material.emissive.setHex(0x1e90ff); o.material.emissiveIntensity = 0.9; }); }
+function updateSelectionMenus(elementId){ const elementData=findClassDataById(elementId); if(!elementData) return; setSelectValue('selected-element', elementId); setSelectValue('attribute-owner-select', elementId); if(elementData.type==='hyperclass') setSelectValue('parent-hyperclass-select', elementId); }
+function selectElement(elementId){ const elementData=findClassDataById(elementId); if(!elementData) return; selectedElementId=Number(elementId); updateSelectionMenus(selectedElementId); highlightSelectedElement(selectedElementId); updateStatus(`Selected: ${elementData.name} (#${elementData.id})`); }
+function handleDiagramElementClick(elementId){ const id=Number(elementId); if(!Number.isFinite(id)) return; selectElement(id); if(linkPickMode==='source'){ pendingLinkSourceId=id; pendingLinkTargetId=null; linkPickMode='target'; updateLinkSourceSelect(id); updateLinkTargetSelect(null); updateStatus('Source selected. Click another class or hyperclass to select the target.'); return; } if(linkPickMode==='target'){ if(id===pendingLinkSourceId){ updateStatus('Target cannot be the same as source. Click another element.'); return; } pendingLinkTargetId=id; linkPickMode='source'; updateLinkTargetSelect(id); const d=findClassDataById(id); updateStatus(`Target selected: ${d?.name||id}. Click Add Link to create the link.`); } }
+function findClassLikeAncestor(object){ let current=object; while(current){ if(current.userData?.isClassLike || current.userData?.hbdsId) return current; current=current.parent; } return null; }
+function setupDiagramClickSelection(){ renderer.domElement.addEventListener('pointerup',(event)=>{ if(Date.now()<suppressClickUntil) return; const rect=renderer.domElement.getBoundingClientRect(); pointer.x=((event.clientX-rect.left)/rect.width)*2-1; pointer.y=-((event.clientY-rect.top)/rect.height)*2+1; raycaster.setFromCamera(pointer,camera); const hits=raycaster.intersectObjects(diagramGroup.children,true); const hit=hits.find(h=>findClassLikeAncestor(h.object)); if(!hit) return; const ancestor=findClassLikeAncestor(hit.object); const id=ancestor?.userData?.hbdsId; if(id!==undefined) handleDiagramElementClick(id); }); }
+function addLinkFromCurrentSelection(){ const sourceId = pendingLinkSourceId || Number(document.getElementById('link-source-select').value); const targetId = pendingLinkTargetId || Number(document.getElementById('link-target-select').value); if(!sourceId||!targetId){ updateStatus('Select a source and target by clicking elements in the diagram.'); return false; } if(sourceId===targetId){ updateStatus('Source and target must be different.'); return false; } const ok=createGenericLink(sourceId,targetId); if(!ok){ updateStatus('Link rejected: missing endpoints or self-link'); return false; } pendingLinkSourceId=null; pendingLinkTargetId=null; linkPickMode='source'; updateLinkSourceSelect(''); updateLinkTargetSelect(''); return true; }
 function clearDynamicScene(){ if(diagramGroup) scene.remove(diagramGroup); diagramGroup = new THREE.Group(); scene.add(diagramGroup); nodeMeshById.clear(); draggableObjects.length=0; if(dragControls) dragControls.dispose(); }
 
 function renderDynamicModel(){
@@ -97,7 +118,8 @@ function renderDynamicModel(){
   dynamicModel.hypergraph.class.forEach(cd=>{
     const built = cd.type==='hyperclass' ? createHyperClass(null, cd) : createClass(cd);
     const mesh = built.classMesh; if(cd.type!=='hyperclass') mesh.position.set(cd.position?.x||0, cd.position?.y||0, cd.position?.z||0);
-    mesh.userData.hbdsId = cd.id; mesh.userData.isHyperClass = cd.type==='hyperclass'; mesh.userData.modelData = cd; mesh.userData.parentClassId = cd.parentClassId || null; mesh.userData.isHbdsClass = true;
+    mesh.userData.hbdsId = cd.id; mesh.userData.isHyperClass = cd.type==='hyperclass'; mesh.userData.modelData = cd; mesh.userData.parentClassId = cd.parentClassId || null; mesh.userData.isHbdsClass = true; mesh.userData.isClassLike = true;
+    mesh.traverse(obj=>{ if(obj.element instanceof HTMLElement){ obj.element.addEventListener('click', e=>{ e.stopPropagation(); handleDiagramElementClick(cd.id); }); } });
     nodeMeshById.set(cd.id, mesh); diagramGroup.add(mesh);
   });
   dynamicModel.hypergraph.class.forEach(cd=>{ if(!cd.parentClassId) return; const p=nodeMeshById.get(cd.parentClassId), ch=nodeMeshById.get(cd.id); if(!p||!ch) return; const wp=ch.getWorldPosition(new THREE.Vector3()); p.worldToLocal(wp); diagramGroup.remove(ch); ch.position.copy(wp); p.add(ch); });
@@ -105,7 +127,7 @@ function renderDynamicModel(){
   dynamicModel.hypergraph.link.forEach(ld=>{ const src=nodeMeshById.get(ld.sourceClassId), tgt=nodeMeshById.get(ld.targetClassId); if(!src||!tgt) return; const handle=(src.userData.isHyperClass||tgt.userData.isHyperClass)?createLinkBetweenHyperClass(diagramGroup,src,tgt,ld):createLinkBetweenClass(ld,nodeMeshById); if(handle){ handle.linkGroup.userData={isHbdsLink:true,linkData:ld,sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId}; diagramGroup.add(handle.linkGroup);} });
   setupDrag(); refreshDynamicScene();
 }
-function setupDrag(){ dragControls = new DragControls(draggableObjects, camera, renderer.domElement); dragControls.addEventListener('dragstart', ()=> orbitControls.enabled=false); dragControls.addEventListener('dragend', ()=> { orbitControls.enabled=true; recalculateAllLinks(); updateJsonPreview(); refreshDynamicScene();}); }
+function setupDrag(){ dragControls = new DragControls(draggableObjects, camera, renderer.domElement); dragControls.addEventListener('dragstart', ()=> orbitControls.enabled=false); dragControls.addEventListener('dragend', ()=> { orbitControls.enabled=true; suppressClickUntil=Date.now()+180; recalculateAllLinks(); updateJsonPreview(); refreshDynamicScene();}); }
 function fitDynamicModelToView(){ const box=new THREE.Box3().setFromObject(diagramGroup); if(box.isEmpty()) return; const size=box.getSize(new THREE.Vector3()); const center=box.getCenter(new THREE.Vector3()); const max=Math.max(size.x,size.y,1); camera.position.set(center.x, center.y, max*1.8); camera.lookAt(center); orbitControls.target.copy(center); orbitControls.update(); updateMinimap(); }
 function refreshDynamicScene(){ recalculateAllLinks(); updateLabelFontSizes(camera); updateHyperClassLabelFontSizes(camera, renderer); updateLinkFontSizes(camera); updateHyperClassLinkFontSizes(camera, renderer); updateJsonPreview(); updateSmartMenus(); updateStatus(); updateMinimap(); renderOnce(); }
 function updateSmartMenus(){
@@ -113,6 +135,9 @@ function updateSmartMenus(){
   [selected,owner,src,tgt].forEach(el=>el.innerHTML=''); parent.innerHTML='<option value="">None / Top Level</option>';
   dynamicModel.hypergraph.class.forEach(n=>{ const txt=`${n.name} (#${n.id})`; [selected,owner,src,tgt].forEach(el=>el.add(new Option(txt,n.id))); if(n.type==='hyperclass') parent.add(new Option(txt,n.id)); });
   dynamicModel.hypergraph.link.forEach(l=>selected.add(new Option(`${l.rendering?.labelText||l.id} [link]`, `link:${l.id}`)));
+  if(selectedElementId!==null) setSelectValue('selected-element', selectedElementId);
+  if(pendingLinkSourceId!==null) updateLinkSourceSelect(pendingLinkSourceId);
+  if(pendingLinkTargetId!==null) updateLinkTargetSelect(pendingLinkTargetId);
 }
 function updateJsonPreview(){ document.getElementById('json-preview').value = JSON.stringify(dynamicModel,null,2); }
 function exportJsonToPreview(){ updateJsonPreview(); navigator.clipboard?.writeText(document.getElementById('json-preview').value).catch(()=>{}); }
@@ -132,11 +157,11 @@ async function maybeOptimize(){ if(!document.getElementById('auto-optimize-toggl
 
 function renderOnce(){ renderer.render(scene,camera); labelRenderer.render(scene,camera); }
 
-async function initDynamicTestPage(){ await loadDefaultSettings().catch(()=>{}); scene=new THREE.Scene(); scene.background=new THREE.Color('#edf1f4'); camera=new THREE.PerspectiveCamera(52,(window.innerWidth-360)/window.innerHeight,0.1,2000); camera.position.set(0,0,12); renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(window.innerWidth-360,window.innerHeight); document.getElementById('container').appendChild(renderer.domElement); labelRenderer=new CSS2DRenderer(); labelRenderer.setSize(window.innerWidth-360,window.innerHeight); labelRenderer.domElement.style.position='fixed'; labelRenderer.domElement.style.top='0'; labelRenderer.domElement.style.left='0'; labelRenderer.domElement.style.pointerEvents='none'; document.body.appendChild(labelRenderer.domElement); orbitControls=new OrbitControls(camera, renderer.domElement); orbitControls.enableDamping=true; scene.add(new THREE.AmbientLight(0xffffff,1)); const dir=new THREE.DirectionalLight(0xffffff,0.65); dir.position.set(7,7,10); scene.add(dir); clearDynamicScene();
+async function initDynamicTestPage(){ await loadDefaultSettings().catch(()=>{}); scene=new THREE.Scene(); scene.background=new THREE.Color('#edf1f4'); camera=new THREE.PerspectiveCamera(52,(window.innerWidth-360)/window.innerHeight,0.1,2000); camera.position.set(0,0,12); renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(window.innerWidth-360,window.innerHeight); document.getElementById('container').appendChild(renderer.domElement); labelRenderer=new CSS2DRenderer(); labelRenderer.setSize(window.innerWidth-360,window.innerHeight); labelRenderer.domElement.style.position='fixed'; labelRenderer.domElement.style.top='0'; labelRenderer.domElement.style.left='0'; labelRenderer.domElement.style.pointerEvents='auto'; document.body.appendChild(labelRenderer.domElement); orbitControls=new OrbitControls(camera, renderer.domElement); orbitControls.enableDamping=true; scene.add(new THREE.AmbientLight(0xffffff,1)); const dir=new THREE.DirectionalLight(0xffffff,0.65); dir.position.set(7,7,10); scene.add(dir); clearDynamicScene();
   document.getElementById('add-hyperclass-button').onclick=async()=>{ createGenericHyperclass(document.getElementById('parent-hyperclass-select').value||null); renderDynamicModel(); await maybeOptimize(); if(document.getElementById('auto-fit-toggle').checked) fitDynamicModelToView(); };
   document.getElementById('add-class-button').onclick=async()=>{ createGenericClass(document.getElementById('parent-hyperclass-select').value||null); renderDynamicModel(); await maybeOptimize(); if(document.getElementById('auto-fit-toggle').checked) fitDynamicModelToView(); };
   document.getElementById('add-attribute-button').onclick=async()=>{ addGenericAttribute(document.getElementById('attribute-owner-select').value); renderDynamicModel(); await maybeOptimize(); };
-  document.getElementById('add-link-button').onclick=async()=>{ if(createGenericLink(document.getElementById('link-source-select').value,document.getElementById('link-target-select').value)){ renderDynamicModel(); await maybeOptimize(); } else updateStatus('Link rejected: missing endpoints or self-link'); };
+  document.getElementById('add-link-button').onclick=async()=>{ if(addLinkFromCurrentSelection()){ renderDynamicModel(); await maybeOptimize(); } };
   document.getElementById('delete-selected-button').onclick=()=>deleteSelectedElement();
   document.getElementById('optimize-layout-button').onclick=async()=>{ await optimizeAndRefreshLayout(getModelContext(), { modelName:'dynamic-test-model', source:'dynamic' }); refreshDynamicScene(); fitDynamicModelToView(); };
   document.getElementById('fit-model-button').onclick=()=>fitDynamicModelToView();
@@ -145,6 +170,7 @@ async function initDynamicTestPage(){ await loadDefaultSettings().catch(()=>{});
   document.getElementById('export-json-button').onclick=()=>exportJsonToPreview();
   document.getElementById('import-json-button').onclick=()=>importJsonFromPreview();
   window.addEventListener('resize', ()=>{ renderer.setSize(window.innerWidth-360,window.innerHeight); labelRenderer.setSize(window.innerWidth-360,window.innerHeight); camera.aspect=(window.innerWidth-360)/window.innerHeight; camera.updateProjectionMatrix(); renderOnce(); updateMinimap(); });
+  setupDiagramClickSelection();
   (function animate(){ requestAnimationFrame(animate); orbitControls.update(); refreshDynamicScene(); })();
   updateSmartMenus(); updateStatus('Ready'); updateJsonPreview();
 }
