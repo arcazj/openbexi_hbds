@@ -6,7 +6,7 @@
   <title>HBDS Dynamic Layout Test</title>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; font-family: Arial, sans-serif; }
-    #container { position: fixed; inset: 0; background: #f4f6f8; }
+    #container { position: fixed; inset: 0; background: #f4f4f4; }
     #model-overview { position: fixed; top: 10px; left: 10px; width: 220px; height: 150px; border: 1px solid #999; background: rgba(255,255,255,.95); z-index: 20; }
     #model-overview-canvas { width: 100%; height: 100%; display: block; }
     #model-overview-viewport { position: absolute; border: 1px dashed #d00; pointer-events: none; }
@@ -17,39 +17,28 @@
     textarea { min-height: 160px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     #layout-status { background: #111; color: #e7ffe7; padding: 8px; min-height: 130px; white-space: pre-wrap; }
     .label { pointer-events: auto; cursor: pointer; }
+    .checkbox-list { display:flex; flex-direction:column; gap:4px; max-height:130px; overflow-y:auto; padding:6px; border:1px solid #ccc; background:rgba(255,255,255,.75); }
+    .checkbox-row { display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; }
+    .checkbox-row input { cursor:pointer; }
   </style>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.176.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.176.0/examples/jsm/"
-  }
-}
-</script>
-
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
 <body>
   <div id="container"></div>
   <div id="model-overview"><canvas id="model-overview-canvas"></canvas><div id="model-overview-viewport"></div></div>
-  <div id="dynamic-test-panel">
-    <h2>HBDS Dynamic Layout Test</h2>
-    <div class="control-group">
-      <button id="add-hyperclass-button">Add Hyperclass</button>
-      <button id="add-class-button">Add Class</button>
-      <button id="add-attribute-button">Add Attribute</button>
-      <button id="add-link-button">Add Link</button>
-    </div>
-    <div class="control-group"><label><input type="checkbox" id="auto-optimize-toggle" checked> Auto Optimize After Add</label><label><input type="checkbox" id="auto-fit-toggle" checked> Auto Fit After Add</label></div>
-    <div class="control-group"><label for="selected-element">Selected Element</label><select id="selected-element"></select></div>
-    <div class="control-group"><label for="parent-hyperclass-select">Parent Hyperclass</label><select id="parent-hyperclass-select"><option value="">None / Top Level</option></select></div>
-    <div class="control-group"><label for="attribute-owner-select">Attribute Owner</label><select id="attribute-owner-select"></select></div>
-    <div class="control-group"><label for="link-source-select">Link Source</label><select id="link-source-select"></select><label for="link-target-select">Link Target</label><select id="link-target-select"></select></div>
+  <div id="dynamic-test-panel"><h2>HBDS Dynamic Layout Test</h2>
+    <div class="control-group"><label for="test-model-select">Select HDBS Model</label><select id="test-model-select"></select></div>
+    <div class="control-group"><button id="add-hyperclass-button">Add Hyperclass</button><button id="add-class-button">Add Class</button><button id="add-attribute-button">Add Attribute</button><button id="add-link-button">Add Link</button></div>
     <div class="control-group"><button id="delete-selected-button">Delete Selected</button><button id="optimize-layout-button">Optimize Layout</button><button id="fit-model-button">Fit Model</button><button id="save-model-button">Save Model</button><button id="reset-model-button">Reset Test Model</button></div>
-    <div class="control-group"><button id="export-json-button">Export JSON</button><button id="import-json-button">Import JSON</button></div>
-    <details open><summary>Current JSON</summary><textarea id="json-preview"></textarea></details>
-    <pre id="layout-status"></pre>
+    <div class="control-group"><button id="export-json-button">Export JSON</button></div>
+    <div class="control-group"><label><input type="checkbox" id="auto-optimize-toggle" checked> Auto Optimize After Add</label><label><input type="checkbox" id="auto-fit-toggle" checked> Auto Fit After Add</label></div>
+    <div class="control-group"><h3>Selected Element</h3><div id="selected-element-checkboxes" class="checkbox-list"></div></div>
+    <div class="control-group"><h3>Parent Hyperclass</h3><div id="parent-hyperclass-checkboxes" class="checkbox-list"></div></div>
+    <div class="control-group"><h3>Attribute Owner</h3><div id="attribute-owner-checkboxes" class="checkbox-list"></div></div>
+    <div class="control-group"><h3>Link Source</h3><div id="link-source-checkboxes" class="checkbox-list"></div></div>
+    <div class="control-group"><h3>Link Target</h3><div id="link-target-checkboxes" class="checkbox-list"></div></div>
+    <textarea id="json-preview"></textarea><pre id="layout-status"></pre>
   </div>
-
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -60,121 +49,43 @@ import { createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSize
 import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
 import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
 import { optimizeAndRefreshLayout, saveScene } from './js/hbds_model.js';
-
-let applyModelDefaults = (m)=>m;
-let loadDefaultSettings = async ()=>({});
-try { const mod = await import('./js/hbds_setting.js'); applyModelDefaults = mod.applyModelDefaults ?? applyModelDefaults; loadDefaultSettings = mod.loadDefaultSettings ?? loadDefaultSettings; } catch {}
-
-let dynamicModel = createEmptyDynamicModel();
-let nextClassId = 1, nextHyperclassNumber = 1, nextClassNumber = 1, nextAttributeNumber = 1, nextLinkNumber = 1;
-let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
-const draggableObjects = []; const nodeMeshById = new Map();
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
-let selectedElementId = null;
-let pendingLinkSourceId = null;
-let pendingLinkTargetId = null;
-let linkPickMode = 'source';
-let selectedMesh = null;
-let suppressClickUntil = 0;
-
-function createEmptyDynamicModel(){ return { hypergraph: { class: [], link: [] } }; }
-function getNextNodeId(){ return nextClassId++; }
-function getModelContext(){ return { scene, camera, renderer, css2DRenderer: labelRenderer, orbitControls, dragControls, diagramGroup, draggableObjects, renderOnce: renderOnce }; }
-
-function createGenericHyperclass(parentHyperclassId = null){
-  const id = getNextNodeId();
-  const hc = { id, name:`hyperclass${nextHyperclassNumber++}`, type:'hyperclass', attributes:[], children:[], parentClassId: parentHyperclassId || null, position:{x:Math.random()*2-1,y:Math.random()*2-1,z:0}, size:{width:4,height:3.2}, rendering:{} };
-  dynamicModel.hypergraph.class.push(hc);
-  if(parentHyperclassId){ const p = dynamicModel.hypergraph.class.find(c=>c.id===Number(parentHyperclassId)); if(p){ p.children = p.children || []; p.children.push(id);} }
-}
-function createGenericClass(parentHyperclassId = null){
-  const id = getNextNodeId();
-  const c = { id, name:`class${nextClassNumber++}`, type:'roundedRectangle', attributes:[], parentClassId: parentHyperclassId || null, position:{x:Math.random()*2-1,y:Math.random()*2-1,z:0}, size:{width:1.8,height:2.2}, rendering:{} };
-  dynamicModel.hypergraph.class.push(c);
-  if(parentHyperclassId){ const p = dynamicModel.hypergraph.class.find(n=>n.id===Number(parentHyperclassId)); if(p){ p.children = p.children || []; p.children.push(id); } }
-}
-function addGenericAttribute(ownerId){ const owner = dynamicModel.hypergraph.class.find(c=>c.id===Number(ownerId)); if(!owner) return; if(!Array.isArray(owner.attributes)) owner.attributes=[]; owner.attributes.push(`att${nextAttributeNumber++}`); }
-function createGenericLink(sourceId, targetId){ if(!sourceId || !targetId || sourceId===targetId) return false; dynamicModel.hypergraph.link.push({ id:`link${nextLinkNumber}`, sourceClassId:Number(sourceId), targetClassId:Number(targetId), rendering:{ labelText:`link${nextLinkNumber++}` } }); return true; }
-
-
-function findClassDataById(elementId){ return dynamicModel.hypergraph.class.find(c=>c.id===Number(elementId)) || null; }
-function setSelectValue(selectId, value){ const el=document.getElementById(selectId); if(!el) return; if(value===null||value===undefined||value===''){ el.value=''; return; } const v=String(value); if([...el.options].some(o=>o.value===v)) el.value=v; }
-function updateLinkSourceSelect(elementId){ setSelectValue('link-source-select', elementId); }
-function updateLinkTargetSelect(elementId){ setSelectValue('link-target-select', elementId); }
-function clearSelectionHighlight(){ if(!selectedMesh) return; selectedMesh.traverse(o=>{ if(o.material?.emissive && o.userData?.__prevEmissiveHex!==undefined){ o.material.emissive.setHex(o.userData.__prevEmissiveHex); o.material.emissiveIntensity = o.userData.__prevEmissiveIntensity ?? 1; delete o.userData.__prevEmissiveHex; delete o.userData.__prevEmissiveIntensity; } }); selectedMesh=null; }
-function highlightSelectedElement(elementId){ clearSelectionHighlight(); const mesh=nodeMeshById.get(Number(elementId)); if(!mesh) return; selectedMesh=mesh; mesh.traverse(o=>{ if(!o.material?.emissive) return; if(o.userData.__prevEmissiveHex===undefined){ o.userData.__prevEmissiveHex=o.material.emissive.getHex(); o.userData.__prevEmissiveIntensity=o.material.emissiveIntensity ?? 1; } o.material.emissive.setHex(0x1e90ff); o.material.emissiveIntensity = 0.9; }); }
-function updateSelectionMenus(elementId){ const elementData=findClassDataById(elementId); if(!elementData) return; setSelectValue('selected-element', elementId); setSelectValue('attribute-owner-select', elementId); if(elementData.type==='hyperclass') setSelectValue('parent-hyperclass-select', elementId); }
-function selectElement(elementId){ const elementData=findClassDataById(elementId); if(!elementData) return; selectedElementId=Number(elementId); updateSelectionMenus(selectedElementId); highlightSelectedElement(selectedElementId); updateStatus(`Selected: ${elementData.name} (#${elementData.id})`); }
-function handleDiagramElementClick(elementId){ const id=Number(elementId); if(!Number.isFinite(id)) return; selectElement(id); if(linkPickMode==='source'){ pendingLinkSourceId=id; pendingLinkTargetId=null; linkPickMode='target'; updateLinkSourceSelect(id); updateLinkTargetSelect(null); updateStatus('Source selected. Click another class or hyperclass to select the target.'); return; } if(linkPickMode==='target'){ if(id===pendingLinkSourceId){ updateStatus('Target cannot be the same as source. Click another element.'); return; } pendingLinkTargetId=id; linkPickMode='source'; updateLinkTargetSelect(id); const d=findClassDataById(id); updateStatus(`Target selected: ${d?.name||id}. Click Add Link to create the link.`); } }
-function findClassLikeAncestor(object){ let current=object; while(current){ if(current.userData?.isClassLike || current.userData?.hbdsId) return current; current=current.parent; } return null; }
-function setupDiagramClickSelection(){ renderer.domElement.addEventListener('pointerup',(event)=>{ if(Date.now()<suppressClickUntil) return; const rect=renderer.domElement.getBoundingClientRect(); pointer.x=((event.clientX-rect.left)/rect.width)*2-1; pointer.y=-((event.clientY-rect.top)/rect.height)*2+1; raycaster.setFromCamera(pointer,camera); const hits=raycaster.intersectObjects(diagramGroup.children,true); const hit=hits.find(h=>findClassLikeAncestor(h.object)); if(!hit) return; const ancestor=findClassLikeAncestor(hit.object); const id=ancestor?.userData?.hbdsId; if(id!==undefined) handleDiagramElementClick(id); }); }
-function addLinkFromCurrentSelection(){ const sourceId = pendingLinkSourceId || Number(document.getElementById('link-source-select').value); const targetId = pendingLinkTargetId || Number(document.getElementById('link-target-select').value); if(!sourceId||!targetId){ updateStatus('Select a source and target by clicking elements in the diagram.'); return false; } if(sourceId===targetId){ updateStatus('Source and target must be different.'); return false; } const ok=createGenericLink(sourceId,targetId); if(!ok){ updateStatus('Link rejected: missing endpoints or self-link'); return false; } pendingLinkSourceId=null; pendingLinkTargetId=null; linkPickMode='source'; updateLinkSourceSelect(''); updateLinkTargetSelect(''); return true; }
-function clearDynamicScene(){ if(diagramGroup) scene.remove(diagramGroup); diagramGroup = new THREE.Group(); scene.add(diagramGroup); nodeMeshById.clear(); draggableObjects.length=0; if(dragControls) dragControls.dispose(); }
-
-function renderDynamicModel(){
-  clearDynamicScene();
-  dynamicModel = applyModelDefaults(dynamicModel) || dynamicModel;
-  dynamicModel.hypergraph.class.forEach(cd=>{
-    const built = cd.type==='hyperclass' ? createHyperClass(null, cd) : createClass(cd);
-    const mesh = built.classMesh; if(cd.type!=='hyperclass') mesh.position.set(cd.position?.x||0, cd.position?.y||0, cd.position?.z||0);
-    mesh.userData.hbdsId = cd.id; mesh.userData.isHyperClass = cd.type==='hyperclass'; mesh.userData.modelData = cd; mesh.userData.parentClassId = cd.parentClassId || null; mesh.userData.isHbdsClass = true; mesh.userData.isClassLike = true;
-    mesh.traverse(obj=>{ if(obj.element instanceof HTMLElement){ obj.element.addEventListener('click', e=>{ e.stopPropagation(); handleDiagramElementClick(cd.id); }); } });
-    nodeMeshById.set(cd.id, mesh); diagramGroup.add(mesh);
-  });
-  dynamicModel.hypergraph.class.forEach(cd=>{ if(!cd.parentClassId) return; const p=nodeMeshById.get(cd.parentClassId), ch=nodeMeshById.get(cd.id); if(!p||!ch) return; const wp=ch.getWorldPosition(new THREE.Vector3()); p.worldToLocal(wp); diagramGroup.remove(ch); ch.position.copy(wp); p.add(ch); });
-  dynamicModel.hypergraph.class.forEach(cd=>{ if(!cd.parentClassId){ const m=nodeMeshById.get(cd.id); if(m) draggableObjects.push(m); } });
-  dynamicModel.hypergraph.link.forEach(ld=>{ const src=nodeMeshById.get(ld.sourceClassId), tgt=nodeMeshById.get(ld.targetClassId); if(!src||!tgt) return; const handle=(src.userData.isHyperClass||tgt.userData.isHyperClass)?createLinkBetweenHyperClass(diagramGroup,src,tgt,ld):createLinkBetweenClass(ld,nodeMeshById); if(handle){ handle.linkGroup.userData={isHbdsLink:true,linkData:ld,sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId}; diagramGroup.add(handle.linkGroup);} });
-  setupDrag(); refreshDynamicScene();
-}
-function setupDrag(){ dragControls = new DragControls(draggableObjects, camera, renderer.domElement); dragControls.addEventListener('dragstart', ()=> orbitControls.enabled=false); dragControls.addEventListener('dragend', ()=> { orbitControls.enabled=true; suppressClickUntil=Date.now()+180; recalculateAllLinks(); updateJsonPreview(); refreshDynamicScene();}); }
-function fitDynamicModelToView(){ const box=new THREE.Box3().setFromObject(diagramGroup); if(box.isEmpty()) return; const size=box.getSize(new THREE.Vector3()); const center=box.getCenter(new THREE.Vector3()); const max=Math.max(size.x,size.y,1); camera.position.set(center.x, center.y, max*1.8); camera.lookAt(center); orbitControls.target.copy(center); orbitControls.update(); updateMinimap(); }
-function refreshDynamicScene(){ recalculateAllLinks(); updateLabelFontSizes(camera); updateHyperClassLabelFontSizes(camera, renderer); updateLinkFontSizes(camera); updateHyperClassLinkFontSizes(camera, renderer); updateJsonPreview(); updateSmartMenus(); updateStatus(); updateMinimap(); renderOnce(); }
-function updateSmartMenus(){
-  const selected=document.getElementById('selected-element'), parent=document.getElementById('parent-hyperclass-select'), owner=document.getElementById('attribute-owner-select'), src=document.getElementById('link-source-select'), tgt=document.getElementById('link-target-select');
-  [selected,owner,src,tgt].forEach(el=>el.innerHTML=''); parent.innerHTML='<option value="">None / Top Level</option>';
-  dynamicModel.hypergraph.class.forEach(n=>{ const txt=`${n.name} (#${n.id})`; [selected,owner,src,tgt].forEach(el=>el.add(new Option(txt,n.id))); if(n.type==='hyperclass') parent.add(new Option(txt,n.id)); });
-  dynamicModel.hypergraph.link.forEach(l=>selected.add(new Option(`${l.rendering?.labelText||l.id} [link]`, `link:${l.id}`)));
-  if(selectedElementId!==null) setSelectValue('selected-element', selectedElementId);
-  if(pendingLinkSourceId!==null) updateLinkSourceSelect(pendingLinkSourceId);
-  if(pendingLinkTargetId!==null) updateLinkTargetSelect(pendingLinkTargetId);
-}
-function updateJsonPreview(){ document.getElementById('json-preview').value = JSON.stringify(dynamicModel,null,2); }
-function exportJsonToPreview(){ updateJsonPreview(); navigator.clipboard?.writeText(document.getElementById('json-preview').value).catch(()=>{}); }
-function rebuildCountersFromModel(model){ nextClassId = Math.max(0,...model.hypergraph.class.map(c=>Number(c.id)||0))+1; const findMax=(re,dflt)=>Math.max(dflt,...model.hypergraph.class.flatMap(c=>[c.name,...(c.attributes||[])]).concat(model.hypergraph.link.map(l=>l.rendering?.labelText||l.id)).map(s=>{const m=String(s).match(re); return m?Number(m[1]):0;})); nextHyperclassNumber=findMax(/^hyperclass(\d+)$/,1)+1; nextClassNumber=findMax(/^class(\d+)$/,1)+1; nextAttributeNumber=findMax(/^att(\d+)$/,1)+1; nextLinkNumber=Math.max(1,...model.hypergraph.link.map(l=>Number((l.rendering?.labelText||l.id||'').match(/(\d+)/)?.[1]||0)))+1; }
-function validateDynamicModel(model){ const errs=[]; const ids=new Set(); const byId=new Map(model.hypergraph.class.map(c=>[c.id,c])); for(const c of model.hypergraph.class){ if(ids.has(c.id)) errs.push(`Duplicate ID: ${c.id}`); ids.add(c.id); if(c.parentClassId && !byId.has(c.parentClassId)) errs.push(`Missing parent for node ${c.id}`); if(!Array.isArray(c.attributes)) errs.push(`attributes is not array for ${c.id}`); if(c.type==='hyperclass'){ for(const child of (c.children||[])){ if(!byId.has(child)) errs.push(`Missing child ${child} in parent ${c.id}`); else if(byId.get(child).parentClassId!==c.id) errs.push(`Child ${child} parentClassId mismatch for parent ${c.id}`); } } }
-  for(const l of model.hypergraph.link){ if(!l.sourceClassId||!l.targetClassId) errs.push(`Invalid link endpoints ${l.id}`); if(!byId.has(l.sourceClassId)||!byId.has(l.targetClassId)) errs.push(`Missing link endpoint for ${l.id}`); }
-  return errs;
-}
-function updateStatus(extra=''){ const m=dynamicModel.hypergraph.class; const links=dynamicModel.hypergraph.link; const attrs=m.reduce((a,c)=>a+(Array.isArray(c.attributes)?c.attributes.length:0),0); const hyper=m.filter(c=>c.type==='hyperclass').length; const cls=m.length-hyper; const errs=validateDynamicModel(dynamicModel); document.getElementById('layout-status').textContent=`Nodes: ${m.length}\nHyperclasses: ${hyper}\nClasses: ${cls}\nAttributes: ${attrs}\nLinks: ${links.length}\nValidation: ${errs.length?'FAILED':'OK'}\n${errs.join('\n')}${extra?`\n${extra}`:''}`; }
-function updateMinimap(){ const canvas=document.getElementById('model-overview-canvas'); const ctx=canvas.getContext('2d'); canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; ctx.clearRect(0,0,canvas.width,canvas.height); const nodes=[...nodeMeshById.values()]; if(!nodes.length) return; const box=new THREE.Box3().setFromObject(diagramGroup); const w=box.max.x-box.min.x||1,h=box.max.y-box.min.y||1; const sx=canvas.width/w, sy=canvas.height/h;
-  dynamicModel.hypergraph.link.forEach(l=>{ const s=nodeMeshById.get(l.sourceClassId), t=nodeMeshById.get(l.targetClassId); if(!s||!t) return; const sp=s.getWorldPosition(new THREE.Vector3()), tp=t.getWorldPosition(new THREE.Vector3()); ctx.strokeStyle='#777'; ctx.beginPath(); ctx.moveTo((sp.x-box.min.x)*sx,canvas.height-(sp.y-box.min.y)*sy); ctx.lineTo((tp.x-box.min.x)*sx,canvas.height-(tp.y-box.min.y)*sy); ctx.stroke(); });
-  dynamicModel.hypergraph.class.forEach(c=>{ const p=nodeMeshById.get(c.id)?.getWorldPosition(new THREE.Vector3()); if(!p) return; ctx.fillStyle=c.type==='hyperclass'?'rgba(100,149,237,.35)':'rgba(255,165,0,.6)'; const ww=(c.size?.width||1)*sx, hh=(c.size?.height||1)*sy; ctx.fillRect((p.x-box.min.x)*sx-ww/2, canvas.height-((p.y-box.min.y)*sy)-hh/2, ww, hh); });
-}
-async function importJsonFromPreview(){ try{ const parsed=JSON.parse(document.getElementById('json-preview').value); dynamicModel=applyModelDefaults(parsed)||parsed; rebuildCountersFromModel(dynamicModel); renderDynamicModel(); if(document.getElementById('auto-fit-toggle').checked) fitDynamicModelToView(); updateStatus('Import: OK'); } catch(e){ updateStatus(`Import JSON error: ${e.message}`); } }
-function deleteSelectedElement(){ const value=document.getElementById('selected-element').value; if(!value) return; if(value.startsWith('link:')){ const id=value.split(':')[1]; dynamicModel.hypergraph.link=dynamicModel.hypergraph.link.filter(l=>l.id!==id); renderDynamicModel(); return; } const nodeId=Number(value); const toDelete=new Set(); const collect=(id)=>{ toDelete.add(id); dynamicModel.hypergraph.class.filter(c=>c.parentClassId===id).forEach(ch=>collect(ch.id)); }; collect(nodeId); dynamicModel.hypergraph.class=dynamicModel.hypergraph.class.filter(c=>!toDelete.has(c.id)); dynamicModel.hypergraph.class.forEach(c=>{ c.children=(c.children||[]).filter(id=>!toDelete.has(id)); if(toDelete.has(c.parentClassId)) c.parentClassId=null; }); dynamicModel.hypergraph.link=dynamicModel.hypergraph.link.filter(l=>!toDelete.has(l.sourceClassId)&&!toDelete.has(l.targetClassId)); renderDynamicModel(); }
-async function maybeOptimize(){ if(!document.getElementById('auto-optimize-toggle').checked) return; await optimizeAndRefreshLayout(getModelContext(), { modelName:'dynamic-test-model', source:'dynamic' }); updateJsonPreview(); updateStatus('Optimized'); }
-
-function renderOnce(){ renderer.render(scene,camera); labelRenderer.render(scene,camera); }
-
-async function initDynamicTestPage(){ await loadDefaultSettings().catch(()=>{}); scene=new THREE.Scene(); scene.background=new THREE.Color('#edf1f4'); camera=new THREE.PerspectiveCamera(52,(window.innerWidth-360)/window.innerHeight,0.1,2000); camera.position.set(0,0,12); renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(window.innerWidth-360,window.innerHeight); document.getElementById('container').appendChild(renderer.domElement); labelRenderer=new CSS2DRenderer(); labelRenderer.setSize(window.innerWidth-360,window.innerHeight); labelRenderer.domElement.style.position='fixed'; labelRenderer.domElement.style.top='0'; labelRenderer.domElement.style.left='0'; labelRenderer.domElement.style.pointerEvents='auto'; document.body.appendChild(labelRenderer.domElement); orbitControls=new OrbitControls(camera, renderer.domElement); orbitControls.enableDamping=true; scene.add(new THREE.AmbientLight(0xffffff,1)); const dir=new THREE.DirectionalLight(0xffffff,0.65); dir.position.set(7,7,10); scene.add(dir); clearDynamicScene();
-  document.getElementById('add-hyperclass-button').onclick=async()=>{ createGenericHyperclass(document.getElementById('parent-hyperclass-select').value||null); renderDynamicModel(); await maybeOptimize(); if(document.getElementById('auto-fit-toggle').checked) fitDynamicModelToView(); };
-  document.getElementById('add-class-button').onclick=async()=>{ createGenericClass(document.getElementById('parent-hyperclass-select').value||null); renderDynamicModel(); await maybeOptimize(); if(document.getElementById('auto-fit-toggle').checked) fitDynamicModelToView(); };
-  document.getElementById('add-attribute-button').onclick=async()=>{ addGenericAttribute(document.getElementById('attribute-owner-select').value); renderDynamicModel(); await maybeOptimize(); };
-  document.getElementById('add-link-button').onclick=async()=>{ if(addLinkFromCurrentSelection()){ renderDynamicModel(); await maybeOptimize(); } };
-  document.getElementById('delete-selected-button').onclick=()=>deleteSelectedElement();
-  document.getElementById('optimize-layout-button').onclick=async()=>{ await optimizeAndRefreshLayout(getModelContext(), { modelName:'dynamic-test-model', source:'dynamic' }); refreshDynamicScene(); fitDynamicModelToView(); };
-  document.getElementById('fit-model-button').onclick=()=>fitDynamicModelToView();
-  document.getElementById('save-model-button').onclick=()=>saveScene(getModelContext(), { fileName:'dynamic_hbds_test_model.json' });
-  document.getElementById('reset-model-button').onclick=()=>{ dynamicModel=createEmptyDynamicModel(); nextClassId=1; nextHyperclassNumber=1; nextClassNumber=1; nextAttributeNumber=1; nextLinkNumber=1; renderDynamicModel(); document.getElementById('json-preview').value=''; updateStatus('Reset complete'); };
-  document.getElementById('export-json-button').onclick=()=>exportJsonToPreview();
-  document.getElementById('import-json-button').onclick=()=>importJsonFromPreview();
-  window.addEventListener('resize', ()=>{ renderer.setSize(window.innerWidth-360,window.innerHeight); labelRenderer.setSize(window.innerWidth-360,window.innerHeight); camera.aspect=(window.innerWidth-360)/window.innerHeight; camera.updateProjectionMatrix(); renderOnce(); updateMinimap(); });
-  setupDiagramClickSelection();
-  (function animate(){ requestAnimationFrame(animate); orbitControls.update(); refreshDynamicScene(); })();
-  updateSmartMenus(); updateStatus('Ready'); updateJsonPreview();
-}
-initDynamicTestPage();
+const TEST_MODEL_OPTIONS=[{label:'Empty Dynamic Model',value:''},{label:'Transportation Links',value:'./test_models/transportation_links.json'}];
+let dynamicModel={hypergraph:{class:[],link:[]}},nextId=1,nextClassNumber=1,nextHyperclassNumber=1,nextAttributeNumber=1,nextLinkNumber=1;
+let scene,camera,renderer,labelRenderer,orbitControls,dragControls,diagramGroup; const nodeMeshById=new Map(),draggableObjects=[];
+let selectedElementId=null,selectedParentHyperclassId=null,selectedAttributeOwnerId=null,selectedLinkSourceId=null,selectedLinkTargetId=null,linkPickMode='source',dragUntil=0;
+const getDefaultClassRendering=()=>({class:{color:'#FFFFFF',material:'flat',borderColor:'#000000',borderWidth:0.02,cornerRadius:0.1,opacity:0.22},attributes:{checkboxColor:'#A9A9A9',checkboxMaterial:'flat',shape:'circle',size:{width:0.14,height:0.14}},connections:{lineColor:'#000000',lineWidth:0.01},textColor:'#000000'});
+const getDefaultHyperclassRendering=()=>({class:{color:'#FFFFFF',material:'flat',borderColor:'#000000',borderWidth:0.02,cornerRadius:0.3,opacity:0.12},attributes:{checkboxColor:'#FFFFFF',checkboxMaterial:'flat',shape:'circle',size:{width:0.14,height:0.14}},connections:{lineColor:'#000000',lineWidth:0.01},textColor:'#000000'});
+const getDefaultLinkRendering=(labelText='')=>({lineColor:'#000000',lineWidth:2,lineStyle:'solid',curveOffset:0.45,arrowheadVisibility:true,arrowheadType:'triangle',arrowheadSize:0.22,labelText,labelFontSize:13,labelColor:'#000000',labelBackgroundColor:'rgba(255,255,255,0.95)',labelPositionAlongPath:0.5,labelOffsetFromPath:0.2,labelRotationBehavior:'follow',zIndex:8});
+function ensureReadableRendering(cd){const c=(cd.rendering?.class?.color||'#fff').replace('#','');const r=parseInt(c.slice(0,2)||'ff',16),g=parseInt(c.slice(2,4)||'ff',16),b=parseInt(c.slice(4,6)||'ff',16);const l=(0.2126*r+0.7152*g+0.0722*b)/255;cd.rendering.textColor=l<0.45?'#FFFFFF':'#000000';if(cd.rendering.class.material==='metallic') cd.rendering.class.material='flat';}
+function applyLocalClassDefaults(cd){const base=cd.type==='hyperclass'?getDefaultHyperclassRendering():getDefaultClassRendering();cd.type=cd.type||'roundedRectangle';cd.position=cd.position||{x:0,y:0,z:0};cd.size=cd.size||{width:1.2,height:1.6};cd.rendering={...base,...(cd.rendering||{})};cd.attributes=Array.isArray(cd.attributes)?cd.attributes:[];cd.children=Array.isArray(cd.children)?cd.children:[];ensureReadableRendering(cd);return cd;}
+const applyLocalLinkDefaults=(l)=>{l.rendering={...getDefaultLinkRendering(l.rendering?.labelText||l.id||`link${nextLinkNumber}`),...(l.rendering||{})}; return l;};
+function applyLocalModelDefaults(m){m.hypergraph=m.hypergraph||{class:[],link:[]};m.hypergraph.class=(m.hypergraph.class||[]).map(applyLocalClassDefaults);m.hypergraph.link=(m.hypergraph.link||[]).map(applyLocalLinkDefaults);return m;}
+function setupLighting(scene){scene.background=new THREE.Color('#f4f4f4');scene.add(new THREE.AmbientLight(0xffffff,1.15));const h=new THREE.HemisphereLight(0xffffff,0xdde6ff,0.75);h.position.set(0,0,10);scene.add(h);const k=new THREE.DirectionalLight(0xffffff,0.85);k.position.set(4,6,10);scene.add(k);const f=new THREE.DirectionalLight(0xffffff,0.45);f.position.set(-6,-4,8);scene.add(f);const fr=new THREE.DirectionalLight(0xffffff,0.35);fr.position.set(0,0,10);scene.add(fr);}
+function findClassDataById(id){return dynamicModel.hypergraph.class.find(c=>c.id===Number(id));}
+function setSingleCheckedCheckbox(groupId,value){document.querySelectorAll(`#${groupId} input`).forEach(i=>i.checked=String(i.value)===String(value));}
+function getCheckedCheckboxValue(groupId){const el=document.querySelector(`#${groupId} input:checked`);return el?Number(el.value):null;}
+function clearCheckboxGroup(groupId){document.getElementById(groupId).innerHTML='';}
+function buildCheckboxGroup(groupId,items,selectedValue,onChange){const el=document.getElementById(groupId);el.innerHTML='';items.forEach(item=>{const row=document.createElement('label');row.className='checkbox-row';const input=document.createElement('input');input.type='checkbox';input.value=item.id;input.checked=Number(selectedValue)===item.id;input.onchange=()=>{setSingleCheckedCheckbox(groupId,input.value);onChange(input.value);};row.append(input,document.createTextNode(`${item.name} (#${item.id})`));el.appendChild(row);});}
+function updateSmartMenus(){const nodes=dynamicModel.hypergraph.class,hy=nodes.filter(n=>n.type==='hyperclass');buildCheckboxGroup('selected-element-checkboxes',nodes,selectedElementId,v=>selectElement(Number(v)));buildCheckboxGroup('parent-hyperclass-checkboxes',hy,selectedParentHyperclassId,v=>selectedParentHyperclassId=Number(v));buildCheckboxGroup('attribute-owner-checkboxes',nodes,selectedAttributeOwnerId,v=>selectedAttributeOwnerId=Number(v));buildCheckboxGroup('link-source-checkboxes',nodes,selectedLinkSourceId,v=>selectedLinkSourceId=Number(v));buildCheckboxGroup('link-target-checkboxes',nodes,selectedLinkTargetId,v=>selectedLinkTargetId=Number(v));}
+function collectDraggableObjects(){draggableObjects.length=0; nodeMeshById.forEach(o=>{if(o?.userData?.isClassLike||o?.userData?.hbdsId) draggableObjects.push(o);});}
+function renderModel(){if(diagramGroup) scene.remove(diagramGroup); diagramGroup=new THREE.Group();scene.add(diagramGroup);nodeMeshById.clear();dynamicModel.hypergraph.class.forEach(cd=>{const b=cd.type==='hyperclass'?createHyperClass(null,cd):createClass(cd);const m=b.classMesh;m.userData={hbdsId:cd.id,isClassLike:true};nodeMeshById.set(cd.id,m);diagramGroup.add(m);});dynamicModel.hypergraph.class.forEach(cd=>{if(cd.parentClassId){const p=nodeMeshById.get(cd.parentClassId),ch=nodeMeshById.get(cd.id);if(p&&ch){const wp=ch.getWorldPosition(new THREE.Vector3());p.worldToLocal(wp);diagramGroup.remove(ch);ch.position.copy(wp);p.add(ch);}}});dynamicModel.hypergraph.link.forEach(ld=>{const s=nodeMeshById.get(ld.sourceClassId),t=nodeMeshById.get(ld.targetClassId);if(!s||!t) return;const h=(findClassDataById(ld.sourceClassId)?.type==='hyperclass'||findClassDataById(ld.targetClassId)?.type==='hyperclass')?createLinkBetweenHyperClass(diagramGroup,s,t,ld):createLinkBetweenClass(ld,nodeMeshById);if(h) diagramGroup.add(h.linkGroup);});collectDraggableObjects();setupDrag();refresh();}
+function updateModelPositionFromObject(o){const cd=findClassDataById(o.userData.hbdsId);if(!cd) return;const pos=o.parent===diagramGroup?o.position:o.getWorldPosition(new THREE.Vector3());cd.position={x:pos.x,y:pos.y,z:pos.z};}
+function constrainDraggedObjectToParent(o){const cd=findClassDataById(o.userData.hbdsId);if(!cd?.parentClassId) return;const p=findClassDataById(cd.parentClassId);if(!p) return;const hw=(p.size?.width||4)/2-0.6,hh=(p.size?.height||3)/2-0.6;o.position.x=Math.max(-hw,Math.min(hw,o.position.x));o.position.y=Math.max(-hh,Math.min(hh,o.position.y));}
+function setupDrag(){if(dragControls) dragControls.dispose();dragControls=new DragControls(draggableObjects,camera,labelRenderer.domElement);dragControls.transformGroup=false;dragControls.addEventListener('dragstart',()=>{orbitControls.enabled=false;dragUntil=Date.now()+500;});dragControls.addEventListener('drag',e=>{constrainDraggedObjectToParent(e.object);updateModelPositionFromObject(e.object);recalculateAllLinks();renderOnce();});dragControls.addEventListener('dragend',e=>{updateModelPositionFromObject(e.object);orbitControls.enabled=true;recalculateAllLinks();updateJsonPreview();refresh();});}
+function selectElement(id){selectedElementId=id;selectedAttributeOwnerId=id;const el=findClassDataById(id);if(el?.type==='hyperclass') selectedParentHyperclassId=id;updateSmartMenus();}
+function handleClick(id){if(Date.now()<dragUntil) return;selectElement(id);if(linkPickMode==='source'){selectedLinkSourceId=id;selectedLinkTargetId=null;linkPickMode='target';}else if(id!==selectedLinkSourceId){selectedLinkTargetId=id;linkPickMode='source';}updateSmartMenus();}
+function addClass(type='roundedRectangle'){const pid=selectedParentHyperclassId||null,id=nextId++;const c=applyLocalClassDefaults({id,name:type==='hyperclass'?`hyperclass${nextHyperclassNumber++}`:`class${nextClassNumber++}`,type:type==='hyperclass'?'hyperclass':'roundedRectangle',position:{x:0,y:0,z:0},size:type==='hyperclass'?{width:4,height:3.2}:{width:1.2,height:1.6},attributes:[],children:[]});if(pid){c.parentClassId=pid;const p=findClassDataById(pid);if(p){p.children=p.children||[];p.children.push(id);c.position={x:0,y:0,z:0};}}dynamicModel.hypergraph.class.push(c);renderModel();selectElement(id);}
+function refresh(){recalculateAllLinks();updateLabelFontSizes(camera);updateHyperClassLabelFontSizes(camera,renderer);updateLinkFontSizes(camera);updateHyperClassLinkFontSizes(camera,renderer);updateSmartMenus();updateJsonPreview();updateStatus();renderOnce();}
+function updateJsonPreview(){document.getElementById('json-preview').value=JSON.stringify(dynamicModel,null,2);}
+function updateStatus(msg=''){document.getElementById('layout-status').textContent=`Nodes: ${dynamicModel.hypergraph.class.length}\nLinks: ${dynamicModel.hypergraph.link.length}\n${msg}`;}
+function fit(){const box=new THREE.Box3().setFromObject(diagramGroup);if(box.isEmpty()) return;const s=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3()),m=Math.max(s.x,s.y,1);camera.position.set(c.x,c.y,m*2);camera.lookAt(c);orbitControls.target.copy(c);orbitControls.update();}
+async function loadTestModel(path){if(!path){dynamicModel=applyLocalModelDefaults({hypergraph:{class:[],link:[]}});renderModel();return;}const r=await fetch(path);dynamicModel=applyLocalModelDefaults(await r.json());nextId=Math.max(0,...dynamicModel.hypergraph.class.map(c=>c.id))+1;renderModel();fit();}
+async function initModelMenu(){let opts=TEST_MODEL_OPTIONS;try{const r=await fetch('./test_models/models.json');if(r.ok){const data=await r.json();opts=[{label:'Empty Dynamic Model',value:''},...data.map(d=>({label:d.label,value:d.path}))];}}catch{}const sel=document.getElementById('test-model-select');opts.forEach(o=>{const op=document.createElement('option');op.textContent=o.label;op.value=o.value;sel.appendChild(op);});sel.onchange=async e=>loadTestModel(e.target.value);}
+function renderOnce(){renderer.render(scene,camera);labelRenderer.render(scene,camera);}
+async function init(){scene=new THREE.Scene();setupLighting(scene);camera=new THREE.PerspectiveCamera(52,(window.innerWidth-360)/window.innerHeight,0.1,2000);camera.position.set(0,0,12);renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(window.innerWidth-360,window.innerHeight);document.getElementById('container').appendChild(renderer.domElement);labelRenderer=new CSS2DRenderer();labelRenderer.setSize(window.innerWidth-360,window.innerHeight);labelRenderer.domElement.style.position='fixed';labelRenderer.domElement.style.top='0';labelRenderer.domElement.style.left='0';document.body.appendChild(labelRenderer.domElement);orbitControls=new OrbitControls(camera,renderer.domElement);
+renderer.domElement.addEventListener('pointerup',e=>{const rect=renderer.domElement.getBoundingClientRect();const p=new THREE.Vector2(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);const rc=new THREE.Raycaster();rc.setFromCamera(p,camera);const hits=rc.intersectObjects(diagramGroup?.children||[],true);const hit=hits.find(h=>h.object.parent?.userData?.hbdsId||h.object.userData?.hbdsId);const obj=hit?.object.userData?.hbdsId?hit.object:hit?.object.parent; if(obj?.userData?.hbdsId) handleClick(obj.userData.hbdsId);});
+document.getElementById('add-hyperclass-button').onclick=()=>addClass('hyperclass');document.getElementById('add-class-button').onclick=()=>addClass();document.getElementById('add-attribute-button').onclick=()=>{const owner=getCheckedCheckboxValue('attribute-owner-checkboxes')||selectedElementId;if(!owner) return updateStatus('No attribute owner selected');const o=findClassDataById(owner);o.attributes.push(`att${nextAttributeNumber++}`);refresh();};document.getElementById('add-link-button').onclick=()=>{const s=getCheckedCheckboxValue('link-source-checkboxes')||selectedLinkSourceId,t=getCheckedCheckboxValue('link-target-checkboxes')||selectedLinkTargetId;if(!s||!t||s===t) return updateStatus('Invalid link source/target');dynamicModel.hypergraph.link.push(applyLocalLinkDefaults({id:`link${nextLinkNumber}`,sourceClassId:s,targetClassId:t,rendering:{labelText:`link${nextLinkNumber++}`}}));renderModel();};document.getElementById('delete-selected-button').onclick=()=>{if(!selectedElementId) return;dynamicModel.hypergraph.class=dynamicModel.hypergraph.class.filter(c=>c.id!==selectedElementId&&c.parentClassId!==selectedElementId);dynamicModel.hypergraph.link=dynamicModel.hypergraph.link.filter(l=>l.sourceClassId!==selectedElementId&&l.targetClassId!==selectedElementId);selectedElementId=null;renderModel();};document.getElementById('optimize-layout-button').onclick=async()=>{await optimizeAndRefreshLayout({scene,camera,renderer,css2DRenderer:labelRenderer,orbitControls,dragControls,diagramGroup,draggableObjects,renderOnce},{modelName:'dynamic-test-model',source:'dynamic'});refresh();};document.getElementById('fit-model-button').onclick=fit;document.getElementById('save-model-button').onclick=()=>saveScene({scene,camera,renderer,css2DRenderer:labelRenderer,orbitControls,dragControls,diagramGroup,draggableObjects,renderOnce},{fileName:'dynamic_hbds_test_model.json'});document.getElementById('reset-model-button').onclick=()=>loadTestModel('');document.getElementById('export-json-button').onclick=updateJsonPreview;
+await initModelMenu();renderModel();updateStatus('Ready');(function a(){requestAnimationFrame(a);orbitControls.update();renderOnce();})();}
+init();
 </script>
-</body>
-</html>
+</body></html>
