@@ -77,6 +77,23 @@ select {
   height: 18px;
 }
 
+#selected-element-checkboxes {
+  max-height: 180px;
+  overflow: auto;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.selected-element-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin: 4px 0;
+}
+
 /* ---------- CSS2D Labels ---------- */
 .label {
   color: #000;
