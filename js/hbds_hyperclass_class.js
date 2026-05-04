@@ -31,6 +31,7 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
   });
 
   const hyperMesh = new THREE.Mesh(geom, mat);
+  hyperMesh.name = `hyperclass-${hyperClassData.name ?? hyperClassData.id ?? 'node'}`;
   hyperMesh.position.set(
     hyperClassData.position?.x ?? 0,
     hyperClassData.position?.y ?? 0,

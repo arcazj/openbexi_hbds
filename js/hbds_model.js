@@ -70,6 +70,7 @@ export async function loadAndRenderScene(modelName, context) {
   }
 
   const data = await HyperClassLoader.load(modelName);
+  buildSelectedElementMenu(data);
   const nextDiagramGroup = new THREE.Group();
   scene.add(nextDiagramGroup);
   setDiagramGroup(nextDiagramGroup);
@@ -150,6 +151,40 @@ export async function loadAndRenderScene(modelName, context) {
   refreshDiagramBoundsAndCamera(context, { fitToView: true, padding: 1.25 });
   updateModelOverview(context);
   renderOnce();
+}
+
+function buildSelectedElementMenu(data) {
+  const container = document.getElementById('selected-element-checkboxes');
+  if (!container || !data?.hypergraph) return;
+  container.innerHTML = '';
+
+  const classes = data.hypergraph.class || [];
+  const links = data.hypergraph.link || [];
+  const classById = new Map(classes.map(c => [c.id, c.name || c.id]));
+
+  const options = [
+    ...classes
+      .filter(c => c.parentClassId)
+      .map(c => ({ key: `parent-${c.id}`, label: `Parent Hyperclass: ${classById.get(c.parentClassId)}` })),
+    ...classes.flatMap(c => (c.attributes || []).map(a => ({
+      key: `attribute-${c.id}-${a.name}`,
+      label: `Attribute Owner: ${c.name} → ${a.name}`
+    }))),
+    ...links.map(l => ({ key: `source-${l.id}`, label: `Link Source: ${classById.get(l.sourceClassId) || l.sourceClassId}` })),
+    ...links.map(l => ({ key: `target-${l.id}`, label: `Link Target: ${classById.get(l.targetClassId) || l.targetClassId}` }))
+  ];
+
+  options.forEach(option => {
+    const row = document.createElement('label');
+    row.className = 'selected-element-option';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.dataset.optionKey = option.key;
+    const text = document.createElement('span');
+    text.textContent = option.label;
+    row.append(input, text);
+    container.appendChild(row);
+  });
 }
 
 export function saveScene(context, options = {}) {
