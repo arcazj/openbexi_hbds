@@ -552,7 +552,7 @@ export function refreshDiagramBoundsAndCamera(context, options = {}) {
   }
   if (options.fitToView !== false && context.camera) {
     const fovR = context.camera.fov * Math.PI / 180;
-    const dist = Math.max(1, (sphere.radius * padding) / Math.sin(fovR / 2));
+    const dist = Math.max(1, (sphere.radius * padding) / Math.sin(fovR));
     context.camera.position.set(center.x, center.y, center.z + dist);
     context.camera.lookAt(center);
     context.orbitControls?.update();
