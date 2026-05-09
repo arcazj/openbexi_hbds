@@ -64,6 +64,21 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
   hub.raycast = () => {};
   hyperMesh.add(hub);
 
+  const hubTop = hub.clone();
+  hubTop.position.set(0, sz.height / 2 - 0.16, 0.08);
+  const hubBottom = hub.clone();
+  hubBottom.position.set(0, -sz.height / 2 + 0.16, 0.08);
+  const hubLeft = hub.clone();
+  hubLeft.position.set(-sz.width / 2 + 0.16, 0, 0.08);
+  const hubRight = hub.clone();
+  hubRight.position.set(sz.width / 2 - 0.16, 0, 0.08);
+  const hubCenter = hub.clone();
+  hubCenter.position.set(0, 0, 0.08);
+  [hubTop, hubBottom, hubLeft, hubRight, hubCenter].forEach(h => { h.raycast = () => {}; hyperMesh.add(h); });
+  hyperMesh.userData.hubs = { top: hubTop, right: hubRight, bottom: hubBottom, left: hubLeft, center: hubCenter };
+  hyperMesh.userData.linkHub = hubCenter;
+
+
   hyperMesh.userData = {
     ...hyperMesh.userData,
     classId: hyperClassData.id,

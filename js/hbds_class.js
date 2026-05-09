@@ -133,6 +133,21 @@ export function createClass(classData) {
     titleObj.raycast = () => {
     };
     classMesh.add(hub);
+
+    const hubTop = hub.clone();
+    hubTop.position.set(0, sz.height / 2 - 0.12, Z_OVERLAY);
+    const hubBottom = hub.clone();
+    hubBottom.position.set(0, -sz.height / 2 + 0.12, Z_OVERLAY);
+    const hubLeft = hub.clone();
+    hubLeft.position.set(-sz.width / 2 + 0.12, 0, Z_OVERLAY);
+    const hubRight = hub.clone();
+    hubRight.position.set(sz.width / 2 - 0.12, 0, Z_OVERLAY);
+    const hubCenter = hub.clone();
+    hubCenter.position.set(0, 0, Z_OVERLAY);
+    [hubTop, hubBottom, hubLeft, hubRight, hubCenter].forEach(h => { h.raycast = () => {}; classMesh.add(h); });
+    classMesh.userData.hubs = { top: hubTop, right: hubRight, bottom: hubBottom, left: hubLeft, center: hubCenter };
+    classMesh.userData.linkHub = hubCenter;
+
     classMesh.add(titleObj);
     labels.push(titleObj);
 
