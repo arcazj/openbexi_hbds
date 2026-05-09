@@ -12,14 +12,44 @@ export const Loader = {
   }
 };
 
-function getHubPositionInParentSpace(classMesh, parentObject) {
-  const hub = classMesh.getObjectByName('class-hub');
-  const worldPos = hub
-    ? hub.getWorldPosition(new THREE.Vector3())
-    : classMesh.getWorldPosition(new THREE.Vector3());
 
-  return parentObject ? parentObject.worldToLocal(worldPos.clone()) : worldPos;
+function getNodeHubs(node) {
+  return node?.userData?.hubs || null;
 }
+
+function getFallbackHub(node) {
+  return node?.userData?.linkHub || node?.getObjectByName('class-hub') || node;
+}
+
+function getHubWorldPosition(hub) {
+  return hub.getWorldPosition(new THREE.Vector3());
+}
+
+function chooseBestHubPair(sourceNode, targetNode) {
+  const sourceHubs = getNodeHubs(sourceNode);
+  const targetHubs = getNodeHubs(targetNode);
+  const sourceCandidates = sourceHubs ? Object.values(sourceHubs).filter(Boolean) : [getFallbackHub(sourceNode)];
+  const targetCandidates = targetHubs ? Object.values(targetHubs).filter(Boolean) : [getFallbackHub(targetNode)];
+  let best = { sourceHub: sourceCandidates[0], targetHub: targetCandidates[0], d2: Infinity };
+  for (const sHub of sourceCandidates) {
+    const s = getHubWorldPosition(sHub);
+    for (const tHub of targetCandidates) {
+      const t = getHubWorldPosition(tHub);
+      const d2 = s.distanceToSquared(t);
+      if (d2 < best.d2) best = { sourceHub: sHub, targetHub: tHub, d2 };
+    }
+  }
+  return best;
+}
+
+function getBestSourceHub(sourceNode, targetNode) {
+  return chooseBestHubPair(sourceNode, targetNode).sourceHub;
+}
+
+function getBestTargetHub(targetNode, sourceNode) {
+  return chooseBestHubPair(sourceNode, targetNode).targetHub;
+}
+
 
 function pathPoint(p0, p1, c, t) {
   const mt = 1 - t;
@@ -88,8 +118,12 @@ export function recalculateAllLinks() {
     const count = bucket.length;
     bucket.forEach((l, idx) => {
       const parent = l.linkGroup.parent;
-      const p0 = getHubPositionInParentSpace(l.sourceClass, parent);
-      const p1 = getHubPositionInParentSpace(l.targetClass, parent);
+      const sourceHub = getBestSourceHub(l.sourceClass, l.targetClass);
+      const targetHub = getBestTargetHub(l.targetClass, l.sourceClass);
+      const p0World = getHubWorldPosition(sourceHub);
+      const p1World = getHubWorldPosition(targetHub);
+      const p0 = parent ? parent.worldToLocal(p0World.clone()) : p0World;
+      const p1 = parent ? parent.worldToLocal(p1World.clone()) : p1World;
       const routePts = Array.isArray(l.linkData.rendering?.routePoints) ? l.linkData.rendering.routePoints : null;
       const points = [];
       let tangent = new THREE.Vector3(1, 0, 0);

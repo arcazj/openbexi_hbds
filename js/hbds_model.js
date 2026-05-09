@@ -365,12 +365,24 @@ function lineIntersectsBox(start, end, rect) {
   return edges.some(([e1, e2]) => segmentsIntersect(start, end, e1, e2));
 }
 
+function getGridSpec(childCount) {
+  if (childCount <= 0) return { columns: 0, rows: 0 };
+  if (childCount === 1) return { columns: 1, rows: 1 };
+  if (childCount === 2) return { columns: 1, rows: 2 };
+  if (childCount === 3) return { columns: 1, rows: 3 };
+  if (childCount <= 6) return { columns: 2, rows: Math.ceil(childCount / 2) };
+  if (childCount <= 9) return { columns: 3, rows: Math.ceil(childCount / 3) };
+  if (childCount <= 16) return { columns: 4, rows: Math.ceil(childCount / 4) };
+  const columns = Math.ceil(Math.sqrt(childCount));
+  return { columns, rows: Math.ceil(childCount / columns) };
+}
+
 function layoutChildrenForAllHyperclasses(layout, options) { layout.nodes.filter(n => n.isHyperClass).forEach(h => layoutChildrenInsideHyperclass(h, layout, options)); }
 function layoutChildrenInsideHyperclass(hyperNode, layout, options) {
   const kids = layout.nodes.filter(n => n.parentClassId === hyperNode.id);
   hyperNode.contentBounds = computeHyperclassContentArea(hyperNode, options);
   if (!kids.length) return;
-  const cols = Math.ceil(Math.sqrt(kids.length)); const rows = Math.ceil(kids.length / cols);
+  const { columns: cols, rows } = getGridSpec(kids.length);
   const area = hyperNode.contentBounds;
   const cellW = (area.maxX - area.minX) / cols; const cellH = (area.maxY - area.minY) / rows;
   kids.forEach((k, i) => {
