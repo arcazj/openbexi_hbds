@@ -45,16 +45,6 @@
     <div class="control-group">
         <button id="fit-model-button">Fit Model</button>
     </div>
-    <div class="control-group editor-tools">
-        <label>Diagram Editor</label>
-        <button id="add-class-button">Add Class</button>
-        <button id="add-hyperclass-button">Add Hyperclass</button>
-        <button id="delete-selected-button">Delete Selected</button>
-        <button id="add-link-button">Link Selected Pair</button>
-        <button id="export-json-button">Export JSON</button>
-        <input id="import-json-input" type="file" accept="application/json">
-        <div id="selection-info">Selected: none</div>
-    </div>
 </div>
 <script type="importmap">
     {
@@ -75,7 +65,7 @@
     import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js';
     import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
     import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
-    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, getData, createClass, createHyperclass, deleteClass, createLink, setData } from './js/hbds_model.js';
+    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls } from './js/hbds_model.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
@@ -139,77 +129,6 @@
             fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
         });
         document.getElementById('fit-model-button').addEventListener('click', () => {
-            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-        });
-
-        let selectedNodeIds = [];
-        const selectionInfo = document.getElementById('selection-info');
-        const setSelection = (ids) => {
-            selectedNodeIds = ids;
-            selectionInfo.textContent = `Selected: ${ids.length ? ids.join(', ') : 'none'}`;
-        };
-
-        const pickClassRoot = (object) => {
-            let cursor = object;
-            while (cursor) {
-                if (cursor.userData?.hbdsId) return cursor;
-                cursor = cursor.parent;
-            }
-            return null;
-        };
-
-        css2DRenderer.domElement.addEventListener('pointerdown', (event) => {
-            const rect = renderer.domElement.getBoundingClientRect();
-            const pointer = new THREE.Vector2(
-                ((event.clientX - rect.left) / rect.width) * 2 - 1,
-                -((event.clientY - rect.top) / rect.height) * 2 + 1
-            );
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(pointer, camera);
-            const hits = raycaster.intersectObjects(diagramGroup.children, true);
-            const hit = hits.find(h => pickClassRoot(h.object));
-            if (!hit) return;
-            const picked = pickClassRoot(hit.object);
-            const id = picked.userData.hbdsId;
-            if (event.shiftKey) {
-                const next = selectedNodeIds.includes(id)
-                    ? selectedNodeIds.filter(v => v !== id)
-                    : [...selectedNodeIds, id].slice(-2);
-                setSelection(next);
-            } else {
-                setSelection([id]);
-            }
-        });
-
-        document.getElementById('add-class-button').addEventListener('click', () => {
-            const node = createClass({ name: `Class ${getData().hypergraph.class.length + 1}` }, { context: getModelContext() });
-            setSelection([node.id]);
-            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-        });
-        document.getElementById('add-hyperclass-button').addEventListener('click', () => {
-            const node = createHyperclass({ name: `Hyperclass ${getData().hypergraph.class.length + 1}` }, { context: getModelContext() });
-            setSelection([node.id]);
-            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-        });
-        document.getElementById('delete-selected-button').addEventListener('click', () => {
-            selectedNodeIds.forEach(id => deleteClass(id, { context: getModelContext() }));
-            setSelection([]);
-            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-        });
-        document.getElementById('add-link-button').addEventListener('click', () => {
-            if (selectedNodeIds.length !== 2) return;
-            createLink({ sourceClassId: selectedNodeIds[0], targetClassId: selectedNodeIds[1], label: 'relation' }, { context: getModelContext() });
-            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-        });
-        document.getElementById('export-json-button').addEventListener('click', () => {
-            saveScene(getModelContext(), { fileName: 'hbds_editor_export.json' });
-        });
-        document.getElementById('import-json-input').addEventListener('change', async (event) => {
-            const file = event.target.files?.[0];
-            if (!file) return;
-            const parsed = JSON.parse(await file.text());
-            setData(parsed, { context: getModelContext(), refresh: true });
-            setSelection([]);
             fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
         });
 
