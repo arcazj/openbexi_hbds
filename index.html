@@ -168,6 +168,7 @@
         dragControls.transformGroup = false;
         let selectedObject = null;
         let selectedOrder = 1;
+        let dragObjectsBackup = null;
 
         const setObjectRenderOrder = (object, order) => {
             object.traverse?.(child => {
@@ -178,6 +179,8 @@
         };
 
         dragControls.addEventListener('dragstart', ev => {
+            dragObjectsBackup = dragControls.objects.slice();
+            dragControls.objects = [ev.object];
             if (selectedObject && selectedObject !== ev.object) {
                 setObjectRenderOrder(selectedObject, 1);
             }
@@ -202,6 +205,7 @@
         });
 
         dragControls.addEventListener('dragend', ev => {
+            if (dragObjectsBackup) dragControls.objects = dragObjectsBackup;
             if (ev.object?.userData) {
                 delete ev.object.userData.dragStartZ;
             }
