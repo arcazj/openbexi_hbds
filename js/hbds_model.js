@@ -470,6 +470,53 @@ function applyLayoutByAlgorithm(algorithm='grid'){
   if(algorithm==='hierarchy') return optimizeLayoutHierarchy();
   return optimizeLayoutGrid();
 }
+
+function layoutChildrenInsideParents(){
+  const nodes=data.hypergraph.class||[];
+  const childrenByParent=new Map();
+  nodes.forEach(n=>{ if(n.parentClassId){ const a=childrenByParent.get(n.parentClassId)||[]; a.push(n); childrenByParent.set(n.parentClassId,a); } });
+
+  function layoutNode(node){
+    const kids=(childrenByParent.get(node.id)||[]).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+    const own=getNodeSize(node);
+    if(!node.position) node.position={x:0,y:0,z:0};
+    if(node.type!=='hyperclass' || kids.length===0) return own;
+
+    const childSizes=kids.map(layoutNode);
+    const {cols,rows}=getGridDimensions(kids.length);
+    const cellW=Math.max(...childSizes.map(s=>s.width))+GRID_GAP_X;
+    const cellH=Math.max(...childSizes.map(s=>s.height))+GRID_GAP_Y;
+    const padX=1.2;
+    const padY=1.1;
+    const attrRows=Math.max(1,Math.ceil((Array.isArray(node.attributes)?node.attributes.length:0)/Math.max(1,Math.floor((rows*cellH)/0.16))));
+    const attrPadX=attrRows>1?0.8:0.5;
+    const gridW=cellW*cols;
+    const gridH=cellH*rows;
+
+    node.size={
+      width:Math.max(own.width,gridW+padX+attrPadX),
+      height:Math.max(own.height,gridH+padY)
+    };
+
+    const parentBounds=getNodeBounds(node);
+    const startX=parentBounds.minX+((node.size.width-gridW)/2)+cellW/2;
+    const startY=parentBounds.maxY-((node.size.height-gridH)/2)-cellH/2;
+
+    kids.forEach((child,idx)=>{
+      const col=idx%cols;
+      const row=Math.floor(idx/cols);
+      if(!child.position) child.position={x:0,y:0,z:0};
+      child.position.x=startX+col*cellW;
+      child.position.y=startY-row*cellH;
+      child.position.z=0;
+    });
+
+    return node.size;
+  }
+
+  const roots=nodes.filter(n=>!n.parentClassId);
+  roots.forEach(layoutNode);
+}
 function getNodeBounds(node){
   const size=getNodeSize(node);
   const pos=node?.position||{x:0,y:0};
@@ -535,6 +582,7 @@ function resolveHyperclassOverlaps(){
 export async function optimizeAndRefreshLayout(context, options={}){
   const algorithm=options.algorithm||'grid';
   applyLayoutByAlgorithm(algorithm);
+  layoutChildrenInsideParents();
   resolveHyperclassOverlaps();
   refreshSceneFromData(context);
   updateLayoutFromData(context,options);
