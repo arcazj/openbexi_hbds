@@ -158,7 +158,10 @@ export function setupCanvasPanControls(context){
   let lastY = 0;
   host.addEventListener('pointerdown', (event) => {
     const is3D = document.getElementById('view-toggle')?.checked;
-    if (is3D || isPointerOverInteractiveObject(event, context)) return;
+    const inOverviewPanel = event.target instanceof Element
+      ? Boolean(event.target.closest('#model-overview'))
+      : false;
+    if (is3D || inOverviewPanel || isPointerOverInteractiveObject(event, context)) return;
     isPanning = true;
     lastX = event.clientX;
     lastY = event.clientY;
