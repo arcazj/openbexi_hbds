@@ -97,8 +97,8 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
     textColor,
     startY: sz.height / 2 - 0.55,
     gapY: 0.16,
-    colX: sz.width / 2 - 0.35,
-    insideBounds: true,
+    colX: sz.width / 2 + 0.35,
+    insideBounds: false,
     hubPosition: hub.position.clone(),
     z: 0.08
   });
