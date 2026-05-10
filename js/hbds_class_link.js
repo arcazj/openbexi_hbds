@@ -92,8 +92,11 @@ export function createLinkBetweenClass(linkData, classById) {
   labelDiv.style.font = `${rendering.labelFontSize ?? 12}px Arial`;
   labelDiv.style.color = rendering.labelColor ?? '#111111';
   labelDiv.style.background = rendering.labelBackgroundColor ?? 'rgba(255,255,255,0.9)';
-  labelDiv.style.padding = '1px 4px';
-  labelDiv.style.borderRadius = '3px';
+  labelDiv.style.padding = '2px 8px';
+  labelDiv.style.borderRadius = '999px';
+  labelDiv.style.border = '1px solid rgba(55,65,81,0.45)';
+  labelDiv.style.whiteSpace = 'nowrap';
+  labelDiv.style.textAlign = 'center';
   const labelObj = new CSS2DObject(labelDiv);
   linkLabels.push(labelObj);
 
@@ -139,6 +142,28 @@ export function recalculateAllLinks() {
         l.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
         const labelIndex = Math.max(1, Math.floor((points.length - 1) * (l.linkData.rendering?.labelPositionAlongPath ?? 0.5)));
         lp = points[labelIndex].clone();
+      } else if (l.linkData.sourceClassId === l.linkData.targetClassId) {
+        const loopRadius = l.linkData.rendering?.selfLoopRadius ?? 0.75;
+        const loopLift = l.linkData.rendering?.selfLoopLift ?? 0.85;
+        const center = p0.clone().add(new THREE.Vector3(loopRadius, loopLift, 0));
+        const seg = 56;
+        for (let i = 0; i <= seg; i++) {
+          const a = (Math.PI * 2 * i) / seg;
+          points.push(new THREE.Vector3(
+            center.x + loopRadius * Math.cos(a),
+            center.y + loopRadius * Math.sin(a),
+            p0.z
+          ));
+        }
+        l.line.geometry.setFromPoints(points);
+        l.line.computeLineDistances();
+        const arrowIdx = Math.floor(seg * 0.92);
+        const arrowPos = points[arrowIdx].clone();
+        const prev = points[Math.max(arrowIdx - 1, 0)].clone();
+        tangent = arrowPos.clone().sub(prev).normalize();
+        l.arrow.position.copy(arrowPos);
+        l.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
+        lp = center.clone().add(new THREE.Vector3(0, 0, 0));
       } else {
         const mid = new THREE.Vector3().addVectors(p0, p1).multiplyScalar(0.5);
         const dir = new THREE.Vector3().subVectors(p1, p0);
