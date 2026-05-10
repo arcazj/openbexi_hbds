@@ -55,35 +55,188 @@ export function refreshDiagramBoundsAndCamera(context, options={}){
   context.renderOnce?.();
   return {box,sphere};
 }
+export function fitModelToCanvas(context, options = {}) {
+  if (!context?.diagramGroup || !context?.camera) return null;
+  const box = new THREE.Box3().setFromObject(context.diagramGroup);
+  if (box.isEmpty()) return null;
+  const sphere = box.getBoundingSphere(new THREE.Sphere());
+  const padding = options.padding ?? 1.15;
+  const fovR = context.camera.fov * Math.PI / 180;
+  const fitHeightDistance = (sphere.radius * padding) / Math.tan(fovR / 2);
+  const fitWidthDistance = fitHeightDistance / Math.max(context.camera.aspect, 1e-6);
+  const dist = Math.max(fitHeightDistance, fitWidthDistance, 1);
+  context.diagramGroup.userData.boundingBox = box.clone();
+  context.diagramGroup.userData.boundingSphere = sphere.clone();
+  context.orbitControls?.target.copy(sphere.center);
+  context.camera.position.set(sphere.center.x, sphere.center.y, sphere.center.z + dist);
+  context.camera.lookAt(sphere.center);
+  context.camera.updateProjectionMatrix();
+  context.orbitControls?.update?.();
+  context.renderOnce?.();
+  if (options.updateOverview) updateModelOverview(context);
+  return { box, sphere };
+}
+
+export function isPointerOverInteractiveObject(event, context) {
+  if (!context?.camera || !context?.diagramGroup || !context?.renderer?.domElement) return false;
+  const rect = context.renderer.domElement.getBoundingClientRect();
+  const pointer = new THREE.Vector2(
+    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+    -((event.clientY - rect.top) / rect.height) * 2 + 1
+  );
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(pointer, context.camera);
+  const hits = raycaster.intersectObjects(context.diagramGroup.children, true);
+  return hits.some(hit => hit.object?.parent?.userData?.isClassLike || hit.object?.userData?.isClassLike);
+}
+
+export function panCameraByScreenDelta(context, dx, dy) {
+  if (!context?.camera || !context?.orbitControls || !context?.renderer?.domElement) return;
+  const distance = context.camera.position.distanceTo(context.orbitControls.target);
+  const fov = context.camera.fov * Math.PI / 180;
+  const worldHeight = 2 * Math.tan(fov / 2) * distance;
+  const worldWidth = worldHeight * context.camera.aspect;
+  const dxWorld = -dx / context.renderer.domElement.clientWidth * worldWidth;
+  const dyWorld = dy / context.renderer.domElement.clientHeight * worldHeight;
+  context.camera.position.x += dxWorld;
+  context.camera.position.y += dyWorld;
+  context.orbitControls.target.x += dxWorld;
+  context.orbitControls.target.y += dyWorld;
+  context.orbitControls.update();
+}
+
+export function initModelOverview(context) {
+  const canvas = document.getElementById('model-overview-canvas');
+  if (!canvas) return;
+  canvas.width = Math.max(1, canvas.clientWidth || 180);
+  canvas.height = Math.max(1, canvas.clientHeight || 140);
+  updateModelOverview(context);
+}
+
+function getOverviewTransform(context, canvas) {
+  const box = new THREE.Box3().setFromObject(context.diagramGroup);
+  if (box.isEmpty()) return null;
+  const size = box.getSize(new THREE.Vector3());
+  const min = box.min.clone();
+  const max = box.max.clone();
+  const pad = 12;
+  const scaleX = (canvas.width - 2 * pad) / Math.max(size.x, 1e-6);
+  const scaleY = (canvas.height - 2 * pad) / Math.max(size.y, 1e-6);
+  const scale = Math.min(scaleX, scaleY);
+  return { min, max, pad, scale, box };
+}
+
+function worldToOverview(pos, transform, canvas) {
+  const x = transform.pad + (pos.x - transform.min.x) * transform.scale;
+  const y = canvas.height - transform.pad - (pos.y - transform.min.y) * transform.scale;
+  return { x, y };
+}
 export function updateModelOverview(context){
-  const canvas=document.getElementById('model-overview-canvas');
-  const viewport=document.getElementById('model-overview-viewport');
-  if(!canvas||!viewport||!context?.diagramGroup) return;
-  const box=context.diagramGroup.userData.boundingBox||new THREE.Box3().setFromObject(context.diagramGroup);
-  if(box.isEmpty()) return;
-  const size=box.getSize(new THREE.Vector3());
-  const center=box.getCenter(new THREE.Vector3());
-  const w=Math.max(1,canvas.clientWidth||180), h=Math.max(1,canvas.clientHeight||140);
-  canvas.width=w; canvas.height=h;
-  const ctx=canvas.getContext('2d'); if(!ctx) return;
-  ctx.clearRect(0,0,w,h);
-  ctx.fillStyle='#fbfbfb'; ctx.fillRect(0,0,w,h);
-  const scale=Math.max(size.x,size.y,1e-6);
-  const px=(x)=>((x-center.x)/scale)*w*0.8+w*0.5;
-  const py=(y)=>((center.y-y)/scale)*h*0.8+h*0.5;
-  ctx.strokeStyle='#1f6feb'; ctx.lineWidth=1;
-  data.hypergraph.class.forEach(n=>{const x=px(n.position?.x||0), y=py(n.position?.y||0); ctx.strokeRect(x-3,y-3,6,6);});
-  const cam=context.camera?.position||new THREE.Vector3();
-  const vx=Math.min(w-40,Math.max(0,px(cam.x)-20)), vy=Math.min(h-30,Math.max(0,py(cam.y)-15));
-  viewport.style.left=`${vx}px`; viewport.style.top=`${vy}px`; viewport.style.width='40px'; viewport.style.height='30px';
+  const canvas = document.getElementById('model-overview-canvas');
+  if (!canvas || !context?.diagramGroup) return;
+  canvas.width = Math.max(1, canvas.clientWidth || 180);
+  canvas.height = Math.max(1, canvas.clientHeight || 140);
+  const transform = getOverviewTransform(context, canvas);
+  if (!transform) return;
+  context.diagramGroup.userData.boundingBox = transform.box.clone();
+  context.diagramGroup.userData.boundingSphere = transform.box.getBoundingSphere(new THREE.Sphere());
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fbfbfb';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawOverviewLinks(ctx, transform, context);
+  drawOverviewHyperclasses(ctx, transform, context);
+  drawOverviewClasses(ctx, transform, context);
+  updateOverviewViewport(context, transform);
 }
 export function setupCanvasPanControls(context){
-  const wrap=document.getElementById('model-overview'); if(!wrap||!context?.camera) return;
-  let dragging=false;
-  const onMove=(e)=>{ if(!dragging) return; const r=wrap.getBoundingClientRect(); const nx=(e.clientX-r.left)/r.width-0.5; const ny=0.5-(e.clientY-r.top)/r.height; const sphere=context.diagramGroup?.userData?.boundingSphere; const scale=(sphere?.radius||10)*2; context.camera.position.x=nx*scale; context.camera.position.y=ny*scale; context.orbitControls?.target.set(0,0,0); context.orbitControls?.update?.(); context.renderOnce?.(); updateModelOverview(context);};
-  wrap.addEventListener('pointerdown',()=>{dragging=true;});
-  window.addEventListener('pointerup',()=>{dragging=false;});
-  window.addEventListener('pointermove',onMove);
+  const host = context?.css2DRenderer?.domElement || context?.renderer?.domElement;
+  if (!host || !context?.camera) return;
+  let isPanning = false;
+  let lastX = 0;
+  let lastY = 0;
+  host.addEventListener('pointerdown', (event) => {
+    const is3D = document.getElementById('view-toggle')?.checked;
+    if (is3D || isPointerOverInteractiveObject(event, context)) return;
+    isPanning = true;
+    lastX = event.clientX;
+    lastY = event.clientY;
+    host.setPointerCapture?.(event.pointerId);
+  });
+  host.addEventListener('pointermove', (event) => {
+    if (!isPanning) return;
+    const dx = event.clientX - lastX;
+    const dy = event.clientY - lastY;
+    lastX = event.clientX;
+    lastY = event.clientY;
+    panCameraByScreenDelta(context, dx, dy);
+    context.renderOnce?.();
+    updateModelOverview(context);
+  });
+  const stopPan = (event) => {
+    if (!isPanning) return;
+    isPanning = false;
+    host.releasePointerCapture?.(event.pointerId);
+  };
+  host.addEventListener('pointerup', stopPan);
+  host.addEventListener('pointercancel', stopPan);
+}
+export function drawOverviewHyperclasses(ctx, transform, context) {
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 1.5;
+  context.diagramGroup.traverse(obj => {
+    if (!obj.userData?.isHyperClass) return;
+    const box = new THREE.Box3().setFromObject(obj);
+    if (box.isEmpty()) return;
+    const canvas = ctx.canvas;
+    const p1 = worldToOverview(new THREE.Vector3(box.min.x, box.max.y, 0), transform, canvas);
+    const p2 = worldToOverview(new THREE.Vector3(box.max.x, box.min.y, 0), transform, canvas);
+    ctx.strokeRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+  });
+}
+export function drawOverviewClasses(ctx, transform, context) {
+  ctx.fillStyle = '#1f6feb';
+  context.diagramGroup.traverse(obj => {
+    if (!obj.userData?.isClassLike || obj.userData?.isHyperClass) return;
+    const p = worldToOverview(obj.getWorldPosition(new THREE.Vector3()), transform, ctx.canvas);
+    ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+  });
+}
+export function drawOverviewLinks(ctx, transform, context) {
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 1;
+  const byId = new Map();
+  context.diagramGroup.traverse(obj => {
+    if (obj.userData?.hbdsId) byId.set(obj.userData.hbdsId, obj);
+  });
+  data.hypergraph.link.forEach(l => {
+    const s = byId.get(l.sourceClassId);
+    const t = byId.get(l.targetClassId);
+    if (!s || !t) return;
+    const ps = worldToOverview(s.getWorldPosition(new THREE.Vector3()), transform, ctx.canvas);
+    const pt = worldToOverview(t.getWorldPosition(new THREE.Vector3()), transform, ctx.canvas);
+    ctx.beginPath(); ctx.moveTo(ps.x, ps.y); ctx.lineTo(pt.x, pt.y); ctx.stroke();
+  });
+}
+export function updateOverviewViewport(context, transform) {
+  const viewport = document.getElementById('model-overview-viewport');
+  if (!viewport || !context?.camera || !context?.orbitControls) return;
+  const canvas = document.getElementById('model-overview-canvas');
+  const distance = context.camera.position.distanceTo(context.orbitControls.target);
+  const fov = context.camera.fov * Math.PI / 180;
+  const visibleHeight = 2 * Math.tan(fov / 2) * distance;
+  const visibleWidth = visibleHeight * context.camera.aspect;
+  const left = context.orbitControls.target.x - visibleWidth / 2;
+  const right = context.orbitControls.target.x + visibleWidth / 2;
+  const top = context.orbitControls.target.y + visibleHeight / 2;
+  const bottom = context.orbitControls.target.y - visibleHeight / 2;
+  const p1 = worldToOverview(new THREE.Vector3(left, top, 0), transform, canvas);
+  const p2 = worldToOverview(new THREE.Vector3(right, bottom, 0), transform, canvas);
+  viewport.style.left = `${Math.min(p1.x, p2.x)}px`;
+  viewport.style.top = `${Math.min(p1.y, p2.y)}px`;
+  viewport.style.width = `${Math.abs(p2.x - p1.x)}px`;
+  viewport.style.height = `${Math.abs(p2.y - p1.y)}px`;
 }
 export function commitDataChange(operationName, updater, options={}){ const before=clone(data); const result=updater(data); data=normalizeData(data); const v=validateData(data); if(!v.valid && options.rollbackOnError!==false){ data=before; throw new Error(`Invalid data after ${operationName}: ${v.errors.join('; ')}`);} if(options.refresh!==false) refreshSceneFromData(options.context); if(options.optimizeLayout===true) updateLayoutFromData(options.context); if(options.saveHistory!==false) history.push({operationName,before,after:clone(data)}); return result; }
 export function setData(nextData, options={}){ data=normalizeData(nextData); const v=validateData(data); if(!v.valid) throw new Error(v.errors.join('; ')); if(options.refresh!==false) refreshSceneFromData(options.context); return getData(); }
