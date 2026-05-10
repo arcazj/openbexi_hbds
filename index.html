@@ -177,15 +177,26 @@
             selectedOrder += 1;
             setObjectRenderOrder(selectedObject, selectedOrder);
             orbitControls.enabled = false;
+
+            const is3D = document.getElementById('view-toggle').checked;
+            if (!is3D) {
+                ev.object.userData.dragStartZ = ev.object.position.z;
+            }
         });
 
-        dragControls.addEventListener('drag', () => {
+        dragControls.addEventListener('drag', ev => {
+            const is3D = document.getElementById('view-toggle').checked;
+            if (!is3D && ev.object?.userData?.dragStartZ !== undefined) {
+                ev.object.position.z = ev.object.userData.dragStartZ;
+            }
             recalculateAllLinks();
         });
 
-        dragControls.addEventListener('dragend', () => {
-            const is3D = document.getElementById('view-toggle').checked;
-            orbitControls.enabled = !is3D;
+        dragControls.addEventListener('dragend', ev => {
+            if (ev.object?.userData) {
+                delete ev.object.userData.dragStartZ;
+            }
+            orbitControls.enabled = true;
         });
 
         toggleView({target: document.getElementById('view-toggle')});
@@ -226,9 +237,9 @@
         }
         const fovR = camera.fov * Math.PI / 180;
         const dist = Math.abs(sphere.radius / Math.sin(fovR / 2));
-        camera.position.set(0, 0, dist * 1.2);
-        camera.lookAt(0, 0, 0);
-        orbitControls.target.set(0, 0, 0);
+        camera.position.set(sphere.center.x, sphere.center.y, sphere.center.z + dist * 1.2);
+        camera.lookAt(sphere.center);
+        orbitControls.target.copy(sphere.center);
         orbitControls.update();
     }
 
