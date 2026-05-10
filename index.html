@@ -65,7 +65,7 @@
     import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js';
     import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
     import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
-    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, refreshDiagramBoundsAndCamera, updateModelOverview, setupCanvasPanControls } from './js/hbds_model.js';
+    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls } from './js/hbds_model.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
@@ -101,6 +101,10 @@
 
         orbitControls = new OrbitControls(camera, css2DRenderer.domElement);
         orbitControls.enableRotate = false;
+        orbitControls.addEventListener('change', () => {
+            renderOnce();
+            updateModelOverview(getModelContext());
+        });
 
         window.addEventListener('resize', onResize);
         const viewToggle = document.getElementById('view-toggle');
@@ -116,19 +120,23 @@
         });
         document.getElementById('optimize-layout-button').addEventListener('click', async () => {
             await optimizeAndRefreshLayout(getModelContext(), {
-                modelName: document.getElementById('model-select').value
+                fitAfterOptimize: true
             });
+            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
         });
         document.getElementById('model-select').addEventListener('change', async e => {
             await loadAndRenderScene(e.target.value, getModelContext());
-            refreshDiagramBoundsAndCamera(getModelContext(), { fitToView: true, padding: 1.25 });
+            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
         });
         document.getElementById('fit-model-button').addEventListener('click', () => {
-            refreshDiagramBoundsAndCamera(getModelContext(), { fitToView: true, padding: 1.25 });
+            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
         });
 
         setupCanvasPanControls(getModelContext());
-        loadAndRenderScene('human', getModelContext());
+        initModelOverview(getModelContext());
+        loadAndRenderScene('human', getModelContext()).then(() => {
+            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
+        });
     }
 
 
@@ -190,6 +198,7 @@
                 ev.object.position.z = ev.object.userData.dragStartZ;
             }
             recalculateAllLinks();
+            updateModelOverview(getModelContext());
         });
 
         dragControls.addEventListener('dragend', ev => {
@@ -197,6 +206,7 @@
                 delete ev.object.userData.dragStartZ;
             }
             orbitControls.enabled = true;
+            updateModelOverview(getModelContext());
         });
 
         toggleView({target: document.getElementById('view-toggle')});
