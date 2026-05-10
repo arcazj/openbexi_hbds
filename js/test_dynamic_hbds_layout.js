@@ -26,7 +26,7 @@ function ensureLighting(){
   fill.position.set(-10,-6,8);
   scene.add(fill);
 }
-function setupDrag(){ if(dragControls) dragControls.dispose(); dragControls=new DragControls(draggableObjects,camera,labelRenderer.domElement); let dragObjectsBackup=null; dragControls.addEventListener('dragstart',(ev)=>{dragObjectsBackup=dragControls.objects.slice(); dragControls.objects=[ev.object]; orbitControls.enabled=false;}); dragControls.addEventListener('dragend',()=>{if(dragObjectsBackup) dragControls.objects=dragObjectsBackup; orbitControls.enabled=true; updateJsonPreviewFromData();}); }
+function setupDrag(){ if(dragControls) dragControls.dispose(); dragControls=new DragControls(draggableObjects,camera,renderer.domElement); let dragObjectsBackup=null; dragControls.addEventListener('dragstart',(ev)=>{dragObjectsBackup=dragControls.objects.slice(); dragControls.objects=[ev.object]; orbitControls.enabled=false;}); dragControls.addEventListener('dragend',()=>{if(dragObjectsBackup) dragControls.objects=dragObjectsBackup; orbitControls.enabled=true; updateJsonPreviewFromData();}); }
 async function afterCrud(){
   if(shouldOptimizeAfterCrud()) await optimizeAndRefreshLayout(ctx());
   else refreshSceneFromData(ctx());
