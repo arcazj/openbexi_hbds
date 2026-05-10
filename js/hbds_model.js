@@ -312,7 +312,37 @@ export const readLink=(idOrPred)=>typeof idOrPred==='function'?data.hypergraph.l
 export const createLink=(input,options={})=>commitDataChange('createLink',d=>{const l=createLinkData(input); const byId=new Map(d.hypergraph.class.map(c=>[c.id,c])); const v=validateLinkData(l,byId); if(!v.valid) throw new Error(v.errors.join('; ')); d.hypergraph.link.push(l); return l;},options);
 export const updateLink=(idOrPred,patch,options={})=>commitDataChange('updateLink',d=>{const i=d.hypergraph.link.findIndex(l=>typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred); if(i<0) throw new Error('link not found'); d.hypergraph.link[i]=updateLinkData(d.hypergraph.link[i],patch);},options);
 export const deleteLink=(idOrPred,options={})=>commitDataChange('deleteLink',d=>{d.hypergraph.link=d.hypergraph.link.filter(l=>!(typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred||(idOrPred?.sourceClassId===l.sourceClassId&&idOrPred?.targetClassId===l.targetClassId)));},options);
-export async function loadAndRenderScene(modelName, context){ const raw=await HyperClassLoader.load(modelName).catch(()=>ClassLoader.load(modelName)); setData(raw,{context,refresh:true}); return getData(); }
+async function loadModelData(modelName){
+  const value=String(modelName||'').trim();
+  const isDirectPath=value.includes('/') || value.endsWith('.json');
+  if(isDirectPath){
+    const response=await fetch(`./${value}`);
+    if(!response.ok) throw new Error(`Model not found: ${value}`);
+    return response.json();
+  }
+  try {
+    return await HyperClassLoader.load(value);
+  } catch {
+    return ClassLoader.load(value);
+  }
+}
+export async function listAvailableModels(manifestPath='models/models_manifest.json'){
+  try {
+    const response=await fetch(`./${manifestPath}`);
+    if(!response.ok) throw new Error(`manifest not found: ${manifestPath}`);
+    const manifest=await response.json();
+    const items=Array.isArray(manifest?.models)?manifest.models:[];
+    return items.filter(Boolean).map(item=>({
+      value:item.value||item.path||item.id||'',
+      label:item.label||item.name||item.value||'',
+      description:item.description||'',
+      tags:Array.isArray(item.tags)?item.tags:[]
+    })).filter(item=>item.value);
+  } catch {
+    return [];
+  }
+}
+export async function loadAndRenderScene(modelName, context){ const raw=await loadModelData(modelName); setData(raw,{context,refresh:true}); return getData(); }
 export function saveScene(context, options={}){ const blob=new Blob([JSON.stringify(getData(),null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=options.fileName||'hbds_saved_model.json'; a.click(); URL.revokeObjectURL(url); return getData(); }
 function getNodeSize(node){
   const base=node?.size||{};
@@ -335,7 +365,7 @@ function getGridDimensions(childCount){
   const cols=Math.ceil(Math.sqrt(childCount));
   return {cols,rows:Math.ceil(childCount/cols)};
 }
-function optimizeLayoutData(){
+function optimizeLayoutGrid(){
   const nodes=data.hypergraph.class||[];
   const byId=new Map(nodes.map(n=>[n.id,n]));
   const childrenByParent=new Map();
@@ -384,4 +414,52 @@ function optimizeLayoutData(){
     layoutNode(root,x,y);
   });
 }
-export async function optimizeAndRefreshLayout(context, options={}){ optimizeLayoutData(); refreshSceneFromData(context); updateLayoutFromData(context,options); }
+function optimizeLayoutRadial(){
+  const nodes=data.hypergraph.class||[];
+  const roots=nodes.filter(n=>!n.parentClassId).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  const radiusStep = 5;
+  roots.forEach((root, idx)=>{
+    const angle=(Math.PI*2*idx)/Math.max(roots.length,1);
+    if(!root.position) root.position={x:0,y:0,z:0};
+    root.position.x=Math.cos(angle)*radiusStep;
+    root.position.y=Math.sin(angle)*radiusStep;
+    root.position.z=0;
+  });
+}
+function optimizeLayoutHierarchy(){
+  const nodes=data.hypergraph.class||[];
+  const childrenByParent=new Map();
+  nodes.forEach(n=>{ if(n.parentClassId){ const a=childrenByParent.get(n.parentClassId)||[]; a.push(n); childrenByParent.set(n.parentClassId,a); } });
+  const roots=nodes.filter(n=>!n.parentClassId).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  const rowGap=3.8, colGap=4.2;
+  function layoutLevel(parent, depth, centerX){
+    const kids=(childrenByParent.get(parent.id)||[]).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+    kids.forEach((child,i)=>{
+      const offset=i-(kids.length-1)/2;
+      if(!child.position) child.position={x:0,y:0,z:0};
+      child.position.x=centerX+offset*colGap;
+      child.position.y=-depth*rowGap;
+      child.position.z=0;
+      layoutLevel(child, depth+1, child.position.x);
+    });
+  }
+  roots.forEach((root, i)=>{
+    if(!root.position) root.position={x:0,y:0,z:0};
+    root.position.x=(i-(roots.length-1)/2)*colGap*1.2;
+    root.position.y=0;
+    root.position.z=0;
+    layoutLevel(root,1,root.position.x);
+  });
+}
+function applyLayoutByAlgorithm(algorithm='grid'){
+  if(algorithm==='radial') return optimizeLayoutRadial();
+  if(algorithm==='hierarchy') return optimizeLayoutHierarchy();
+  return optimizeLayoutGrid();
+}
+export async function optimizeAndRefreshLayout(context, options={}){
+  const algorithm=options.algorithm||'grid';
+  applyLayoutByAlgorithm(algorithm);
+  refreshSceneFromData(context);
+  updateLayoutFromData(context,options);
+  return { algorithm };
+}
