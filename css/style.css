@@ -137,3 +137,21 @@ select {
   background: rgba(255, 51, 0, 0.08);
   pointer-events: none;
 }
+
+.editor-tools button,
+.editor-tools input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+#selection-info {
+  font-size: 12px;
+  color: #333;
+  padding: 6px;
+  background: #f6f7f8;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+}
