@@ -14,8 +14,10 @@ This project provides an interactive visualization tool for **Hypergraph-Based D
 
 * **Interactive 2D & 3D Views**: Seamlessly switch between a 2D pannable layout and a full 3D orbital view.
 * **Dynamic Model Loading**: Load different HBDS models on-the-fly from external JSON files.
+* **Model Catalog Manifest**: Populate the model selector from `/models/models_manifest.json`.
 * **Direct Manipulation**: Drag and drop class entities to organize your diagram in 2D view.
 * **Fallback Gracefully**: Automatically loads a default model if a specified one isn't found.
+* **Multiple Layout Algorithms**: Optimize node placement with `grid`, `hierarchy`, or `radial` layout modes.
 
 ### Built With
 

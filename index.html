@@ -49,6 +49,20 @@
         <button id="optimize-layout-button">Optimize Layout</button>
     </div>
     <div class="control-group">
+        <label for="layout-algorithm-select">Layout Algorithm</label>
+        <select id="layout-algorithm-select">
+            <option value="grid">Grid (default)</option>
+            <option value="hierarchy">Hierarchy</option>
+            <option value="radial">Radial</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label class="checkbox-wrapper" for="auto-optimize-toggle">
+            <input type="checkbox" id="auto-optimize-toggle">
+            <span>Auto optimize on model load</span>
+        </label>
+    </div>
+    <div class="control-group">
         <button id="fit-model-button">Fit Model</button>
     </div>
 </div>
@@ -71,7 +85,7 @@
     import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js';
     import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
     import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
-    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls } from './js/hbds_model.js';
+    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels } from './js/hbds_model.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
@@ -80,6 +94,7 @@
 
     /* ---------- MAIN APPLICATION ---------- */
     function init() {
+        bootstrapModelCatalog();
         scene = new THREE.Scene();
         scene.background = new THREE.Color('#f0f0f0');
 
@@ -125,13 +140,20 @@
             saveScene(getModelContext(), { fileName });
         });
         document.getElementById('optimize-layout-button').addEventListener('click', async () => {
+            const algorithm = document.getElementById('layout-algorithm-select').value;
             await optimizeAndRefreshLayout(getModelContext(), {
+                algorithm,
                 fitAfterOptimize: true
             });
             fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
         });
         document.getElementById('model-select').addEventListener('change', async e => {
             await loadAndRenderScene(e.target.value, getModelContext());
+            if (document.getElementById('auto-optimize-toggle').checked) {
+                await optimizeAndRefreshLayout(getModelContext(), {
+                    algorithm: document.getElementById('layout-algorithm-select').value
+                });
+            }
             fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
         });
         document.getElementById('fit-model-button').addEventListener('click', () => {
@@ -143,6 +165,19 @@
         initModelOverview(getModelContext());
         loadAndRenderScene('human', getModelContext()).then(() => {
             fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
+        });
+    }
+    async function bootstrapModelCatalog() {
+        const select = document.getElementById('model-select');
+        const models = await listAvailableModels();
+        if (!Array.isArray(models) || models.length === 0) return;
+        select.innerHTML = '';
+        models.forEach((model) => {
+            const option = document.createElement('option');
+            option.value = model.value;
+            option.textContent = model.label;
+            if (model.description) option.title = model.description;
+            select.appendChild(option);
         });
     }
 
