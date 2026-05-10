@@ -95,10 +95,9 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
       lineWidth: hyperClassData.rendering?.connections?.lineWidth ?? 0.01
     },
     textColor,
-    startY: sz.height / 2 - 0.55,
+    startY: sz.height / 2 - 0.45,
     gapY: 0.16,
-    colX: sz.width / 2 + 0.35,
-    insideBounds: false,
+    colX: sz.width / 2 + 0.28,
     hubPosition: hub.position.clone(),
     z: 0.08
   });

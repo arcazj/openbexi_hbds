@@ -163,22 +163,12 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
     const cbH = attrCfg.size.height ?? cbW;
     const gapY = options.gapY ?? 0.15;
     const startY = options.startY ?? (size.height / 2 - 0.1);
-    const insideBounds = options.insideBounds === true;
-    const colX = options.colX ?? (insideBounds ? (size.width / 2 - 0.4 - cbW) : (size.width / 2 + 0.25 + cbW));
+    const colX = options.colX ?? (size.width / 2 + 0.25 + cbW);
     const hubPos = options.hubPosition ?? new THREE.Vector3((size.width * 0.9) / 2, (size.height * 0.9) / 2, options.z ?? 0.06);
     const z = options.z ?? 0.06;
 
-    const minX = -size.width / 2 + 0.18;
-    const maxX = size.width / 2 - 0.18;
-    const minY = -size.height / 2 + 0.2;
-    const maxY = size.height / 2 - 0.2;
-    const maxRows = Math.max(1, Math.floor((maxY - minY) / gapY));
-
     attributes.forEach((attrName, idx) => {
-        const col = insideBounds ? Math.floor(idx / maxRows) : 0;
-        const row = insideBounds ? (idx % maxRows) : idx;
-        const y = THREE.MathUtils.clamp(startY - row * gapY, minY, maxY);
-        const x = THREE.MathUtils.clamp(colX - col * (cbW + 0.22), minX, maxX);
+        const y = startY - idx * gapY;
 
         // checkbox cube
         const cube = new THREE.Mesh(
@@ -189,7 +179,7 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
                 roughness: 0.25
             })
         );
-        cube.position.set(x, y, z);
+        cube.position.set(colX, y, z);
         cube.raycast = () => {
         };
         classMesh.add(cube);
@@ -213,9 +203,8 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
         aDiv.style.font = '12px Arial';
         aDiv.textContent = attrName;
         const aLbl = new CSS2DObject(aDiv);
-        const labelX = insideBounds ? x - cbW - 0.05 : x + cbW + 0.12;
-        aLbl.position.set(THREE.MathUtils.clamp(labelX, minX, maxX), y, z);
-        aLbl.center.set(insideBounds ? 1 : 0, 0.5);
+        aLbl.position.set(colX + cbW + 0.12, y, z);
+        aLbl.center.set(0, 0.5);
         classMesh.add(aLbl);
         labels.push(aLbl);
     });
