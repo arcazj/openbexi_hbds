@@ -7,6 +7,10 @@ import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLin
 let data = { hypergraph: { class: [], link: [] } };
 const history=[];
 const modelRuntime={ classById:new Map(), linkGroups:[], diagramGroup:null, draggableObjects:[] };
+const GRID_GAP_X = 0.9;
+const GRID_GAP_Y = 0.9;
+const ROOT_GAP_X = 2.6;
+const ROOT_GAP_Y = 2.2;
 const clone=(v)=>typeof structuredClone==='function'?structuredClone(v):JSON.parse(JSON.stringify(v));
 const nextId=(p)=>`${p}_${Math.random().toString(36).slice(2,8)}`;
 export const getData=()=>data;
@@ -267,4 +271,68 @@ export const updateLink=(idOrPred,patch,options={})=>commitDataChange('updateLin
 export const deleteLink=(idOrPred,options={})=>commitDataChange('deleteLink',d=>{d.hypergraph.link=d.hypergraph.link.filter(l=>!(typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred||(idOrPred?.sourceClassId===l.sourceClassId&&idOrPred?.targetClassId===l.targetClassId)));},options);
 export async function loadAndRenderScene(modelName, context){ const raw=await HyperClassLoader.load(modelName).catch(()=>ClassLoader.load(modelName)); setData(raw,{context,refresh:true}); return getData(); }
 export function saveScene(context, options={}){ const blob=new Blob([JSON.stringify(getData(),null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=options.fileName||'hbds_saved_model.json'; a.click(); URL.revokeObjectURL(url); return getData(); }
-export async function optimizeAndRefreshLayout(context, options={}){ refreshSceneFromData(context); updateLayoutFromData(context,options); }
+function getNodeSize(node){
+  const base=node?.size||{};
+  const attrCount=Array.isArray(node?.attributes)?node.attributes.length:0;
+  const minH=node?.type==='hyperclass'?3.2:2;
+  const width=Math.max(base.width||1, node?.type==='hyperclass'?4:1);
+  const height=Math.max(base.height||minH, minH + attrCount*0.18);
+  return { width, height };
+}
+function getGridDimensions(childCount){
+  if(childCount<=1) return {cols:1,rows:1};
+  if(childCount===2) return {cols:1,rows:2};
+  if(childCount===3) return {cols:1,rows:3};
+  if(childCount===4) return {cols:2,rows:2};
+  if(childCount<=6) return {cols:2,rows:Math.ceil(childCount/2)};
+  if(childCount<=9) return {cols:3,rows:Math.ceil(childCount/3)};
+  if(childCount<=16) return {cols:4,rows:Math.ceil(childCount/4)};
+  const cols=Math.ceil(Math.sqrt(childCount));
+  return {cols,rows:Math.ceil(childCount/cols)};
+}
+function optimizeLayoutData(){
+  const nodes=data.hypergraph.class||[];
+  const byId=new Map(nodes.map(n=>[n.id,n]));
+  const childrenByParent=new Map();
+  nodes.forEach(n=>{ if(n.parentClassId){ const a=childrenByParent.get(n.parentClassId)||[]; a.push(n); childrenByParent.set(n.parentClassId,a); } });
+  const roots=nodes.filter(n=>!n.parentClassId).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+
+  function layoutNode(node, cx, cy){
+    const kids=(childrenByParent.get(node.id)||[]).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+    const own=getNodeSize(node);
+    if(!node.position) node.position={x:0,y:0,z:0};
+    node.position.x=cx; node.position.y=cy; node.position.z=0;
+    if(node.type!=='hyperclass' || kids.length===0) return own;
+
+    const {cols,rows}=getGridDimensions(kids.length);
+    const childSizes=kids.map(getNodeSize);
+    const cellW=Math.max(...childSizes.map(s=>s.width))+GRID_GAP_X;
+    const cellH=Math.max(...childSizes.map(s=>s.height))+GRID_GAP_Y;
+    const gridW=Math.max(cellW*cols, own.width-1.2);
+    const gridH=Math.max(cellH*rows, own.height-1.2);
+    node.size={width:Math.max(own.width,gridW+1.2),height:Math.max(own.height,gridH+1.2)};
+
+    const startX=cx-gridW/2+cellW/2;
+    const startY=cy+gridH/2-cellH/2;
+    kids.forEach((child, idx)=>{
+      const col=idx%cols;
+      const row=Math.floor(idx/cols);
+      const x=startX + col*cellW;
+      const y=startY - row*cellH;
+      layoutNode(child,x,y);
+    });
+    return node.size;
+  }
+
+  const rootCount=roots.length;
+  const rootCols=Math.max(1,Math.ceil(Math.sqrt(rootCount)));
+  const rootRows=Math.ceil(rootCount/rootCols);
+  roots.forEach((root,idx)=>{
+    const col=idx%rootCols;
+    const row=Math.floor(idx/rootCols);
+    const x=(col-(rootCols-1)/2)*(6+ROOT_GAP_X);
+    const y=((rootRows-1)/2-row)*(5+ROOT_GAP_Y);
+    layoutNode(root,x,y);
+  });
+}
+export async function optimizeAndRefreshLayout(context, options={}){ optimizeLayoutData(); refreshSceneFromData(context); updateLayoutFromData(context,options); }
