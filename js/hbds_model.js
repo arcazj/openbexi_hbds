@@ -28,10 +28,23 @@ export function normalizeData(inputData){
 export function validateData(currentData=data){const e=[],w=[]; const hg=currentData?.hypergraph; if(!Array.isArray(hg?.class)) e.push('missing hypergraph.class'); if(!Array.isArray(hg?.link)) e.push('missing hypergraph.link'); const ids=new Set(); const byId=new Map(); for(const c of hg?.class||[]){if(ids.has(c.id)) e.push(`duplicate class id ${c.id}`); ids.add(c.id); byId.set(c.id,c); if(!Array.isArray(c.attributes)) e.push(`invalid attributes for ${c.id}`);} const lids=new Set(); for(const l of hg?.link||[]){ if(l.id&&lids.has(l.id)) e.push(`duplicate link id ${l.id}`); if(l.id) lids.add(l.id); if(!byId.has(l.sourceClassId)) e.push(`missing link source ${l.sourceClassId}`); if(!byId.has(l.targetClassId)) e.push(`missing link target ${l.targetClassId}`);} return {valid:e.length===0,errors:e,warnings:w};}
 export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
   if(dragControls){dragControls.dispose(); setDragControls?.(null);} const dg=new THREE.Group(); scene?.add(dg); setDiagramGroup?.(dg); modelRuntime.diagramGroup=dg; modelRuntime.classById.clear(); modelRuntime.linkGroups=[];
-  for(const cd of data.hypergraph.class){ const r=cd.type==='hyperclass'?createHyperClass(null,cd):createClassMesh(cd); const m=r.classMesh; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true}; if(cd.type!=='hyperclass'&&cd.position) m.position.set(cd.position.x||0,cd.position.y||0,cd.position.z||0); dg.add(m); modelRuntime.classById.set(cd.id,m);} 
-  // Keep every class/hyperclass as a direct child of the diagram group so dragging
-  // one node never implicitly moves other nodes through parent/child transforms.
-  // parentClassId is still preserved in data for logical grouping.
+  for(const cd of data.hypergraph.class){ const r=cd.type==='hyperclass'?createHyperClass(null,cd):createClassMesh(cd); const m=r.classMesh; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true}; dg.add(m); modelRuntime.classById.set(cd.id,m);} 
+  for(const cd of data.hypergraph.class){
+    const node=modelRuntime.classById.get(cd.id);
+    if(!node) continue;
+    const p=cd.position||{x:0,y:0,z:0};
+    if(cd.parentClassId){
+      const parent=modelRuntime.classById.get(cd.parentClassId);
+      if(parent){
+        const parentWorld=new THREE.Vector3();
+        parent.getWorldPosition(parentWorld);
+        parent.add(node);
+        node.position.set((p.x||0)-parentWorld.x,(p.y||0)-parentWorld.y,(p.z||0)-parentWorld.z);
+        continue;
+      }
+    }
+    node.position.set(p.x||0,p.y||0,p.z||0);
+  }
   for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,ld):createLinkBetweenClass(ld,modelRuntime.classById); if(!r) continue; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(ld),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);} 
   draggableObjects.length=0; for(const cd of data.hypergraph.class){ const o=modelRuntime.classById.get(cd.id); if(o) draggableObjects.push(o); }
   modelRuntime.draggableObjects=draggableObjects;
