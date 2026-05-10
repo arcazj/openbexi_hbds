@@ -265,3 +265,11 @@ function roundedRect(w, h, r) {
 
     return s;
 }
+
+export function createClassData(input={}, defaults={}) {
+  return normalizeClassData({ ...defaults, ...input, id: input.id ?? `class_${Math.random().toString(36).slice(2,8)}`, type: input.type && input.type!=='hyperclass' ? input.type : 'roundedRectangle' });
+}
+export function updateClassData(classData, patch={}) { return normalizeClassData({ ...classData, ...patch, rendering: { ...(classData.rendering||{}), ...(patch.rendering||{}) } }); }
+export function deleteClassData(currentData, classId){ const next=JSON.parse(JSON.stringify(currentData)); next.hypergraph.class=(next.hypergraph.class||[]).filter(c=>c.id!==classId); return next; }
+export function normalizeClassData(classData={}) { return { ...classData, name: classData.name||'Class', attributes: Array.isArray(classData.attributes)?classData.attributes:[], position: classData.position||{x:0,y:0,z:0}, size: classData.size||{width:1.2,height:1.6}, type: classData.type==='hyperclass'?'roundedRectangle':(classData.type||'roundedRectangle') }; }
+export function validateClassData(classData){ const errors=[]; if(!classData?.id) errors.push('missing id'); if(!Array.isArray(classData?.attributes)) errors.push('attributes must be array'); return { valid: errors.length===0, errors, warnings: [] }; }

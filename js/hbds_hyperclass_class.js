@@ -137,3 +137,10 @@ function roundedRect(w, h, r) {
   s.quadraticCurveTo(x, y, x, y + r);
   return s;
 }
+
+export function createHyperclassData(input={}, defaults={}){ return normalizeHyperclassData({ ...defaults, ...input, id: input.id ?? `hyper_${Math.random().toString(36).slice(2,8)}`, type:'hyperclass' }); }
+export function updateHyperclassData(hyperclassData, patch={}){ return normalizeHyperclassData({ ...hyperclassData, ...patch, rendering:{ ...(hyperclassData.rendering||{}), ...(patch.rendering||{}) }, type:'hyperclass' }); }
+export function normalizeHyperclassData(h={}){ return { ...h, type:'hyperclass', name:h.name||'Hyperclass', attributes:Array.isArray(h.attributes)?h.attributes:[], children:Array.isArray(h.children)?h.children:[], position:h.position||{x:0,y:0,z:0}, size:h.size||{width:4,height:3.2} }; }
+export function validateHyperclassData(h){ const errors=[]; if(h?.type!=='hyperclass') errors.push('type must be hyperclass'); if(!Array.isArray(h?.children)) errors.push('children must be array'); return {valid:errors.length===0,errors,warnings:[]}; }
+export function addChildData(hyperclassData, childId){ const children=new Set(hyperclassData.children||[]); children.add(childId); return { ...hyperclassData, children:[...children] }; }
+export function removeChildData(hyperclassData, childId){ return { ...hyperclassData, children:(hyperclassData.children||[]).filter(id=>id!==childId) }; }
