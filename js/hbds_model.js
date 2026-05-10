@@ -167,7 +167,10 @@ export function setupCanvasPanControls(context){
     const inOverviewPanel = event.target instanceof Element
       ? Boolean(event.target.closest('#model-overview'))
       : false;
-    if (is3D || inOverviewPanel || isPointerOverInteractiveObject(event, context)) return;
+    const editable = document.getElementById('editable-toggle')?.checked ?? true;
+    if (is3D || inOverviewPanel) return;
+    if (editable && isPointerOverInteractiveObject(event, context)) return;
+    if (editable) return;
     isPanning = true;
     lastX = event.clientX;
     lastY = event.clientY;
@@ -246,6 +249,46 @@ export function updateOverviewViewport(context, transform) {
   viewport.style.top = `${Math.min(p1.y, p2.y)}px`;
   viewport.style.width = `${Math.abs(p2.x - p1.x)}px`;
   viewport.style.height = `${Math.abs(p2.y - p1.y)}px`;
+  setupOverviewViewportDrag(context, transform);
+}
+let overviewDragBound = false;
+function overviewToWorld(x, y, transform, canvas) {
+  const worldX = transform.min.x + (x - transform.pad) / transform.scale;
+  const worldY = transform.min.y + ((canvas.height - y) - transform.pad) / transform.scale;
+  return { x: worldX, y: worldY };
+}
+function setupOverviewViewportDrag(context, transform) {
+  if (overviewDragBound) return;
+  const viewport = document.getElementById('model-overview-viewport');
+  const canvas = document.getElementById('model-overview-canvas');
+  if (!viewport || !canvas) return;
+  let dragging = false;
+  viewport.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    viewport.setPointerCapture?.(e.pointerId);
+  });
+  viewport.addEventListener('pointermove', (e) => {
+    if (!dragging || !context?.camera || !context?.orbitControls) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    const world = overviewToWorld(cx, cy, getOverviewTransform(context, canvas), canvas);
+    const dx = world.x - context.orbitControls.target.x;
+    const dy = world.y - context.orbitControls.target.y;
+    context.orbitControls.target.set(world.x, world.y, context.orbitControls.target.z);
+    context.camera.position.x += dx;
+    context.camera.position.y += dy;
+    context.orbitControls.update();
+    context.renderOnce?.();
+    updateModelOverview(context);
+  });
+  const stop = (e) => {
+    dragging = false;
+    viewport.releasePointerCapture?.(e.pointerId);
+  };
+  viewport.addEventListener('pointerup', stop);
+  viewport.addEventListener('pointercancel', stop);
+  overviewDragBound = true;
 }
 export function commitDataChange(operationName, updater, options={}){ const before=clone(data); const result=updater(data); data=normalizeData(data); const v=validateData(data); if(!v.valid && options.rollbackOnError!==false){ data=before; throw new Error(`Invalid data after ${operationName}: ${v.errors.join('; ')}`);} if(options.refresh!==false) refreshSceneFromData(options.context); if(options.optimizeLayout===true) updateLayoutFromData(options.context); if(options.saveHistory!==false) history.push({operationName,before,after:clone(data)}); return result; }
 export function setData(nextData, options={}){ data=normalizeData(nextData); const v=validateData(data); if(!v.valid) throw new Error(v.errors.join('; ')); if(options.refresh!==false) refreshSceneFromData(options.context); return getData(); }
@@ -275,8 +318,10 @@ function getNodeSize(node){
   const base=node?.size||{};
   const attrCount=Array.isArray(node?.attributes)?node.attributes.length:0;
   const minH=node?.type==='hyperclass'?3.2:2;
-  const width=Math.max(base.width||1, node?.type==='hyperclass'?4:1);
-  const height=Math.max(base.height||minH, minH + attrCount*0.18);
+  const minW=node?.type==='hyperclass'?4:1;
+  const attrW=node?.type==='hyperclass' ? 3.2 : 1.2;
+  const width=Math.max(base.width||1, minW, attrW);
+  const height=Math.max(base.height||minH, minH + attrCount*0.2);
   return { width, height };
 }
 function getGridDimensions(childCount){
@@ -308,9 +353,13 @@ function optimizeLayoutData(){
     const childSizes=kids.map(getNodeSize);
     const cellW=Math.max(...childSizes.map(s=>s.width))+GRID_GAP_X;
     const cellH=Math.max(...childSizes.map(s=>s.height))+GRID_GAP_Y;
-    const gridW=Math.max(cellW*cols, own.width-1.2);
-    const gridH=Math.max(cellH*rows, own.height-1.2);
-    node.size={width:Math.max(own.width,gridW+1.2),height:Math.max(own.height,gridH+1.2)};
+    const padX = 1.2;
+    const padY = 1.1;
+    const gridW=Math.max(cellW*cols, own.width-padX);
+    const gridH=Math.max(cellH*rows, own.height-padY);
+    const attrRows=Math.max(1,Math.ceil((Array.isArray(node.attributes)?node.attributes.length:0)/Math.max(1,Math.floor((gridH)/0.16))));
+    const attrPadX = attrRows > 1 ? 0.8 : 0.5;
+    node.size={width:Math.max(own.width,gridW+padX+attrPadX),height:Math.max(own.height,gridH+padY)};
 
     const startX=cx-gridW/2+cellW/2;
     const startY=cy+gridH/2-cellH/2;
