@@ -5,19 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Dynamic Layout Test</title>
   <style>
-    html, body { margin: 0; height: 100%; overflow: hidden; font-family: Arial, sans-serif; }
+    html, body { margin: 0; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     #container { position: fixed; inset: 0; background: #f4f4f4; }
     #model-overview { position: fixed; top: 10px; left: 10px; width: 220px; height: 150px; border: 1px solid #999; background: rgba(255,255,255,.95); z-index: 20; }
     #model-overview-canvas { width: 100%; height: 100%; display: block; }
     #model-overview-viewport { position: absolute; border: 1px dashed #d00; pointer-events: none; }
-    #dynamic-test-panel { position: fixed; top: 0; right: 0; width: 360px; height: 100%; overflow: auto; background: rgba(255,255,255,0.97); border-left: 1px solid #ccc; padding: 12px; z-index: 30; }
-    .control-group { margin-bottom: 10px; display: grid; gap: 6px; }
-    .control-group button { padding: 7px 8px; }
-    select, textarea, button { width: 100%; box-sizing: border-box; }
+    #dynamic-test-panel { position: fixed; top: 0; right: 0; width: 360px; height: 100%; overflow: auto; background: rgba(255,255,255,0.72); backdrop-filter: blur(18px) saturate(1.2); border-left: 1px solid rgba(255,255,255,.6); padding: 12px; z-index: 30; box-shadow: -12px 0 40px rgba(0,0,0,.08); }
+    .control-group { margin-bottom: 10px; display: grid; gap: 6px; background: rgba(255,255,255,.55); border: 1px solid rgba(0,0,0,.06); border-radius: 12px; padding: 10px; }
+    .control-group button { padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(0,0,0,.1); background: linear-gradient(#fff, #f4f4f6); }
+    .control-group button:hover { background: linear-gradient(#fff, #ececf0); }
+    select, textarea, button { width: 100%; box-sizing: border-box; font: inherit; }
+    select, textarea { border-radius: 10px; border: 1px solid rgba(0,0,0,.15); padding: 8px; background: rgba(255,255,255,.92); }
     textarea { min-height: 160px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     #layout-status { background: #111; color: #e7ffe7; padding: 8px; min-height: 130px; white-space: pre-wrap; }
     .label { pointer-events: auto; cursor: pointer; }
     .inline-hint { font-size: 12px; color: #444; }
+    .mode-segment { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+    .mode-segment button { font-size: 12px; }
+    .mode-segment button.active { background: linear-gradient(#0a84ff,#0066db); color: #fff; border-color: #0066db; }
+    .muted { opacity: .6; pointer-events: none; }
   </style>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
@@ -25,7 +31,19 @@
   <div id="container"></div>
   <div id="model-overview"><canvas id="model-overview-canvas"></canvas><div id="model-overview-viewport"></div></div>
   <div id="dynamic-test-panel"><h2>HBDS Dynamic Layout Test</h2>
-    <div class="control-group"><label for="test-model-select">Select HDBS Model</label><select id="test-model-select"></select></div>
+    <div class="control-group"><label for="test-model-select">Select HDBS Model</label><select id="test-model-select"></select>
+      <label for="edit-mode-select">Editable Mode</label>
+      <select id="edit-mode-select">
+        <option value="full">Full Edit</option>
+        <option value="structure">Structure Only</option>
+        <option value="readonly">Read Only</option>
+      </select>
+      <div class="mode-segment">
+        <button id="mode-full" type="button">Full</button>
+        <button id="mode-structure" type="button">Structure</button>
+        <button id="mode-readonly" type="button">Read Only</button>
+      </div>
+    </div>
     <div class="control-group"><button id="add-hyperclass-button">Add Hyperclass</button><button id="add-class-button">Add Class</button><button id="add-attribute-button">Add Attribute</button><button id="add-link-button">Add Link</button></div>
     <div class="control-group"><button id="delete-selected-button">Delete Selected</button><button id="optimize-layout-button">Optimize Layout</button><button id="fit-model-button">Fit Model</button><button id="save-model-button">Save Model</button><button id="reset-model-button">Reset Test Model</button></div>
     <div class="control-group"><button id="export-json-button">Export JSON</button></div>
