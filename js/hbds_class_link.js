@@ -184,3 +184,8 @@ export function updateLinkFontSizes(camera) {
     label.element.style.fontSize = `${size.toFixed(1)}px`;
   }
 }
+
+export function createLinkData(input={}, defaults={}){ return normalizeLinkData({ ...defaults, ...input, id: input.id ?? `link_${Math.random().toString(36).slice(2,8)}` }); }
+export function updateLinkData(linkData, patch={}){ return normalizeLinkData({ ...linkData, ...patch, rendering:{ ...(linkData.rendering||{}), ...(patch.rendering||{}) } }); }
+export function normalizeLinkData(linkData={}){ return { ...linkData, rendering:{ labelText: linkData.rendering?.labelText ?? linkData.id ?? '', ...(linkData.rendering||{}) } }; }
+export function validateLinkData(linkData, classById){ const errors=[]; if(!linkData.sourceClassId) errors.push('missing sourceClassId'); if(!linkData.targetClassId) errors.push('missing targetClassId'); if(linkData.sourceClassId===linkData.targetClassId && !linkData.allowSelfLink) errors.push('self link not allowed'); if(classById){ if(!classById.has(linkData.sourceClassId)) errors.push('source not found'); if(!classById.has(linkData.targetClassId)) errors.push('target not found'); } return {valid:errors.length===0,errors,warnings:[]}; }
