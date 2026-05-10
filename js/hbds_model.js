@@ -31,6 +31,60 @@ export function refreshSceneFromData(context){ if(!context) return; const {scene
   modelRuntime.draggableObjects=draggableObjects;
   context.setupDragControls?.(); recalculateAllLinks(); updateLabelFontSizes(context.camera); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
 export function updateLayoutFromData(context){ recalculateAllLinks(); updateLabelFontSizes(context.camera); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
+export function refreshDiagramBoundsAndCamera(context, options={}){
+  if(!context?.diagramGroup) return null;
+  const box=new THREE.Box3().setFromObject(context.diagramGroup);
+  if(box.isEmpty()){
+    context.diagramGroup.userData.boundingBox=null;
+    context.diagramGroup.userData.boundingSphere=null;
+    return null;
+  }
+  const sphere=box.getBoundingSphere(new THREE.Sphere());
+  context.diagramGroup.userData.boundingBox=box.clone();
+  context.diagramGroup.userData.boundingSphere=sphere.clone();
+  if(options.fitToView && context.camera){
+    const padding=options.padding??1.2;
+    const fovR=context.camera.fov*Math.PI/180;
+    const dist=Math.abs((sphere.radius*padding)/Math.sin(fovR/2));
+    context.camera.position.set(sphere.center.x,sphere.center.y,sphere.center.z+dist);
+    context.camera.lookAt(sphere.center);
+    context.orbitControls?.target.copy(sphere.center);
+    context.orbitControls?.update?.();
+    context.setCamera2D?.();
+  }
+  context.renderOnce?.();
+  return {box,sphere};
+}
+export function updateModelOverview(context){
+  const canvas=document.getElementById('model-overview-canvas');
+  const viewport=document.getElementById('model-overview-viewport');
+  if(!canvas||!viewport||!context?.diagramGroup) return;
+  const box=context.diagramGroup.userData.boundingBox||new THREE.Box3().setFromObject(context.diagramGroup);
+  if(box.isEmpty()) return;
+  const size=box.getSize(new THREE.Vector3());
+  const center=box.getCenter(new THREE.Vector3());
+  const w=Math.max(1,canvas.clientWidth||180), h=Math.max(1,canvas.clientHeight||140);
+  canvas.width=w; canvas.height=h;
+  const ctx=canvas.getContext('2d'); if(!ctx) return;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#fbfbfb'; ctx.fillRect(0,0,w,h);
+  const scale=Math.max(size.x,size.y,1e-6);
+  const px=(x)=>((x-center.x)/scale)*w*0.8+w*0.5;
+  const py=(y)=>((center.y-y)/scale)*h*0.8+h*0.5;
+  ctx.strokeStyle='#1f6feb'; ctx.lineWidth=1;
+  data.hypergraph.class.forEach(n=>{const x=px(n.position?.x||0), y=py(n.position?.y||0); ctx.strokeRect(x-3,y-3,6,6);});
+  const cam=context.camera?.position||new THREE.Vector3();
+  const vx=Math.min(w-40,Math.max(0,px(cam.x)-20)), vy=Math.min(h-30,Math.max(0,py(cam.y)-15));
+  viewport.style.left=`${vx}px`; viewport.style.top=`${vy}px`; viewport.style.width='40px'; viewport.style.height='30px';
+}
+export function setupCanvasPanControls(context){
+  const wrap=document.getElementById('model-overview'); if(!wrap||!context?.camera) return;
+  let dragging=false;
+  const onMove=(e)=>{ if(!dragging) return; const r=wrap.getBoundingClientRect(); const nx=(e.clientX-r.left)/r.width-0.5; const ny=0.5-(e.clientY-r.top)/r.height; const sphere=context.diagramGroup?.userData?.boundingSphere; const scale=(sphere?.radius||10)*2; context.camera.position.x=nx*scale; context.camera.position.y=ny*scale; context.orbitControls?.target.set(0,0,0); context.orbitControls?.update?.(); context.renderOnce?.(); updateModelOverview(context);};
+  wrap.addEventListener('pointerdown',()=>{dragging=true;});
+  window.addEventListener('pointerup',()=>{dragging=false;});
+  window.addEventListener('pointermove',onMove);
+}
 export function commitDataChange(operationName, updater, options={}){ const before=clone(data); const result=updater(data); data=normalizeData(data); const v=validateData(data); if(!v.valid && options.rollbackOnError!==false){ data=before; throw new Error(`Invalid data after ${operationName}: ${v.errors.join('; ')}`);} if(options.refresh!==false) refreshSceneFromData(options.context); if(options.optimizeLayout===true) updateLayoutFromData(options.context); if(options.saveHistory!==false) history.push({operationName,before,after:clone(data)}); return result; }
 export function setData(nextData, options={}){ data=normalizeData(nextData); const v=validateData(data); if(!v.valid) throw new Error(v.errors.join('; ')); if(options.refresh!==false) refreshSceneFromData(options.context); return getData(); }
 export function resetData(options={}){ return setData({hypergraph:{class:[],link:[]}},options); }
