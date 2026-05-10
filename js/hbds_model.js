@@ -11,6 +11,7 @@ const GRID_GAP_X = 0.9;
 const GRID_GAP_Y = 0.9;
 const ROOT_GAP_X = 2.6;
 const ROOT_GAP_Y = 2.2;
+const MIN_HYPERCLASS_GAP = 0.8;
 const clone=(v)=>typeof structuredClone==='function'?structuredClone(v):JSON.parse(JSON.stringify(v));
 const nextId=(p)=>`${p}_${Math.random().toString(36).slice(2,8)}`;
 export const getData=()=>data;
@@ -469,9 +470,72 @@ function applyLayoutByAlgorithm(algorithm='grid'){
   if(algorithm==='hierarchy') return optimizeLayoutHierarchy();
   return optimizeLayoutGrid();
 }
+function getNodeBounds(node){
+  const size=getNodeSize(node);
+  const pos=node?.position||{x:0,y:0};
+  return {
+    minX:(pos.x||0)-size.width/2,
+    maxX:(pos.x||0)+size.width/2,
+    minY:(pos.y||0)-size.height/2,
+    maxY:(pos.y||0)+size.height/2
+  };
+}
+function isAncestor(ancestorId,nodeId,byId){
+  let current=byId.get(nodeId);
+  while(current?.parentClassId){
+    if(current.parentClassId===ancestorId) return true;
+    current=byId.get(current.parentClassId);
+  }
+  return false;
+}
+function overlapDepth(a,b,gap=MIN_HYPERCLASS_GAP){
+  const x=Math.min(a.maxX,b.maxX)-Math.max(a.minX,b.minX);
+  const y=Math.min(a.maxY,b.maxY)-Math.max(a.minY,b.minY);
+  if(x<=-gap || y<=-gap) return null;
+  return {x:x+gap,y:y+gap};
+}
+function resolveHyperclassOverlaps(){
+  const nodes=data.hypergraph.class||[];
+  const byId=new Map(nodes.map(n=>[n.id,n]));
+  const hyperclasses=nodes.filter(n=>n.type==='hyperclass');
+  if(hyperclasses.length<2) return;
+
+  for(let iter=0; iter<80; iter++){
+    let moved=false;
+    for(let i=0;i<hyperclasses.length;i++){
+      for(let j=i+1;j<hyperclasses.length;j++){
+        const a=hyperclasses[i];
+        const b=hyperclasses[j];
+        if(isAncestor(a.id,b.id,byId) || isAncestor(b.id,a.id,byId)) continue;
+        const ab=getNodeBounds(a);
+        const bb=getNodeBounds(b);
+        const overlap=overlapDepth(ab,bb);
+        if(!overlap) continue;
+        if(!a.position) a.position={x:0,y:0,z:0};
+        if(!b.position) b.position={x:0,y:0,z:0};
+        const dx=(b.position.x||0)-(a.position.x||0);
+        const dy=(b.position.y||0)-(a.position.y||0);
+        const separateX=Math.abs(dx)>=Math.abs(dy);
+        const sign=(separateX?dx:dy)>=0?1:-1;
+        if(separateX){
+          const shift=overlap.x/2;
+          a.position.x-=sign*shift;
+          b.position.x+=sign*shift;
+        } else {
+          const shift=overlap.y/2;
+          a.position.y-=sign*shift;
+          b.position.y+=sign*shift;
+        }
+        moved=true;
+      }
+    }
+    if(!moved) break;
+  }
+}
 export async function optimizeAndRefreshLayout(context, options={}){
   const algorithm=options.algorithm||'grid';
   applyLayoutByAlgorithm(algorithm);
+  resolveHyperclassOverlaps();
   refreshSceneFromData(context);
   updateLayoutFromData(context,options);
   return { algorithm };
