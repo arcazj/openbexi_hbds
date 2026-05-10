@@ -6,11 +6,26 @@ import { getData,setData,resetData,validateData,createClass,deleteClass,createHy
 
 let scene,camera,renderer,labelRenderer,orbitControls,dragControls,diagramGroup; const draggableObjects=[];
 let selectedElementId=null,selectedParentHyperclassId=null,selectedAttributeOwnerId=null,selectedLinkSourceId=null,selectedLinkTargetId=null;
+let editMode='full';
 let nextClassNumber=1,nextHyperclassNumber=1,nextAttributeNumber=1,nextLinkNumber=1;
 const ctx=()=>({scene,camera,renderer,css2DRenderer:labelRenderer,orbitControls,dragControls,diagramGroup,draggableObjects,setDiagramGroup:(g)=>diagramGroup=g,setDragControls:(d)=>dragControls=d,setupDragControls:setupDrag,renderOnce});
 const shouldOptimizeAfterCrud=()=>document.getElementById('auto-optimize-toggle')?.checked===true;
 const idItems=()=>getData().hypergraph.class;
 function updateSmartMenusFromData(){ const nodes=(idItems()||[]).filter(Boolean), hy=nodes.filter(n=>n?.type==='hyperclass'); const set=(id,arr,sel,ph)=>{const el=document.getElementById(id);el.innerHTML=''; if(ph){const o=document.createElement('option');o.value='';o.textContent=ph;el.appendChild(o);} arr.forEach(n=>{const o=document.createElement('option');o.value=n.id;o.textContent=`${n.name} (${n.id})`;el.appendChild(o);}); if(sel!=null) el.value=String(sel);}; set('selected-element-select',nodes,selectedElementId,'-- Select element --'); set('parent-hyperclass-select',hy,selectedParentHyperclassId,'-- No parent hyperclass --'); set('attribute-owner-select',nodes,selectedAttributeOwnerId,'-- Select owner --'); set('link-source-select',nodes,selectedLinkSourceId,'-- Select source --'); set('link-target-select',nodes,selectedLinkTargetId,'-- Select target --'); }
+function updateAppleModeControls(){
+  const isReadOnly=editMode==='readonly';
+  const structureOnly=editMode==='structure';
+  const disable=(id,state)=>{const el=document.getElementById(id); if(el) el.disabled=state;};
+  disable('add-hyperclass-button',isReadOnly);
+  disable('add-class-button',isReadOnly);
+  disable('add-link-button',isReadOnly||structureOnly);
+  disable('add-attribute-button',isReadOnly||structureOnly);
+  disable('delete-selected-button',isReadOnly);
+  ['mode-full','mode-structure','mode-readonly'].forEach(id=>document.getElementById(id)?.classList.remove('active'));
+  document.getElementById(`mode-${editMode}`)?.classList.add('active');
+  const selectionGroup=document.getElementById('selected-element-select')?.closest('.control-group');
+  if(selectionGroup) selectionGroup.classList.toggle('muted',isReadOnly);
+}
 function updateJsonPreviewFromData(){ document.getElementById('json-preview').value=JSON.stringify(getData(),null,2); }
 function renderOnce(){ renderer.render(scene,camera); labelRenderer.render(scene,camera); }
 function ensureLighting(){
@@ -43,6 +58,11 @@ async function init(){ scene=new THREE.Scene(); scene.background=new THREE.Color
 ensureLighting();
 await setData({hypergraph:{class:[],link:[]}}, {context:ctx(),refresh:true}); updateSmartMenusFromData(); updateJsonPreviewFromData();
 document.getElementById('add-class-button').onclick=handleAddClass; document.getElementById('add-hyperclass-button').onclick=handleAddHyperclass; document.getElementById('add-attribute-button').onclick=handleAddAttribute; document.getElementById('add-link-button').onclick=handleAddLink; document.getElementById('delete-selected-button').onclick=handleDeleteSelected; document.getElementById('optimize-layout-button').onclick=()=>optimizeAndRefreshLayout(ctx()); document.getElementById('fit-model-button').onclick=()=>fitModelToCanvas(ctx(),{padding:1.2,updateOverview:true}); document.getElementById('save-model-button').onclick=()=>saveScene(ctx(),{fileName:'dynamic_hbds_test_model.json'}); document.getElementById('reset-model-button').onclick=async()=>{resetData({context:ctx(),refresh:true}); await afterCrud();};
+document.getElementById('edit-mode-select').onchange=(e)=>{editMode=e.target.value||'full'; updateAppleModeControls();};
+document.getElementById('mode-full').onclick=()=>{editMode='full'; document.getElementById('edit-mode-select').value='full'; updateAppleModeControls();};
+document.getElementById('mode-structure').onclick=()=>{editMode='structure'; document.getElementById('edit-mode-select').value='structure'; updateAppleModeControls();};
+document.getElementById('mode-readonly').onclick=()=>{editMode='readonly'; document.getElementById('edit-mode-select').value='readonly'; updateAppleModeControls();};
 ['selected-element-select','parent-hyperclass-select','attribute-owner-select','link-source-select','link-target-select'].forEach(id=>document.getElementById(id).onchange=(e)=>{const v=e.target.value||null; if(id==='selected-element-select') selectedElementId=v; if(id==='parent-hyperclass-select') selectedParentHyperclassId=v; if(id==='attribute-owner-select') selectedAttributeOwnerId=v; if(id==='link-source-select') selectedLinkSourceId=v; if(id==='link-target-select') selectedLinkTargetId=v;});
+updateAppleModeControls();
 (function anim(){requestAnimationFrame(anim); orbitControls.update(); renderOnce();})(); }
 init();
