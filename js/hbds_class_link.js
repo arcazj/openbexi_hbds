@@ -121,8 +121,9 @@ export function recalculateAllLinks() {
     const count = bucket.length;
     bucket.forEach((l, idx) => {
       const parent = l.linkGroup.parent;
-      const sourceHub = getBestSourceHub(l.sourceClass, l.targetClass);
-      const targetHub = getBestTargetHub(l.targetClass, l.sourceClass);
+      const isSelfLink = l.linkData.sourceClassId === l.linkData.targetClassId;
+      const sourceHub = isSelfLink ? getFallbackHub(l.sourceClass) : getBestSourceHub(l.sourceClass, l.targetClass);
+      const targetHub = isSelfLink ? getFallbackHub(l.targetClass) : getBestTargetHub(l.targetClass, l.sourceClass);
       const p0World = getHubWorldPosition(sourceHub);
       const p1World = getHubWorldPosition(targetHub);
       const p0 = parent ? parent.worldToLocal(p0World.clone()) : p0World;
@@ -142,28 +143,24 @@ export function recalculateAllLinks() {
         l.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
         const labelIndex = Math.max(1, Math.floor((points.length - 1) * (l.linkData.rendering?.labelPositionAlongPath ?? 0.5)));
         lp = points[labelIndex].clone();
-      } else if (l.linkData.sourceClassId === l.linkData.targetClassId) {
-        const loopRadius = l.linkData.rendering?.selfLoopRadius ?? 0.75;
-        const loopLift = l.linkData.rendering?.selfLoopLift ?? 0.85;
-        const center = p0.clone().add(new THREE.Vector3(loopRadius, loopLift, 0));
-        const seg = 56;
-        for (let i = 0; i <= seg; i++) {
-          const a = (Math.PI * 2 * i) / seg;
-          points.push(new THREE.Vector3(
-            center.x + loopRadius * Math.cos(a),
-            center.y + loopRadius * Math.sin(a),
-            p0.z
-          ));
-        }
+      } else if (isSelfLink) {
+        const selfNormal = new THREE.Vector3(1, 1, 0).normalize();
+        const selfLength = l.linkData.rendering?.selfLinkLength ?? 0.95;
+        const end = p0.clone().addScaledVector(selfNormal, selfLength);
+        const mid = p0.clone().add(end).multiplyScalar(0.5);
+        const ortho = new THREE.Vector3(-selfNormal.y, selfNormal.x, 0).normalize();
+        const control = mid.clone().addScaledVector(ortho, l.linkData.rendering?.curveOffset ?? 0.35);
+        const seg = 24;
+        for (let i = 0; i <= seg; i++) points.push(pathPoint(p0, end, control, i / seg));
         l.line.geometry.setFromPoints(points);
         l.line.computeLineDistances();
-        const arrowIdx = Math.floor(seg * 0.92);
-        const arrowPos = points[arrowIdx].clone();
-        const prev = points[Math.max(arrowIdx - 1, 0)].clone();
+        const arrowT = 0.92;
+        const arrowPos = pathPoint(p0, end, control, arrowT);
+        const prev = pathPoint(p0, end, control, arrowT - 0.05);
         tangent = arrowPos.clone().sub(prev).normalize();
         l.arrow.position.copy(arrowPos);
         l.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
-        lp = center.clone().add(new THREE.Vector3(0, 0, 0));
+        lp = pathPoint(p0, end, control, l.linkData.rendering?.labelPositionAlongPath ?? 0.55);
       } else {
         const mid = new THREE.Vector3().addVectors(p0, p1).multiplyScalar(0.5);
         const dir = new THREE.Vector3().subVectors(p1, p0);

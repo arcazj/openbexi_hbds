@@ -37,6 +37,12 @@
         </label>
     </div>
     <div class="control-group">
+        <label class="checkbox-wrapper" for="editable-toggle">
+            <input type="checkbox" id="editable-toggle" checked>
+            <span>Editable mode</span>
+        </label>
+    </div>
+    <div class="control-group">
         <button id="save-model-button">Save Model</button>
     </div>
     <div class="control-group">
@@ -131,6 +137,7 @@
         document.getElementById('fit-model-button').addEventListener('click', () => {
             fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
         });
+        document.getElementById('editable-toggle').addEventListener('change', toggleEditableMode);
 
         setupCanvasPanControls(getModelContext());
         initModelOverview(getModelContext());
@@ -238,6 +245,11 @@
         if (dragControls) dragControls.enabled = !is3D;
         if (!is3D) setCamera2D();
         updateModelOverview(getModelContext());
+    }
+    function toggleEditableMode(e) {
+        const editable = e.target.checked;
+        if (dragControls) dragControls.enabled = editable && !document.getElementById('view-toggle').checked;
+        orbitControls.enabled = !editable;
     }
 
     function setCamera2D() {
