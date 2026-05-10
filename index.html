@@ -103,7 +103,9 @@
         orbitControls.enableRotate = false;
 
         window.addEventListener('resize', onResize);
-        document.getElementById('view-toggle').addEventListener('change', toggleView);
+        const viewToggle = document.getElementById('view-toggle');
+        viewToggle.checked = false;
+        viewToggle.addEventListener('change', toggleView);
         document.getElementById('save-model-button').addEventListener('click', () => {
             const selectedModelValue = document.getElementById('model-select').value;
             const fileName = selectedModelValue.endsWith('.json')
