@@ -1,0 +1,879 @@
+{
+  "schemaVersion": "1.0.0",
+  "modelId": "satellite_world",
+  "modelName": "Satellite World",
+  "description": "Complete satellite-domain JSON structure covering launches, space objects, satellites, TLEs, orbit states, tracking, operations, conjunctions, decay, reentry, debris, and provenance.",
+  "units": {
+    "time": "UTC ISO-8601",
+    "distance": "km",
+    "length": "m",
+    "mass": "kg",
+    "angle": "deg",
+    "velocity": "m/s",
+    "frequency": "MHz"
+  },
+  "visualizationRules": {
+    "nodeAttributeLayout": "red hub -> black fan-out lines -> vertical black marker stack -> attribute text",
+    "linkEndpointRule": "hub-to-hub only",
+    "linkRouting": "orthogonal process-flow",
+    "arrowheadRule": "arrowhead attached to target hub",
+    "labelRule": "label placed on longest clear route segment"
+  },
+  "controlledVocabularies": {
+    "objectTypes": [
+      "satellite",
+      "payload",
+      "rocket_body",
+      "upper_stage",
+      "debris",
+      "fragment",
+      "unknown"
+    ],
+    "missionTypes": [
+      "communications",
+      "earth_observation",
+      "navigation",
+      "weather",
+      "science",
+      "technology_demo",
+      "military",
+      "crew",
+      "cargo",
+      "astronomy",
+      "inspection",
+      "unknown"
+    ],
+    "operationalStatuses": [
+      "planned",
+      "launched",
+      "commissioning",
+      "operational",
+      "standby",
+      "extended_mission",
+      "inactive",
+      "retired",
+      "failed",
+      "lost",
+      "unknown"
+    ],
+    "decayStatuses": [
+      "not_decayed",
+      "predicted_decay",
+      "controlled_deorbit",
+      "uncontrolled_reentry",
+      "decayed",
+      "reentered",
+      "moved_to_graveyard_orbit",
+      "graveyard_orbit",
+      "unknown"
+    ],
+    "orbitRegimes": [
+      "LEO",
+      "MEO",
+      "GEO",
+      "GTO",
+      "HEO",
+      "SSO",
+      "polar",
+      "cislunar",
+      "suborbital",
+      "interplanetary",
+      "graveyard",
+      "unknown"
+    ],
+    "launchOutcomes": [
+      "planned",
+      "success",
+      "partial_failure",
+      "failure",
+      "scrubbed",
+      "unknown"
+    ],
+    "maneuverTypes": [
+      "station_keeping",
+      "orbit_raise",
+      "orbit_lower",
+      "collision_avoidance",
+      "deorbit",
+      "attitude_control",
+      "graveyard_disposal",
+      "unknown"
+    ],
+    "eventTypes": [
+      "launch",
+      "deployment",
+      "maneuver",
+      "anomaly",
+      "conjunction",
+      "fragmentation",
+      "decay_prediction",
+      "reentry",
+      "recovery",
+      "status_change",
+      "catalog_update"
+    ],
+    "riskLevels": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "critical",
+      "unknown"
+    ]
+  },
+  "domainModel": {
+    "hyperclasses": [
+      {
+        "id": "identity_ownership",
+        "name": "Identity / Ownership",
+        "classes": [
+          "spaceObject",
+          "satellite",
+          "organization",
+          "registryRecord"
+        ]
+      },
+      {
+        "id": "launch_deployment",
+        "name": "Launch / Deployment",
+        "classes": [
+          "launchMission",
+          "launchVehicle",
+          "launchSite",
+          "deploymentEvent"
+        ]
+      },
+      {
+        "id": "orbit_tracking",
+        "name": "Orbit / TLE / Tracking",
+        "classes": [
+          "orbitState",
+          "tleSet",
+          "ephemerisStateVector",
+          "trackingSensor",
+          "trackingObservation"
+        ]
+      },
+      {
+        "id": "mission_operations",
+        "name": "Mission / Operations",
+        "classes": [
+          "payload",
+          "groundStation",
+          "communicationChannel",
+          "maneuver",
+          "telemetrySnapshot"
+        ]
+      },
+      {
+        "id": "safety_events",
+        "name": "Safety / Events / Risk",
+        "classes": [
+          "conjunctionAssessment",
+          "collisionAvoidanceAction",
+          "anomalyEvent",
+          "fragmentationEvent"
+        ]
+      },
+      {
+        "id": "decay_reentry",
+        "name": "Decay / Reentry / Disposal",
+        "classes": [
+          "decayPrediction",
+          "reentryEvent",
+          "disposalPlan",
+          "recoveryReport"
+        ]
+      }
+    ],
+    "classes": {
+      "spaceObject": [
+        "objectId",
+        "objectType",
+        "objectName",
+        "noradCatalogId",
+        "internationalDesignator",
+        "cosparId",
+        "countryOfRegistry",
+        "currentStatus",
+        "decayStatus",
+        "createdAtUtc",
+        "updatedAtUtc"
+      ],
+      "satellite": [
+        "satelliteId",
+        "objectId",
+        "commonName",
+        "aliases",
+        "busModel",
+        "manufacturerOrganizationId",
+        "ownerOrganizationId",
+        "operatorOrganizationId",
+        "missionType",
+        "massKg",
+        "dryMassKg",
+        "dimensionsM",
+        "powerWatts",
+        "propulsionType",
+        "attitudeControlType",
+        "designLifeYears",
+        "operationalStatus",
+        "launchId",
+        "currentTleId",
+        "latestOrbitStateId",
+        "latestDecayPredictionId"
+      ],
+      "organization": [
+        "organizationId",
+        "name",
+        "roles",
+        "country",
+        "website",
+        "contact"
+      ],
+      "registryRecord": [
+        "registryRecordId",
+        "objectId",
+        "registryName",
+        "registryNumber",
+        "registrationCountry",
+        "registrationDateUtc",
+        "legalOwnerOrganizationId",
+        "licenseReference"
+      ],
+      "launchMission": [
+        "launchId",
+        "missionName",
+        "launchDateTimeUtc",
+        "launchWindowOpenUtc",
+        "launchWindowCloseUtc",
+        "launchSiteId",
+        "launchVehicleId",
+        "providerOrganizationId",
+        "outcome",
+        "targetOrbitRegime",
+        "payloadObjectIds",
+        "deploymentEventIds",
+        "notes"
+      ],
+      "launchVehicle": [
+        "launchVehicleId",
+        "vehicleName",
+        "family",
+        "variant",
+        "manufacturerOrganizationId",
+        "stages",
+        "payloadCapacityLeoKg",
+        "payloadCapacityGeoKg",
+        "reusable"
+      ],
+      "launchSite": [
+        "launchSiteId",
+        "siteName",
+        "padName",
+        "country",
+        "latitudeDeg",
+        "longitudeDeg",
+        "elevationM",
+        "operatorOrganizationId"
+      ],
+      "deploymentEvent": [
+        "deploymentEventId",
+        "launchId",
+        "objectId",
+        "deployedFromObjectId",
+        "separationTimeUtc",
+        "sequenceNumber",
+        "deploymentStatus",
+        "initialOrbitStateId"
+      ],
+      "orbitState": [
+        "orbitStateId",
+        "objectId",
+        "epochUtc",
+        "orbitRegime",
+        "semiMajorAxisKm",
+        "perigeeAltitudeKm",
+        "apogeeAltitudeKm",
+        "inclinationDeg",
+        "eccentricity",
+        "raanDeg",
+        "argumentOfPerigeeDeg",
+        "meanAnomalyDeg",
+        "periodMinutes",
+        "source"
+      ],
+      "tleSet": [
+        "tleId",
+        "objectId",
+        "noradCatalogId",
+        "epochUtc",
+        "line0",
+        "line1",
+        "line2",
+        "classification",
+        "internationalDesignator",
+        "elementSetNumber",
+        "revolutionNumberAtEpoch",
+        "inclinationDeg",
+        "raanDeg",
+        "eccentricity",
+        "argumentOfPerigeeDeg",
+        "meanAnomalyDeg",
+        "meanMotionRevPerDay",
+        "bstarDragTerm",
+        "ephemerisType",
+        "checksumValid",
+        "source",
+        "retrievedAtUtc"
+      ],
+      "ephemerisStateVector": [
+        "ephemerisId",
+        "objectId",
+        "epochUtc",
+        "referenceFrame",
+        "positionKm",
+        "velocityKmPerSec",
+        "covariance",
+        "source"
+      ],
+      "trackingSensor": [
+        "sensorId",
+        "name",
+        "sensorType",
+        "ownerOrganizationId",
+        "latitudeDeg",
+        "longitudeDeg",
+        "altitudeM",
+        "frequencyBand"
+      ],
+      "trackingObservation": [
+        "observationId",
+        "objectId",
+        "sensorId",
+        "observationTimeUtc",
+        "measurementType",
+        "azimuthDeg",
+        "elevationDeg",
+        "rangeKm",
+        "rangeRateKmPerSec",
+        "uncertainty"
+      ],
+      "payload": [
+        "payloadId",
+        "satelliteId",
+        "payloadName",
+        "payloadType",
+        "instrumentName",
+        "massKg",
+        "powerWatts",
+        "dataProducts"
+      ],
+      "groundStation": [
+        "groundStationId",
+        "name",
+        "operatorOrganizationId",
+        "latitudeDeg",
+        "longitudeDeg",
+        "altitudeM",
+        "antennaDiameterM",
+        "supportedBands"
+      ],
+      "communicationChannel": [
+        "channelId",
+        "satelliteId",
+        "groundStationId",
+        "band",
+        "uplinkFrequencyMHz",
+        "downlinkFrequencyMHz",
+        "bandwidthMHz",
+        "modulation",
+        "encryption",
+        "status"
+      ],
+      "maneuver": [
+        "maneuverId",
+        "objectId",
+        "maneuverType",
+        "plannedStartUtc",
+        "executedStartUtc",
+        "deltaVMSec",
+        "propellantUsedKg",
+        "preManeuverOrbitStateId",
+        "postManeuverOrbitStateId",
+        "result"
+      ],
+      "telemetrySnapshot": [
+        "telemetryId",
+        "satelliteId",
+        "timestampUtc",
+        "batteryStateOfChargePct",
+        "busVoltageV",
+        "temperatureC",
+        "attitudeMode",
+        "healthStatus"
+      ],
+      "conjunctionAssessment": [
+        "conjunctionId",
+        "primaryObjectId",
+        "secondaryObjectId",
+        "timeOfClosestApproachUtc",
+        "missDistanceM",
+        "radialMissM",
+        "inTrackMissM",
+        "crossTrackMissM",
+        "probabilityOfCollision",
+        "riskLevel",
+        "mitigationActionId"
+      ],
+      "collisionAvoidanceAction": [
+        "mitigationActionId",
+        "conjunctionId",
+        "objectId",
+        "actionType",
+        "decisionTimeUtc",
+        "maneuverId",
+        "outcome"
+      ],
+      "anomalyEvent": [
+        "anomalyId",
+        "objectId",
+        "eventTimeUtc",
+        "severity",
+        "subsystem",
+        "description",
+        "rootCause",
+        "resolutionStatus"
+      ],
+      "fragmentationEvent": [
+        "fragmentationId",
+        "parentObjectId",
+        "eventTimeUtc",
+        "cause",
+        "estimatedFragmentCount",
+        "catalogedFragmentObjectIds",
+        "debrisCloudOrbitStateId"
+      ],
+      "decayPrediction": [
+        "decayPredictionId",
+        "objectId",
+        "predictionEpochUtc",
+        "predictedDecayUtc",
+        "uncertaintyHours",
+        "source",
+        "solarFluxModel",
+        "dragModel",
+        "confidence"
+      ],
+      "reentryEvent": [
+        "reentryEventId",
+        "objectId",
+        "reentryType",
+        "actualReentryUtc",
+        "estimatedReentryUtc",
+        "latitudeDeg",
+        "longitudeDeg",
+        "footprintDescription",
+        "survivingMassKg",
+        "casualtyRisk",
+        "confirmed"
+      ],
+      "disposalPlan": [
+        "disposalPlanId",
+        "objectId",
+        "plannedMethod",
+        "plannedDateUtc",
+        "targetOrbitRegime",
+        "requiredDeltaVMSec",
+        "complianceStandard",
+        "completionStatus"
+      ],
+      "recoveryReport": [
+        "recoveryReportId",
+        "reentryEventId",
+        "recovered",
+        "recoveryDateUtc",
+        "locationDescription",
+        "recoveredMassKg",
+        "hazardAssessment",
+        "reportingOrganizationId"
+      ]
+    },
+    "relationships": [
+      {
+        "id": "org_owns_satellite",
+        "source": "organization",
+        "target": "satellite",
+        "label": "owns",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "org_operates_satellite",
+        "source": "organization",
+        "target": "satellite",
+        "label": "operates",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "org_manufactures_satellite",
+        "source": "organization",
+        "target": "satellite",
+        "label": "manufactures",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "satellite_registered_as",
+        "source": "satellite",
+        "target": "registryRecord",
+        "label": "registered as",
+        "cardinality": "1:0..N"
+      },
+      {
+        "id": "launch_uses_vehicle",
+        "source": "launchMission",
+        "target": "launchVehicle",
+        "label": "uses vehicle",
+        "cardinality": "N:1"
+      },
+      {
+        "id": "launch_from_site",
+        "source": "launchMission",
+        "target": "launchSite",
+        "label": "launches from",
+        "cardinality": "N:1"
+      },
+      {
+        "id": "launch_deploys_object",
+        "source": "launchMission",
+        "target": "spaceObject",
+        "label": "deploys",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "launch_creates_deployment",
+        "source": "launchMission",
+        "target": "deploymentEvent",
+        "label": "creates deployment",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "object_has_orbit",
+        "source": "spaceObject",
+        "target": "orbitState",
+        "label": "has orbit state",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "object_has_tle",
+        "source": "spaceObject",
+        "target": "tleSet",
+        "label": "has TLE",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "object_has_ephemeris",
+        "source": "spaceObject",
+        "target": "ephemerisStateVector",
+        "label": "has ephemeris",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "sensor_records_observation",
+        "source": "trackingSensor",
+        "target": "trackingObservation",
+        "label": "records",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "observation_tracks_object",
+        "source": "trackingObservation",
+        "target": "spaceObject",
+        "label": "tracks",
+        "cardinality": "N:1"
+      },
+      {
+        "id": "satellite_carries_payload",
+        "source": "satellite",
+        "target": "payload",
+        "label": "carries",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "satellite_uses_channel",
+        "source": "satellite",
+        "target": "communicationChannel",
+        "label": "uses channel",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "channel_links_ground_station",
+        "source": "communicationChannel",
+        "target": "groundStation",
+        "label": "links to",
+        "cardinality": "N:1"
+      },
+      {
+        "id": "object_performs_maneuver",
+        "source": "spaceObject",
+        "target": "maneuver",
+        "label": "performs",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "satellite_emits_telemetry",
+        "source": "satellite",
+        "target": "telemetrySnapshot",
+        "label": "emits telemetry",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "object_primary_in_conjunction",
+        "source": "spaceObject",
+        "target": "conjunctionAssessment",
+        "label": "primary in",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "object_secondary_in_conjunction",
+        "source": "spaceObject",
+        "target": "conjunctionAssessment",
+        "label": "secondary in",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "conjunction_mitigated_by",
+        "source": "conjunctionAssessment",
+        "target": "collisionAvoidanceAction",
+        "label": "mitigated by",
+        "cardinality": "0..1:1"
+      },
+      {
+        "id": "avoidance_executes_maneuver",
+        "source": "collisionAvoidanceAction",
+        "target": "maneuver",
+        "label": "executes",
+        "cardinality": "0..1:1"
+      },
+      {
+        "id": "object_has_anomaly",
+        "source": "spaceObject",
+        "target": "anomalyEvent",
+        "label": "has anomaly",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "object_fragments_into",
+        "source": "spaceObject",
+        "target": "fragmentationEvent",
+        "label": "fragments into",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "object_has_decay_prediction",
+        "source": "spaceObject",
+        "target": "decayPrediction",
+        "label": "has decay prediction",
+        "cardinality": "1:N"
+      },
+      {
+        "id": "object_reenters_as",
+        "source": "spaceObject",
+        "target": "reentryEvent",
+        "label": "reenters as",
+        "cardinality": "1:0..1"
+      },
+      {
+        "id": "object_has_disposal_plan",
+        "source": "spaceObject",
+        "target": "disposalPlan",
+        "label": "has disposal plan",
+        "cardinality": "1:0..N"
+      },
+      {
+        "id": "reentry_has_recovery_report",
+        "source": "reentryEvent",
+        "target": "recoveryReport",
+        "label": "has recovery report",
+        "cardinality": "1:0..N"
+      }
+    ]
+  },
+  "recordTemplate": {
+    "spaceObject": {
+      "objectId": "obj_000001",
+      "objectType": "satellite",
+      "objectName": "ExampleSat-1",
+      "noradCatalogId": null,
+      "internationalDesignator": null,
+      "cosparId": null,
+      "countryOfRegistry": null,
+      "currentStatus": "planned",
+      "decayStatus": "not_decayed",
+      "createdAtUtc": null,
+      "updatedAtUtc": null
+    },
+    "satellite": {
+      "satelliteId": "sat_000001",
+      "objectId": "obj_000001",
+      "identity": {
+        "commonName": "ExampleSat-1",
+        "aliases": [],
+        "busModel": null,
+        "missionType": "earth_observation"
+      },
+      "organizations": {
+        "ownerOrganizationId": null,
+        "operatorOrganizationId": null,
+        "manufacturerOrganizationId": null,
+        "launchCustomerOrganizationId": null
+      },
+      "physical": {
+        "massKg": null,
+        "dryMassKg": null,
+        "dimensionsM": {
+          "x": null,
+          "y": null,
+          "z": null
+        },
+        "crossSectionAreaM2": null,
+        "powerWatts": null,
+        "propulsionType": null,
+        "attitudeControlType": null,
+        "designLifeYears": null
+      },
+      "mission": {
+        "primaryMission": null,
+        "secondaryMissions": [],
+        "serviceRegions": [],
+        "operationalStatus": "planned",
+        "commissioningDateUtc": null,
+        "endOfLifePlanId": null
+      },
+      "currentData": {
+        "currentTleId": null,
+        "latestOrbitStateId": null,
+        "latestDecayPredictionId": null,
+        "reentryEventId": null
+      }
+    },
+    "launchMission": {
+      "launchId": "launch_000001",
+      "missionName": "Example Launch",
+      "launchDateTimeUtc": null,
+      "launchWindowOpenUtc": null,
+      "launchWindowCloseUtc": null,
+      "launchSiteId": "site_000001",
+      "launchVehicleId": "lv_000001",
+      "providerOrganizationId": null,
+      "outcome": "planned",
+      "targetOrbit": {
+        "orbitRegime": "LEO",
+        "inclinationDeg": null,
+        "altitudeKm": null
+      },
+      "payloadObjectIds": [
+        "obj_000001"
+      ],
+      "deploymentEventIds": []
+    },
+    "tleSet": {
+      "tleId": "tle_000001",
+      "objectId": "obj_000001",
+      "noradCatalogId": null,
+      "epochUtc": null,
+      "line0": "EXAMPLESAT-1",
+      "line1": "1 NNNNNU YYDDD.AAA  .00000000  00000-0  00000-0 0  0000",
+      "line2": "2 NNNNN  00.0000 000.0000 0000000 000.0000 000.0000 00.00000000",
+      "parsed": {
+        "classification": "U",
+        "internationalDesignator": null,
+        "inclinationDeg": null,
+        "raanDeg": null,
+        "eccentricity": null,
+        "argumentOfPerigeeDeg": null,
+        "meanAnomalyDeg": null,
+        "meanMotionRevPerDay": null,
+        "bstarDragTerm": null,
+        "ephemerisType": null,
+        "elementSetNumber": null,
+        "revolutionNumberAtEpoch": null,
+        "checksumValid": null
+      },
+      "source": null,
+      "retrievedAtUtc": null
+    },
+    "orbitState": {
+      "orbitStateId": "orbit_000001",
+      "objectId": "obj_000001",
+      "epochUtc": null,
+      "orbitRegime": "LEO",
+      "semiMajorAxisKm": null,
+      "perigeeAltitudeKm": null,
+      "apogeeAltitudeKm": null,
+      "inclinationDeg": null,
+      "eccentricity": null,
+      "raanDeg": null,
+      "argumentOfPerigeeDeg": null,
+      "meanAnomalyDeg": null,
+      "periodMinutes": null,
+      "source": null
+    },
+    "decayAndReentry": {
+      "decayPrediction": {
+        "decayPredictionId": "decay_pred_000001",
+        "objectId": "obj_000001",
+        "predictionEpochUtc": null,
+        "predictedDecayUtc": null,
+        "uncertaintyHours": null,
+        "source": null,
+        "solarFluxModel": null,
+        "dragModel": null,
+        "confidence": "unknown"
+      },
+      "reentryEvent": {
+        "reentryEventId": "reentry_000001",
+        "objectId": "obj_000001",
+        "reentryType": "unknown",
+        "actualReentryUtc": null,
+        "estimatedReentryUtc": null,
+        "location": {
+          "latitudeDeg": null,
+          "longitudeDeg": null,
+          "footprintDescription": null
+        },
+        "survivingMassKg": null,
+        "casualtyRisk": "unknown",
+        "confirmed": false
+      }
+    }
+  },
+  "records": {
+    "spaceObjects": [],
+    "satellites": [],
+    "organizations": [],
+    "registryRecords": [],
+    "launchMissions": [],
+    "launchVehicles": [],
+    "launchSites": [],
+    "deploymentEvents": [],
+    "orbitStates": [],
+    "tleSets": [],
+    "ephemerisStateVectors": [],
+    "trackingSensors": [],
+    "trackingObservations": [],
+    "payloads": [],
+    "groundStations": [],
+    "communicationChannels": [],
+    "maneuvers": [],
+    "telemetrySnapshots": [],
+    "conjunctionAssessments": [],
+    "collisionAvoidanceActions": [],
+    "anomalyEvents": [],
+    "fragmentationEvents": [],
+    "decayPredictions": [],
+    "reentryEvents": [],
+    "disposalPlans": [],
+    "recoveryReports": [],
+    "events": []
+  }
+}

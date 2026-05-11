@@ -1,0 +1,169 @@
+{
+  "hypergraph": {
+    "hyperclass": [
+      {
+        "id": 100,
+        "name": "Human",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Last name",
+          "First name",
+          "Middle name",
+          "Age",
+          "Weight",
+          "Height",
+          "Sex",
+          "Date of birth",
+          "Place of birth",
+          "Nationality",
+          "Marital status",
+          "Occupation",
+          "Education level",
+          "Address",
+          "Phone number",
+          "Email"
+        ],
+        "position": {
+          "x": 20,
+          "y": 5,
+          "z": 0
+        },
+        "size": {
+          "width": 4,
+          "height": 4.5
+        },
+        "rendering": {
+          "class": {
+            "color": "#ECECEC",
+            "material": "phong",
+            "borderColor": "#333333",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#A9A9A9",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#555555",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        },
+        "classes": [
+          {
+            "id": 1,
+            "name": "Man",
+            "type": "roundedRectangle",
+            "specific_attributes": [
+              "Beard Style"
+            ],
+            "position": {
+              "x": -1,
+              "y": 0,
+              "z": 0.1
+            },
+            "size": {
+              "width": 1.8,
+              "height": 3
+            },
+            "rendering": {
+              "class": {
+                "color": "#ADD8E6",
+                "material": "metallic",
+                "borderColor": "#000080",
+                "borderWidth": 0.02,
+                "cornerRadius": 0.1
+              },
+              "textColor": "#000000"
+            }
+          },
+          {
+            "id": 2,
+            "name": "Woman",
+            "type": "roundedRectangle",
+            "specific_attributes": [
+              "Maiden Name"
+            ],
+            "position": {
+              "x": 1,
+              "y": 0,
+              "z": 0.1
+            },
+            "size": {
+              "width": 1.8,
+              "height": 3
+            },
+            "rendering": {
+              "class": {
+                "color": "#FFB6C1",
+                "material": "metallic",
+                "borderColor": "#800000",
+                "borderWidth": 0.02,
+                "cornerRadius": 0.1
+              },
+              "textColor": "#000000"
+            }
+          }
+        ]
+      }
+    ],
+    "class": [
+      {
+        "id": 3,
+        "name": "Car",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Make",
+          "Model",
+          "Year",
+          "VIN",
+          "Color",
+          "Mileage",
+          "Engine type",
+          "Fuel type",
+          "Transmission",
+          "License plate",
+          "Owner"
+        ],
+        "position": {
+          "x": 26,
+          "y": 5,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2.5
+        },
+        "rendering": {
+          "class": {
+            "color": "#00BFFF",
+            "material": "metallic",
+            "borderColor": "#000080",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#A9A9A9",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      }
+    ]
+  }
+}

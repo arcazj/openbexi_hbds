@@ -37,3 +37,4 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/js/hbds_class_old.js

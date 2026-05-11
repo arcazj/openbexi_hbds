@@ -1,0 +1,2580 @@
+{
+  "schemaVersion": "1.0.0",
+  "modelId": "satellite_world",
+  "modelName": "Satellite World",
+  "description": "Domain JSON structure for satellite launch, identity, ownership, orbit, TLE data, operations, tracking, decay, reentry, debris, and risk.",
+  "units": {
+    "time": "UTC ISO-8601",
+    "length": "meters",
+    "distance": "kilometers",
+    "mass": "kilograms",
+    "angle": "degrees",
+    "velocity": "meters_per_second",
+    "frequency": "MHz",
+    "power": "watts",
+    "coordinateFrameDefault": "TEME for TLE-derived states, ITRF/WGS84 for Earth-fixed positions"
+  },
+  "controlledVocabularies": {
+    "spaceObjectTypes": [
+      "satellite",
+      "payload",
+      "rocket_body",
+      "upper_stage",
+      "debris",
+      "fragment",
+      "unknown"
+    ],
+    "missionTypes": [
+      "communications",
+      "earth_observation",
+      "navigation",
+      "weather",
+      "science",
+      "technology_demo",
+      "military",
+      "crew",
+      "cargo",
+      "space_station",
+      "astronomy",
+      "space_tug",
+      "inspection",
+      "unknown"
+    ],
+    "operationalStatuses": [
+      "planned",
+      "launched",
+      "commissioning",
+      "operational",
+      "standby",
+      "extended_mission",
+      "inactive",
+      "retired",
+      "failed",
+      "lost",
+      "unknown"
+    ],
+    "decayStatuses": [
+      "not_decayed",
+      "predicted_decay",
+      "controlled_deorbit",
+      "uncontrolled_reentry",
+      "decayed",
+      "reentered",
+      "moved_to_graveyard_orbit",
+      "graveyard_orbit",
+      "unknown"
+    ],
+    "orbitRegimes": [
+      "LEO",
+      "MEO",
+      "GEO",
+      "GTO",
+      "HEO",
+      "SSO",
+      "polar",
+      "equatorial",
+      "cislunar",
+      "suborbital",
+      "interplanetary",
+      "graveyard",
+      "unknown"
+    ],
+    "launchOutcomes": [
+      "planned",
+      "success",
+      "partial_failure",
+      "failure",
+      "scrubbed",
+      "unknown"
+    ],
+    "maneuverTypes": [
+      "station_keeping",
+      "orbit_raise",
+      "orbit_lower",
+      "collision_avoidance",
+      "deorbit",
+      "attitude_control",
+      "graveyard_disposal",
+      "unknown"
+    ],
+    "eventTypes": [
+      "launch",
+      "deployment",
+      "maneuver",
+      "anomaly",
+      "conjunction",
+      "fragmentation",
+      "decay_prediction",
+      "reentry",
+      "recovery",
+      "status_change",
+      "catalog_update"
+    ],
+    "riskLevels": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "critical",
+      "unknown"
+    ]
+  },
+  "hbdsDiagram": {
+    "layoutMode": "fixed_process_flow",
+    "nodeStyle": {
+      "attributeLayout": "red_hub_to_black_fanout_to_vertical_marker_stack_to_attribute_text",
+      "defaultHub": "visible_red_attribute_hub",
+      "keepAttributesAttachedToHub": true
+    },
+    "linkRouting": {
+      "endpointPolicy": "hub_to_hub_only",
+      "style": "orthogonal_process_flow",
+      "avoidObstacles": true,
+      "separateParallelLinks": true,
+      "arrowheadAt": "target_hub",
+      "labelPlacement": "best_clear_segment"
+    },
+    "hyperclasses": [
+      {
+        "id": "hc_identity_ownership",
+        "name": "Identity / Ownership",
+        "classes": [
+          "space_object",
+          "satellite",
+          "organization",
+          "registry_record"
+        ]
+      },
+      {
+        "id": "hc_launch_deployment",
+        "name": "Launch / Deployment",
+        "classes": [
+          "launch_mission",
+          "launch_vehicle",
+          "launch_site",
+          "deployment_event"
+        ]
+      },
+      {
+        "id": "hc_orbit_tracking",
+        "name": "Orbit / Tracking",
+        "classes": [
+          "orbit_state",
+          "tle_set",
+          "ephemeris_state_vector",
+          "tracking_sensor",
+          "tracking_observation"
+        ]
+      },
+      {
+        "id": "hc_mission_operations",
+        "name": "Mission / Operations",
+        "classes": [
+          "payload",
+          "ground_station",
+          "communication_channel",
+          "maneuver",
+          "telemetry_snapshot"
+        ]
+      },
+      {
+        "id": "hc_safety_events",
+        "name": "Safety / Events / Risk",
+        "classes": [
+          "conjunction_assessment",
+          "anomaly_event",
+          "fragmentation_event",
+          "collision_avoidance_action"
+        ]
+      },
+      {
+        "id": "hc_decay_reentry",
+        "name": "Decay / Reentry / Disposal",
+        "classes": [
+          "decay_prediction",
+          "reentry_event",
+          "disposal_plan",
+          "recovery_report"
+        ]
+      }
+    ]
+  },
+  "classDefinitions": [
+    {
+      "id": "space_object",
+      "name": "Space Object",
+      "hyperclassId": "hc_identity_ownership",
+      "description": "Generic cataloged object in Earth orbit or beyond.",
+      "attributes": [
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectType",
+          "type": "enum:spaceObjectTypes",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectName",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "noradCatalogId",
+          "type": "integer",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "internationalDesignator",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "cosparId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "countryOfRegistry",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "currentStatus",
+          "type": "enum:operationalStatuses",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "decayStatus",
+          "type": "enum:decayStatuses",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "createdAtUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "updatedAtUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "satellite",
+      "name": "Satellite",
+      "hyperclassId": "hc_identity_ownership",
+      "description": "Artificial satellite or payload bus.",
+      "attributes": [
+        {
+          "name": "satelliteId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "commonName",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "busModel",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "manufacturerOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "ownerOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "operatorOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "missionType",
+          "type": "enum:missionTypes",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "massKg",
+          "type": "number",
+          "unit": "kg",
+          "required": false
+        },
+        {
+          "name": "dryMassKg",
+          "type": "number",
+          "unit": "kg",
+          "required": false
+        },
+        {
+          "name": "powerWatts",
+          "type": "number",
+          "unit": "W",
+          "required": false
+        },
+        {
+          "name": "designLifeYears",
+          "type": "number",
+          "unit": "years",
+          "required": false
+        },
+        {
+          "name": "operationalStatus",
+          "type": "enum:operationalStatuses",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "launchId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "currentTleId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "latestDecayPredictionId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "organization",
+      "name": "Organization",
+      "hyperclassId": "hc_identity_ownership",
+      "description": "",
+      "attributes": [
+        {
+          "name": "organizationId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "role",
+          "type": "array:string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "website",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "contact",
+          "type": "object",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "registry_record",
+      "name": "Registry Record",
+      "hyperclassId": "hc_identity_ownership",
+      "description": "",
+      "attributes": [
+        {
+          "name": "registryRecordId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "registryName",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "registryNumber",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "registrationCountry",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "registrationDateUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "legalOwnerOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "licenseReference",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "launch_mission",
+      "name": "Launch Mission",
+      "hyperclassId": "hc_launch_deployment",
+      "description": "",
+      "attributes": [
+        {
+          "name": "launchId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "missionName",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "launchDateTimeUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "launchWindowOpenUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "launchWindowCloseUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "launchSiteId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "launchVehicleId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "providerOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "outcome",
+          "type": "enum:launchOutcomes",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "targetOrbitRegime",
+          "type": "enum:orbitRegimes",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "payloadObjectIds",
+          "type": "array:string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "launch_vehicle",
+      "name": "Launch Vehicle",
+      "hyperclassId": "hc_launch_deployment",
+      "description": "",
+      "attributes": [
+        {
+          "name": "launchVehicleId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "vehicleName",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "family",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "variant",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "manufacturerOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "stages",
+          "type": "integer",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "payloadCapacityLeoKg",
+          "type": "number",
+          "unit": "kg",
+          "required": false
+        },
+        {
+          "name": "payloadCapacityGeoKg",
+          "type": "number",
+          "unit": "kg",
+          "required": false
+        },
+        {
+          "name": "reusable",
+          "type": "boolean",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "launch_site",
+      "name": "Launch Site",
+      "hyperclassId": "hc_launch_deployment",
+      "description": "",
+      "attributes": [
+        {
+          "name": "launchSiteId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "siteName",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "padName",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "latitudeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "longitudeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "elevationM",
+          "type": "number",
+          "unit": "m",
+          "required": false
+        },
+        {
+          "name": "operatorOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "deployment_event",
+      "name": "Deployment Event",
+      "hyperclassId": "hc_launch_deployment",
+      "description": "",
+      "attributes": [
+        {
+          "name": "deploymentEventId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "launchId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "deployedFromObjectId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "separationTimeUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "sequenceNumber",
+          "type": "integer",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "deploymentStatus",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "initialOrbitStateId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "orbit_state",
+      "name": "Orbit State",
+      "hyperclassId": "hc_orbit_tracking",
+      "description": "",
+      "attributes": [
+        {
+          "name": "orbitStateId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "epochUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": true
+        },
+        {
+          "name": "orbitRegime",
+          "type": "enum:orbitRegimes",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "semiMajorAxisKm",
+          "type": "number",
+          "unit": "km",
+          "required": false
+        },
+        {
+          "name": "perigeeAltitudeKm",
+          "type": "number",
+          "unit": "km",
+          "required": false
+        },
+        {
+          "name": "apogeeAltitudeKm",
+          "type": "number",
+          "unit": "km",
+          "required": false
+        },
+        {
+          "name": "inclinationDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "eccentricity",
+          "type": "number",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "raanDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "argumentOfPerigeeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "periodMinutes",
+          "type": "number",
+          "unit": "minutes",
+          "required": false
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "tle_set",
+      "name": "TLE Set",
+      "hyperclassId": "hc_orbit_tracking",
+      "description": "",
+      "attributes": [
+        {
+          "name": "tleId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "noradCatalogId",
+          "type": "integer",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "epochUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": true
+        },
+        {
+          "name": "line0",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "line1",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "line2",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "classification",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "internationalDesignator",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "elementSetNumber",
+          "type": "integer",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "revolutionNumberAtEpoch",
+          "type": "integer",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "inclinationDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "raanDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "eccentricity",
+          "type": "number",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "argumentOfPerigeeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "meanAnomalyDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "meanMotionRevPerDay",
+          "type": "number",
+          "unit": "rev/day",
+          "required": false
+        },
+        {
+          "name": "bstarDragTerm",
+          "type": "number",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "ephemerisType",
+          "type": "integer",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "checksumValid",
+          "type": "boolean",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "retrievedAtUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "ephemeris_state_vector",
+      "name": "Ephemeris State Vector",
+      "hyperclassId": "hc_orbit_tracking",
+      "description": "",
+      "attributes": [
+        {
+          "name": "ephemerisId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "epochUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": true
+        },
+        {
+          "name": "referenceFrame",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "positionKm",
+          "type": "array:number",
+          "unit": "km",
+          "required": true
+        },
+        {
+          "name": "velocityKmPerSec",
+          "type": "array:number",
+          "unit": "km/s",
+          "required": true
+        },
+        {
+          "name": "covariance",
+          "type": "array:number",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "tracking_sensor",
+      "name": "Tracking Sensor",
+      "hyperclassId": "hc_orbit_tracking",
+      "description": "",
+      "attributes": [
+        {
+          "name": "sensorId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "sensorType",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "ownerOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "latitudeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "longitudeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "altitudeM",
+          "type": "number",
+          "unit": "m",
+          "required": false
+        },
+        {
+          "name": "frequencyBand",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "tracking_observation",
+      "name": "Tracking Observation",
+      "hyperclassId": "hc_orbit_tracking",
+      "description": "",
+      "attributes": [
+        {
+          "name": "observationId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "sensorId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "observationTimeUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": true
+        },
+        {
+          "name": "measurementType",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "azimuthDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "elevationDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "rangeKm",
+          "type": "number",
+          "unit": "km",
+          "required": false
+        },
+        {
+          "name": "rangeRateKmPerSec",
+          "type": "number",
+          "unit": "km/s",
+          "required": false
+        },
+        {
+          "name": "uncertainty",
+          "type": "object",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "payload",
+      "name": "Payload",
+      "hyperclassId": "hc_mission_operations",
+      "description": "",
+      "attributes": [
+        {
+          "name": "payloadId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "satelliteId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "payloadName",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "payloadType",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "instrumentName",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "massKg",
+          "type": "number",
+          "unit": "kg",
+          "required": false
+        },
+        {
+          "name": "powerWatts",
+          "type": "number",
+          "unit": "W",
+          "required": false
+        },
+        {
+          "name": "dataProducts",
+          "type": "array:string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "ground_station",
+      "name": "Ground Station",
+      "hyperclassId": "hc_mission_operations",
+      "description": "",
+      "attributes": [
+        {
+          "name": "groundStationId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "operatorOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "latitudeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "longitudeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "altitudeM",
+          "type": "number",
+          "unit": "m",
+          "required": false
+        },
+        {
+          "name": "antennaDiameterM",
+          "type": "number",
+          "unit": "m",
+          "required": false
+        },
+        {
+          "name": "supportedBands",
+          "type": "array:string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "communication_channel",
+      "name": "Communication Channel",
+      "hyperclassId": "hc_mission_operations",
+      "description": "",
+      "attributes": [
+        {
+          "name": "channelId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "satelliteId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "groundStationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "band",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "uplinkFrequencyMHz",
+          "type": "number",
+          "unit": "MHz",
+          "required": false
+        },
+        {
+          "name": "downlinkFrequencyMHz",
+          "type": "number",
+          "unit": "MHz",
+          "required": false
+        },
+        {
+          "name": "bandwidthMHz",
+          "type": "number",
+          "unit": "MHz",
+          "required": false
+        },
+        {
+          "name": "modulation",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "encryption",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "maneuver",
+      "name": "Maneuver",
+      "hyperclassId": "hc_mission_operations",
+      "description": "",
+      "attributes": [
+        {
+          "name": "maneuverId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "maneuverType",
+          "type": "enum:maneuverTypes",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "plannedStartUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "executedStartUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "deltaVMSec",
+          "type": "number",
+          "unit": "m/s",
+          "required": false
+        },
+        {
+          "name": "propellantUsedKg",
+          "type": "number",
+          "unit": "kg",
+          "required": false
+        },
+        {
+          "name": "preManeuverOrbitStateId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "postManeuverOrbitStateId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "result",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "telemetry_snapshot",
+      "name": "Telemetry Snapshot",
+      "hyperclassId": "hc_mission_operations",
+      "description": "",
+      "attributes": [
+        {
+          "name": "telemetryId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "satelliteId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "timestampUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": true
+        },
+        {
+          "name": "batteryStateOfChargePct",
+          "type": "number",
+          "unit": "percent",
+          "required": false
+        },
+        {
+          "name": "busVoltageV",
+          "type": "number",
+          "unit": "V",
+          "required": false
+        },
+        {
+          "name": "temperatureC",
+          "type": "number",
+          "unit": "C",
+          "required": false
+        },
+        {
+          "name": "attitudeMode",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "healthStatus",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "conjunction_assessment",
+      "name": "Conjunction Assessment",
+      "hyperclassId": "hc_safety_events",
+      "description": "",
+      "attributes": [
+        {
+          "name": "conjunctionId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "primaryObjectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "secondaryObjectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "timeOfClosestApproachUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": true
+        },
+        {
+          "name": "missDistanceM",
+          "type": "number",
+          "unit": "m",
+          "required": false
+        },
+        {
+          "name": "radialMissM",
+          "type": "number",
+          "unit": "m",
+          "required": false
+        },
+        {
+          "name": "inTrackMissM",
+          "type": "number",
+          "unit": "m",
+          "required": false
+        },
+        {
+          "name": "crossTrackMissM",
+          "type": "number",
+          "unit": "m",
+          "required": false
+        },
+        {
+          "name": "probabilityOfCollision",
+          "type": "number",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "riskLevel",
+          "type": "enum:riskLevels",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "mitigationActionId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "anomaly_event",
+      "name": "Anomaly Event",
+      "hyperclassId": "hc_safety_events",
+      "description": "",
+      "attributes": [
+        {
+          "name": "anomalyId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "eventTimeUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": true
+        },
+        {
+          "name": "severity",
+          "type": "enum:riskLevels",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "subsystem",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "rootCause",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "resolutionStatus",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "fragmentation_event",
+      "name": "Fragmentation Event",
+      "hyperclassId": "hc_safety_events",
+      "description": "",
+      "attributes": [
+        {
+          "name": "fragmentationId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "parentObjectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "eventTimeUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "cause",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "estimatedFragmentCount",
+          "type": "integer",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "catalogedFragmentObjectIds",
+          "type": "array:string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "debrisCloudOrbitStateId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "collision_avoidance_action",
+      "name": "Collision Avoidance Action",
+      "hyperclassId": "hc_safety_events",
+      "description": "",
+      "attributes": [
+        {
+          "name": "mitigationActionId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "conjunctionId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "actionType",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "decisionTimeUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "maneuverId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "outcome",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "decay_prediction",
+      "name": "Decay Prediction",
+      "hyperclassId": "hc_decay_reentry",
+      "description": "",
+      "attributes": [
+        {
+          "name": "decayPredictionId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "predictionEpochUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": true
+        },
+        {
+          "name": "predictedDecayUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": true
+        },
+        {
+          "name": "uncertaintyHours",
+          "type": "number",
+          "unit": "hours",
+          "required": false
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "solarFluxModel",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "dragModel",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "confidence",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "reentry_event",
+      "name": "Reentry Event",
+      "hyperclassId": "hc_decay_reentry",
+      "description": "",
+      "attributes": [
+        {
+          "name": "reentryEventId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "reentryType",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "actualReentryUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "estimatedReentryUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "latitudeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "longitudeDeg",
+          "type": "number",
+          "unit": "deg",
+          "required": false
+        },
+        {
+          "name": "footprintDescription",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "survivingMassKg",
+          "type": "number",
+          "unit": "kg",
+          "required": false
+        },
+        {
+          "name": "casualtyRisk",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "confirmed",
+          "type": "boolean",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "disposal_plan",
+      "name": "Disposal Plan",
+      "hyperclassId": "hc_decay_reentry",
+      "description": "",
+      "attributes": [
+        {
+          "name": "disposalPlanId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "objectId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "plannedMethod",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "plannedDateUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "targetOrbitRegime",
+          "type": "enum:orbitRegimes",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "requiredDeltaVMSec",
+          "type": "number",
+          "unit": "m/s",
+          "required": false
+        },
+        {
+          "name": "complianceStandard",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "completionStatus",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    },
+    {
+      "id": "recovery_report",
+      "name": "Recovery Report",
+      "hyperclassId": "hc_decay_reentry",
+      "description": "",
+      "attributes": [
+        {
+          "name": "recoveryReportId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "reentryEventId",
+          "type": "string",
+          "unit": null,
+          "required": true
+        },
+        {
+          "name": "recovered",
+          "type": "boolean",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "recoveryDateUtc",
+          "type": "datetime",
+          "unit": "UTC",
+          "required": false
+        },
+        {
+          "name": "locationDescription",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "recoveredMassKg",
+          "type": "number",
+          "unit": "kg",
+          "required": false
+        },
+        {
+          "name": "hazardAssessment",
+          "type": "string",
+          "unit": null,
+          "required": false
+        },
+        {
+          "name": "reportingOrganizationId",
+          "type": "string",
+          "unit": null,
+          "required": false
+        }
+      ],
+      "visual": {
+        "hubPolicy": "use_visible_red_hub",
+        "attributeLayout": "fanout_from_red_hub"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel_org_owns_satellite",
+      "sourceClass": "organization",
+      "targetClass": "satellite",
+      "label": "owns",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_org_operates_satellite",
+      "sourceClass": "organization",
+      "targetClass": "satellite",
+      "label": "operates",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_org_manufactures_satellite",
+      "sourceClass": "organization",
+      "targetClass": "satellite",
+      "label": "manufactures",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_satellite_has_registry",
+      "sourceClass": "satellite",
+      "targetClass": "registry_record",
+      "label": "registered as",
+      "cardinality": "1:0..N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_launch_uses_vehicle",
+      "sourceClass": "launch_mission",
+      "targetClass": "launch_vehicle",
+      "label": "uses vehicle",
+      "cardinality": "N:1",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_launch_from_site",
+      "sourceClass": "launch_mission",
+      "targetClass": "launch_site",
+      "label": "launches from",
+      "cardinality": "N:1",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_launch_deploys_object",
+      "sourceClass": "launch_mission",
+      "targetClass": "space_object",
+      "label": "deploys",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_launch_creates_deployment",
+      "sourceClass": "launch_mission",
+      "targetClass": "deployment_event",
+      "label": "creates deployment",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_deployment_places_object",
+      "sourceClass": "deployment_event",
+      "targetClass": "space_object",
+      "label": "places object",
+      "cardinality": "N:1",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_object_has_orbit",
+      "sourceClass": "space_object",
+      "targetClass": "orbit_state",
+      "label": "has orbit state",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_object_has_tle",
+      "sourceClass": "space_object",
+      "targetClass": "tle_set",
+      "label": "has TLE",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_object_has_ephemeris",
+      "sourceClass": "space_object",
+      "targetClass": "ephemeris_state_vector",
+      "label": "has ephemeris",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_sensor_observes_object",
+      "sourceClass": "tracking_sensor",
+      "targetClass": "tracking_observation",
+      "label": "records observation",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_observation_tracks_object",
+      "sourceClass": "tracking_observation",
+      "targetClass": "space_object",
+      "label": "tracks",
+      "cardinality": "N:1",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_satellite_carries_payload",
+      "sourceClass": "satellite",
+      "targetClass": "payload",
+      "label": "carries",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_satellite_communicates_channel",
+      "sourceClass": "satellite",
+      "targetClass": "communication_channel",
+      "label": "uses channel",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_channel_uses_ground_station",
+      "sourceClass": "communication_channel",
+      "targetClass": "ground_station",
+      "label": "links to",
+      "cardinality": "N:1",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_object_performs_maneuver",
+      "sourceClass": "space_object",
+      "targetClass": "maneuver",
+      "label": "performs",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_satellite_emits_telemetry",
+      "sourceClass": "satellite",
+      "targetClass": "telemetry_snapshot",
+      "label": "emits telemetry",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_conjunction_primary",
+      "sourceClass": "space_object",
+      "targetClass": "conjunction_assessment",
+      "label": "primary in",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_conjunction_secondary",
+      "sourceClass": "space_object",
+      "targetClass": "conjunction_assessment",
+      "label": "secondary in",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_conjunction_mitigated_by",
+      "sourceClass": "conjunction_assessment",
+      "targetClass": "collision_avoidance_action",
+      "label": "mitigated by",
+      "cardinality": "0..1:1",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_action_executes_maneuver",
+      "sourceClass": "collision_avoidance_action",
+      "targetClass": "maneuver",
+      "label": "executes",
+      "cardinality": "0..1:1",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_object_has_anomaly",
+      "sourceClass": "space_object",
+      "targetClass": "anomaly_event",
+      "label": "has anomaly",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_object_fragments",
+      "sourceClass": "space_object",
+      "targetClass": "fragmentation_event",
+      "label": "fragments into",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_object_has_decay_prediction",
+      "sourceClass": "space_object",
+      "targetClass": "decay_prediction",
+      "label": "has decay prediction",
+      "cardinality": "1:N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_object_reenters",
+      "sourceClass": "space_object",
+      "targetClass": "reentry_event",
+      "label": "reenters as",
+      "cardinality": "1:0..1",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_object_has_disposal_plan",
+      "sourceClass": "space_object",
+      "targetClass": "disposal_plan",
+      "label": "has disposal plan",
+      "cardinality": "1:0..N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    },
+    {
+      "id": "rel_reentry_has_recovery",
+      "sourceClass": "reentry_event",
+      "targetClass": "recovery_report",
+      "label": "has recovery report",
+      "cardinality": "1:0..N",
+      "direction": "source_to_target",
+      "visual": {
+        "routing": "orthogonal_hub_to_hub",
+        "sourceHub": "best",
+        "targetHub": "best"
+      }
+    }
+  ],
+  "recordTemplates": {
+    "spaceObject": {
+      "objectId": "obj_000001",
+      "objectType": "satellite",
+      "objectName": "ExampleSat-1",
+      "noradCatalogId": null,
+      "internationalDesignator": null,
+      "cosparId": null,
+      "countryOfRegistry": null,
+      "currentStatus": "planned",
+      "decayStatus": "not_decayed",
+      "registryRecordIds": [],
+      "launchId": null,
+      "tleIds": [],
+      "orbitStateIds": [],
+      "eventIds": [],
+      "sourceProvenance": []
+    },
+    "satellite": {
+      "satelliteId": "sat_000001",
+      "objectId": "obj_000001",
+      "identity": {
+        "commonName": "ExampleSat-1",
+        "aliases": [],
+        "busModel": null,
+        "missionType": "earth_observation"
+      },
+      "organizations": {
+        "ownerOrganizationId": null,
+        "operatorOrganizationId": null,
+        "manufacturerOrganizationId": null,
+        "launchCustomerOrganizationId": null
+      },
+      "physical": {
+        "massKg": null,
+        "dryMassKg": null,
+        "dimensionsM": {
+          "x": null,
+          "y": null,
+          "z": null
+        },
+        "crossSectionAreaM2": null,
+        "powerWatts": null,
+        "propulsionType": null,
+        "attitudeControlType": null,
+        "designLifeYears": null
+      },
+      "mission": {
+        "primaryMission": null,
+        "secondaryMissions": [],
+        "serviceRegions": [],
+        "operationalStatus": "planned",
+        "commissioningDateUtc": null,
+        "endOfLifePlanId": null
+      },
+      "currentLinks": {
+        "currentTleId": null,
+        "latestOrbitStateId": null,
+        "latestDecayPredictionId": null,
+        "reentryEventId": null
+      }
+    },
+    "launchMission": {
+      "launchId": "launch_000001",
+      "missionName": "Example Launch",
+      "launchDateTimeUtc": null,
+      "launchSiteId": "site_000001",
+      "launchVehicleId": "lv_000001",
+      "providerOrganizationId": null,
+      "outcome": "planned",
+      "targetOrbit": {
+        "orbitRegime": "LEO",
+        "inclinationDeg": null,
+        "altitudeKm": null,
+        "localTimeOfDescendingNode": null
+      },
+      "payloadObjectIds": [
+        "obj_000001"
+      ],
+      "deploymentEventIds": []
+    },
+    "tleSet": {
+      "tleId": "tle_000001",
+      "objectId": "obj_000001",
+      "noradCatalogId": null,
+      "epochUtc": null,
+      "line0": "EXAMPLESAT-1",
+      "line1": "1 NNNNNU YYDDD.AAA  .00000000  00000-0  00000-0 0  0000",
+      "line2": "2 NNNNN  00.0000 000.0000 0000000 000.0000 000.0000 00.00000000",
+      "parsed": {
+        "classification": "U",
+        "internationalDesignator": null,
+        "inclinationDeg": null,
+        "raanDeg": null,
+        "eccentricity": null,
+        "argumentOfPerigeeDeg": null,
+        "meanAnomalyDeg": null,
+        "meanMotionRevPerDay": null,
+        "bstarDragTerm": null,
+        "ephemerisType": null,
+        "elementSetNumber": null,
+        "revolutionNumberAtEpoch": null,
+        "checksumValid": null
+      },
+      "source": null,
+      "retrievedAtUtc": null
+    },
+    "decayAndReentry": {
+      "decayPrediction": {
+        "decayPredictionId": "decay_pred_000001",
+        "objectId": "obj_000001",
+        "predictionEpochUtc": null,
+        "predictedDecayUtc": null,
+        "uncertaintyHours": null,
+        "source": null,
+        "confidence": "unknown"
+      },
+      "reentryEvent": {
+        "reentryEventId": "reentry_000001",
+        "objectId": "obj_000001",
+        "reentryType": "unknown",
+        "actualReentryUtc": null,
+        "estimatedReentryUtc": null,
+        "location": {
+          "latitudeDeg": null,
+          "longitudeDeg": null,
+          "footprintDescription": null
+        },
+        "survivingMassKg": null,
+        "casualtyRisk": "unknown",
+        "confirmed": false
+      }
+    },
+    "event": {
+      "eventId": "event_000001",
+      "eventType": "status_change",
+      "objectId": "obj_000001",
+      "eventTimeUtc": null,
+      "title": null,
+      "description": null,
+      "relatedRecordIds": [],
+      "sourceProvenance": []
+    }
+  },
+  "records": {
+    "spaceObjects": [],
+    "satellites": [],
+    "organizations": [],
+    "registryRecords": [],
+    "launchMissions": [],
+    "launchVehicles": [],
+    "launchSites": [],
+    "deploymentEvents": [],
+    "orbitStates": [],
+    "tleSets": [],
+    "ephemerisStateVectors": [],
+    "trackingSensors": [],
+    "trackingObservations": [],
+    "payloads": [],
+    "groundStations": [],
+    "communicationChannels": [],
+    "maneuvers": [],
+    "telemetrySnapshots": [],
+    "conjunctionAssessments": [],
+    "collisionAvoidanceActions": [],
+    "anomalyEvents": [],
+    "fragmentationEvents": [],
+    "decayPredictions": [],
+    "reentryEvents": [],
+    "disposalPlans": [],
+    "recoveryReports": [],
+    "events": []
+  }
+}
