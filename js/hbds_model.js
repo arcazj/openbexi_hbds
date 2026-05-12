@@ -17,6 +17,31 @@ const nextId=(p)=>`${p}_${Math.random().toString(36).slice(2,8)}`;
 export const getData=()=>data;
 export function normalizeData(inputData){
   const m=clone(inputData||{}); m.hypergraph=m.hypergraph||{};
+  if(Array.isArray(m.hypergraph.hyperclass) && (!Array.isArray(m.hypergraph.class) || m.hypergraph.class.length===0)){
+    const flattened=[];
+    for(const rawHyperclass of m.hypergraph.hyperclass){
+      const hyperclass={...rawHyperclass,type:'hyperclass',children:[]};
+      delete hyperclass.classes;
+      flattened.push(hyperclass);
+      const nestedClasses=Array.isArray(rawHyperclass?.classes)?rawHyperclass.classes:[];
+      for(const child of nestedClasses){
+        const childNode={...child,attributes:Array.isArray(child.attributes)?child.attributes:child.specific_attributes||[],parentClassId:hyperclass.id};
+        delete childNode.specific_attributes;
+        flattened.push(childNode);
+        hyperclass.children.push(childNode.id);
+      }
+    }
+    if(Array.isArray(m.hypergraph.class)) flattened.push(...m.hypergraph.class);
+    m.hypergraph.class=flattened;
+    m.hypergraph.link=Array.isArray(m.hypergraph.relationships)
+      ? m.hypergraph.relationships.map(rel=>({
+          ...rel,
+          sourceClassId:rel.sourceClassId??rel.source,
+          targetClassId:rel.targetClassId??rel.target,
+          name:rel.name||rel.label||''
+        }))
+      : (Array.isArray(m.hypergraph.link)?m.hypergraph.link:[]);
+  }
   m.hypergraph.class=Array.isArray(m.hypergraph.class)?m.hypergraph.class:[];
   m.hypergraph.link=Array.isArray(m.hypergraph.link)?m.hypergraph.link:[];
   const ids=new Set(); const byId=new Map();
