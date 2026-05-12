@@ -22,7 +22,7 @@
             <option value="models/transportation.json">transportation</option>
             <option value="models/transportation_links.json">transportation and links</option>
             <option value="models/human_and_car_links.json">human and car links</option>
-            <option value="bridge_road_links.json">bridge road links</option>
+            <option value="models/bridge_road_links.json">bridge road links</option>
             <option value="models/hyperclass_mail_Carrier.json">Hyperclass Mail Carrier</option>
             <option value="models/hyperclass_mail_Carrier_with_links.json">Hyperclass Mail Carrier with links</option>
             <option value="models/complex_hyperclass_mail_Carrier_with_links.json">Complex Hyperclass Mail Carrier with links</option>
@@ -87,7 +87,7 @@
     import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js';
     import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js';
     import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js';
-    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels } from './js/hbds_model.js';
+    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls } from './js/hbds_model.js';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
@@ -96,7 +96,6 @@
 
     /* ---------- MAIN APPLICATION ---------- */
     function init() {
-        bootstrapModelCatalog();
         scene = new THREE.Scene();
         scene.background = new THREE.Color('#f0f0f0');
 
@@ -165,21 +164,9 @@
 
         setupCanvasPanControls(getModelContext());
         initModelOverview(getModelContext());
-        loadAndRenderScene('human', getModelContext()).then(() => {
+        const initialModel = document.getElementById('model-select').value;
+        loadAndRenderScene(initialModel, getModelContext()).then(() => {
             fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-        });
-    }
-    async function bootstrapModelCatalog() {
-        const select = document.getElementById('model-select');
-        const models = await listAvailableModels();
-        if (!Array.isArray(models) || models.length === 0) return;
-        select.innerHTML = '';
-        models.forEach((model) => {
-            const option = document.createElement('option');
-            option.value = model.value;
-            option.textContent = model.label;
-            if (model.description) option.title = model.description;
-            select.appendChild(option);
         });
     }
 
