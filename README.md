@@ -1,113 +1,114 @@
-# Project Title: HDBS Graphic Simulator
+# HBDS Graphic Simulator
 
-## About The Project
-
-This project provides an interactive visualization tool for **Hypergraph-Based Data Structures (HBDS)**. Built entirely with web technologies, it allows users to load, view, and manipulate complex data models in both 2D and 3D space directly in the browser.
-
-### Live Demo
+An interactive browser-based simulator for **Hypergraph-Based Data Structures (HBDS)**. The app renders HBDS models as editable 2D diagrams and optional 3D scenes using Three.js.
 
 [Live Demo](https://arcazj.github.io/openbexi_hbds/index.html)
 
 ![HBDS Human class](pictures/HBDS_Model.JPG)
 
-### Key Features:
+## Features
 
-* **Interactive 2D & 3D Views**: Seamlessly switch between a 2D pannable layout and a full 3D orbital view.
-* **Dynamic Model Loading**: Load different HBDS models on-the-fly from external JSON files.
-* **Model Catalog Manifest**: Populate the model selector from `/models/models_manifest.json`.
-* **Direct Manipulation**: Drag and drop class entities to organize your diagram in 2D view.
-* **Fallback Gracefully**: Automatically loads a default model if a specified one isn't found.
-* **Multiple Layout Algorithms**: Optimize node placement with `grid`, `hierarchy`, or `radial` layout modes.
+* **2D and 3D views**: Switch between an editable 2D canvas and an orbitable 3D view.
+* **Sample model library**: Load predefined JSON models from the `models/` directory.
+* **Class, hyperclass, and link rendering**: Visualize nested hyperclasses, attributes, and relationships between classes.
+* **Direct manipulation**: Drag classes and hyperclasses in editable mode.
+* **Layout tools**: Fit models to the canvas and optimize placement with `grid`, `hierarchy`, or `radial` layout algorithms.
+* **Overview minimap**: Navigate larger models with the built-in model overview.
+* **Model export**: Save the current scene as a JSON file.
+* **Dynamic layout test page**: Use `test_dynamic_hbds_layout.html` to add, delete, link, and export model elements during development.
 
-### Built With
+## Built With
 
-* [![Three.js][Three.js]][Three.js-url]
-
----
+* [Three.js](https://threejs.org/)
+* Plain HTML, CSS, and JavaScript ES modules
 
 ## Getting Started
 
-To get a local copy up and running, follow these simple steps.
+The simulator runs entirely in the browser, but it must be served from a local web server. Opening `index.html` directly with the `file://` protocol will not work reliably because the app uses ES modules and loads JSON model files.
 
 ### Prerequisites
 
-This project requires no special installations or package managers like npm. You only need a modern web browser and a local web server to handle ES module imports.
+Use a modern browser and one of the following local server options:
 
-### Installation
+* Python 3
+* Any static file server that serves this repository root
 
-1.  **Clone the repo**
-    ```sh
-    git clone https://github.com/arcazj/openbexi_hbds.git
-    ```
-2.  **Navigate to the project directory**
-    ```sh
-    cd openbexi_hbds
-    ```
-3.  **Run a local web server**
-    Because the simulator uses ES Modules (`import`), you must serve the `index.html` file. You cannot open it directly via the `file://` protocol. A simple built-in Python server works perfectly:
+### Run Locally
 
-    * For **Python 3**:
-        ```sh
-        python3 -m http.server
-        ```
-    * For **Python 2**:
-        ```sh
-        python -m SimpleHTTPServer
-        ```
-4.  **Open the simulator**
-    Navigate to `http://localhost:8000` in your web browser.
+```sh
+git clone https://github.com/arcazj/openbexi_hbds.git
+cd openbexi_hbds
+python -m http.server 8000
+```
 
----
+Then open:
+
+* Main simulator: `http://localhost:8000/`
+* Dynamic layout test page: `http://localhost:8000/test_dynamic_hbds_layout.html`
+
+On systems where `python` points to Python 2, use:
+
+```sh
+python3 -m http.server 8000
+```
 
 ## Usage
 
-* **Select a Model**: Use the dropdown menu on the top right to load different HBDS models.
-* **Toggle 3D View**: Check the "Enable 3-D View" box to switch from the default 2D layout to a fully rotatable 3D view.
-* **Navigate the Scene**:
-    * **Pan**: Right-click and drag (or two-finger drag on a trackpad).
-    * **Zoom**: Use the mouse scroll wheel.
-    * **Rotate** (in 3D view only): Left-click and drag.
-* **Drag Classes**: In 2D view, left-click and drag any class rectangle to move it around the canvas.
+* **Select a model** from the control panel to load a sample from `models/`.
+* **Enable 3-D View** to rotate the scene with the mouse.
+* **Editable mode** controls whether model nodes can be dragged.
+* **Optimize Layout** recalculates node placement with the selected layout algorithm.
+* **Fit Model** recenters and zooms the camera around the current model.
+* **Save Model** downloads the current HBDS graph as JSON.
 
-To add new models, simply place your `.json` files in the `/models` directory and they will appear in the dropdown.
+Navigation:
 
----
+* **Pan**: Right-click and drag, or use a two-finger trackpad drag.
+* **Zoom**: Use the mouse wheel or trackpad scroll.
+* **Rotate**: In 3D mode, left-click and drag.
+* **Move nodes**: In 2D editable mode, left-click and drag a class or hyperclass.
+
+## Models
+
+Models live in the `models/` directory as JSON files. The main page currently lists its available models in `index.html`; the helper `models/models_manifest.json` is available for pages or tools that want manifest-based model discovery.
+
+When adding a new model for the main simulator:
+
+1. Add the JSON file under `models/`.
+2. Add an `<option>` for it in the `model-select` dropdown in `index.html`.
+3. Serve the app locally and verify the model loads.
+
+## Project Structure
+
+```text
+.
+|-- css/                         # Application styles
+|-- js/                          # HBDS rendering, model, layout, and link modules
+|-- models/                      # Sample HBDS JSON models
+|-- pictures/                    # README and project images
+|-- index.html                   # Main simulator
+|-- test_dynamic_hbds_layout.html # Development/test UI for dynamic edits
+`-- pom.xml                      # Java/Maven scaffold, not required for the browser app
+```
 
 ## Roadmap
 
-* [ ] Add support for hyperclasses.
-* [ ] Add support for defining relationships between hyperclasses and classes.
-* [ ] Implement a search or filter feature for attributes.
-* [ ] Allow real-time editing of class properties from the UI.
+* [ ] Expand hyperclass editing workflows.
+* [ ] Add richer relationship editing between hyperclasses and classes.
+* [ ] Implement search or filtering for classes and attributes.
+* [ ] Add model validation feedback in the UI.
+* [ ] Move the main model selector to manifest-based discovery.
 
-See the [open issues](https://github.com/arcazj/openbexi_hbds/issues) for a full list of proposed features (and known issues).
-
----
+See the [open issues](https://github.com/arcazj/openbexi_hbds/issues) for proposed features and known issues.
 
 ## Contributing
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
----
+1. Fork the project.
+2. Create a feature branch: `git checkout -b feature/my-change`.
+3. Commit your changes: `git commit -m "Describe the change"`.
+4. Push the branch: `git push origin feature/my-change`.
+5. Open a pull request.
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
----
-## Acknowledgments
-
-* [Three.js](https://threejs.org/)
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-[Three.js]: https://img.shields.io/badge/three.js-000000?style=for-the-badge&logo=three.js&logoColor=white
-[Three.js-url]: https://threejs.org/
+Distributed under the MIT License. See [LICENSE.txt](LICENSE.txt) for details.
