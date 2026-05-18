@@ -1,0 +1,5252 @@
+{
+  "generatedAt": "2026-05-16T21:42:03.775Z",
+  "models": [
+    "bridge_road_links.json",
+    "complex_HDBS_Structure.json",
+    "complex_hyperclass_mail_Carrier_with_links.json",
+    "human_and_car_and_more.json",
+    "human_and_car_links.json",
+    "human_and_car.json",
+    "human.json",
+    "hyperclass_mail_Carrier_with_links.json",
+    "hyperclass_mail_Carrier.json",
+    "hyperclasse_human_and_car.json",
+    "hyperclasse_link_human_and_car.json",
+    "opera_de Paris.json",
+    "satellite_world_compact_structure.json",
+    "satellite_world_complete_structure.json",
+    "TGV.json",
+    "transportation_links.json",
+    "transportation.json"
+  ],
+  "uniqueNames": 469,
+  "generated": 463,
+  "reused": 6,
+  "collisions": 5,
+  "icons": [
+    {
+      "name": "A du reseau cable de contact",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_cable_de_contact.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau cable porteur",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_cable_porteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau cables de signalisation",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_cables_de_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau circuit de voie",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_circuit_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau CPA",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_cpa.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau feeders",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_feeders.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau ferre",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_ferre.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau fibre optique",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_fibre_optique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau HT 25kV",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_ht_25kv.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau hydrographique",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_hydrographique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau routier",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_routier.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "A du reseau THT",
+      "types": [
+        "class"
+      ],
+      "icon": "a_du_reseau_tht.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Accessoire",
+      "types": [
+        "class"
+      ],
+      "icon": "accessoire.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "ACCIDENT",
+      "types": [
+        "class"
+      ],
+      "icon": "accident.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Achat",
+      "types": [
+        "class"
+      ],
+      "icon": "achat.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Active / Personal Mobility",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "active_personal_mobility.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json"
+      ]
+    },
+    {
+      "name": "Administration",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "administration.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Administration Financiere",
+      "types": [
+        "class"
+      ],
+      "icon": "administration_financiere.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "AGENT DE MAINTENANCE",
+      "types": [
+        "class"
+      ],
+      "icon": "agent_de_maintenance.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "AIGUILLAGE",
+      "types": [
+        "class"
+      ],
+      "icon": "aiguillage.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Air Transport",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "air_transport.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json"
+      ]
+    },
+    {
+      "name": "Airplane",
+      "types": [
+        "class"
+      ],
+      "icon": "airplane.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "Alimentation Generale",
+      "types": [
+        "class"
+      ],
+      "icon": "alimentation_generale.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Animal",
+      "types": [
+        "class"
+      ],
+      "icon": "animal.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Anomaly Event",
+      "types": [
+        "class"
+      ],
+      "icon": "anomaly_event.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Arbre",
+      "types": [
+        "class"
+      ],
+      "icon": "arbre.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Arc",
+      "types": [
+        "class"
+      ],
+      "icon": "arc.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "ARC",
+      "types": [
+        "class"
+      ],
+      "icon": "ARC.svg",
+      "source": "existing",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Armature",
+      "types": [
+        "class"
+      ],
+      "icon": "armature.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "ATTACHE FAST-CLIP",
+      "types": [
+        "class"
+      ],
+      "icon": "attache_fast_clip.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "AUTOTRANSFORMATEUR",
+      "types": [
+        "class"
+      ],
+      "icon": "autotransformateur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Balance",
+      "types": [
+        "class"
+      ],
+      "icon": "balance.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "BALISE ERTMS",
+      "types": [
+        "class"
+      ],
+      "icon": "balise_ertms.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Ballet",
+      "types": [
+        "class"
+      ],
+      "icon": "ballet.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "BASSIN HYDRAULIQUE",
+      "types": [
+        "class"
+      ],
+      "icon": "bassin_hydraulique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "BATIMENT 6 VOIES",
+      "types": [
+        "class"
+      ],
+      "icon": "batiment_6_voies.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "BATRACHODUC",
+      "types": [
+        "class"
+      ],
+      "icon": "batrachoduc.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Bicycle",
+      "types": [
+        "class"
+      ],
+      "icon": "bicycle.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "Billetterie",
+      "types": [
+        "class"
+      ],
+      "icon": "billetterie.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Boat",
+      "types": [
+        "class"
+      ],
+      "icon": "boat.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "BOGIE",
+      "types": [
+        "class"
+      ],
+      "icon": "bogie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Bridge",
+      "types": [
+        "class"
+      ],
+      "icon": "bridge.svg",
+      "source": "generated",
+      "files": [
+        "bridge_road_links.json"
+      ]
+    },
+    {
+      "name": "Bureau Direction",
+      "types": [
+        "class"
+      ],
+      "icon": "bureau_direction.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Bureau Personnel",
+      "types": [
+        "class"
+      ],
+      "icon": "bureau_personnel.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Bus",
+      "types": [
+        "class"
+      ],
+      "icon": "bus.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "BUSE HYDRAULIQUE",
+      "types": [
+        "class"
+      ],
+      "icon": "buse_hydraulique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "BUTTE DE TERRE",
+      "types": [
+        "class"
+      ],
+      "icon": "butte_de_terre.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Cable",
+      "types": [
+        "class"
+      ],
+      "icon": "cable.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CABLE DE CONTACT",
+      "types": [
+        "class"
+      ],
+      "icon": "cable_de_contact.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CABLE DE PROTECTION AERIENNE",
+      "types": [
+        "class"
+      ],
+      "icon": "cable_de_protection_aerienne.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CABLE PORTEUR",
+      "types": [
+        "class"
+      ],
+      "icon": "cable_porteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Caisse",
+      "types": [
+        "class"
+      ],
+      "icon": "caisse.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CAISSE",
+      "types": [
+        "class"
+      ],
+      "icon": "CAISSE.svg",
+      "source": "existing",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CALCULATEUR",
+      "types": [
+        "class"
+      ],
+      "icon": "calculateur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Camera",
+      "types": [
+        "class"
+      ],
+      "icon": "camera.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Camion",
+      "types": [
+        "class"
+      ],
+      "icon": "camion.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CANTON",
+      "types": [
+        "class"
+      ],
+      "icon": "canton.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CAPTEUR",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "capteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CAPTEUR DE CHUTE DE VEHICULE",
+      "types": [
+        "class"
+      ],
+      "icon": "capteur_de_chute_de_vehicule.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Capteur Effort",
+      "types": [
+        "class"
+      ],
+      "icon": "capteur_effort.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CAPTEUR OUVRAGE",
+      "types": [
+        "class"
+      ],
+      "icon": "capteur_ouvrage.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CAPTEUR RAME IRIS",
+      "types": [
+        "class"
+      ],
+      "icon": "capteur_rame_iris.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CAPTEUR VENT",
+      "types": [
+        "class"
+      ],
+      "icon": "capteur_vent.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Capteurs, situations et incidents",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "capteurs_situations_et_incidents.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Car",
+      "types": [
+        "class"
+      ],
+      "icon": "Car.png",
+      "source": "existing",
+      "files": [
+        "human_and_car_and_more.json",
+        "human_and_car_links.json",
+        "human_and_car.json",
+        "hyperclasse_human_and_car.json",
+        "hyperclasse_link_human_and_car.json",
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "CATENAIRE",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "catenaire.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CENTRAL SOUS-STATION",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "central_sous_station.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CENTRE NATIONAL DES OPERATIONS",
+      "types": [
+        "class"
+      ],
+      "icon": "centre_national_des_operations.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CHANTIER DE RETENTION",
+      "types": [
+        "class"
+      ],
+      "icon": "chantier_de_retention.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Chariot",
+      "types": [
+        "class"
+      ],
+      "icon": "chariot.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Chariot de transport",
+      "types": [
+        "class"
+      ],
+      "icon": "chariot_de_transport.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CHASSIS",
+      "types": [
+        "class"
+      ],
+      "icon": "chassis.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Chaufferie",
+      "types": [
+        "class"
+      ],
+      "icon": "chaufferie.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Chaussure",
+      "types": [
+        "class"
+      ],
+      "icon": "chaussure.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CHEF DE POSTE",
+      "types": [
+        "class"
+      ],
+      "icon": "chef_de_poste.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Cintre",
+      "types": [
+        "class"
+      ],
+      "icon": "cintre.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CIRCUIT DE VOIE",
+      "types": [
+        "class"
+      ],
+      "icon": "circuit_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau cable de contact",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_cable_de_contact.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau cable porteur",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_cable_porteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau cables de signalisation",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_cables_de_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau circuit de voie",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_circuit_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau CPA",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_cpa.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau feeders",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_feeders.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau ferre",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_ferre.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau fibre optique",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_fibre_optique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau HT 25kV",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_ht_25kv.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau hydrographique",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_hydrographique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau routier",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_routier.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "CL du reseau THT",
+      "types": [
+        "class"
+      ],
+      "icon": "cl_du_reseau_tht.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Cloison",
+      "types": [
+        "class"
+      ],
+      "icon": "cloison.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Collision Avoidance Action",
+      "types": [
+        "class"
+      ],
+      "icon": "collision_avoidance_action.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Commande",
+      "types": [
+        "class"
+      ],
+      "icon": "commande.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Commande, controle et signalisation",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "commande_controle_et_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Communication Channel",
+      "types": [
+        "class"
+      ],
+      "icon": "communication_channel.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "COMPOSANT LINEAIRE",
+      "types": [
+        "class"
+      ],
+      "icon": "composant_lineaire.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Comptabilite",
+      "types": [
+        "class"
+      ],
+      "icon": "comptabilite.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Concert",
+      "types": [
+        "class"
+      ],
+      "icon": "concert.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CONDUCTEUR",
+      "types": [
+        "class"
+      ],
+      "icon": "conducteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Conjunction Assessment",
+      "types": [
+        "class"
+      ],
+      "icon": "conjunction_assessment.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Console",
+      "types": [
+        "class"
+      ],
+      "icon": "console.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CONSTITUANTS DE LA RAME",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "constituants_de_la_rame.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Contact",
+      "types": [
+        "class"
+      ],
+      "icon": "contact.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CONTRAINTE",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "contrainte.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Contraintes, environnement et materiaux",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "contraintes_environnement_et_materiaux.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Controle Lineaire",
+      "types": [
+        "class"
+      ],
+      "icon": "controle_lineaire.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Controleur",
+      "types": [
+        "class"
+      ],
+      "icon": "controleur.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Costume",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "costume.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "COUCHE",
+      "types": [
+        "class"
+      ],
+      "icon": "couche.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Coulisses",
+      "types": [
+        "class"
+      ],
+      "icon": "coulisses.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "CTA",
+      "types": [
+        "class"
+      ],
+      "icon": "cta.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "D du reseau cable de contact",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_cable_de_contact.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau cable porteur",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_cable_porteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau cables de signalisation",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_cables_de_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau circuit de voie",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_circuit_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau CPA",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_cpa.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau feeders",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_feeders.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau ferre",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_ferre.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau fibre optique",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_fibre_optique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau HT 25kV",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_ht_25kv.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau hydrographique",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_hydrographique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau routier",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_routier.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "D du reseau THT",
+      "types": [
+        "class"
+      ],
+      "icon": "d_du_reseau_tht.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Decay / Reentry / Disposal",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "decay_reentry_disposal.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Decay Prediction",
+      "types": [
+        "class"
+      ],
+      "icon": "decay_prediction.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "DECISION",
+      "types": [
+        "class"
+      ],
+      "icon": "decision.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Decor",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "decor.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Delivery Attempt",
+      "types": [
+        "class"
+      ],
+      "icon": "delivery_attempt.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Delivery Events",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "delivery_events.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Delivery Exception",
+      "types": [
+        "class"
+      ],
+      "icon": "delivery_exception.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Delivery Vehicle",
+      "types": [
+        "class"
+      ],
+      "icon": "delivery_vehicle.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Deployment Event",
+      "types": [
+        "class"
+      ],
+      "icon": "deployment_event.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "DETECTEUR DE BOITE CHAUDE ELECTRONIQUE",
+      "types": [
+        "class"
+      ],
+      "icon": "detecteur_de_boite_chaude_electronique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Direction",
+      "types": [
+        "class"
+      ],
+      "icon": "direction.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "DISJONCTEUR",
+      "types": [
+        "class"
+      ],
+      "icon": "disjoncteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Dispatch Plan",
+      "types": [
+        "class"
+      ],
+      "icon": "dispatch_plan.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Disposal Plan",
+      "types": [
+        "class"
+      ],
+      "icon": "disposal_plan.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Domaine",
+      "types": [
+        "class"
+      ],
+      "icon": "domaine.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "DOMAINE",
+      "types": [
+        "class"
+      ],
+      "icon": "DOMAINE.svg",
+      "source": "existing",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "DRH",
+      "types": [
+        "class"
+      ],
+      "icon": "drh.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Dynamometre",
+      "types": [
+        "class"
+      ],
+      "icon": "dynamometre.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Eau",
+      "types": [
+        "class"
+      ],
+      "icon": "eau.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Element 3D",
+      "types": [
+        "class"
+      ],
+      "icon": "element_3d.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Element de Decoration",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "element_de_decoration.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Element plat",
+      "types": [
+        "class"
+      ],
+      "icon": "element_plat.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Energie Electrique",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "energie_electrique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Energie et traction",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "energie_et_traction.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Enterprise_System_A",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "enterprise_system_a.svg",
+      "source": "generated",
+      "files": [
+        "complex_HDBS_Structure.json"
+      ]
+    },
+    {
+      "name": "Entrees",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "entrees.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Ephemeris State Vector",
+      "types": [
+        "class"
+      ],
+      "icon": "ephemeris_state_vector.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Equipement",
+      "types": [
+        "class"
+      ],
+      "icon": "equipement.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Escalier",
+      "types": [
+        "class"
+      ],
+      "icon": "escalier.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Espace Accueil",
+      "types": [
+        "class"
+      ],
+      "icon": "espace_accueil.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Espace Commercial",
+      "types": [
+        "class"
+      ],
+      "icon": "espace_commercial.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Espace Reception",
+      "types": [
+        "class"
+      ],
+      "icon": "espace_reception.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Essai Climatisation",
+      "types": [
+        "class"
+      ],
+      "icon": "essai_climatisation.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Essai Electrique",
+      "types": [
+        "class"
+      ],
+      "icon": "essai_electrique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Essai Securite",
+      "types": [
+        "class"
+      ],
+      "icon": "essai_securite.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "ESSIEU",
+      "types": [
+        "class"
+      ],
+      "icon": "essieu.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "ETABLISSEMENT DE MAINTENANCE DU MATERIEL",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "etablissement_de_maintenance_du_materiel.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "ETCS",
+      "types": [
+        "class"
+      ],
+      "icon": "etcs.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Evacuation",
+      "types": [
+        "class"
+      ],
+      "icon": "evacuation.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "EXERCICE",
+      "types": [
+        "class"
+      ],
+      "icon": "exercice.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Exploitant",
+      "types": [
+        "class"
+      ],
+      "icon": "exploitant.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Express Mail",
+      "types": [
+        "class"
+      ],
+      "icon": "express_mail.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "External_Monitoring_Service",
+      "types": [
+        "class"
+      ],
+      "icon": "external_monitoring_service.svg",
+      "source": "generated",
+      "files": [
+        "complex_HDBS_Structure.json"
+      ]
+    },
+    {
+      "name": "Extracteur",
+      "types": [
+        "class"
+      ],
+      "icon": "extracteur.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Facilities",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "facilities.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "FEEDER",
+      "types": [
+        "class"
+      ],
+      "icon": "feeder.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Ferry",
+      "types": [
+        "class"
+      ],
+      "icon": "ferry.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "Fondation",
+      "types": [
+        "class"
+      ],
+      "icon": "fondation.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Footbridge",
+      "types": [
+        "class"
+      ],
+      "icon": "footbridge.svg",
+      "source": "generated",
+      "files": [
+        "bridge_road_links.json"
+      ]
+    },
+    {
+      "name": "Fosse Orchestre",
+      "types": [
+        "class"
+      ],
+      "icon": "fosse_orchestre.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Fournisseur",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "fournisseur.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Fragmentation Event",
+      "types": [
+        "class"
+      ],
+      "icon": "fragmentation_event.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "FREIN ELECTRIQUE",
+      "types": [
+        "class"
+      ],
+      "icon": "frein_electrique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "FREIN ELECTRO-PNEUMATIQUE",
+      "types": [
+        "class"
+      ],
+      "icon": "frein_electro_pneumatique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "GARE",
+      "types": [
+        "class"
+      ],
+      "icon": "gare.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Gradateur",
+      "types": [
+        "class"
+      ],
+      "icon": "gradateur.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Gril technique",
+      "types": [
+        "class"
+      ],
+      "icon": "gril_technique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Ground Station",
+      "types": [
+        "class"
+      ],
+      "icon": "ground_station.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "GSM/R",
+      "types": [
+        "class"
+      ],
+      "icon": "gsm_r.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Habit",
+      "types": [
+        "class"
+      ],
+      "icon": "habit.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Helicopter",
+      "types": [
+        "class"
+      ],
+      "icon": "helicopter.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "Human",
+      "types": [
+        "class",
+        "hyperclass"
+      ],
+      "icon": "human.svg",
+      "source": "generated",
+      "files": [
+        "human_and_car_and_more.json",
+        "human_and_car_links.json",
+        "human_and_car.json",
+        "human.json",
+        "hyperclasse_human_and_car.json",
+        "hyperclasse_link_human_and_car.json"
+      ]
+    },
+    {
+      "name": "Identity / Ownership",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "identity_ownership.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "IHM",
+      "types": [
+        "class"
+      ],
+      "icon": "ihm.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "IHM CSS",
+      "types": [
+        "class"
+      ],
+      "icon": "ihm_css.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "INCIDENT",
+      "types": [
+        "class"
+      ],
+      "icon": "incident.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Infrastructure ferroviaire",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "infrastructure_ferroviaire.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "INSTALLATION",
+      "types": [
+        "class"
+      ],
+      "icon": "installation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Instance Publique",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "instance_publique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Instrument de Mesure",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "instrument_de_mesure.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Isolation Incendie",
+      "types": [
+        "class"
+      ],
+      "icon": "isolation_incendie.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "La LGV Est Europeenne - Structure HBDS",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "la_lgv_est_europeenne_structure_hbds.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Launch / Deployment",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "launch_deployment.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Launch Mission",
+      "types": [
+        "class"
+      ],
+      "icon": "launch_mission.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Launch Site",
+      "types": [
+        "class"
+      ],
+      "icon": "launch_site.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Launch Vehicle",
+      "types": [
+        "class"
+      ],
+      "icon": "launch_vehicle.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Letter",
+      "types": [
+        "class"
+      ],
+      "icon": "letter.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json",
+        "hyperclass_mail_Carrier_with_links.json",
+        "hyperclass_mail_Carrier.json"
+      ]
+    },
+    {
+      "name": "Lettre",
+      "types": [
+        "class"
+      ],
+      "icon": "lettre.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Ligne Grande Vitesse",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "ligne_grande_vitesse.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Load Manifest",
+      "types": [
+        "class"
+      ],
+      "icon": "load_manifest.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "LONG RAIL SOUDE",
+      "types": [
+        "class"
+      ],
+      "icon": "long_rail_soude.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Luminaire",
+      "types": [
+        "class"
+      ],
+      "icon": "luminaire.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Lustre",
+      "types": [
+        "class"
+      ],
+      "icon": "lustre.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "MACHINE A LAVER",
+      "types": [
+        "class"
+      ],
+      "icon": "machine_a_laver.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Machinerie de Scene",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "machinerie_de_scene.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Machinerie Thermique",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "machinerie_thermique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Mail",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "mail.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json",
+        "hyperclass_mail_Carrier_with_links.json",
+        "hyperclass_mail_Carrier.json"
+      ]
+    },
+    {
+      "name": "Mail Carrier",
+      "types": [
+        "class"
+      ],
+      "icon": "mail_carrier.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json",
+        "hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "MAINTENANCE DES VOIES",
+      "types": [
+        "class"
+      ],
+      "icon": "maintenance_des_voies.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Maintenance et etablissement materiel",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "maintenance_et_etablissement_materiel.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Maintenance Zone Administrative",
+      "types": [
+        "class"
+      ],
+      "icon": "maintenance_zone_administrative.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Maintenance Zone Publique",
+      "types": [
+        "class"
+      ],
+      "icon": "maintenance_zone_publique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Maintenance Zone Scene",
+      "types": [
+        "class"
+      ],
+      "icon": "maintenance_zone_scene.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Man",
+      "types": [
+        "class"
+      ],
+      "icon": "man.svg",
+      "source": "generated",
+      "files": [
+        "hyperclasse_human_and_car.json",
+        "hyperclasse_link_human_and_car.json"
+      ]
+    },
+    {
+      "name": "Maneuver",
+      "types": [
+        "class"
+      ],
+      "icon": "maneuver.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "MAT RADIO",
+      "types": [
+        "class"
+      ],
+      "icon": "mat_radio.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MATERIAUX",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "materiaux.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MATERIAUX DE CARRIERE",
+      "types": [
+        "class"
+      ],
+      "icon": "materiaux_de_carriere.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MATERIAUX EXTRAITS SUR PLACE",
+      "types": [
+        "class"
+      ],
+      "icon": "materiaux_extraits_sur_place.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Materiel de Securite",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "materiel_de_securite.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Matiere",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "matiere.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Matrice Veille Realisations",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "matrice_veille_realisations.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Metal",
+      "types": [
+        "class"
+      ],
+      "icon": "metal.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Mineral",
+      "types": [
+        "class"
+      ],
+      "icon": "mineral.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Ministere",
+      "types": [
+        "class"
+      ],
+      "icon": "ministere.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Mission / Operations",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "mission_operations.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "MOBILE",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "mobile.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Mobile et constituants de la rame",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "mobile_et_constituants_de_la_rame.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Mobilier Controle Climatisation",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "mobilier_controle_climatisation.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Mobilier Controle Studio",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "mobilier_controle_studio.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "MOBILIER DE POINT ANNEXE",
+      "types": [
+        "class"
+      ],
+      "icon": "mobilier_de_point_annexe.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MOBILIER DE SOMMET",
+      "types": [
+        "class"
+      ],
+      "icon": "mobilier_de_sommet.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Mobilier Gestion Son Lumiere",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "mobilier_gestion_son_lumiere.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Mobilier Manipulation Decors",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "mobilier_manipulation_decors.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Mobilier Support Lumiere",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "mobilier_support_lumiere.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Modele HBDS generique",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "modele_hbds_generique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Monitoring",
+      "types": [
+        "class"
+      ],
+      "icon": "monitoring.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Moteur",
+      "types": [
+        "class"
+      ],
+      "icon": "moteur.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Motorcycle",
+      "types": [
+        "class"
+      ],
+      "icon": "motorcycle.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "MOTRICE",
+      "types": [
+        "class"
+      ],
+      "icon": "motrice.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau cable de contact",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_cable_de_contact.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau cable porteur",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_cable_porteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau cables de signalisation",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_cables_de_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau circuit de voie",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_circuit_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau CPA",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_cpa.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau feeders",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_feeders.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau ferre",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_ferre.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau fibre optique",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_fibre_optique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau HT 25kV",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_ht_25kv.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau hydrographique",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_hydrographique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau routier",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_routier.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MPA du reseau THT",
+      "types": [
+        "class"
+      ],
+      "icon": "mpa_du_reseau_tht.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MS du reseau cables de signalisation",
+      "types": [
+        "class"
+      ],
+      "icon": "ms_du_reseau_cables_de_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MS du reseau circuit de voie",
+      "types": [
+        "class"
+      ],
+      "icon": "ms_du_reseau_circuit_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MS du reseau ferre",
+      "types": [
+        "class"
+      ],
+      "icon": "ms_du_reseau_ferre.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MS du reseau fibre optique",
+      "types": [
+        "class"
+      ],
+      "icon": "ms_du_reseau_fibre_optique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MS du reseau HT 25kV",
+      "types": [
+        "class"
+      ],
+      "icon": "ms_du_reseau_ht_25kv.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MS du reseau hydrographique",
+      "types": [
+        "class"
+      ],
+      "icon": "ms_du_reseau_hydrographique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MS du reseau routier",
+      "types": [
+        "class"
+      ],
+      "icon": "ms_du_reseau_routier.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MS du reseau THT",
+      "types": [
+        "class"
+      ],
+      "icon": "ms_du_reseau_tht.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "MUR ANTI-BRUIT",
+      "types": [
+        "class"
+      ],
+      "icon": "mur_anti_bruit.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "NETTOYAGE EXTERIEUR",
+      "types": [
+        "class"
+      ],
+      "icon": "nettoyage_exterieur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "NETTOYAGE INTERIEUR",
+      "types": [
+        "class"
+      ],
+      "icon": "nettoyage_interieur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "NORME DE TRACE",
+      "types": [
+        "class"
+      ],
+      "icon": "norme_de_trace.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Notification",
+      "types": [
+        "class"
+      ],
+      "icon": "notification.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Opera",
+      "types": [
+        "class"
+      ],
+      "icon": "opera.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "OPERATEUR",
+      "types": [
+        "class"
+      ],
+      "icon": "operateur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Orbit / TLE / Tracking",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "orbit_tle_tracking.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json"
+      ]
+    },
+    {
+      "name": "Orbit / Tracking",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "orbit_tracking.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Orbit State",
+      "types": [
+        "class"
+      ],
+      "icon": "orbit_state.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Ordinateur",
+      "types": [
+        "class"
+      ],
+      "icon": "ordinateur.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Organigramme",
+      "types": [
+        "class"
+      ],
+      "icon": "organigramme.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Organization",
+      "types": [
+        "class"
+      ],
+      "icon": "organization.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "OUVRAGE",
+      "types": [
+        "class"
+      ],
+      "icon": "ouvrage.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "OUVRAGE CONTRE LA POLLUTION SONORE",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "ouvrage_contre_la_pollution_sonore.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "OUVRAGE D'ART",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "ouvrage_d_art.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "OUVRAGE HYDRAULIQUE",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "ouvrage_hydraulique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "OUVRAGE POUR L'ENVIRONNEMENT",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "ouvrage_pour_l_environnement.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Ouvrages et ouvrages d'art",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "ouvrages_et_ouvrages_d_art.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau cable de contact",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_cable_de_contact.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau cable porteur",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_cable_porteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau cables de signalisation",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_cables_de_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau circuit de voie",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_circuit_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau CPA",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_cpa.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau feeders",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_feeders.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau ferre",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_ferre.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau fibre optique",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_fibre_optique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau HT 25kV",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_ht_25kv.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau hydrographique",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_hydrographique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau routier",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_routier.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PA du reseau THT",
+      "types": [
+        "class"
+      ],
+      "icon": "pa_du_reseau_tht.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Package",
+      "types": [
+        "class"
+      ],
+      "icon": "package.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json",
+        "hyperclass_mail_Carrier_with_links.json",
+        "hyperclass_mail_Carrier.json"
+      ]
+    },
+    {
+      "name": "Palette",
+      "types": [
+        "class"
+      ],
+      "icon": "palette.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "PANNE",
+      "types": [
+        "class"
+      ],
+      "icon": "panne.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PANTOGRAPHE",
+      "types": [
+        "class"
+      ],
+      "icon": "pantographe.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PARC NATUREL REGIONAL",
+      "types": [
+        "class"
+      ],
+      "icon": "parc_naturel_regional.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Parcel Locker",
+      "types": [
+        "class"
+      ],
+      "icon": "parcel_locker.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "PASSAGE GRANDE FAUNE",
+      "types": [
+        "class"
+      ],
+      "icon": "passage_grande_faune.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "PASSAGE PETITE FAUNE",
+      "types": [
+        "class"
+      ],
+      "icon": "passage_petite_faune.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Passage technique",
+      "types": [
+        "class"
+      ],
+      "icon": "passage_technique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Payload",
+      "types": [
+        "class"
+      ],
+      "icon": "payload.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Perche",
+      "types": [
+        "class"
+      ],
+      "icon": "perche.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Perruque",
+      "types": [
+        "class"
+      ],
+      "icon": "perruque.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Person",
+      "types": [
+        "class"
+      ],
+      "icon": "person.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json",
+        "hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "PERSONNEL CSS",
+      "types": [
+        "class"
+      ],
+      "icon": "personnel_css.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Plancher",
+      "types": [
+        "class"
+      ],
+      "icon": "plancher.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "PLATE-FORME",
+      "types": [
+        "class"
+      ],
+      "icon": "plate_forme.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Plateau",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "plateau.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "POINT ANNEXE",
+      "types": [
+        "class"
+      ],
+      "icon": "point_annexe.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Point Annexes",
+      "types": [
+        "class"
+      ],
+      "icon": "point_annexes.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Points de Controle",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "points_de_controle.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Pompe",
+      "types": [
+        "class"
+      ],
+      "icon": "pompe.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Pont",
+      "types": [
+        "class"
+      ],
+      "icon": "pont.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "PONT",
+      "types": [
+        "class"
+      ],
+      "icon": "PONT.svg",
+      "source": "existing",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Porte",
+      "types": [
+        "class"
+      ],
+      "icon": "porte.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Post Office",
+      "types": [
+        "class"
+      ],
+      "icon": "post_office.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Postal Operations",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "postal_operations.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "POSTE DE CHANGEMENT DE VOIE",
+      "types": [
+        "class"
+      ],
+      "icon": "poste_de_changement_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "POSTE DE CHANGEMENT DE VOIE AVEC EVITEMENT",
+      "types": [
+        "class"
+      ],
+      "icon": "poste_de_changement_de_voie_avec_evitement.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "POSTE DE COMMANDE A DISTANCE",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "poste_de_commande_a_distance.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "POSTE DE SIGNALISATION",
+      "types": [
+        "class"
+      ],
+      "icon": "poste_de_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Poteau",
+      "types": [
+        "class"
+      ],
+      "icon": "poteau.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "POTEAU CATENAIRE",
+      "types": [
+        "class"
+      ],
+      "icon": "poteau_catenaire.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Pret",
+      "types": [
+        "class"
+      ],
+      "icon": "pret.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Projecteur",
+      "types": [
+        "class"
+      ],
+      "icon": "projecteur.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Proof of Delivery",
+      "types": [
+        "class"
+      ],
+      "icon": "proof_of_delivery.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Public",
+      "types": [
+        "class"
+      ],
+      "icon": "public.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Rail de guidage",
+      "types": [
+        "class"
+      ],
+      "icon": "rail_de_guidage.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Rail Transport",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "rail_transport.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json"
+      ]
+    },
+    {
+      "name": "RAME",
+      "types": [
+        "class"
+      ],
+      "icon": "rame.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "RAME DE MAINTENANCE",
+      "types": [
+        "class"
+      ],
+      "icon": "rame_de_maintenance.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "RAME ICE",
+      "types": [
+        "class"
+      ],
+      "icon": "rame_ice.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "RAME TGV",
+      "types": [
+        "class"
+      ],
+      "icon": "rame_tgv.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Rayonnage",
+      "types": [
+        "class"
+      ],
+      "icon": "rayonnage.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Realisation Administration",
+      "types": [
+        "class"
+      ],
+      "icon": "realisation_administration.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Realisation Salle",
+      "types": [
+        "class"
+      ],
+      "icon": "realisation_salle.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Realisation Scene",
+      "types": [
+        "class"
+      ],
+      "icon": "realisation_scene.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Recovery Report",
+      "types": [
+        "class"
+      ],
+      "icon": "recovery_report.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Reentry Event",
+      "types": [
+        "class"
+      ],
+      "icon": "reentry_event.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Regie Audio",
+      "types": [
+        "class"
+      ],
+      "icon": "regie_audio.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Registered Mail",
+      "types": [
+        "class"
+      ],
+      "icon": "registered_mail.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Registry Record",
+      "types": [
+        "class"
+      ],
+      "icon": "registry_record.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "REMBLAI",
+      "types": [
+        "class"
+      ],
+      "icon": "remblai.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "REMPLACEMENT DE PIECE",
+      "types": [
+        "class"
+      ],
+      "icon": "remplacement_de_piece.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "reseau cable de contact",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_cable_de_contact.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "reseau cable porteur",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_cable_porteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "reseau cables de signalisation",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_cables_de_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "reseau circuit de voie",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_circuit_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Reseau Climatisation Scene",
+      "types": [
+        "class"
+      ],
+      "icon": "reseau_climatisation_scene.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "reseau CPA",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_cpa.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Reseau DMX",
+      "types": [
+        "class"
+      ],
+      "icon": "reseau_dmx.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Reseau Electrique Scene",
+      "types": [
+        "class"
+      ],
+      "icon": "reseau_electrique_scene.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "reseau feeders",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_feeders.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "reseau ferre",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_ferre.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "reseau fibre optique",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_fibre_optique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Reseau Fluide",
+      "types": [
+        "class"
+      ],
+      "icon": "reseau_fluide.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "reseau HT 25kV",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_ht_25kv.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "reseau hydrographique",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_hydrographique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "reseau routier",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_routier.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Reseau Securite Scene",
+      "types": [
+        "class"
+      ],
+      "icon": "reseau_securite_scene.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "reseau THT",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseau_tht.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Reseaux lineaires et techniques",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "reseaux_lineaires_et_techniques.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Reserve",
+      "types": [
+        "class"
+      ],
+      "icon": "reserve.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "River",
+      "types": [
+        "class"
+      ],
+      "icon": "river.svg",
+      "source": "generated",
+      "files": [
+        "bridge_road_links.json"
+      ]
+    },
+    {
+      "name": "Road",
+      "types": [
+        "class"
+      ],
+      "icon": "road.svg",
+      "source": "generated",
+      "files": [
+        "bridge_road_links.json"
+      ]
+    },
+    {
+      "name": "Road Transport",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "road_transport.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json"
+      ]
+    },
+    {
+      "name": "ROUE",
+      "types": [
+        "class"
+      ],
+      "icon": "roue.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Route",
+      "types": [
+        "class"
+      ],
+      "icon": "route.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "S du reseau cable de contact",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_cable_de_contact.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau cable porteur",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_cable_porteur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau cables de signalisation",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_cables_de_signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau circuit de voie",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_circuit_de_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau CPA",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_cpa.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau feeders",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_feeders.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau ferre",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_ferre.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau fibre optique",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_fibre_optique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau HT 25kV",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_ht_25kv.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau hydrographique",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_hydrographique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau routier",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_routier.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "S du reseau THT",
+      "types": [
+        "class"
+      ],
+      "icon": "s_du_reseau_tht.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Safety / Events / Risk",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "safety_events_risk.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Salle",
+      "types": [
+        "class"
+      ],
+      "icon": "salle.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Sas",
+      "types": [
+        "class"
+      ],
+      "icon": "sas.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Satellite",
+      "types": [
+        "class"
+      ],
+      "icon": "satellite.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "SAUT DE MOUTON",
+      "types": [
+        "class"
+      ],
+      "icon": "saut_de_mouton.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Scene",
+      "types": [
+        "class"
+      ],
+      "icon": "scene.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Secretariat",
+      "types": [
+        "class"
+      ],
+      "icon": "secretariat.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Segment",
+      "types": [
+        "class"
+      ],
+      "icon": "segment.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Service",
+      "types": [
+        "class"
+      ],
+      "icon": "service.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "SIGNALISATION",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "signalisation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SIGNALISATION CABINE",
+      "types": [
+        "class"
+      ],
+      "icon": "signalisation_cabine.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SIGNALISATION VOIE",
+      "types": [
+        "class"
+      ],
+      "icon": "signalisation_voie.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SITUATION",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "situation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Skateboard",
+      "types": [
+        "class"
+      ],
+      "icon": "skateboard.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "Sommet",
+      "types": [
+        "class"
+      ],
+      "icon": "sommet.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "SOMMET",
+      "types": [
+        "class"
+      ],
+      "icon": "SOMMET.svg",
+      "source": "existing",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Sorting Center",
+      "types": [
+        "class"
+      ],
+      "icon": "sorting_center.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Sorting Task",
+      "types": [
+        "class"
+      ],
+      "icon": "sorting_task.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "SOUS-STATION",
+      "types": [
+        "class"
+      ],
+      "icon": "sous_station.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Space Object",
+      "types": [
+        "class"
+      ],
+      "icon": "space_object.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Space Transport",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "space_transport.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json"
+      ]
+    },
+    {
+      "name": "Spaceship",
+      "types": [
+        "class"
+      ],
+      "icon": "spaceship.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "Spectacle",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "spectacle.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "STATION ELECTRIQUE",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "station_electrique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Stock",
+      "types": [
+        "class"
+      ],
+      "icon": "stock.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Structure HBDS Palais Garnier",
+      "types": [
+        "class"
+      ],
+      "icon": "structure_hbds_palais_garnier.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Subway",
+      "types": [
+        "class"
+      ],
+      "icon": "subway.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "SUPERPOSITION FER-FER",
+      "types": [
+        "class"
+      ],
+      "icon": "superposition_fer_fer.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SUPERPOSITION FER-HYDRO",
+      "types": [
+        "class"
+      ],
+      "icon": "superposition_fer_hydro.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SUPERPOSITION FER-ROUTIER",
+      "types": [
+        "class"
+      ],
+      "icon": "superposition_fer_routier.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SUPERPOSITIONS",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "superpositions.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Superstructure",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "superstructure.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Support",
+      "types": [
+        "class"
+      ],
+      "icon": "support.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Surveillance",
+      "types": [
+        "class"
+      ],
+      "icon": "surveillance.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "SURVEILLANCE GENERALE",
+      "types": [
+        "class"
+      ],
+      "icon": "surveillance_generale.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Synthetique",
+      "types": [
+        "class"
+      ],
+      "icon": "synthetique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "SYSTEME DE FREINAGE",
+      "types": [
+        "class"
+      ],
+      "icon": "systeme_de_freinage.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SYSTEME ERTMS",
+      "types": [
+        "class"
+      ],
+      "icon": "systeme_ertms.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SYSTEME EUROCAB",
+      "types": [
+        "class"
+      ],
+      "icon": "systeme_eurocab.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SYSTEME INFORMATIQUE MAINTENANCE",
+      "types": [
+        "class"
+      ],
+      "icon": "systeme_informatique_maintenance.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "SYSTEME-EXPERT",
+      "types": [
+        "class"
+      ],
+      "icon": "systeme_expert.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "TABLEAU DE CONTROLE OPTIQUE",
+      "types": [
+        "class"
+      ],
+      "icon": "tableau_de_controle_optique.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Tableau Electrique",
+      "types": [
+        "class"
+      ],
+      "icon": "tableau_electrique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "TACHE DE MAINTENANCE",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "tache_de_maintenance.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "TALUS",
+      "types": [
+        "class"
+      ],
+      "icon": "talus.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Technique",
+      "types": [
+        "class"
+      ],
+      "icon": "technique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Telemetry Snapshot",
+      "types": [
+        "class"
+      ],
+      "icon": "telemetry_snapshot.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "TELEPHONE D'ALARME",
+      "types": [
+        "class"
+      ],
+      "icon": "telephone_d_alarme.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "TGV POS",
+      "types": [
+        "class"
+      ],
+      "icon": "tgv_pos.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "TGV RESEAU",
+      "types": [
+        "class"
+      ],
+      "icon": "tgv_reseau.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "TLE Set",
+      "types": [
+        "class"
+      ],
+      "icon": "tle_set.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Town",
+      "types": [
+        "class"
+      ],
+      "icon": "town.svg",
+      "source": "generated",
+      "files": [
+        "human_and_car_and_more.json"
+      ]
+    },
+    {
+      "name": "Tracking Event",
+      "types": [
+        "class"
+      ],
+      "icon": "tracking_event.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "Tracking Observation",
+      "types": [
+        "class"
+      ],
+      "icon": "tracking_observation.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Tracking Sensor",
+      "types": [
+        "class"
+      ],
+      "icon": "tracking_sensor.svg",
+      "source": "generated",
+      "files": [
+        "satellite_world_compact_structure.json",
+        "satellite_world_complete_structure.json"
+      ]
+    },
+    {
+      "name": "Train",
+      "types": [
+        "class"
+      ],
+      "icon": "train.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "Tram",
+      "types": [
+        "class"
+      ],
+      "icon": "tram.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json",
+        "transportation.json"
+      ]
+    },
+    {
+      "name": "TRANCHEE COUVERTE",
+      "types": [
+        "class"
+      ],
+      "icon": "tranchee_couverte.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "TRANSFORMATEUR",
+      "types": [
+        "class"
+      ],
+      "icon": "transformateur.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "TRANSMISSION VOIE MACHINE",
+      "types": [
+        "class"
+      ],
+      "icon": "transmission_voie_machine.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Transportation",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "transportation.svg",
+      "source": "generated",
+      "files": [
+        "complex_hyperclass_mail_Carrier_with_links.json"
+      ]
+    },
+    {
+      "name": "TRAVAUX",
+      "types": [
+        "class"
+      ],
+      "icon": "travaux.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "TRAVERSE",
+      "types": [
+        "class"
+      ],
+      "icon": "traverse.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Treuil",
+      "types": [
+        "class"
+      ],
+      "icon": "treuil.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Types de rames",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "types_de_rames.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "UNITE DE CONTROLE",
+      "types": [
+        "class"
+      ],
+      "icon": "unite_de_controle.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "UNITE DE SIMULATION",
+      "types": [
+        "class"
+      ],
+      "icon": "unite_de_simulation.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Vehicule",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "vehicule.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Veille Point Annexes",
+      "types": [
+        "class"
+      ],
+      "icon": "veille_point_annexes.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Veille Segment",
+      "types": [
+        "class"
+      ],
+      "icon": "veille_segment.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Ventilation",
+      "types": [
+        "class"
+      ],
+      "icon": "ventilation.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "VIADUC",
+      "types": [
+        "class"
+      ],
+      "icon": "viaduc.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "VIDANGE TOILETTES",
+      "types": [
+        "class"
+      ],
+      "icon": "vidange_toilettes.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Voie ferree",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "voie_ferree.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Voiture",
+      "types": [
+        "class"
+      ],
+      "icon": "voiture.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "VOITURE PASSAGER",
+      "types": [
+        "class"
+      ],
+      "icon": "voiture_passager.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Volume",
+      "types": [
+        "class"
+      ],
+      "icon": "volume.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Water Transport",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "water_transport.svg",
+      "source": "generated",
+      "files": [
+        "transportation_links.json"
+      ]
+    },
+    {
+      "name": "Woman",
+      "types": [
+        "class"
+      ],
+      "icon": "woman.svg",
+      "source": "generated",
+      "files": [
+        "hyperclasse_human_and_car.json",
+        "hyperclasse_link_human_and_car.json"
+      ]
+    },
+    {
+      "name": "ZICO",
+      "types": [
+        "class"
+      ],
+      "icon": "zico.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "ZNIEFF",
+      "types": [
+        "class"
+      ],
+      "icon": "znieff.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Zone Administrative",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "zone_administrative.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Zone Cage de Scene",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "zone_cage_de_scene.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "Zone de Stockage",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "zone_de_stockage.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    },
+    {
+      "name": "ZONE NATURA 2000",
+      "types": [
+        "class"
+      ],
+      "icon": "zone_natura_2000.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "ZONE PROTEGEE",
+      "types": [
+        "class"
+      ],
+      "icon": "zone_protegee.svg",
+      "source": "generated",
+      "files": [
+        "TGV.json"
+      ]
+    },
+    {
+      "name": "Zone Publique",
+      "types": [
+        "hyperclass"
+      ],
+      "icon": "zone_publique.svg",
+      "source": "generated",
+      "files": [
+        "opera_de Paris.json"
+      ]
+    }
+  ]
+}

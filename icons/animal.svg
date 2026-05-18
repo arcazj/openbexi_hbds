@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none" role="img" aria-label="Animal (class)">
+  <title>Animal (class)</title>
+  <g stroke="#0f172a" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M48 18c-16 13-24 27-24 39 0 10 8 18 18 18 8 0 15-4 20-11 5-8 6-18 2-30-3-8-8-13-16-16z"/><path d="M49 33c-4 18-9 31-18 41"/>
+  </g>
+  <path d="M18 84h60" stroke="hsl(93 64% 38%)" stroke-width="5.5" stroke-linecap="round"/>
+  
+</svg>
