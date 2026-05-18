@@ -125,6 +125,18 @@
       "tags": [
         "domain"
       ]
+    },
+    {
+      "value": "models/satellite_world_simple_structure.json",
+      "label": "Satellite World Simple Structure",
+      "description": "Simple CelesTrak-inspired HBDS satellite model (satellites, payload type, capacity, TLE, rocket, manufacturer, launch).",
+      "tags": [
+        "domain",
+        "space",
+        "simple",
+        "grid",
+        "metallic"
+      ]
     }
   ]
 }
