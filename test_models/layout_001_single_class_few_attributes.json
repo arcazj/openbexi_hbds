@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "name": "Layout 001 Single Class Few Attributes",
+    "purpose": "Validates a minimal class, top label, red hub, attributes, and save/load baseline.",
+    "preserveLayout": false,
+    "regressionTags": [
+      "layout",
+      "class",
+      "attributes"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "class_single_few",
+        "name": "Vehicle",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_single_few_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "class_single_few_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "class_single_few_attr_3",
+            "name": "owner"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.55,
+          "height": 1.95
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": []
+  }
+}

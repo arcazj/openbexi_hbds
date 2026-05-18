@@ -16,8 +16,8 @@
           "Condition"
         ],
         "position": {
-          "x": 6,
-          "y": 8,
+          "x": -3.6500000000000004,
+          "y": 2.175,
           "z": 0
         },
         "size": {
@@ -63,8 +63,8 @@
           "Waterway type"
         ],
         "position": {
-          "x": 14,
-          "y": 8.1,
+          "x": -3.5675,
+          "y": -2.175,
           "z": 0
         },
         "size": {
@@ -110,8 +110,8 @@
           "Condition"
         ],
         "position": {
-          "x": 22,
-          "y": 8.2,
+          "x": 2.085,
+          "y": 2.175,
           "z": 0
         },
         "size": {
@@ -157,8 +157,8 @@
           "Condition"
         ],
         "position": {
-          "x": 14,
-          "y": 3.2,
+          "x": 2.0025,
+          "y": -2.175,
           "z": 0
         },
         "size": {
@@ -195,6 +195,8 @@
         "sourceClassId": 1,
         "targetClassId": 2,
         "rendering": {
+          "labelText": "crosses",
+          "orthogonalStyle": "auto",
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -202,7 +204,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "crosses",
           "labelFontSize": 13,
           "labelColor": "#0d1321",
           "labelPositionAlongPath": 0.35,
@@ -210,12 +211,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "labelBackgroundColor": "rgba(255,255,255,0.95)"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 2,
         "targetClassId": 1,
         "rendering": {
+          "labelText": "crossed by",
+          "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -223,7 +227,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "crossed by",
           "labelFontSize": 13,
           "labelColor": "#0b3d02",
           "labelPositionAlongPath": 0.65,
@@ -231,12 +234,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "labelBackgroundColor": "rgba(255,255,255,0.95)"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 2,
         "targetClassId": 3,
         "rendering": {
+          "labelText": "crosses",
+          "orthogonalStyle": "auto",
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -244,7 +250,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "crosses",
           "labelFontSize": 13,
           "labelColor": "#0d1321",
           "labelPositionAlongPath": 0.55,
@@ -252,12 +257,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "labelBackgroundColor": "rgba(255,255,255,0.95)"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 3,
         "targetClassId": 2,
         "rendering": {
+          "labelText": "crossed by",
+          "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -265,7 +273,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "crossed by",
           "labelFontSize": 13,
           "labelColor": "#0b3d02",
           "labelPositionAlongPath": 0.45,
@@ -273,12 +280,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "labelBackgroundColor": "rgba(255,255,255,0.95)"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 1,
         "targetClassId": 4,
         "rendering": {
+          "labelText": "supports",
+          "orthogonalStyle": "auto",
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -286,7 +296,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "supports",
           "labelFontSize": 13,
           "labelColor": "#3b0a57",
           "labelPositionAlongPath": 0.4,
@@ -294,12 +303,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "labelBackgroundColor": "rgba(255,255,255,0.95)"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 4,
         "targetClassId": 1,
         "rendering": {
+          "labelText": "supported by",
+          "orthogonalStyle": "auto",
           "lineColor": "#ef6c00",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -307,7 +319,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "supported by",
           "labelFontSize": 13,
           "labelColor": "#4a2500",
           "labelPositionAlongPath": 0.55,
@@ -315,12 +326,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "labelBackgroundColor": "rgba(255,255,255,0.95)"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 4,
         "targetClassId": 3,
         "rendering": {
+          "labelText": "crosses",
+          "orthogonalStyle": "auto",
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -328,7 +342,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "crosses",
           "labelFontSize": 13,
           "labelColor": "#0d1321",
           "labelPositionAlongPath": 0.45,
@@ -336,12 +349,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "labelBackgroundColor": "rgba(255,255,255,0.95)"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 3,
         "targetClassId": 4,
         "rendering": {
+          "labelText": "crossed by",
+          "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -349,7 +365,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "crossed by",
           "labelFontSize": 13,
           "labelColor": "#0b3d02",
           "labelPositionAlongPath": 0.6,
@@ -357,8 +372,37 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "labelBackgroundColor": "rgba(255,255,255,0.95)"
-        }
+        },
+        "allowSelfLink": true
       }
     ]
+  },
+  "metadata": {
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "grid"
+    }
   }
 }

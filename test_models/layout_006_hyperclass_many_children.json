@@ -1,0 +1,458 @@
+{
+  "metadata": {
+    "name": "Layout 006 Hyperclass Many Children",
+    "purpose": "Validates a larger hyperclass body sized to fit many children and attribute blocks.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "hyperclass",
+      "many-children"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "hyper_fleet",
+        "name": "Fleet Management",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "hyper_fleet_attr_1",
+            "name": "domainStatus"
+          },
+          {
+            "id": "hyper_fleet_attr_2",
+            "name": "region"
+          }
+        ],
+        "children": [
+          "fleet_vehicle",
+          "fleet_driver",
+          "fleet_route",
+          "fleet_depot",
+          "fleet_trip",
+          "fleet_policy"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 7.2,
+          "height": 5.8
+        },
+        "rendering": {
+          "class": {
+            "color": "#ecfccb",
+            "metallicColor": "#bbf7d0",
+            "material": "metallic",
+            "borderColor": "#15803d",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#15803d",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#15803d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "fleet_vehicle",
+        "name": "Vehicle",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "fleet_vehicle_attr_1",
+            "name": "plate"
+          },
+          {
+            "id": "fleet_vehicle_attr_2",
+            "name": "type"
+          },
+          {
+            "id": "fleet_vehicle_attr_3",
+            "name": "capacity"
+          }
+        ],
+        "parentClassId": "hyper_fleet",
+        "position": {
+          "x": -2.2,
+          "y": 1.25,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "fleet_driver",
+        "name": "Driver",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "fleet_driver_attr_1",
+            "name": "name"
+          },
+          {
+            "id": "fleet_driver_attr_2",
+            "name": "license"
+          },
+          {
+            "id": "fleet_driver_attr_3",
+            "name": "shift"
+          }
+        ],
+        "parentClassId": "hyper_fleet",
+        "position": {
+          "x": 0,
+          "y": 1.25,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "fleet_route",
+        "name": "Route",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "fleet_route_attr_1",
+            "name": "origin"
+          },
+          {
+            "id": "fleet_route_attr_2",
+            "name": "destination"
+          },
+          {
+            "id": "fleet_route_attr_3",
+            "name": "eta"
+          }
+        ],
+        "parentClassId": "hyper_fleet",
+        "position": {
+          "x": 2.2,
+          "y": 1.25,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "fleet_depot",
+        "name": "Depot",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "fleet_depot_attr_1",
+            "name": "code"
+          },
+          {
+            "id": "fleet_depot_attr_2",
+            "name": "dockCount"
+          }
+        ],
+        "parentClassId": "hyper_fleet",
+        "position": {
+          "x": -2.2,
+          "y": -1.25,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "fleet_trip",
+        "name": "Trip",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "fleet_trip_attr_1",
+            "name": "tripId"
+          },
+          {
+            "id": "fleet_trip_attr_2",
+            "name": "status"
+          }
+        ],
+        "parentClassId": "hyper_fleet",
+        "position": {
+          "x": 0,
+          "y": -1.25,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#b99bd0",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "fleet_policy",
+        "name": "Policy",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "fleet_policy_attr_1",
+            "name": "rule"
+          },
+          {
+            "id": "fleet_policy_attr_2",
+            "name": "priority"
+          }
+        ],
+        "parentClassId": "hyper_fleet",
+        "position": {
+          "x": 2.2,
+          "y": -1.25,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#df86a8",
+            "metallicColor": "#ffafcc",
+            "material": "metallic",
+            "borderColor": "#8a3a57",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#8a3a57",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#8a3a57",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_vehicle_trip",
+        "sourceClassId": "fleet_vehicle",
+        "targetClassId": "fleet_driver",
+        "name": "assigned to",
+        "rendering": {
+          "labelText": "assigned to",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.62,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12,
+          "routeSide": "top"
+        }
+      },
+      {
+        "id": "link_driver_trip",
+        "sourceClassId": "fleet_driver",
+        "targetClassId": "fleet_route",
+        "name": "hands off",
+        "rendering": {
+          "labelText": "hands off",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.62,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12,
+          "routeSide": "top"
+        }
+      },
+      {
+        "id": "link_trip_route",
+        "sourceClassId": "fleet_depot",
+        "targetClassId": "fleet_trip",
+        "name": "stages",
+        "rendering": {
+          "labelText": "stages",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.62,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12,
+          "routeSide": "bottom"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "metadata": {
+    "name": "Layout 003 Two Classes Attributes",
+    "purpose": "Validates two independent class bodies, attribute blocks, hubs, and one orthogonal link.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "layout",
+      "links"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "class_alpha",
+        "name": "Customer",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_alpha_attr_1",
+            "name": "name"
+          },
+          {
+            "id": "class_alpha_attr_2",
+            "name": "tier"
+          },
+          {
+            "id": "class_alpha_attr_3",
+            "name": "region"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -1.8,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_beta",
+        "name": "Order",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_beta_attr_1",
+            "name": "orderId"
+          },
+          {
+            "id": "class_beta_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "class_beta_attr_3",
+            "name": "total"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 1.8,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_customer_order",
+        "sourceClassId": "class_alpha",
+        "targetClassId": "class_beta",
+        "name": "places",
+        "rendering": {
+          "labelText": "places",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

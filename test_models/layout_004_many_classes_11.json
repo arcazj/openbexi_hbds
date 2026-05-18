@@ -1,0 +1,684 @@
+{
+  "metadata": {
+    "name": "Layout 004 Many Classes 11",
+    "purpose": "Exercises grid layout and overlap avoidance for many independent classes.",
+    "preserveLayout": false,
+    "regressionTags": [
+      "layout",
+      "many-classes",
+      "grid"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "grid_class_1",
+        "name": "Class 1",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_1_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_1_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_1_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.3,
+          "y": 1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "grid_class_2",
+        "name": "Class 2",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_2_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_2_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_2_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -1.0999999999999996,
+          "y": 1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "grid_class_3",
+        "name": "Class 3",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_3_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_3_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_3_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 1.1000000000000005,
+          "y": 1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "grid_class_4",
+        "name": "Class 4",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_4_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_4_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_4_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 3.3000000000000007,
+          "y": 1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "grid_class_5",
+        "name": "Class 5",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_5_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_5_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_5_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.3,
+          "y": -0.40000000000000013,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#b99bd0",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "grid_class_6",
+        "name": "Class 6",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_6_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_6_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_6_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -1.0999999999999996,
+          "y": -0.40000000000000013,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#df86a8",
+            "metallicColor": "#ffafcc",
+            "material": "metallic",
+            "borderColor": "#8a3a57",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#8a3a57",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#8a3a57",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "grid_class_7",
+        "name": "Class 7",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_7_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_7_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_7_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 1.1000000000000005,
+          "y": -0.40000000000000013,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#a8b5c7",
+            "metallicColor": "#cbd5e1",
+            "material": "metallic",
+            "borderColor": "#475569",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#475569",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#475569",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "grid_class_8",
+        "name": "Class 8",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_8_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_8_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_8_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 3.3000000000000007,
+          "y": -0.40000000000000013,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#77c6ba",
+            "metallicColor": "#99f6e4",
+            "material": "metallic",
+            "borderColor": "#0f766e",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#0f766e",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#0f766e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "grid_class_9",
+        "name": "Class 9",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_9_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_9_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_9_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.3,
+          "y": -2.6000000000000005,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "grid_class_10",
+        "name": "Class 10",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_10_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_10_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_10_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -1.0999999999999996,
+          "y": -2.6000000000000005,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "grid_class_11",
+        "name": "Class 11",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "grid_class_11_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "grid_class_11_attr_2",
+            "name": "status"
+          },
+          {
+            "id": "grid_class_11_attr_3",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 1.1000000000000005,
+          "y": -2.6000000000000005,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.85
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_grid_1_2",
+        "sourceClassId": "grid_class_1",
+        "targetClassId": "grid_class_2",
+        "name": "feeds",
+        "rendering": {
+          "labelText": "feeds",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_grid_2_6",
+        "sourceClassId": "grid_class_2",
+        "targetClassId": "grid_class_6",
+        "name": "validates",
+        "rendering": {
+          "labelText": "validates",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_grid_7_11",
+        "sourceClassId": "grid_class_10",
+        "targetClassId": "grid_class_11",
+        "name": "routes",
+        "rendering": {
+          "labelText": "routes",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.7,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12,
+          "routeSide": "bottom"
+        }
+      }
+    ]
+  }
+}

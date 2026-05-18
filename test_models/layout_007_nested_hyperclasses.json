@@ -1,0 +1,421 @@
+{
+  "metadata": {
+    "name": "Layout 007 Nested Hyperclasses",
+    "purpose": "Exercises nested hyperclass containment, recursive sizing, labels, hubs, and links.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "nested",
+      "hyperclass"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "hyper_enterprise",
+        "name": "Enterprise",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "hyper_enterprise_attr_1",
+            "name": "portfolio"
+          },
+          {
+            "id": "hyper_enterprise_attr_2",
+            "name": "risk"
+          }
+        ],
+        "children": [
+          "hyper_sales",
+          "hyper_platform"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 11.2,
+          "height": 6.5
+        },
+        "rendering": {
+          "class": {
+            "color": "#dbeafe",
+            "metallicColor": "#c7d2fe",
+            "material": "metallic",
+            "borderColor": "#2563eb",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#2563eb",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#2563eb",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "hyper_sales",
+        "name": "Sales",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "hyper_sales_attr_1",
+            "name": "quota"
+          }
+        ],
+        "children": [
+          "class_account",
+          "class_contract"
+        ],
+        "parentClassId": "hyper_enterprise",
+        "position": {
+          "x": -3,
+          "y": 0.65,
+          "z": 0
+        },
+        "size": {
+          "width": 5.2,
+          "height": 3.4
+        },
+        "rendering": {
+          "class": {
+            "color": "#ecfccb",
+            "metallicColor": "#bbf7d0",
+            "material": "metallic",
+            "borderColor": "#15803d",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#15803d",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#15803d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "hyper_platform",
+        "name": "Platform",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "hyper_platform_attr_1",
+            "name": "availability"
+          }
+        ],
+        "children": [
+          "class_api",
+          "class_service"
+        ],
+        "parentClassId": "hyper_enterprise",
+        "position": {
+          "x": 3,
+          "y": 0.65,
+          "z": 0
+        },
+        "size": {
+          "width": 4.2,
+          "height": 3.4
+        },
+        "rendering": {
+          "class": {
+            "color": "#fff7ed",
+            "metallicColor": "#fed7aa",
+            "material": "metallic",
+            "borderColor": "#c2410c",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#c2410c",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#c2410c",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_account",
+        "name": "Account",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_account_attr_1",
+            "name": "name"
+          },
+          {
+            "id": "class_account_attr_2",
+            "name": "segment"
+          }
+        ],
+        "parentClassId": "hyper_sales",
+        "position": {
+          "x": -4.1,
+          "y": 0.45,
+          "z": 0
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_contract",
+        "name": "Contract",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_contract_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "class_contract_attr_2",
+            "name": "term"
+          }
+        ],
+        "parentClassId": "hyper_sales",
+        "position": {
+          "x": -1.55,
+          "y": 0.45,
+          "z": 0
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "class_api",
+        "name": "API",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_api_attr_1",
+            "name": "version"
+          },
+          {
+            "id": "class_api_attr_2",
+            "name": "status"
+          }
+        ],
+        "parentClassId": "hyper_platform",
+        "position": {
+          "x": 1.85,
+          "y": 0.45,
+          "z": 0
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "class_service",
+        "name": "Service",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_service_attr_1",
+            "name": "name"
+          },
+          {
+            "id": "class_service_attr_2",
+            "name": "tier"
+          }
+        ],
+        "parentClassId": "hyper_platform",
+        "position": {
+          "x": 3.55,
+          "y": 0.45,
+          "z": 0
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_contract_service",
+        "sourceClassId": "class_contract",
+        "targetClassId": "class_service",
+        "name": "activates",
+        "rendering": {
+          "labelText": "activates",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_sales_platform",
+        "sourceClassId": "hyper_sales",
+        "targetClassId": "hyper_platform",
+        "name": "depends on",
+        "rendering": {
+          "labelText": "depends on",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.95,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

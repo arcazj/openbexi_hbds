@@ -1,0 +1,140 @@
+{
+  "metadata": {
+    "name": "Layout 002 Single Class Many Attributes",
+    "purpose": "Exercises a tall attribute block and label density on a single metallic panel.",
+    "preserveLayout": false,
+    "regressionTags": [
+      "layout",
+      "attributes",
+      "density"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "class_many_attrs",
+        "name": "Asset Registry",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_many_attrs_attr_1",
+            "name": "asset1"
+          },
+          {
+            "id": "class_many_attrs_attr_2",
+            "name": "asset2"
+          },
+          {
+            "id": "class_many_attrs_attr_3",
+            "name": "asset3"
+          },
+          {
+            "id": "class_many_attrs_attr_4",
+            "name": "asset4"
+          },
+          {
+            "id": "class_many_attrs_attr_5",
+            "name": "asset5"
+          },
+          {
+            "id": "class_many_attrs_attr_6",
+            "name": "asset6"
+          },
+          {
+            "id": "class_many_attrs_attr_7",
+            "name": "asset7"
+          },
+          {
+            "id": "class_many_attrs_attr_8",
+            "name": "asset8"
+          },
+          {
+            "id": "class_many_attrs_attr_9",
+            "name": "asset9"
+          },
+          {
+            "id": "class_many_attrs_attr_10",
+            "name": "asset10"
+          },
+          {
+            "id": "class_many_attrs_attr_11",
+            "name": "asset11"
+          },
+          {
+            "id": "class_many_attrs_attr_12",
+            "name": "asset12"
+          },
+          {
+            "id": "class_many_attrs_attr_13",
+            "name": "asset13"
+          },
+          {
+            "id": "class_many_attrs_attr_14",
+            "name": "asset14"
+          },
+          {
+            "id": "class_many_attrs_attr_15",
+            "name": "asset15"
+          },
+          {
+            "id": "class_many_attrs_attr_16",
+            "name": "asset16"
+          },
+          {
+            "id": "class_many_attrs_attr_17",
+            "name": "asset17"
+          },
+          {
+            "id": "class_many_attrs_attr_18",
+            "name": "asset18"
+          },
+          {
+            "id": "class_many_attrs_attr_19",
+            "name": "asset19"
+          },
+          {
+            "id": "class_many_attrs_attr_20",
+            "name": "asset20"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.8,
+          "height": 4.6
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": []
+  }
+}

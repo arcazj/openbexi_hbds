@@ -1,8 +1,9 @@
 import * as THREE from 'three';
-import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { attachAttributesToMesh } from './hbds_class.js';
+import { attachAttributesToMesh, createIconTitleLabel } from './hbds_class.js?v=fit-font-20260517i';
 
 const hyperclassLabels = [];
+let lastSizingCamera = null;
+let lastSizingRenderer = null;
 
 export const Loader = {
   async load(modelNameOrPath) {
@@ -22,13 +23,21 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
 
   const shape = roundedRect(sz.width, sz.height, classCfg.cornerRadius ?? 0.3);
   const geom = new THREE.ExtrudeGeometry(shape, { depth: 0.03, bevelEnabled: false });
+  const hyperColor = new THREE.Color(classCfg.metallicColor ?? classCfg.color ?? '#FFFFFF');
+  const opacity = classCfg.opacity ?? 0.18;
   const mat = new THREE.MeshStandardMaterial({
-    color: classCfg.color ?? '#FFFFFF',
-    transparent: true,
-    opacity: classCfg.opacity ?? 0.14,
-    metalness: 0.9,
-    roughness: 0.35
+    color: hyperColor,
+    metalness: classCfg.metalness ?? 0.42,
+    roughness: classCfg.roughness ?? 0.28,
+    emissive: hyperColor,
+    emissiveIntensity: classCfg.emissiveIntensity ?? 0.035,
+    side: THREE.DoubleSide,
+    depthWrite: opacity >= 0.85,
+    transparent: opacity < 1,
+    opacity
   });
+  mat.userData.hbdsMetallicPanel = true;
+  mat.userData.hbdsHyperclassPanel = true;
 
   const hyperMesh = new THREE.Mesh(geom, mat);
   hyperMesh.position.set(
@@ -43,15 +52,26 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
   );
   hyperMesh.add(border);
 
-  const titleDiv = document.createElement('div');
-  titleDiv.className = 'label class-label hyperclass-label';
-  titleDiv.setAttribute('data-class', hyperClassData.name ?? '');
-  titleDiv.setAttribute('data-hyperclass', 'true');
-  titleDiv.style.font = 'bold 18px Arial';
-  titleDiv.style.color = textColor;
-  titleDiv.textContent = hyperClassData.name ?? 'Hyperclass';
-  const title = new CSS2DObject(titleDiv);
-  title.position.set(0, sz.height / 2 - 0.22, 0.08);
+  const title = createIconTitleLabel(hyperClassData, {
+    className: 'label class-label hyperclass-label',
+    isHyperclass: true,
+    textColor,
+    legacyFont: 'bold 18px Arial',
+    iconFont: 'bold 18px Arial',
+    iconSize: classCfg.iconSize ?? 1,
+    legacyPosition: new THREE.Vector3(0, sz.height / 2 - 0.22, 0.08),
+    iconPosition: new THREE.Vector3(0, sz.height / 2 - 0.4, 0.08),
+    onIconLoaded: () => {
+      if (lastSizingCamera) updateLabelFontSizes(lastSizingCamera, lastSizingRenderer);
+    }
+  });
+  title.userData = {
+    ...title.userData,
+    labelKind: 'title',
+    nodeSize: { width: sz.width, height: sz.height },
+    nodeType: 'hyperclass',
+    text: hyperClassData.name ?? 'Hyperclass'
+  };
   hyperMesh.add(title);
   hyperclassLabels.push(title);
 
@@ -60,6 +80,7 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
     new THREE.MeshBasicMaterial({ color: '#FF0000' })
   );
   hub.name = 'class-hub';
+  hub.userData.hubRadius = 0.04;
   hub.position.set((sz.width * 0.85) / 2, (sz.height * 0.85) / 2, 0.08);
   hub.raycast = () => {};
   hyperMesh.add(hub);
@@ -108,18 +129,56 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
 }
 
 export function updateLabelFontSizes(camera, renderer, options = {}) {
+  lastSizingCamera = camera ?? lastSizingCamera;
+  lastSizingRenderer = renderer ?? lastSizingRenderer;
   const wp = new THREE.Vector3();
   const cp = new THREE.Vector3();
   camera.getWorldPosition(cp);
+  const viewportHeight = Math.max(1, renderer?.domElement?.clientHeight ?? globalThis.innerHeight ?? 800);
   hyperclassLabels.forEach(label => {
     label.getWorldPosition(wp);
     const dist = Math.max(1, wp.distanceTo(cp));
-    const isTitle = label.element.classList.contains('class-label');
-    const size = isTitle
-      ? THREE.MathUtils.clamp(160 / dist, 14, 32)
-      : THREE.MathUtils.clamp(100 / dist, 8, 16);
-    label.element.style.fontSize = `${size.toFixed(1)}px`;
+    const nodeWidth = label.userData?.nodeSize?.width ?? label.parent?.userData?.modelData?.size?.width ?? 4;
+    const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, dist, viewportHeight);
+    const availableWidthPx = Math.max(72, (nodeWidth - 0.36) * pixelsPerWorldUnit);
+    const distanceSize = THREE.MathUtils.clamp(150 / dist, 2.8, 22);
+    const verticalCap = Math.max(2.8, 0.28 * pixelsPerWorldUnit);
+    const text = label.userData?.text || label.element.textContent || '';
+    const fitSize = availableWidthPx / Math.max(1, String(text).length * 0.62 + (label.element.classList.contains('hbds-icon-title') ? 1.25 : 0));
+    const size = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), 2.8, 22);
+    applyHyperclassTitleSizing(label.element, availableWidthPx, size);
   });
+}
+
+function getPixelsPerWorldUnit(camera, distance, viewportHeight) {
+  if (camera?.isPerspectiveCamera) {
+    const fov = camera.fov * Math.PI / 180;
+    return viewportHeight / Math.max(1e-6, 2 * Math.tan(fov / 2) * Math.max(distance, 1e-6));
+  }
+  if (camera?.isOrthographicCamera) return viewportHeight / Math.max(1e-6, camera.top - camera.bottom);
+  return 80;
+}
+
+function applyHyperclassTitleSizing(element, availableWidthPx, fontSize) {
+  element.style.fontSize = `${fontSize.toFixed(1)}px`;
+  element.style.maxWidth = `${Math.round(availableWidthPx)}px`;
+  element.style.overflow = 'hidden';
+  element.style.textOverflow = 'ellipsis';
+  element.style.whiteSpace = 'nowrap';
+  const row = element.querySelector?.('.hbds-icon-title-row');
+  const title = row?.querySelector?.('span') || row?.lastElementChild;
+  if (row) {
+    row.style.maxWidth = `${Math.round(availableWidthPx)}px`;
+    row.style.overflow = 'hidden';
+  }
+  if (title) {
+    const icon = row?.querySelector?.('img');
+    const iconWidth = icon ? icon.getBoundingClientRect().width + fontSize * 0.45 : 0;
+    title.style.maxWidth = `${Math.max(30, Math.round(availableWidthPx - iconWidth))}px`;
+    title.style.overflow = 'hidden';
+    title.style.textOverflow = 'ellipsis';
+    title.style.whiteSpace = 'nowrap';
+  }
 }
 
 function roundedRect(w, h, r) {
@@ -140,7 +199,29 @@ function roundedRect(w, h, r) {
 
 export function createHyperclassData(input={}, defaults={}){ return normalizeHyperclassData({ ...defaults, ...input, id: input.id ?? `hyper_${Math.random().toString(36).slice(2,8)}`, type:'hyperclass' }); }
 export function updateHyperclassData(hyperclassData, patch={}){ return normalizeHyperclassData({ ...hyperclassData, ...patch, rendering:{ ...(hyperclassData.rendering||{}), ...(patch.rendering||{}) }, type:'hyperclass' }); }
-export function normalizeHyperclassData(h={}){ return { ...h, type:'hyperclass', name:h.name||'Hyperclass', attributes:Array.isArray(h.attributes)?h.attributes:[], children:Array.isArray(h.children)?h.children:[], position:h.position||{x:0,y:0,z:0}, size:h.size||{width:4,height:3.2} }; }
+export function normalizeHyperclassData(h={}) {
+  const name=h.name||'Hyperclass';
+  const size=h.size||{width:4,height:3.2};
+  const titleWidth=Math.min(8.5,Math.max(4,name.length*0.105+0.9));
+  return {
+    ...h,
+    type:'hyperclass',
+    name,
+    attributes:Array.isArray(h.attributes)?h.attributes:[],
+    children:Array.isArray(h.children)?h.children:[],
+    position:h.position||{x:0,y:0,z:0},
+    size:{...size,width:Math.max(size.width||0,titleWidth),height:size.height||3.2},
+    rendering:{
+      ...(h.rendering||{}),
+      class:{
+        ...(h.rendering?.class||{}),
+        material:'metallic',
+        metalness:h.rendering?.class?.metalness ?? 0.42,
+        roughness:h.rendering?.class?.roughness ?? 0.28
+      }
+    }
+  };
+}
 export function validateHyperclassData(h){ const errors=[]; if(h?.type!=='hyperclass') errors.push('type must be hyperclass'); if(!Array.isArray(h?.children)) errors.push('children must be array'); return {valid:errors.length===0,errors,warnings:[]}; }
 export function addChildData(hyperclassData, childId){ const children=new Set(hyperclassData.children||[]); children.add(childId); return { ...hyperclassData, children:[...children] }; }
 export function removeChildData(hyperclassData, childId){ return { ...hyperclassData, children:(hyperclassData.children||[]).filter(id=>id!==childId) }; }

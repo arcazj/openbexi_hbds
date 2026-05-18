@@ -34,7 +34,7 @@
         },
         "rendering": {
           "class": {
-            "color": "#ECECEC",
+            "color": "#FFD700",
             "material": "phong",
             "borderColor": "#333333",
             "borderWidth": 0.02,
@@ -74,7 +74,7 @@
             },
             "rendering": {
               "class": {
-                "color": "#ADD8E6",
+                "color": "#FFD700",
                 "material": "metallic",
                 "borderColor": "#000080",
                 "borderWidth": 0.02,

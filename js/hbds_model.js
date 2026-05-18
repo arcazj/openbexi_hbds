@@ -1,22 +1,47 @@
 import * as THREE from 'three';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=fit-font-20260517i';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=fit-font-20260517i';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=fit-font-20260517i';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=fit-font-20260517i';
+
+export const DEFAULT_SCENE_SETTINGS = {
+  background: '#eef2f6',
+  ambient: 0.82,
+  front: 0.16,
+  sources: [
+    { intensity: 0.14, direction: { x: -5, y: 7, z: 13 } },
+    { intensity: 0.1, direction: { x: 8, y: -6, z: 10 } }
+  ]
+};
+
+export const DEFAULT_LAYOUT_SETTINGS = {
+  algorithm: 'none'
+};
+const DEFAULT_FIT_PADDING = 1.15;
 
 let data = { hypergraph: { class: [], link: [] } };
 const history=[];
 const modelRuntime={ classById:new Map(), linkGroups:[], diagramGroup:null, draggableObjects:[] };
-const GRID_GAP_X = 0.9;
-const GRID_GAP_Y = 0.9;
+const GRID_GAP_X = 1.15;
+const GRID_GAP_Y = 0.78;
 const ROOT_GAP_X = 2.6;
 const ROOT_GAP_Y = 2.2;
 const MIN_HYPERCLASS_GAP = 0.8;
+const CLASS_MIN_WIDTH = 1.35;
+const CLASS_MIN_HEIGHT = 1.75;
+const HYPERCLASS_MIN_WIDTH = 4;
+const HYPERCLASS_MIN_HEIGHT = 3.2;
+const HYPERCLASS_PADDING = { left: 0.65, right: 0.75, top: 0.9, bottom: 0.55 };
+const HIDDEN_MODEL_VALUES = new Set([
+  'models/hyperclasse_human_and_car.json',
+  'models/hyperclasse_link_human_and_car.json'
+]);
 const clone=(v)=>typeof structuredClone==='function'?structuredClone(v):JSON.parse(JSON.stringify(v));
 const nextId=(p)=>`${p}_${Math.random().toString(36).slice(2,8)}`;
 export const getData=()=>data;
 export function normalizeData(inputData){
   const m=clone(inputData||{}); m.hypergraph=m.hypergraph||{};
+  m.metadata=normalizeModelMetadata({ ...(m.hypergraph.metadata||{}), ...(m.metadata||{}) });
   if(Array.isArray(m.hypergraph.hyperclass) && (!Array.isArray(m.hypergraph.class) || m.hypergraph.class.length===0)){
     const flattened=[];
     for(const rawHyperclass of m.hypergraph.hyperclass){
@@ -51,8 +76,143 @@ export function normalizeData(inputData){
   m.hypergraph.link=m.hypergraph.link.map(l=>normalizeLinkData(l)).filter(l=>l.sourceClassId&&l.targetClassId&&byId.has(l.sourceClassId)&&byId.has(l.targetClassId));
   return m;
 }
+export function normalizeModelMetadata(metadata={}){
+  const source=metadata&&typeof metadata==='object'?metadata:{};
+  return {
+    ...source,
+    sceneSettings:normalizeSceneSettings(source.sceneSettings || source.scene || source.settings),
+    layout:normalizeLayoutSettings(source.layout)
+  };
+}
+export function normalizeSceneSettings(settings={}){
+  const source=settings&&typeof settings==='object'?settings:{};
+  const legacySourceOne=source.sourceOne || source.keyLight || {};
+  const legacySourceTwo=source.sourceTwo || source.fillLight || {};
+  const sources=Array.isArray(source.sources)&&source.sources.length
+    ? source.sources
+    : [
+        {
+          intensity:source.key ?? legacySourceOne.intensity,
+          direction:legacySourceOne.direction || { x:source.keyX, y:source.keyY, z:source.keyZ }
+        },
+        {
+          intensity:source.fill ?? legacySourceTwo.intensity,
+          direction:legacySourceTwo.direction || { x:source.fillX, y:source.fillY, z:source.fillZ }
+        }
+      ];
+  return {
+    background:normalizeHexColor(source.background, DEFAULT_SCENE_SETTINGS.background),
+    ambient:toFiniteNumber(source.ambient, DEFAULT_SCENE_SETTINGS.ambient),
+    front:toFiniteNumber(source.front, DEFAULT_SCENE_SETTINGS.front),
+    sources:[
+      normalizeLightSource(sources[0], DEFAULT_SCENE_SETTINGS.sources[0]),
+      normalizeLightSource(sources[1], DEFAULT_SCENE_SETTINGS.sources[1])
+    ]
+  };
+}
+export function normalizeLayoutSettings(layout={}){
+  if(typeof layout==='string') return { algorithm:normalizeLayoutAlgorithm(layout) };
+  const source=layout&&typeof layout==='object'?layout:{};
+  const rootFitSource=hasFitMetricFields(source)?source:null;
+  const fit=normalizeFitSettings(source.fit ?? source.fitMetrics ?? rootFitSource);
+  const normalized={ ...source, algorithm:normalizeLayoutAlgorithm(source.algorithm) };
+  delete normalized.fitMetrics;
+  if(fit) normalized.fit=fit;
+  else if('fit' in source) normalized.fit=null;
+  return normalized;
+}
+export function getSceneSettings(currentData=data){
+  return clone(normalizeSceneSettings(currentData?.metadata?.sceneSettings));
+}
+export function getLayoutSettings(currentData=data){
+  return clone(normalizeLayoutSettings(currentData?.metadata?.layout));
+}
+export function setSceneSettings(sceneSettings, options={}){
+  data=normalizeData({ ...data, metadata:{ ...(data.metadata||{}), sceneSettings } });
+  if(options.applyContext!==false) applyDataMetadataToContext(options.context);
+  if(options.refresh===true) refreshSceneFromData(options.context);
+  return getSceneSettings();
+}
+export function setLayoutSettings(layoutSettings, options={}){
+  data=normalizeData({ ...data, metadata:{ ...(data.metadata||{}), layout:layoutSettings } });
+  if(options.applyContext!==false) applyDataMetadataToContext(options.context);
+  if(options.refresh===true) refreshSceneFromData(options.context);
+  return getLayoutSettings();
+}
+function normalizeLightSource(source={},fallback){
+  const direction=source?.direction || {};
+  return {
+    intensity:toFiniteNumber(source?.intensity, fallback.intensity),
+    direction:{
+      x:toFiniteNumber(direction.x, fallback.direction.x),
+      y:toFiniteNumber(direction.y, fallback.direction.y),
+      z:toFiniteNumber(direction.z, fallback.direction.z)
+    }
+  };
+}
+function normalizeHexColor(value,fallback){
+  const clean=String(value||'').trim();
+  if(/^#[0-9a-f]{6}$/i.test(clean)) return clean;
+  if(/^#[0-9a-f]{3}$/i.test(clean)) return `#${clean.slice(1).split('').map(c=>c+c).join('')}`;
+  return fallback;
+}
+function toFiniteNumber(value,fallback){
+  const number=Number(value);
+  return Number.isFinite(number)?number:fallback;
+}
+function roundFitNumber(value){
+  const number=Number(value);
+  return Number.isFinite(number)?Number(number.toFixed(4)):0;
+}
+function hasFitMetricFields(source={}){
+  return [
+    'fitHeightDistance',
+    'fitWidthDistance',
+    'distance',
+    'diagramWidth',
+    'diagramHeight',
+    'diagramDepth',
+    'radius',
+    'cameraAspect',
+    'cameraFov',
+    'padding'
+  ].some(key=>source?.[key]!==undefined);
+}
+function normalizeFitSettings(fit){
+  if(!fit || typeof fit!=='object') return null;
+  const center=fit.center&&typeof fit.center==='object'
+    ? {
+        x:toFiniteNumber(fit.center.x,0),
+        y:toFiniteNumber(fit.center.y,0),
+        z:toFiniteNumber(fit.center.z,0)
+      }
+    : { x:0, y:0, z:0 };
+  return {
+    padding:toFiniteNumber(fit.padding,DEFAULT_FIT_PADDING),
+    fitHeightDistance:toFiniteNumber(fit.fitHeightDistance ?? fit.heightDistance,0),
+    fitWidthDistance:toFiniteNumber(fit.fitWidthDistance ?? fit.widthDistance,0),
+    distance:toFiniteNumber(fit.distance,0),
+    diagramWidth:toFiniteNumber(fit.diagramWidth ?? fit.width,0),
+    diagramHeight:toFiniteNumber(fit.diagramHeight ?? fit.height,0),
+    diagramDepth:toFiniteNumber(fit.diagramDepth ?? fit.depth,0),
+    radius:toFiniteNumber(fit.radius,0),
+    center,
+    cameraAspect:toFiniteNumber(fit.cameraAspect ?? fit.aspect,1),
+    cameraFov:toFiniteNumber(fit.cameraFov ?? fit.fov,50)
+  };
+}
+function normalizeLayoutAlgorithm(value){
+  const clean=String(value||'none').toLowerCase();
+  return ['none','grid','hierarchy','radial'].includes(clean)?clean:'none';
+}
+function applyDataMetadataToContext(context){
+  if(!context) return;
+  context.applyModelSceneSettings?.(getSceneSettings());
+  context.applyModelLayoutSettings?.(getLayoutSettings());
+  applyFitMetadataToContext(context,{ updateOverview:true, preserveMetadata:true });
+}
 export function validateData(currentData=data){const e=[],w=[]; const hg=currentData?.hypergraph; if(!Array.isArray(hg?.class)) e.push('missing hypergraph.class'); if(!Array.isArray(hg?.link)) e.push('missing hypergraph.link'); const ids=new Set(); const byId=new Map(); for(const c of hg?.class||[]){if(ids.has(c.id)) e.push(`duplicate class id ${c.id}`); ids.add(c.id); byId.set(c.id,c); if(!Array.isArray(c.attributes)) e.push(`invalid attributes for ${c.id}`);} const lids=new Set(); for(const l of hg?.link||[]){ if(l.id&&lids.has(l.id)) e.push(`duplicate link id ${l.id}`); if(l.id) lids.add(l.id); if(!byId.has(l.sourceClassId)) e.push(`missing link source ${l.sourceClassId}`); if(!byId.has(l.targetClassId)) e.push(`missing link target ${l.targetClassId}`);} return {valid:e.length===0,errors:e,warnings:w};}
-export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
+export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; clearLinkRegistry(); if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
   if(dragControls){dragControls.dispose(); setDragControls?.(null);} const dg=new THREE.Group(); scene?.add(dg); setDiagramGroup?.(dg); modelRuntime.diagramGroup=dg; modelRuntime.classById.clear(); modelRuntime.linkGroups=[];
   for(const cd of data.hypergraph.class){ const r=cd.type==='hyperclass'?createHyperClass(null,cd):createClassMesh(cd); const m=r.classMesh; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true}; dg.add(m); modelRuntime.classById.set(cd.id,m);} 
   for(const cd of data.hypergraph.class){
@@ -74,8 +234,9 @@ export function refreshSceneFromData(context){ if(!context) return; const {scene
   for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,ld):createLinkBetweenClass(ld,modelRuntime.classById); if(!r) continue; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(ld),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);} 
   draggableObjects.length=0; for(const cd of data.hypergraph.class){ const o=modelRuntime.classById.get(cd.id); if(o) draggableObjects.push(o); }
   modelRuntime.draggableObjects=draggableObjects;
-  context.setupDragControls?.(); recalculateAllLinks(); updateLabelFontSizes(context.camera); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
-export function updateLayoutFromData(context){ recalculateAllLinks(); updateLabelFontSizes(context.camera); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
+  context.setupDragControls?.(); recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
+export function updateLayoutFromData(context){ recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
+export function updateSceneLabelScales(context){ if(!context?.camera) return; updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
 export function refreshDiagramBoundsAndCamera(context, options={}){
   if(!context?.diagramGroup) return null;
   const box=new THREE.Box3().setFromObject(context.diagramGroup);
@@ -96,6 +257,7 @@ export function refreshDiagramBoundsAndCamera(context, options={}){
     context.orbitControls?.target.copy(sphere.center);
     context.orbitControls?.update?.();
     context.setCamera2D?.();
+    updateFitMetadataFromContext(context,{padding});
   }
   context.renderOnce?.();
   return {box,sphere};
@@ -104,12 +266,9 @@ export function fitModelToCanvas(context, options = {}) {
   if (!context?.diagramGroup || !context?.camera) return null;
   const box = new THREE.Box3().setFromObject(context.diagramGroup);
   if (box.isEmpty()) return null;
+  const metrics = calculateFitMetrics(box, context.camera, options);
   const sphere = box.getBoundingSphere(new THREE.Sphere());
-  const padding = options.padding ?? 1.15;
-  const fovR = context.camera.fov * Math.PI / 180;
-  const fitHeightDistance = (sphere.radius * padding) / Math.tan(fovR / 2);
-  const fitWidthDistance = fitHeightDistance / Math.max(context.camera.aspect, 1e-6);
-  const dist = Math.max(fitHeightDistance, fitWidthDistance, 1);
+  const dist = Math.max(metrics.distance, 1);
   context.diagramGroup.userData.boundingBox = box.clone();
   context.diagramGroup.userData.boundingSphere = sphere.clone();
   context.orbitControls?.target.copy(sphere.center);
@@ -119,7 +278,73 @@ export function fitModelToCanvas(context, options = {}) {
   context.orbitControls?.update?.();
   context.renderOnce?.();
   if (options.updateOverview) updateModelOverview(context);
-  return { box, sphere };
+  saveFitMetadata(metrics);
+  return { box, sphere, fit: metrics };
+}
+
+export function applyFitMetadataToContext(context, options = {}) {
+  if (!context?.camera) return false;
+  const fit = normalizeFitSettings(options.fit ?? getLayoutSettings().fit);
+  if (!hasUsableFitSettings(fit)) return false;
+  const center = new THREE.Vector3(fit.center.x, fit.center.y, fit.center.z);
+  const storedDistance = Math.max(fit.distance, fit.fitHeightDistance, fit.fitWidthDistance, 1);
+  if (Number.isFinite(fit.cameraFov) && fit.cameraFov > 1 && options.applyFov !== false) {
+    context.camera.fov = fit.cameraFov;
+  }
+  context.orbitControls?.target.copy(center);
+  context.camera.position.set(center.x, center.y, center.z + storedDistance);
+  context.camera.lookAt(center);
+  context.camera.updateProjectionMatrix();
+  context.orbitControls?.update?.();
+  updateSceneLabelScales(context);
+  context.renderOnce?.();
+  if (options.updateOverview) updateModelOverview(context);
+  if (options.preserveMetadata !== true) saveFitMetadata(fit);
+  return true;
+}
+
+function calculateFitMetrics(box, camera, options = {}) {
+  const sphere = box.getBoundingSphere(new THREE.Sphere());
+  const size = box.getSize(new THREE.Vector3());
+  const previousFit = getLayoutSettings().fit || {};
+  const padding = options.padding ?? previousFit.padding ?? DEFAULT_FIT_PADDING;
+  const fovR = camera.fov * Math.PI / 180;
+  const fitHeightDistance = (sphere.radius * padding) / Math.tan(fovR / 2);
+  const fitWidthDistance = fitHeightDistance / Math.max(camera.aspect, 1e-6);
+  const distance = Math.max(fitHeightDistance, fitWidthDistance, 1);
+  return {
+    padding: roundFitNumber(padding),
+    fitHeightDistance: roundFitNumber(fitHeightDistance),
+    fitWidthDistance: roundFitNumber(fitWidthDistance),
+    distance: roundFitNumber(distance),
+    diagramWidth: roundFitNumber(size.x),
+    diagramHeight: roundFitNumber(size.y),
+    diagramDepth: roundFitNumber(size.z),
+    radius: roundFitNumber(sphere.radius),
+    center: {
+      x: roundFitNumber(sphere.center.x),
+      y: roundFitNumber(sphere.center.y),
+      z: roundFitNumber(sphere.center.z)
+    },
+    cameraAspect: roundFitNumber(camera.aspect),
+    cameraFov: roundFitNumber(camera.fov)
+  };
+}
+
+function saveFitMetadata(fit) {
+  if (!fit) return getLayoutSettings();
+  return setLayoutSettings({ ...getLayoutSettings(), fit }, { applyContext: false });
+}
+
+function updateFitMetadataFromContext(context, options = {}) {
+  if (!context?.diagramGroup || !context?.camera) return getLayoutSettings();
+  const box = new THREE.Box3().setFromObject(context.diagramGroup);
+  if (box.isEmpty()) return getLayoutSettings();
+  return saveFitMetadata(calculateFitMetrics(box, context.camera, options)).fit;
+}
+
+function hasUsableFitSettings(fit) {
+  return Boolean(fit && (fit.distance > 0 || fit.fitHeightDistance > 0 || fit.fitWidthDistance > 0));
 }
 
 export function isPointerOverInteractiveObject(event, context) {
@@ -202,6 +427,7 @@ export function setupCanvasPanControls(context){
   let lastX = 0;
   let lastY = 0;
   host.addEventListener('pointerdown', (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
     const is3D = document.getElementById('view-toggle')?.checked;
     const inOverviewPanel = event.target instanceof Element
       ? Boolean(event.target.closest('#model-overview'))
@@ -209,10 +435,11 @@ export function setupCanvasPanControls(context){
     const editable = document.getElementById('editable-toggle')?.checked ?? true;
     if (is3D || inOverviewPanel) return;
     if (editable && isPointerOverInteractiveObject(event, context)) return;
-    if (editable) return;
+    event.preventDefault?.();
     isPanning = true;
     lastX = event.clientX;
     lastY = event.clientY;
+    host.style.cursor = 'grabbing';
     host.setPointerCapture?.(event.pointerId);
   });
   host.addEventListener('pointermove', (event) => {
@@ -228,6 +455,7 @@ export function setupCanvasPanControls(context){
   const stopPan = (event) => {
     if (!isPanning) return;
     isPanning = false;
+    host.style.cursor = '';
     host.releasePointerCapture?.(event.pointerId);
   };
   host.addEventListener('pointerup', stopPan);
@@ -330,8 +558,8 @@ function setupOverviewViewportDrag(context, transform) {
   overviewDragBound = true;
 }
 export function commitDataChange(operationName, updater, options={}){ const before=clone(data); const result=updater(data); data=normalizeData(data); const v=validateData(data); if(!v.valid && options.rollbackOnError!==false){ data=before; throw new Error(`Invalid data after ${operationName}: ${v.errors.join('; ')}`);} if(options.refresh!==false) refreshSceneFromData(options.context); if(options.optimizeLayout===true) updateLayoutFromData(options.context); if(options.saveHistory!==false) history.push({operationName,before,after:clone(data)}); return result; }
-export function setData(nextData, options={}){ data=normalizeData(nextData); const v=validateData(data); if(!v.valid) throw new Error(v.errors.join('; ')); if(options.refresh!==false) refreshSceneFromData(options.context); return getData(); }
-export function resetData(options={}){ return setData({hypergraph:{class:[],link:[]}},options); }
+export function setData(nextData, options={}){ data=normalizeData(nextData); const v=validateData(data); if(!v.valid) throw new Error(v.errors.join('; ')); if(options.refresh!==false) refreshSceneFromData(options.context); applyDataMetadataToContext(options.context); return getData(); }
+export function resetData(options={}){ return setData({metadata:{layout:DEFAULT_LAYOUT_SETTINGS,sceneSettings:DEFAULT_SCENE_SETTINGS},hypergraph:{class:[],link:[]}},options); }
 export function readClass(id){return data.hypergraph.class.find(c=>c.id===id)||null;} export const readHyperclass=readClass;
 export function createClass(input,options={}){ return commitDataChange('createClass',d=>{ const c=createClassData(input); d.hypergraph.class.push(c); if(c.parentClassId) addChildToHyperclass(c.parentClassId,c.id,{...options,refresh:false,saveHistory:false}); return c;},options); }
 export function updateClass(id,patch,options={}){ return commitDataChange('updateClass',d=>{ const i=d.hypergraph.class.findIndex(c=>c.id===id&&c.type!=='hyperclass'); if(i<0) throw new Error('class not found'); d.hypergraph.class[i]=updateClassData(d.hypergraph.class[i],patch); return d.hypergraph.class[i];},options); }
@@ -351,28 +579,35 @@ export const readLink=(idOrPred)=>typeof idOrPred==='function'?data.hypergraph.l
 export const createLink=(input,options={})=>commitDataChange('createLink',d=>{const l=createLinkData(input); const byId=new Map(d.hypergraph.class.map(c=>[c.id,c])); const v=validateLinkData(l,byId); if(!v.valid) throw new Error(v.errors.join('; ')); d.hypergraph.link.push(l); return l;},options);
 export const updateLink=(idOrPred,patch,options={})=>commitDataChange('updateLink',d=>{const i=d.hypergraph.link.findIndex(l=>typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred); if(i<0) throw new Error('link not found'); d.hypergraph.link[i]=updateLinkData(d.hypergraph.link[i],patch);},options);
 export const deleteLink=(idOrPred,options={})=>commitDataChange('deleteLink',d=>{d.hypergraph.link=d.hypergraph.link.filter(l=>!(typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred||(idOrPred?.sourceClassId===l.sourceClassId&&idOrPred?.targetClassId===l.targetClassId)));},options);
-async function loadModelData(modelName){
+async function loadModelData(modelName, options={}){
   const value=String(modelName||'').trim();
-  const isDirectPath=value.includes('/') || value.endsWith('.json');
-  if(isDirectPath){
-    const response=await fetch(`./${value}`);
-    if(!response.ok) throw new Error(`Model not found: ${value}`);
-    return response.json();
+  const allowedBasePath=options.allowedBasePath==null?null:normalizeModelDirectoryPath(options.allowedBasePath);
+  const defaultBasePath=normalizeModelDirectoryPath(options.defaultBasePath ?? allowedBasePath ?? 'models/');
+  const resourcePath=normalizeModelResourcePath(value,defaultBasePath);
+  if(allowedBasePath && !resourcePath.startsWith(allowedBasePath)){
+    throw new Error(`Model path "${value}" is outside ${allowedBasePath}`);
   }
-  try {
-    return await HyperClassLoader.load(value);
-  } catch {
-    return ClassLoader.load(value);
-  }
+  return loadJsonResource(withCacheBust(`./${resourcePath}`),`Model not found: ${value}`);
 }
-export async function listAvailableModels(manifestPath='models/models_manifest.json'){
+export async function listAvailableModels(options='models/models_manifest.json', maybeModelsPath){
+  const config=typeof options==='string'
+    ? { manifestPath:options, modelsPath:maybeModelsPath ?? 'models/' }
+    : (options||{});
+  const modelsPath=normalizeModelDirectoryPath(config.modelsPath ?? 'models/');
+  const manifestPath=config.manifestPath ?? `${modelsPath}models_manifest.json`;
+  const hiddenValues=config.hiddenValues ?? (modelsPath==='models/'?[...HIDDEN_MODEL_VALUES]:[]);
+  const hiddenSet=new Set(hiddenValues.map(value=>canonicalModelValue(value,modelsPath)));
+  const manifestItems=await loadModelManifestItems(manifestPath,modelsPath);
+  const discoveredItems=config.discover === false ? [] : await discoverModelDirectoryItems(modelsPath);
+  return mergeModelItems({ hiddenValues:hiddenSet, defaultBasePath:modelsPath },manifestItems,discoveredItems);
+}
+
+async function loadModelManifestItems(manifestPath,defaultBasePath='models/'){
   try {
-    const response=await fetch(`./${manifestPath}`);
-    if(!response.ok) throw new Error(`manifest not found: ${manifestPath}`);
-    const manifest=await response.json();
+    const manifest=await loadJsonResource(withCacheBust(`./${manifestPath}`),`manifest not found: ${manifestPath}`);
     const items=Array.isArray(manifest?.models)?manifest.models:[];
     return items.filter(Boolean).map(item=>({
-      value:item.value||item.path||item.id||'',
+      value:normalizeModelResourcePath(item.value||item.path||item.id||'',defaultBasePath),
       label:item.label||item.name||item.value||'',
       description:item.description||'',
       tags:Array.isArray(item.tags)?item.tags:[]
@@ -381,17 +616,161 @@ export async function listAvailableModels(manifestPath='models/models_manifest.j
     return [];
   }
 }
-export async function loadAndRenderScene(modelName, context){ const raw=await loadModelData(modelName); setData(raw,{context,refresh:true}); return getData(); }
-export function saveScene(context, options={}){ const blob=new Blob([JSON.stringify(getData(),null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=options.fileName||'hbds_saved_model.json'; a.click(); URL.revokeObjectURL(url); return getData(); }
+
+async function discoverModelDirectoryItems(modelsPath){
+  try {
+    const normalizedPath=normalizeModelDirectoryPath(modelsPath);
+    const text=await loadTextResource(withCacheBust(`./${normalizedPath}`));
+    return extractModelFilesFromDirectoryHtml(text,normalizedPath).map(fileName=>({
+      value:`${normalizedPath}${fileName}`,
+      label:labelFromModelFile(fileName),
+      description:`Model file: ${fileName}`,
+      tags:['model']
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function extractModelFilesFromDirectoryHtml(html,modelsPath){
+  const files=new Set();
+  const collect=href=>{
+    try {
+      const base=new URL(`./${modelsPath}`, globalThis.location?.href || import.meta.url);
+      const url=new URL(href,base);
+      const fileName=decodeURIComponent(url.pathname.split('/').pop()||'');
+      if(/\.json$/i.test(fileName) && !/manifest\.json$/i.test(fileName)) files.add(fileName);
+    } catch {}
+  };
+
+  if(typeof DOMParser!=='undefined'){
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    doc.querySelectorAll('a[href]').forEach(link=>collect(link.getAttribute('href')));
+  }
+  for(const match of html.matchAll(/href=["']([^"']+\.json)["']/gi)) collect(match[1]);
+  return [...files].sort((a,b)=>a.localeCompare(b,undefined,{sensitivity:'base'}));
+}
+
+function mergeModelItems(options={},...groups){
+  if(Array.isArray(options)){
+    groups=[options,...groups];
+    options={};
+  }
+  const hiddenValues=options.hiddenValues || HIDDEN_MODEL_VALUES;
+  const defaultBasePath=normalizeModelDirectoryPath(options.defaultBasePath ?? 'models/');
+  const byKey=new Map();
+  for(const group of groups){
+    for(const item of group){
+      const key=canonicalModelValue(item.value,defaultBasePath);
+      if(!key || hiddenValues.has(key) || byKey.has(key)) continue;
+      byKey.set(key,item);
+    }
+  }
+  return [...byKey.values()];
+}
+
+function normalizeModelDirectoryPath(path){
+  const clean=String(path||'models/').trim().replace(/\\/g,'/').replace(/^\.\//,'').replace(/^\/+/,'');
+  if(!clean) return 'models/';
+  return clean.endsWith('/')?clean:`${clean}/`;
+}
+
+function normalizeModelResourcePath(value,defaultBasePath='models/'){
+  const basePath=normalizeModelDirectoryPath(defaultBasePath);
+  const clean=String(value||'').trim().replace(/\\/g,'/').replace(/^\.\//,'').replace(/^\/+/,'');
+  if(!clean) return '';
+  if(clean.split('/').includes('..')) throw new Error(`Unsupported model path: ${value}`);
+  if(clean.includes('/') || /\.json$/i.test(clean)) return /\.json$/i.test(clean)?clean:`${clean}.json`;
+  return `${basePath}${clean.replace(/\.json$/i,'')}.json`;
+}
+
+function canonicalModelValue(value,defaultBasePath='models/'){
+  return normalizeModelResourcePath(value,defaultBasePath).toLowerCase();
+}
+
+function labelFromModelFile(fileName){
+  return String(fileName||'')
+    .replace(/\.json$/i,'')
+    .replace(/[_-]+/g,' ')
+    .replace(/\s+/g,' ')
+    .trim()
+    .replace(/\b\w/g,char=>char.toUpperCase());
+}
+function withCacheBust(path){
+  const separator=String(path).includes('?')?'&':'?';
+  return `${path}${separator}v=${Date.now()}`;
+}
+async function loadJsonResource(path,message){
+  try {
+    return JSON.parse(await loadTextResource(path));
+  } catch (error) {
+    throw new Error(message || error?.message || String(error));
+  }
+}
+async function loadTextResource(path){
+  if(typeof fetch==='function'){
+    const response=await fetch(path);
+    if(!response.ok) throw new Error(`Request failed: ${path}`);
+    return response.text();
+  }
+  if(typeof XMLHttpRequest==='function'){
+    return new Promise((resolve,reject)=>{
+      const request=new XMLHttpRequest();
+      request.open('GET',path,true);
+      request.onload=()=>request.status>=200&&request.status<300?resolve(request.responseText):reject(new Error(`Request failed: ${path}`));
+      request.onerror=()=>reject(new Error(`Request failed: ${path}`));
+      request.send();
+    });
+  }
+  throw new Error('No browser request API available');
+}
+export async function loadAndRenderScene(modelName, context, options={}){ const raw=await loadModelData(modelName,options); setData(raw,{context,refresh:true}); return getData(); }
+export function saveScene(context, options={}){ if(options.updateFitMetadata!==false) updateFitMetadataFromContext(context,options); const snapshot=getData(); const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=options.fileName||'hbds_saved_model.json'; a.click(); URL.revokeObjectURL(url); return snapshot; }
 function getNodeSize(node){
+  return getNodeBodySize(node);
+}
+function getNodeBodySize(node){
   const base=node?.size||{};
   const attrCount=Array.isArray(node?.attributes)?node.attributes.length:0;
-  const minH=node?.type==='hyperclass'?3.2:2;
-  const minW=node?.type==='hyperclass'?4:1;
-  const attrW=node?.type==='hyperclass' ? 3.2 : 1.2;
-  const width=Math.max(base.width||1, minW, attrW);
-  const height=Math.max(base.height||minH, minH + attrCount*0.2);
-  return { width, height };
+  if(node?.type==='hyperclass'){
+    return {
+      width:Math.max(base.width||0,HYPERCLASS_MIN_WIDTH),
+      height:Math.max(base.height||0,HYPERCLASS_MIN_HEIGHT)
+    };
+  }
+  return {
+    width:Math.max(base.width||0,CLASS_MIN_WIDTH),
+    height:Math.max(base.height||0,CLASS_MIN_HEIGHT,0.55+attrCount*0.16)
+  };
+}
+function getOptimizedHyperclassBaseSize(){
+  return { width:HYPERCLASS_MIN_WIDTH, height:HYPERCLASS_MIN_HEIGHT };
+}
+function getNodeVisualMetrics(node){
+  const body=getNodeBodySize(node);
+  const attributeRight=getAttributeRightExtent(node);
+  return {
+    body,
+    width:body.width+attributeRight,
+    height:body.height,
+    offsetX:attributeRight/2,
+    offsetY:0,
+    attributeRight
+  };
+}
+function getAttributeRightExtent(node){
+  const attributes=Array.isArray(node?.attributes)?node.attributes:[];
+  if(!attributes.length) return 0;
+  const cbW=node?.rendering?.attributes?.size?.width ?? 0.1;
+  const longest=Math.max(...attributes.map((attribute,index)=>getAttributeDisplayName(attribute,index).length));
+  const labelWidth=Math.min(2.2,Math.max(0.46,longest*0.055));
+  return 0.25 + cbW*2 + 0.12 + labelWidth + 0.18;
+}
+function getAttributeDisplayName(attribute,index){
+  if(typeof attribute==='string') return attribute;
+  if(typeof attribute==='number' || typeof attribute==='boolean') return String(attribute);
+  if(!attribute || typeof attribute!=='object') return `attribute${index+1}`;
+  return String(attribute.name ?? attribute.label ?? attribute.title ?? attribute.id ?? `attribute${index+1}`);
 }
 function getGridDimensions(childCount){
   if(childCount<=1) return {cols:1,rows:1};
@@ -404,53 +783,107 @@ function getGridDimensions(childCount){
   const cols=Math.ceil(Math.sqrt(childCount));
   return {cols,rows:Math.ceil(childCount/cols)};
 }
-function optimizeLayoutGrid(){
-  const nodes=data.hypergraph.class||[];
-  const byId=new Map(nodes.map(n=>[n.id,n]));
+function getChildrenByParent(nodes){
   const childrenByParent=new Map();
   nodes.forEach(n=>{ if(n.parentClassId){ const a=childrenByParent.get(n.parentClassId)||[]; a.push(n); childrenByParent.set(n.parentClassId,a); } });
-  const roots=nodes.filter(n=>!n.parentClassId).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-
-  function layoutNode(node, cx, cy){
-    const kids=(childrenByParent.get(node.id)||[]).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-    const own=getNodeSize(node);
-    if(!node.position) node.position={x:0,y:0,z:0};
-    node.position.x=cx; node.position.y=cy; node.position.z=0;
-    if(node.type!=='hyperclass' || kids.length===0) return own;
-
-    const {cols,rows}=getGridDimensions(kids.length);
-    const childSizes=kids.map(getNodeSize);
-    const cellW=Math.max(...childSizes.map(s=>s.width))+GRID_GAP_X;
-    const cellH=Math.max(...childSizes.map(s=>s.height))+GRID_GAP_Y;
-    const padX = 1.2;
-    const padY = 1.1;
-    const gridW=Math.max(cellW*cols, own.width-padX);
-    const gridH=Math.max(cellH*rows, own.height-padY);
-    const attrRows=Math.max(1,Math.ceil((Array.isArray(node.attributes)?node.attributes.length:0)/Math.max(1,Math.floor((gridH)/0.16))));
-    const attrPadX = attrRows > 1 ? 0.8 : 0.5;
-    node.size={width:Math.max(own.width,gridW+padX+attrPadX),height:Math.max(own.height,gridH+padY)};
-
-    const startX=cx-gridW/2+cellW/2;
-    const startY=cy+gridH/2-cellH/2;
-    kids.forEach((child, idx)=>{
-      const col=idx%cols;
-      const row=Math.floor(idx/cols);
-      const x=startX + col*cellW;
-      const y=startY - row*cellH;
-      layoutNode(child,x,y);
-    });
-    return node.size;
+  return childrenByParent;
+}
+function sortByName(a,b){
+  return String(a.name).localeCompare(String(b.name));
+}
+function buildGridMetrics(items,metrics,options={}){
+  const {cols,rows}=options.dimensions || getGridDimensions(items.length);
+  const gapX=options.gapX ?? GRID_GAP_X;
+  const gapY=options.gapY ?? GRID_GAP_Y;
+  const colWidths=Array(cols).fill(0);
+  const rowHeights=Array(rows).fill(0);
+  items.forEach((item,index)=>{
+    const col=index%cols;
+    const row=Math.floor(index/cols);
+    const metric=metrics.get(item.id) || getNodeVisualMetrics(item);
+    colWidths[col]=Math.max(colWidths[col],metric.width);
+    rowHeights[row]=Math.max(rowHeights[row],metric.height);
+  });
+  return {
+    cols,
+    rows,
+    gapX,
+    gapY,
+    colWidths,
+    rowHeights,
+    width:colWidths.reduce((sum,width)=>sum+width,0)+Math.max(0,cols-1)*gapX,
+    height:rowHeights.reduce((sum,height)=>sum+height,0)+Math.max(0,rows-1)*gapY
+  };
+}
+function measureLayoutTree(node,childrenByParent,metrics){
+  const kids=(childrenByParent.get(node.id)||[]).sort(sortByName);
+  if(node.type!=='hyperclass' || kids.length===0){
+    const metric=getNodeVisualMetrics(node);
+    node.size=metric.body;
+    metrics.set(node.id,metric);
+    return metric;
   }
 
+  kids.forEach(child=>measureLayoutTree(child,childrenByParent,metrics));
+  const grid=buildGridMetrics(kids,metrics);
+  const base=getOptimizedHyperclassBaseSize(node);
+  node.size={
+    width:Math.max(base.width,grid.width+HYPERCLASS_PADDING.left+HYPERCLASS_PADDING.right),
+    height:Math.max(base.height,grid.height+HYPERCLASS_PADDING.top+HYPERCLASS_PADDING.bottom)
+  };
+  const metric=getNodeVisualMetrics(node);
+  metrics.set(node.id,metric);
+  return metric;
+}
+function placeMeasuredTree(node,cx,cy,childrenByParent,metrics){
+  const kids=(childrenByParent.get(node.id)||[]).sort(sortByName);
+  if(!node.position) node.position={x:0,y:0,z:0};
+  node.position.x=cx;
+  node.position.y=cy;
+  node.position.z=0;
+  if(node.type!=='hyperclass' || kids.length===0) return;
+
+  const grid=buildGridMetrics(kids,metrics);
+  const contentLeft=cx-node.size.width/2+HYPERCLASS_PADDING.left;
+  const contentTop=cy+node.size.height/2-HYPERCLASS_PADDING.top;
+  let yCursor=contentTop;
+  for(let row=0;row<grid.rows;row++){
+    let xCursor=contentLeft;
+    const rowHeight=grid.rowHeights[row];
+    for(let col=0;col<grid.cols;col++){
+      const index=row*grid.cols+col;
+      const child=kids[index];
+      const colWidth=grid.colWidths[col];
+      if(child){
+        const metric=metrics.get(child.id);
+        const childX=xCursor+colWidth/2-(metric?.offsetX||0);
+        const childY=yCursor-rowHeight/2-(metric?.offsetY||0);
+        placeMeasuredTree(child,childX,childY,childrenByParent,metrics);
+      }
+      xCursor+=colWidth+grid.gapX;
+    }
+    yCursor-=rowHeight+grid.gapY;
+  }
+}
+function optimizeLayoutGrid(){
+  const nodes=data.hypergraph.class||[];
+  const childrenByParent=getChildrenByParent(nodes);
+  const roots=nodes.filter(n=>!n.parentClassId).sort(sortByName);
+  const metrics=new Map();
+  roots.forEach(root=>measureLayoutTree(root,childrenByParent,metrics));
   const rootCount=roots.length;
   const rootCols=Math.max(1,Math.ceil(Math.sqrt(rootCount)));
   const rootRows=Math.ceil(rootCount/rootCols);
+  const rootGrid=buildGridMetrics(roots,metrics,{dimensions:{cols:rootCols,rows:rootRows},gapX:ROOT_GAP_X,gapY:ROOT_GAP_Y});
   roots.forEach((root,idx)=>{
     const col=idx%rootCols;
     const row=Math.floor(idx/rootCols);
-    const x=(col-(rootCols-1)/2)*(6+ROOT_GAP_X);
-    const y=((rootRows-1)/2-row)*(5+ROOT_GAP_Y);
-    layoutNode(root,x,y);
+    const xStart=-rootGrid.width/2+rootGrid.colWidths.slice(0,col).reduce((sum,width)=>sum+width+ROOT_GAP_X,0);
+    const yStart=rootGrid.height/2-rootGrid.rowHeights.slice(0,row).reduce((sum,height)=>sum+height+ROOT_GAP_Y,0);
+    const metric=metrics.get(root.id);
+    const x=xStart+rootGrid.colWidths[col]/2-(metric?.offsetX||0);
+    const y=yStart-rootGrid.rowHeights[row]/2-(metric?.offsetY||0);
+    placeMeasuredTree(root,x,y,childrenByParent,metrics);
   });
 }
 function optimizeLayoutRadial(){
@@ -498,49 +931,14 @@ function applyLayoutByAlgorithm(algorithm='grid'){
 
 function layoutChildrenInsideParents(){
   const nodes=data.hypergraph.class||[];
-  const childrenByParent=new Map();
-  nodes.forEach(n=>{ if(n.parentClassId){ const a=childrenByParent.get(n.parentClassId)||[]; a.push(n); childrenByParent.set(n.parentClassId,a); } });
-
-  function layoutNode(node){
-    const kids=(childrenByParent.get(node.id)||[]).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-    const own=getNodeSize(node);
-    if(!node.position) node.position={x:0,y:0,z:0};
-    if(node.type!=='hyperclass' || kids.length===0) return own;
-
-    const childSizes=kids.map(layoutNode);
-    const {cols,rows}=getGridDimensions(kids.length);
-    const cellW=Math.max(...childSizes.map(s=>s.width))+GRID_GAP_X;
-    const cellH=Math.max(...childSizes.map(s=>s.height))+GRID_GAP_Y;
-    const padX=1.2;
-    const padY=1.1;
-    const attrRows=Math.max(1,Math.ceil((Array.isArray(node.attributes)?node.attributes.length:0)/Math.max(1,Math.floor((rows*cellH)/0.16))));
-    const attrPadX=attrRows>1?0.8:0.5;
-    const gridW=cellW*cols;
-    const gridH=cellH*rows;
-
-    node.size={
-      width:Math.max(own.width,gridW+padX+attrPadX),
-      height:Math.max(own.height,gridH+padY)
-    };
-
-    const parentBounds=getNodeBounds(node);
-    const startX=parentBounds.minX+((node.size.width-gridW)/2)+cellW/2;
-    const startY=parentBounds.maxY-((node.size.height-gridH)/2)-cellH/2;
-
-    kids.forEach((child,idx)=>{
-      const col=idx%cols;
-      const row=Math.floor(idx/cols);
-      if(!child.position) child.position={x:0,y:0,z:0};
-      child.position.x=startX+col*cellW;
-      child.position.y=startY-row*cellH;
-      child.position.z=0;
-    });
-
-    return node.size;
-  }
-
+  const childrenByParent=getChildrenByParent(nodes);
+  const metrics=new Map();
   const roots=nodes.filter(n=>!n.parentClassId);
-  roots.forEach(layoutNode);
+  roots.forEach(root=>measureLayoutTree(root,childrenByParent,metrics));
+  roots.forEach(root=>{
+    const p=root.position||{x:0,y:0,z:0};
+    placeMeasuredTree(root,p.x||0,p.y||0,childrenByParent,metrics);
+  });
 }
 function getNodeBounds(node){
   const size=getNodeSize(node);
@@ -605,7 +1003,13 @@ function resolveHyperclassOverlaps(){
   }
 }
 export async function optimizeAndRefreshLayout(context, options={}){
-  const algorithm=options.algorithm||'grid';
+  const algorithm=normalizeLayoutAlgorithm(options.algorithm||getLayoutSettings().algorithm);
+  setLayoutSettings({ ...getLayoutSettings(), algorithm }, { applyContext:false });
+  applyDataMetadataToContext(context);
+  if(algorithm==='none'){
+    updateLayoutFromData(context,options);
+    return { algorithm, skipped:true };
+  }
   applyLayoutByAlgorithm(algorithm);
   layoutChildrenInsideParents();
   resolveHyperclassOverlaps();

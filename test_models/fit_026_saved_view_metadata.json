@@ -1,0 +1,135 @@
+{
+  "metadata": {
+    "name": "Fit 026 Saved View Metadata",
+    "purpose": "Verifies that metadata.layout.fit is applied on load instead of being immediately overwritten by a fresh fit.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "fit",
+      "metadata",
+      "camera"
+    ],
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.11,
+        "fitHeightDistance": 25,
+        "fitWidthDistance": 18,
+        "distance": 25,
+        "diagramWidth": 3.6,
+        "diagramHeight": 1.9,
+        "diagramDepth": 0.11,
+        "radius": 2.05,
+        "center": {
+          "x": 7,
+          "y": -4,
+          "z": 0.25
+        },
+        "cameraAspect": 1.2,
+        "cameraFov": 52
+      }
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "fit_alpha",
+        "name": "Saved Fit Alpha",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "fit_alpha_attr_1",
+            "name": "state"
+          },
+          {
+            "id": "fit_alpha_attr_2",
+            "name": "owner"
+          }
+        ],
+        "position": {
+          "x": -1.5,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.8
+        },
+        "rendering": {
+          "class": {
+            "color": "#ffd166",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "fit_beta",
+        "name": "Saved Fit Beta",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "fit_beta_attr_1",
+            "name": "status"
+          }
+        ],
+        "position": {
+          "x": 1.6,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 2,
+          "height": 1.8
+        },
+        "rendering": {
+          "class": {
+            "color": "#8ecae6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "fit_alpha_to_beta",
+        "sourceClassId": "fit_alpha",
+        "targetClassId": "fit_beta",
+        "rendering": {
+          "labelText": "uses saved fit",
+          "lineColor": "#2563eb",
+          "lineWidth": 2,
+          "relationshipCornerRadius": 0.18
+        }
+      }
+    ]
+  }
+}

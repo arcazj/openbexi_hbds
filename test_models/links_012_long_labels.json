@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "name": "Links 012 Long Labels",
+    "purpose": "Validates long link label placement and collision separation.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "long-labels"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "long_link_source",
+        "name": "Source",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "long_link_source_attr_1",
+            "name": "status"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -2.6,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "long_link_target",
+        "name": "Target",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "long_link_target_attr_1",
+            "name": "status"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 2.6,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_long_label_primary",
+        "sourceClassId": "long_link_source",
+        "targetClassId": "long_link_target",
+        "name": "synchronizes a very long relationship label across operational boundaries",
+        "rendering": {
+          "labelText": "synchronizes a very long relationship label across operational boundaries",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_long_label_secondary",
+        "sourceClassId": "long_link_target",
+        "targetClassId": "long_link_source",
+        "name": "returns another extremely long label for bidirectional validation",
+        "rendering": {
+          "labelText": "returns another extremely long label for bidirectional validation",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

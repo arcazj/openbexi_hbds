@@ -1,0 +1,218 @@
+{
+  "metadata": {
+    "name": "Links 011 Short Labels",
+    "purpose": "Verifies short link labels, small arrowheads, and boundary hub contact.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "short-labels"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "short_link_a",
+        "name": "Node A",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "short_link_a_attr_1",
+            "name": "a1"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -2,
+          "y": 0.6,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "short_link_b",
+        "name": "Node B",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "short_link_b_attr_1",
+            "name": "b1"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": -0.7,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "short_link_c",
+        "name": "Node C",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "short_link_c_attr_1",
+            "name": "c1"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 2,
+          "y": 0.6,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_short_a_b",
+        "sourceClassId": "short_link_a",
+        "targetClassId": "short_link_b",
+        "name": "x",
+        "rendering": {
+          "labelText": "x",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_short_b_c",
+        "sourceClassId": "short_link_b",
+        "targetClassId": "short_link_c",
+        "name": "y",
+        "rendering": {
+          "labelText": "y",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_short_c_a",
+        "sourceClassId": "short_link_c",
+        "targetClassId": "short_link_a",
+        "name": "z",
+        "rendering": {
+          "labelText": "z",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

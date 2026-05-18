@@ -1,0 +1,234 @@
+{
+  "metadata": {
+    "name": "Links 014 Class To Hyperclass",
+    "purpose": "Validates mixed target routing between a class hub and a hyperclass hub.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "class-hyperclass"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "external_sensor",
+        "name": "Sensor",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "external_sensor_attr_1",
+            "name": "signal"
+          },
+          {
+            "id": "external_sensor_attr_2",
+            "name": "health"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.1,
+          "y": 0.6,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "hyper_monitoring",
+        "name": "Monitoring Domain",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "hyper_monitoring_attr_1",
+            "name": "window"
+          }
+        ],
+        "children": [
+          "monitor_alert",
+          "monitor_rule"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0.8,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 5.2,
+          "height": 3.3
+        },
+        "rendering": {
+          "class": {
+            "color": "#ecfccb",
+            "metallicColor": "#bbf7d0",
+            "material": "metallic",
+            "borderColor": "#15803d",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#15803d",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#15803d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "monitor_alert",
+        "name": "Alert",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "monitor_alert_attr_1",
+            "name": "severity"
+          }
+        ],
+        "parentClassId": "hyper_monitoring",
+        "position": {
+          "x": -0.2,
+          "y": 0.1,
+          "z": 0
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.55
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "monitor_rule",
+        "name": "Rule",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "monitor_rule_attr_1",
+            "name": "enabled"
+          }
+        ],
+        "parentClassId": "hyper_monitoring",
+        "position": {
+          "x": 1.9,
+          "y": 0.1,
+          "z": 0
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.55
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_sensor_domain",
+        "sourceClassId": "external_sensor",
+        "targetClassId": "hyper_monitoring",
+        "name": "reports into",
+        "rendering": {
+          "labelText": "reports into",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.8,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

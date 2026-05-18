@@ -20,22 +20,24 @@
           4
         ],
         "position": {
-          "x": 0.8201345689999995,
-          "y": 8.38000338,
+          "x": -9.7875,
+          "y": -5.605000000000001,
           "z": 0
         },
         "size": {
-          "width": 7.210000000298023,
-          "height": 6.152499999999999
+          "width": 4.535,
+          "height": 9.160000000000002
         },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
-            "material": "flat",
+            "material": "metallic",
             "borderColor": "#000000",
             "borderWidth": 0.02,
             "cornerRadius": 0.3,
-            "opacity": 0.12
+            "opacity": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -71,13 +73,13 @@
         ],
         "parentClassId": 100,
         "position": {
-          "x": -1.5122498739112444,
-          "y": 9.40724835509796,
-          "z": -1.3877787807814457e-17
+          "x": -10.569999999999999,
+          "y": -5.78,
+          "z": 0
         },
         "size": {
-          "width": 1,
-          "height": 2
+          "width": 1.35,
+          "height": 2.1500000000000004
         },
         "rendering": {
           "class": {
@@ -116,12 +118,12 @@
         ],
         "parentClassId": 100,
         "position": {
-          "x": 2.4770003176859614,
-          "y": 9.357767218284902,
-          "z": -1.3877787807814457e-17
+          "x": -10.569999999999999,
+          "y": -8.635000000000002,
+          "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.6700000000000002,
           "height": 2
         },
         "rendering": {
@@ -161,12 +163,12 @@
         ],
         "parentClassId": 100,
         "position": {
-          "x": -1.4135152082851121,
-          "y": 6.778622691973551,
-          "z": -1.3877787807814457e-17
+          "x": -10.569999999999999,
+          "y": -2.9250000000000003,
+          "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.35,
           "height": 2
         },
         "rendering": {
@@ -209,22 +211,24 @@
           13
         ],
         "position": {
-          "x": 9.819612336999999,
-          "y": 8.820235932000003,
+          "x": -9.7875,
+          "y": 5.68,
           "z": 0
         },
         "size": {
-          "width": 6.309999989271162,
-          "height": 4.839999904632569
+          "width": 4.425000000000001,
+          "height": 6.23
         },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
-            "material": "flat",
+            "material": "metallic",
             "borderColor": "#000000",
             "borderWidth": 0.02,
             "cornerRadius": 0.3,
-            "opacity": 0.12
+            "opacity": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -255,12 +259,12 @@
         ],
         "parentClassId": 101,
         "position": {
-          "x": 7.984282211372061,
-          "y": 8.984475364872447,
+          "x": -10.487499999999999,
+          "y": 6.895,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.35,
           "height": 2
         },
         "rendering": {
@@ -297,12 +301,12 @@
         ],
         "parentClassId": 101,
         "position": {
-          "x": 11.040719736135724,
-          "y": 7.715884509097964,
+          "x": -10.514999999999999,
+          "y": 4.114999999999999,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.6700000000000002,
           "height": 2
         },
         "rendering": {
@@ -347,22 +351,24 @@
           11
         ],
         "position": {
-          "x": -9.036188122126529,
-          "y": -1.9128695614700333,
+          "x": 7.990000000000002,
+          "y": 5.68,
           "z": 0
         },
         "size": {
-          "width": 7.510000095665454,
-          "height": 6.227500047683716
+          "width": 4.545,
+          "height": 9.010000000000002
         },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
-            "material": "flat",
+            "material": "metallic",
             "borderColor": "#000000",
             "borderWidth": 0.02,
             "cornerRadius": 0.3,
-            "opacity": 0.12
+            "opacity": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -393,12 +399,12 @@
         ],
         "parentClassId": 102,
         "position": {
-          "x": -11.764533303164523,
-          "y": -3.5813179937351247,
+          "x": 7.042500000000002,
+          "y": 5.505,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.35,
           "height": 2
         },
         "rendering": {
@@ -436,12 +442,12 @@
         ],
         "parentClassId": 102,
         "position": {
-          "x": -8.688256796364444,
-          "y": -1.912075941011044,
+          "x": 7.317500000000003,
+          "y": 8.285,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.35,
           "height": 2
         },
         "rendering": {
@@ -478,12 +484,12 @@
         ],
         "parentClassId": 102,
         "position": {
-          "x": -6.475506006166931,
-          "y": -3.5909931917094333,
+          "x": 7.335000000000003,
+          "y": 2.7249999999999996,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.35,
           "height": 2
         },
         "rendering": {
@@ -526,22 +532,24 @@
           9
         ],
         "position": {
-          "x": 15.350716048961889,
-          "y": 2.3982668129000437,
+          "x": -0.8874999999999992,
+          "y": 5.68,
           "z": 0
         },
         "size": {
-          "width": 6.510000095665454,
-          "height": 5.0400001907348635
+          "width": 4.645,
+          "height": 6.23
         },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
-            "material": "flat",
+            "material": "metallic",
             "borderColor": "#000000",
             "borderWidth": 0.02,
             "cornerRadius": 0.3,
-            "opacity": 0.12
+            "opacity": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -572,12 +580,12 @@
         ],
         "parentClassId": 103,
         "position": {
-          "x": 13.521348796106992,
-          "y": 1.342017041984918,
+          "x": -1.669999999999999,
+          "y": 6.895,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.44,
           "height": 2
         },
         "rendering": {
@@ -615,12 +623,12 @@
         ],
         "parentClassId": 103,
         "position": {
-          "x": 16.85799982261679,
-          "y": 1.2508741215751669,
+          "x": -1.7249999999999992,
+          "y": 4.114999999999999,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.6700000000000002,
           "height": 2
         },
         "rendering": {
@@ -663,22 +671,24 @@
           8
         ],
         "position": {
-          "x": 1.5760811071656473,
-          "y": -7.350870102811598,
+          "x": 7.935000000000002,
+          "y": -5.605000000000001,
           "z": 0
         },
         "size": {
-          "width": 6.510000095665454,
-          "height": 5.0400001907348635
+          "width": 4.49,
+          "height": 6.23
         },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
-            "material": "flat",
+            "material": "metallic",
             "borderColor": "#000000",
             "borderWidth": 0.02,
             "cornerRadius": 0.3,
-            "opacity": 0.12
+            "opacity": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -709,12 +719,12 @@
         ],
         "parentClassId": 104,
         "position": {
-          "x": -0.9079778878572142,
-          "y": -6.374771810081888,
+          "x": 7.207500000000002,
+          "y": -4.390000000000001,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.35,
           "height": 2
         },
         "rendering": {
@@ -752,12 +762,12 @@
         ],
         "parentClassId": 104,
         "position": {
-          "x": 2.6001964983227923,
-          "y": -8.82078575587647,
+          "x": 7.015000000000002,
+          "y": -7.170000000000002,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.35,
           "height": 2
         },
         "rendering": {
@@ -799,22 +809,24 @@
           12
         ],
         "position": {
-          "x": 12.860922032467965,
-          "y": -8.380557368214108,
+          "x": -0.9149999999999991,
+          "y": -5.605000000000001,
           "z": 0
         },
         "size": {
-          "width": 5.909999904930591,
-          "height": 4.439999809265137
+          "width": 4.585000000000001,
+          "height": 3.45
         },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
-            "material": "flat",
+            "material": "metallic",
             "borderColor": "#000000",
             "borderWidth": 0.02,
             "cornerRadius": 0.3,
-            "opacity": 0.12
+            "opacity": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -844,12 +856,12 @@
         ],
         "parentClassId": 105,
         "position": {
-          "x": 11.1811217581594,
-          "y": -8.891627879359403,
+          "x": -1.7799999999999994,
+          "y": -5.780000000000001,
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.5550000000000002,
           "height": 2
         },
         "rendering": {
@@ -882,6 +894,7 @@
         "targetClassId": 2,
         "rendering": {
           "labelText": "shares road with",
+          "orthogonalStyle": "auto",
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -897,13 +910,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 2,
         "targetClassId": 4,
         "rendering": {
           "labelText": "shares road with",
+          "orthogonalStyle": "auto",
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -930,13 +945,15 @@
               "z": 0
             }
           ]
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 3,
         "targetClassId": 4,
         "rendering": {
           "labelText": "feeds public transit",
+          "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -952,13 +969,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 13,
         "targetClassId": 3,
         "rendering": {
           "labelText": "supports last-mile mobility",
+          "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -974,13 +993,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 4,
         "targetClassId": 5,
         "rendering": {
           "labelText": "transfers passengers to",
+          "orthogonalStyle": "auto",
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -996,13 +1017,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 4,
         "targetClassId": 10,
         "rendering": {
           "labelText": "interchanges with",
+          "orthogonalStyle": "auto",
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1029,13 +1052,15 @@
               "z": 0
             }
           ]
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 10,
         "targetClassId": 11,
         "rendering": {
           "labelText": "interchanges with",
+          "orthogonalStyle": "auto",
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1051,13 +1076,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 5,
         "targetClassId": 11,
         "rendering": {
           "labelText": "shares rail corridor",
+          "orthogonalStyle": "auto",
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -1073,13 +1100,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 5,
         "targetClassId": 102,
         "rendering": {
           "labelText": "connects stations",
+          "orthogonalStyle": "auto",
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1095,13 +1124,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 10,
         "targetClassId": 102,
         "rendering": {
           "labelText": "serves urban stations",
+          "orthogonalStyle": "auto",
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1117,13 +1148,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 11,
         "targetClassId": 102,
         "rendering": {
           "labelText": "serves street stations",
+          "orthogonalStyle": "auto",
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1139,13 +1172,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 6,
         "targetClassId": 103,
         "rendering": {
           "labelText": "connects airports",
+          "orthogonalStyle": "auto",
           "lineColor": "#00838f",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1161,13 +1196,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 9,
         "targetClassId": 103,
         "rendering": {
           "labelText": "supports air service",
+          "orthogonalStyle": "auto",
           "lineColor": "#00838f",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -1183,13 +1220,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 6,
         "targetClassId": 9,
         "rendering": {
           "labelText": "supports regional transfer",
+          "orthogonalStyle": "auto",
           "lineColor": "#00838f",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1205,13 +1244,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 7,
         "targetClassId": 8,
         "rendering": {
           "labelText": "shares waterways with",
+          "orthogonalStyle": "auto",
           "lineColor": "#00838f",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1227,13 +1268,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 8,
         "targetClassId": 1,
         "rendering": {
           "labelText": "carries vehicles",
+          "orthogonalStyle": "auto",
           "lineColor": "#ef6c00",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1260,13 +1303,15 @@
               "z": 0
             }
           ]
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 8,
         "targetClassId": 4,
         "rendering": {
           "labelText": "carries passengers",
+          "orthogonalStyle": "auto",
           "lineColor": "#ef6c00",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1282,13 +1327,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 104,
         "targetClassId": 100,
         "rendering": {
           "labelText": "connects ports to roads",
+          "orthogonalStyle": "auto",
           "lineColor": "#ad1457",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1304,13 +1351,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 100,
         "targetClassId": 102,
         "rendering": {
           "labelText": "interchanges with",
+          "orthogonalStyle": "auto",
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1326,13 +1375,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 101,
         "targetClassId": 100,
         "rendering": {
           "labelText": "shares urban corridors",
+          "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -1359,13 +1410,15 @@
               "z": 0
             }
           ]
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 102,
         "targetClassId": 101,
         "rendering": {
           "labelText": "feeds last-mile mobility",
+          "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -1392,13 +1445,15 @@
               "z": 0
             }
           ]
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 103,
         "targetClassId": 100,
         "rendering": {
           "labelText": "connects airports to roads",
+          "orthogonalStyle": "auto",
           "lineColor": "#00838f",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1425,13 +1480,15 @@
               "z": 0
             }
           ]
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 103,
         "targetClassId": 102,
         "rendering": {
           "labelText": "connects airports to rail",
+          "orthogonalStyle": "auto",
           "lineColor": "#00838f",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1458,13 +1515,15 @@
               "z": 0
             }
           ]
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 105,
         "targetClassId": 103,
         "rendering": {
           "labelText": "uses launch airspace",
+          "orthogonalStyle": "auto",
           "lineColor": "#ad1457",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1480,13 +1539,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 12,
         "targetClassId": 105,
         "rendering": {
           "labelText": "launches from",
+          "orthogonalStyle": "auto",
           "lineColor": "#ad1457",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -1502,13 +1563,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8,
           "routePoints": []
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 105,
         "targetClassId": 100,
         "rendering": {
           "labelText": "requires ground logistics",
+          "orthogonalStyle": "auto",
           "lineColor": "#ad1457",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -1535,8 +1598,54 @@
               "z": 0
             }
           ]
-        }
+        },
+        "allowSelfLink": true
       }
     ]
+  },
+  "metadata": {
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "grid",
+      "fit": {
+        "padding": 1.15,
+        "fitHeightDistance": 38.6811,
+        "fitWidthDistance": 23.3619,
+        "distance": 38.6811,
+        "diagramWidth": 22.8175,
+        "diagramHeight": 21.526,
+        "diagramDepth": 0.15,
+        "radius": 15.6846,
+        "center": {
+          "x": -0.7962,
+          "y": 0,
+          "z": 0.075
+        },
+        "cameraAspect": 1.6557,
+        "cameraFov": 50
+      }
+    }
   }
 }

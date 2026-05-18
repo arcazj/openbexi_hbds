@@ -49,6 +49,84 @@ canvas {
   width: 100%;
 }
 
+.settings-group {
+  gap: 0;
+}
+
+.settings-title,
+.settings-subtitle {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.settings-group summary.settings-title {
+  align-items: center;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  padding: 2px 0;
+}
+
+.settings-group summary.settings-title::-webkit-details-marker {
+  display: none;
+}
+
+.settings-group summary.settings-title::after {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  color: #334155;
+  content: "+";
+  font-size: 12px;
+  height: 18px;
+  line-height: 16px;
+  text-align: center;
+  width: 18px;
+}
+
+.settings-group[open] summary.settings-title::after {
+  content: "-";
+}
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 9px;
+}
+
+.settings-subtitle {
+  margin-top: 4px;
+}
+
+.inline-field,
+.range-field {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.inline-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.range-field {
+  display: grid;
+  grid-template-columns: minmax(74px, 0.9fr) minmax(120px, 1.1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.range-field input[type="range"] {
+  width: 100%;
+}
+
 select {
   padding: 8px;
   border-radius: 4px;

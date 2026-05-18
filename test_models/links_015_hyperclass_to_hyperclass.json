@@ -1,0 +1,233 @@
+{
+  "metadata": {
+    "name": "Links 015 Hyperclass To Hyperclass",
+    "purpose": "Validates hyperclass to hyperclass hubs, arrowheads, labels, and orthogonal routes.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "hyperclass-hyperclass"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "hyper_left",
+        "name": "Planning",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "hyper_left_attr_1",
+            "name": "cadence"
+          }
+        ],
+        "children": [
+          "plan_goal"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -2.5,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 3.8,
+          "height": 3.2
+        },
+        "rendering": {
+          "class": {
+            "color": "#dbeafe",
+            "metallicColor": "#c7d2fe",
+            "material": "metallic",
+            "borderColor": "#2563eb",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#2563eb",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#2563eb",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "plan_goal",
+        "name": "Goal",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "plan_goal_attr_1",
+            "name": "metric"
+          }
+        ],
+        "parentClassId": "hyper_left",
+        "position": {
+          "x": -2.5,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "hyper_right",
+        "name": "Execution",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "hyper_right_attr_1",
+            "name": "state"
+          }
+        ],
+        "children": [
+          "exec_task"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 2.5,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 3.8,
+          "height": 3.2
+        },
+        "rendering": {
+          "class": {
+            "color": "#ecfccb",
+            "metallicColor": "#bbf7d0",
+            "material": "metallic",
+            "borderColor": "#15803d",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#15803d",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#15803d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "exec_task",
+        "name": "Task",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "exec_task_attr_1",
+            "name": "assignee"
+          }
+        ],
+        "parentClassId": "hyper_right",
+        "position": {
+          "x": 2.5,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_planning_execution",
+        "sourceClassId": "hyper_left",
+        "targetClassId": "hyper_right",
+        "name": "authorizes",
+        "rendering": {
+          "labelText": "authorizes",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}
