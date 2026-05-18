@@ -1,0 +1,590 @@
+{
+  "metadata": {
+    "name": "Links 024 Dense Relationship Edge Ports",
+    "purpose": "Dense class-to-class link routing with many hollow relationship ports and attribute hubs.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "relationship-ports",
+      "dense"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "dense_hub",
+        "name": "Transit Core",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_hub_state",
+            "name": "state"
+          },
+          {
+            "id": "dense_hub_policy",
+            "name": "policy"
+          },
+          {
+            "id": "dense_hub_score",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.65,
+          "height": 1.95
+        },
+        "rendering": {
+          "class": {
+            "color": "#d5a243",
+            "metallicColor": "#d5a243",
+            "material": "metallic",
+            "borderColor": "#795719",
+            "cornerRadius": 0.13,
+            "metalness": 0.55,
+            "roughness": 0.22
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_north",
+        "name": "North Gate",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_north_route",
+            "name": "route"
+          },
+          {
+            "id": "dense_north_load",
+            "name": "load"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 3,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#7fa0aa",
+            "metallicColor": "#7fa0aa",
+            "material": "metallic",
+            "borderColor": "#345463",
+            "cornerRadius": 0.13,
+            "metalness": 0.5,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#284a59",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#284a59",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_south",
+        "name": "South Gate",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_south_route",
+            "name": "route"
+          },
+          {
+            "id": "dense_south_load",
+            "name": "load"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": -3,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#9f6936",
+            "metallicColor": "#9f6936",
+            "material": "metallic",
+            "borderColor": "#62370f",
+            "cornerRadius": 0.13,
+            "metalness": 0.53,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#5b310f",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#5b310f",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_east",
+        "name": "East Yard",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_east_lane",
+            "name": "lane"
+          },
+          {
+            "id": "dense_east_owner",
+            "name": "owner"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 3.4,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#69906c",
+            "metallicColor": "#69906c",
+            "material": "metallic",
+            "borderColor": "#31593a",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#234d31",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#234d31",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_west",
+        "name": "West Yard",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_west_lane",
+            "name": "lane"
+          },
+          {
+            "id": "dense_west_owner",
+            "name": "owner"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.4,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#b395bc",
+            "metallicColor": "#b395bc",
+            "material": "metallic",
+            "borderColor": "#6c4a75",
+            "cornerRadius": 0.13,
+            "metalness": 0.5,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#59415f",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#59415f",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_ne",
+        "name": "Northeast",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_ne_signal",
+            "name": "signal"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 3.2,
+          "y": 2.35,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.5
+        },
+        "rendering": {
+          "class": {
+            "color": "#8fc8df",
+            "metallicColor": "#8fc8df",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.5,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_nw",
+        "name": "Northwest",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_nw_signal",
+            "name": "signal"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.2,
+          "y": 2.35,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.5
+        },
+        "rendering": {
+          "class": {
+            "color": "#c8a8d6",
+            "metallicColor": "#c8a8d6",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.5,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_se",
+        "name": "Southeast",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_se_signal",
+            "name": "signal"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 3.2,
+          "y": -2.35,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.5
+        },
+        "rendering": {
+          "class": {
+            "color": "#f3a05f",
+            "metallicColor": "#f3a05f",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.53,
+            "roughness": 0.23
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_sw",
+        "name": "Southwest",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_sw_signal",
+            "name": "signal"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.2,
+          "y": -2.35,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.5
+        },
+        "rendering": {
+          "class": {
+            "color": "#b1dfc0",
+            "metallicColor": "#b1dfc0",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.48,
+            "roughness": 0.25
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "dense_link_n_core",
+        "sourceClassId": "dense_north",
+        "targetClassId": "dense_hub",
+        "name": "feeds",
+        "rendering": {
+          "labelText": "feeds",
+          "lineColor": "#345463",
+          "sourcePortSide": "bottom",
+          "targetPortSide": "top",
+          "orthogonalStyle": "vertical",
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "dense_link_s_core",
+        "sourceClassId": "dense_south",
+        "targetClassId": "dense_hub",
+        "name": "returns",
+        "rendering": {
+          "labelText": "returns",
+          "lineColor": "#7a3f14",
+          "sourcePortSide": "top",
+          "targetPortSide": "bottom",
+          "orthogonalStyle": "vertical",
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "dense_link_e_core",
+        "sourceClassId": "dense_east",
+        "targetClassId": "dense_hub",
+        "name": "loads",
+        "rendering": {
+          "labelText": "loads",
+          "lineColor": "#31593a",
+          "sourcePortSide": "left",
+          "targetPortSide": "right",
+          "orthogonalStyle": "horizontal",
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "dense_link_w_core",
+        "sourceClassId": "dense_west",
+        "targetClassId": "dense_hub",
+        "name": "stages",
+        "rendering": {
+          "labelText": "stages",
+          "lineColor": "#6c4a75",
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "orthogonalStyle": "horizontal",
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "dense_link_nw_ne",
+        "sourceClassId": "dense_nw",
+        "targetClassId": "dense_ne",
+        "name": "cross-feed",
+        "rendering": {
+          "labelText": "cross-feed",
+          "lineColor": "#6b4b82",
+          "sourcePortSide": "top",
+          "targetPortSide": "top",
+          "routeSide": "top",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.8,
+          "relationshipCornerRadius": 0.2
+        }
+      },
+      {
+        "id": "dense_link_sw_se",
+        "sourceClassId": "dense_sw",
+        "targetClassId": "dense_se",
+        "name": "balances",
+        "rendering": {
+          "labelText": "balances",
+          "lineColor": "#087443",
+          "sourcePortSide": "bottom",
+          "targetPortSide": "bottom",
+          "routeSide": "bottom",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.8,
+          "relationshipCornerRadius": 0.2
+        }
+      },
+      {
+        "id": "dense_link_ne_se",
+        "sourceClassId": "dense_ne",
+        "targetClassId": "dense_se",
+        "name": "routes",
+        "rendering": {
+          "labelText": "routes",
+          "lineColor": "#155e75",
+          "sourcePortSide": "right",
+          "targetPortSide": "right",
+          "routeSide": "right",
+          "orthogonalStyle": "vertical",
+          "orthogonalClearance": 0.75,
+          "relationshipCornerRadius": 0.2
+        }
+      },
+      {
+        "id": "dense_link_nw_sw",
+        "sourceClassId": "dense_nw",
+        "targetClassId": "dense_sw",
+        "name": "syncs",
+        "rendering": {
+          "labelText": "syncs",
+          "lineColor": "#59415f",
+          "sourcePortSide": "left",
+          "targetPortSide": "left",
+          "routeSide": "left",
+          "orthogonalStyle": "vertical",
+          "orthogonalClearance": 0.75,
+          "relationshipCornerRadius": 0.2
+        }
+      },
+      {
+        "id": "dense_link_n_s",
+        "sourceClassId": "dense_north",
+        "targetClassId": "dense_south",
+        "name": "express",
+        "rendering": {
+          "labelText": "express",
+          "lineColor": "#0f766e",
+          "sourcePortSide": "left",
+          "targetPortSide": "left",
+          "routeSide": "left",
+          "orthogonalStyle": "vertical",
+          "orthogonalClearance": 1.15,
+          "relationshipCornerRadius": 0.2
+        }
+      },
+      {
+        "id": "dense_link_e_w",
+        "sourceClassId": "dense_east",
+        "targetClassId": "dense_west",
+        "name": "shuttle",
+        "rendering": {
+          "labelText": "shuttle",
+          "lineColor": "#a16207",
+          "sourcePortSide": "top",
+          "targetPortSide": "top",
+          "routeSide": "top",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 1.2,
+          "relationshipCornerRadius": 0.2
+        }
+      }
+    ]
+  }
+}

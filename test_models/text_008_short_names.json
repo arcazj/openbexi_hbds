@@ -1,0 +1,139 @@
+{
+  "metadata": {
+    "name": "Text 008 Short Names",
+    "purpose": "Validates tiny labels and small link labels without disappearing.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "text",
+      "short"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "a",
+        "name": "A",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "a_attr_1",
+            "name": "x"
+          },
+          {
+            "id": "a_attr_2",
+            "name": "y"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -1.2,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.1,
+          "height": 1.45
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "b",
+        "name": "B",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "b_attr_1",
+            "name": "m"
+          },
+          {
+            "id": "b_attr_2",
+            "name": "n"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 1.2,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.1,
+          "height": 1.45
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "l",
+        "sourceClassId": "a",
+        "targetClassId": "b",
+        "name": "x",
+        "rendering": {
+          "labelText": "x",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 11
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,325 @@
+{
+  "metadata": {
+    "name": "Links 018 Orthogonal Routing Avoidance",
+    "purpose": "Exercises obstacle-aware orthogonal links that should avoid class and attribute blocks.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "orthogonal",
+      "avoidance"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "route_source",
+        "name": "Bridge",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "route_source_attr_1",
+            "name": "name"
+          },
+          {
+            "id": "route_source_attr_2",
+            "name": "type"
+          },
+          {
+            "id": "route_source_attr_3",
+            "name": "condition"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.2,
+          "y": 1.45,
+          "z": 0
+        },
+        "size": {
+          "width": 1.55,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "route_target",
+        "name": "Road",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "route_target_attr_1",
+            "name": "name"
+          },
+          {
+            "id": "route_target_attr_2",
+            "name": "speedLimit"
+          },
+          {
+            "id": "route_target_attr_3",
+            "name": "capacity"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 3.2,
+          "y": -1.45,
+          "z": 0
+        },
+        "size": {
+          "width": 1.55,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "route_obstacle_a",
+        "name": "River",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "route_obstacle_a_attr_1",
+            "name": "flow"
+          },
+          {
+            "id": "route_obstacle_a_attr_2",
+            "name": "depth"
+          },
+          {
+            "id": "route_obstacle_a_attr_3",
+            "name": "risk"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -0.7,
+          "y": 0.25,
+          "z": 0
+        },
+        "size": {
+          "width": 1.55,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "route_obstacle_b",
+        "name": "Footpath",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "route_obstacle_b_attr_1",
+            "name": "access"
+          },
+          {
+            "id": "route_obstacle_b_attr_2",
+            "name": "width"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 1.6,
+          "y": 2,
+          "z": 0
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "route_obstacle_c",
+        "name": "Rail",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "route_obstacle_c_attr_1",
+            "name": "line"
+          },
+          {
+            "id": "route_obstacle_c_attr_2",
+            "name": "signal"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0.35,
+          "y": -2.7,
+          "z": 0
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.65
+        },
+        "rendering": {
+          "class": {
+            "color": "#b99bd0",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_bridge_road",
+        "sourceClassId": "route_source",
+        "targetClassId": "route_target",
+        "name": "crosses and connects around obstacles",
+        "rendering": {
+          "labelText": "crosses and connects around obstacles",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 1.05,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_road_bridge",
+        "sourceClassId": "route_target",
+        "targetClassId": "route_source",
+        "name": "supported by",
+        "rendering": {
+          "labelText": "supported by",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 1.15,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

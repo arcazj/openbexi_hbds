@@ -1,0 +1,325 @@
+{
+  "metadata": {
+    "name": "Links 023 Relationship Edge Ports Reference",
+    "purpose": "Reference case where relationship links use hollow edge ports while attributes keep red hubs.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "relationship-ports",
+      "attributes"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "port_north",
+        "name": "North",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "port_north_attr_n",
+            "name": "n"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 2.8,
+          "z": 0
+        },
+        "size": {
+          "width": 1.85,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#5f8290",
+            "metallicColor": "#5f8290",
+            "material": "metallic",
+            "borderColor": "#2d5362",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.23
+          },
+          "attributes": {
+            "checkboxColor": "#123b4a",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#123b4a",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "port_west",
+        "name": "West",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "port_west_attr_w",
+            "name": "w"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -4.1,
+          "y": -0.55,
+          "z": 0
+        },
+        "size": {
+          "width": 1.75,
+          "height": 2.0
+        },
+        "rendering": {
+          "class": {
+            "color": "#b295ba",
+            "metallicColor": "#b295ba",
+            "material": "metallic",
+            "borderColor": "#735476",
+            "cornerRadius": 0.13,
+            "metalness": 0.5,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#59415f",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#59415f",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "port_shared",
+        "name": "Shared Hub",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "port_shared_attr_state",
+            "name": "state"
+          },
+          {
+            "id": "port_shared_attr_owner",
+            "name": "owner"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": -0.55,
+          "z": 0
+        },
+        "size": {
+          "width": 1.9,
+          "height": 2.1
+        },
+        "rendering": {
+          "class": {
+            "color": "#ba913b",
+            "metallicColor": "#ba913b",
+            "material": "metallic",
+            "borderColor": "#7a5a1f",
+            "cornerRadius": 0.13,
+            "metalness": 0.55,
+            "roughness": 0.22
+          },
+          "attributes": {
+            "checkboxColor": "#6f4311",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#6f4311",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "port_east",
+        "name": "East",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "port_east_attr_e",
+            "name": "e"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 4.25,
+          "y": -0.55,
+          "z": 0
+        },
+        "size": {
+          "width": 1.75,
+          "height": 2.0
+        },
+        "rendering": {
+          "class": {
+            "color": "#5f8266",
+            "metallicColor": "#5f8266",
+            "material": "metallic",
+            "borderColor": "#31593a",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#0f4b35",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#0f4b35",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "port_south",
+        "name": "South",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "port_south_attr_s",
+            "name": "s"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": -3.55,
+          "z": 0
+        },
+        "size": {
+          "width": 1.75,
+          "height": 2.0
+        },
+        "rendering": {
+          "class": {
+            "color": "#9c642d",
+            "metallicColor": "#9c642d",
+            "material": "metallic",
+            "borderColor": "#633913",
+            "cornerRadius": 0.13,
+            "metalness": 0.54,
+            "roughness": 0.23
+          },
+          "attributes": {
+            "checkboxColor": "#5b310f",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#5b310f",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "port_link_w_feeds_n",
+        "sourceClassId": "port_west",
+        "targetClassId": "port_north",
+        "name": "w feeds",
+        "rendering": {
+          "labelText": "w feeds",
+          "lineColor": "#8a5a13",
+          "lineWidth": 2,
+          "sourcePortSide": "top",
+          "targetPortSide": "left",
+          "routeSide": "left",
+          "orthogonalStyle": "vertical",
+          "orthogonalClearance": 0.85,
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "port_link_n_feeds_shared",
+        "sourceClassId": "port_north",
+        "targetClassId": "port_shared",
+        "name": "n feeds",
+        "rendering": {
+          "labelText": "n feeds",
+          "lineColor": "#9a6a1c",
+          "lineWidth": 2,
+          "sourcePortSide": "bottom",
+          "targetPortSide": "top",
+          "orthogonalStyle": "vertical",
+          "orthogonalClearance": 0.65,
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "port_link_shared_feeds_e",
+        "sourceClassId": "port_shared",
+        "targetClassId": "port_east",
+        "name": "e feeds",
+        "rendering": {
+          "labelText": "e feeds",
+          "lineColor": "#146a73",
+          "lineWidth": 2,
+          "sourcePortSide": "right",
+          "targetPortSide": "top",
+          "routeSide": "top",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.7,
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "port_link_shared_feeds_s",
+        "sourceClassId": "port_shared",
+        "targetClassId": "port_south",
+        "name": "s feeds",
+        "rendering": {
+          "labelText": "s feeds",
+          "lineColor": "#12824e",
+          "lineWidth": 2,
+          "sourcePortSide": "bottom",
+          "targetPortSide": "top",
+          "orthogonalStyle": "vertical",
+          "orthogonalClearance": 0.65,
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "port_link_e_returns_shared",
+        "sourceClassId": "port_east",
+        "targetClassId": "port_shared",
+        "name": "returns",
+        "rendering": {
+          "labelText": "returns",
+          "lineColor": "#5d3168",
+          "lineWidth": 2,
+          "sourcePortSide": "bottom",
+          "targetPortSide": "bottom",
+          "routeSide": "bottom",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.95,
+          "relationshipCornerRadius": 0.2
+        }
+      }
+    ]
+  }
+}

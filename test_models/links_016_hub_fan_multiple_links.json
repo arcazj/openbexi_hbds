@@ -1,0 +1,357 @@
+{
+  "metadata": {
+    "name": "Links 016 Hub Fan Multiple Links",
+    "purpose": "Exercises fan-in/fan-out lane separation and hub boundary arrow placement.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "fan",
+      "hubs"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "hub_center",
+        "name": "Shared Hub",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "hub_center_attr_1",
+            "name": "state"
+          },
+          {
+            "id": "hub_center_attr_2",
+            "name": "owner"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.55,
+          "height": 1.9
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "hub_north",
+        "name": "North",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "hub_north_attr_1",
+            "name": "n"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 2.8,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "hub_east",
+        "name": "East",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "hub_east_attr_1",
+            "name": "e"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 3,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "hub_south",
+        "name": "South",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "hub_south_attr_1",
+            "name": "s"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": -2.8,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "hub_west",
+        "name": "West",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "hub_west_attr_1",
+            "name": "w"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#b99bd0",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_north_center",
+        "sourceClassId": "hub_north",
+        "targetClassId": "hub_center",
+        "name": "n feeds",
+        "rendering": {
+          "labelText": "n feeds",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_east_center",
+        "sourceClassId": "hub_east",
+        "targetClassId": "hub_center",
+        "name": "e feeds",
+        "rendering": {
+          "labelText": "e feeds",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_south_center",
+        "sourceClassId": "hub_south",
+        "targetClassId": "hub_center",
+        "name": "s feeds",
+        "rendering": {
+          "labelText": "s feeds",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_west_center",
+        "sourceClassId": "hub_west",
+        "targetClassId": "hub_center",
+        "name": "w feeds",
+        "rendering": {
+          "labelText": "w feeds",
+          "lineColor": "#874a17",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_center_east",
+        "sourceClassId": "hub_center",
+        "targetClassId": "hub_east",
+        "name": "returns",
+        "rendering": {
+          "labelText": "returns",
+          "lineColor": "#694b7d",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

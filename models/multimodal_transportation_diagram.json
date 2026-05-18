@@ -1,0 +1,841 @@
+{
+  "metadata": {
+    "name": "Multimodal Transportation Diagram",
+    "description": "HBDS model reconstructed from the multimodal transportation diagram.",
+    "preserveLayout": true
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "road_transport",
+        "name": "Road Transport",
+        "type": "hyperclass",
+        "attributes": [
+          { "id": "road_network_id", "name": "Network ID" },
+          { "id": "road_type", "name": "Road type" },
+          { "id": "road_traffic_capacity", "name": "Traffic capacity" },
+          { "id": "road_average_speed", "name": "Average speed" },
+          { "id": "road_regulation_zone", "name": "Regulation zone" },
+          { "id": "road_signal_priority", "name": "Signal priority" },
+          { "id": "road_lane_policy", "name": "Lane policy" }
+        ],
+        "children": ["car", "motorcycle", "bus"],
+        "position": { "x": -4.8, "y": 3.7, "z": 0 },
+        "size": { "width": 4.8, "height": 3.5 },
+        "rendering": {
+          "class": { "color": "#ffffff", "borderColor": "#111827", "borderWidth": 0.02, "cornerRadius": 0.18, "opacity": 0.1 },
+          "attributes": { "checkboxColor": "#ef4444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "car",
+        "name": "Car",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "car_model", "name": "Model" },
+          { "id": "car_year", "name": "Year" },
+          { "id": "car_vin", "name": "VIN" },
+          { "id": "car_engine", "name": "Engine" },
+          { "id": "car_color", "name": "Color" },
+          { "id": "car_fuel_type", "name": "Fuel type" },
+          { "id": "car_transmission", "name": "Transmission" },
+          { "id": "car_mileage", "name": "Mileage" },
+          { "id": "car_license_plate", "name": "License plate" }
+        ],
+        "parentClassId": "road_transport",
+        "position": { "x": -6.25, "y": 4.55, "z": 0 },
+        "size": { "width": 1.45, "height": 0.68 },
+        "rendering": {
+          "class": { "color": "#1f4e79", "borderColor": "#153754", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "motorcycle",
+        "name": "Motorcycle",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "motorcycle_model", "name": "Model" },
+          { "id": "motorcycle_brand", "name": "Brand" },
+          { "id": "motorcycle_vin", "name": "VIN" },
+          { "id": "motorcycle_type", "name": "Type" },
+          { "id": "motorcycle_engine_size", "name": "Engine size" },
+          { "id": "motorcycle_fuel", "name": "Fuel" },
+          { "id": "motorcycle_color", "name": "Color" },
+          { "id": "motorcycle_license_plate", "name": "License plate" }
+        ],
+        "parentClassId": "road_transport",
+        "position": { "x": -6.25, "y": 3.7, "z": 0 },
+        "size": { "width": 1.45, "height": 0.68 },
+        "rendering": {
+          "class": { "color": "#f97316", "borderColor": "#c2410c", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "bus",
+        "name": "Bus",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "bus_operator", "name": "Operator" },
+          { "id": "bus_route_number", "name": "Route number" },
+          { "id": "bus_capacity", "name": "Capacity" },
+          { "id": "bus_fuel_type", "name": "Fuel type" },
+          { "id": "bus_length", "name": "Length" },
+          { "id": "bus_license_plate", "name": "License plate" }
+        ],
+        "parentClassId": "road_transport",
+        "position": { "x": -6.25, "y": 2.75, "z": 0 },
+        "size": { "width": 1.45, "height": 0.68 },
+        "rendering": {
+          "class": { "color": "#a9792b", "borderColor": "#7a541b", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "rail_transport",
+        "name": "Rail Transport",
+        "type": "hyperclass",
+        "attributes": [
+          { "id": "rail_network_id", "name": "Network ID" },
+          { "id": "rail_track_type", "name": "Track type" },
+          { "id": "rail_operator", "name": "Operator" },
+          { "id": "rail_service_frequency", "name": "Service frequency" },
+          { "id": "rail_station_count", "name": "Station count" },
+          { "id": "rail_signal_system", "name": "Signal system" },
+          { "id": "rail_power_system", "name": "Power system" }
+        ],
+        "children": ["train", "subway", "tram"],
+        "position": { "x": -5.05, "y": 0, "z": 0 },
+        "size": { "width": 4.65, "height": 3.05 },
+        "rendering": {
+          "class": { "color": "#ffffff", "borderColor": "#111827", "borderWidth": 0.02, "cornerRadius": 0.18, "opacity": 0.1 },
+          "attributes": { "checkboxColor": "#ef4444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "train",
+        "name": "Train",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "train_type", "name": "Train-type" },
+          { "id": "train_operator", "name": "Operator" },
+          { "id": "train_power", "name": "Power" },
+          { "id": "train_carriages", "name": "Number of carriages" },
+          { "id": "train_route", "name": "Route" }
+        ],
+        "parentClassId": "rail_transport",
+        "position": { "x": -6.55, "y": 0.75, "z": 0 },
+        "size": { "width": 1.35, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#5b2a86", "borderColor": "#3b0764", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "subway",
+        "name": "Subway",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "subway_operator", "name": "Operator" },
+          { "id": "subway_line_name", "name": "Line name" },
+          { "id": "subway_capacity", "name": "Capacity" },
+          { "id": "subway_stops", "name": "Stops" }
+        ],
+        "parentClassId": "rail_transport",
+        "position": { "x": -6.55, "y": 0, "z": 0 },
+        "size": { "width": 1.35, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#6d28d9", "borderColor": "#4c1d95", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "tram",
+        "name": "Tram",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "tram_operator", "name": "Operator" },
+          { "id": "tram_line", "name": "Line" },
+          { "id": "tram_capacity", "name": "Capacity" }
+        ],
+        "parentClassId": "rail_transport",
+        "position": { "x": -6.55, "y": -0.75, "z": 0 },
+        "size": { "width": 1.35, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#7c3aed", "borderColor": "#4c1d95", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "water_transport",
+        "name": "Water Transport",
+        "type": "hyperclass",
+        "attributes": [
+          { "id": "water_region", "name": "Waterway region" },
+          { "id": "water_port_authority", "name": "Port authority" },
+          { "id": "water_route_type", "name": "Route type" },
+          { "id": "water_passenger_capacity", "name": "Passenger capacity" },
+          { "id": "water_cargo_support", "name": "Cargo support" },
+          { "id": "water_weather_restriction", "name": "Weather restriction" }
+        ],
+        "children": ["boat", "ferry"],
+        "position": { "x": -4.65, "y": -3.55, "z": 0 },
+        "size": { "width": 5.05, "height": 3.05 },
+        "rendering": {
+          "class": { "color": "#ffffff", "borderColor": "#111827", "borderWidth": 0.02, "cornerRadius": 0.18, "opacity": 0.1 },
+          "attributes": { "checkboxColor": "#ef4444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "boat",
+        "name": "Boat",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "boat_type", "name": "Boat type" },
+          { "id": "boat_operator", "name": "Operator" },
+          { "id": "boat_capacity", "name": "Capacity" },
+          { "id": "boat_hull", "name": "Hull" },
+          { "id": "boat_engine_type", "name": "Engine type" }
+        ],
+        "parentClassId": "water_transport",
+        "position": { "x": -6.0, "y": -3.15, "z": 0 },
+        "size": { "width": 1.35, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#1f7a8c", "borderColor": "#155e75", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "ferry",
+        "name": "Ferry",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "ferry_operator", "name": "Operator" },
+          { "id": "ferry_route", "name": "Route" },
+          { "id": "ferry_passenger_capacity", "name": "Passenger capacity" },
+          { "id": "ferry_vehicle_capacity", "name": "Vehicle capacity" }
+        ],
+        "parentClassId": "water_transport",
+        "position": { "x": -6.0, "y": -4.05, "z": 0 },
+        "size": { "width": 1.35, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#28788a", "borderColor": "#155e75", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "active_personal_mobility",
+        "name": "Active / Personal Mobility",
+        "type": "hyperclass",
+        "attributes": [
+          { "id": "mobility_zone", "name": "Mobility zone" },
+          { "id": "mobility_lane_type", "name": "Lane type" },
+          { "id": "mobility_safety_equipment", "name": "Safety equipment" },
+          { "id": "mobility_distance_range", "name": "Distance range" },
+          { "id": "mobility_user_type", "name": "User type" },
+          { "id": "mobility_parking_policy", "name": "Parking policy" }
+        ],
+        "children": ["bicycle", "skateboard"],
+        "position": { "x": 3.05, "y": 3.95, "z": 0 },
+        "size": { "width": 4.95, "height": 3.25 },
+        "rendering": {
+          "class": { "color": "#ffffff", "borderColor": "#111827", "borderWidth": 0.02, "cornerRadius": 0.18, "opacity": 0.1 },
+          "attributes": { "checkboxColor": "#ef4444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "bicycle",
+        "name": "Bicycle",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "bicycle_type", "name": "Type" },
+          { "id": "bicycle_brand", "name": "Brand" },
+          { "id": "bicycle_frame_size", "name": "Frame size" },
+          { "id": "bicycle_gears", "name": "Gears" },
+          { "id": "bicycle_last_mile", "name": "Supports last-mile mobility" },
+          { "id": "bicycle_color", "name": "Color" }
+        ],
+        "parentClassId": "active_personal_mobility",
+        "position": { "x": 1.8, "y": 4.35, "z": 0 },
+        "size": { "width": 1.5, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#43a047", "borderColor": "#1b5e20", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "skateboard",
+        "name": "Skateboard",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "skateboard_type", "name": "Type" },
+          { "id": "skateboard_deck_length", "name": "Deck length" },
+          { "id": "skateboard_brand", "name": "Brand" }
+        ],
+        "parentClassId": "active_personal_mobility",
+        "position": { "x": 1.8, "y": 3.25, "z": 0 },
+        "size": { "width": 1.5, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#d6336c", "borderColor": "#9f1239", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "air_transport",
+        "name": "Air Transport",
+        "type": "hyperclass",
+        "attributes": [
+          { "id": "air_airspace_region", "name": "Airspace region" },
+          { "id": "air_airport_hub", "name": "Airport hub" },
+          { "id": "air_operator", "name": "Operator" },
+          { "id": "air_flight_range", "name": "Flight range" },
+          { "id": "air_safety_class", "name": "Safety class" },
+          { "id": "air_runway_access", "name": "Runway access" }
+        ],
+        "children": ["airplane", "helicopter"],
+        "position": { "x": 4.4, "y": 0.25, "z": 0 },
+        "size": { "width": 4.3, "height": 3.05 },
+        "rendering": {
+          "class": { "color": "#ffffff", "borderColor": "#111827", "borderWidth": 0.02, "cornerRadius": 0.18, "opacity": 0.1 },
+          "attributes": { "checkboxColor": "#ef4444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "airplane",
+        "name": "Airplane",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "airplane_operator", "name": "Operator" },
+          { "id": "airplane_flight_number", "name": "Flight number" },
+          { "id": "airplane_aircraft_type", "name": "Aircraft type" },
+          { "id": "airplane_seat_capacity", "name": "Seat capacity" },
+          { "id": "airplane_engine_type", "name": "Engine type" }
+        ],
+        "parentClassId": "air_transport",
+        "position": { "x": 3.0, "y": 0.65, "z": 0 },
+        "size": { "width": 1.45, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#2d5f9a", "borderColor": "#1e3a8a", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "helicopter",
+        "name": "Helicopter",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "helicopter_operator", "name": "Operator" },
+          { "id": "helicopter_type", "name": "Helicopter type" },
+          { "id": "helicopter_capacity", "name": "Capacity" },
+          { "id": "helicopter_tail_number", "name": "Tail number" }
+        ],
+        "parentClassId": "air_transport",
+        "position": { "x": 3.0, "y": -0.35, "z": 0 },
+        "size": { "width": 1.45, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#444444", "borderColor": "#1f2937", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "space_transport",
+        "name": "Space Transport",
+        "type": "hyperclass",
+        "attributes": [
+          { "id": "space_mission_id", "name": "Mission ID" },
+          { "id": "space_launch_site", "name": "Launch site" },
+          { "id": "space_orbit_type", "name": "Orbit type" },
+          { "id": "space_payload_capacity", "name": "Payload capacity" },
+          { "id": "space_mission_operator", "name": "Mission operator" },
+          { "id": "space_recovery_plan", "name": "Recovery plan" }
+        ],
+        "children": ["spaceship"],
+        "position": { "x": 4.35, "y": -3.55, "z": 0 },
+        "size": { "width": 4.1, "height": 2.45 },
+        "rendering": {
+          "class": { "color": "#ffffff", "borderColor": "#111827", "borderWidth": 0.02, "cornerRadius": 0.18, "opacity": 0.1 },
+          "attributes": { "checkboxColor": "#ef4444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "spaceship",
+        "name": "Spaceship",
+        "type": "roundedRectangle",
+        "attributes": [
+          { "id": "spaceship_operator", "name": "Operator" },
+          { "id": "spaceship_mission_type", "name": "Mission type" },
+          { "id": "spaceship_launch_site", "name": "Launch site" },
+          { "id": "spaceship_payload_capacity", "name": "Payload capacity" }
+        ],
+        "parentClassId": "space_transport",
+        "position": { "x": 3.15, "y": -3.55, "z": 0 },
+        "size": { "width": 1.55, "height": 0.65 },
+        "rendering": {
+          "class": { "color": "#7e3f98", "borderColor": "#581c87", "cornerRadius": 0.06 },
+          "attributes": { "checkboxColor": "#444444", "size": { "width": 0.1, "height": 0.1 } },
+          "connections": { "lineColor": "#111827", "lineWidth": 0.01 },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "road_active_shares_road",
+        "sourceClassId": "road_transport",
+        "targetClassId": "active_personal_mobility",
+        "rendering": {
+          "labelText": "shares road with",
+          "lineColor": "#f97316",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#7c2d12",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": -8.1, "y": 5.65, "z": 0 },
+            { "x": -8.1, "y": 5.85, "z": 0 },
+            { "x": 5.15, "y": 5.85, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "road_rail_corridors",
+        "sourceClassId": "road_transport",
+        "targetClassId": "rail_transport",
+        "rendering": {
+          "labelText": "shares urban corridors",
+          "lineColor": "#2e7d32",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#14532d",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": -0.18,
+          "routePoints": [
+            { "x": -8.0, "y": 3.8, "z": 0 },
+            { "x": -8.0, "y": 1.15, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "rail_active_last_mile",
+        "sourceClassId": "rail_transport",
+        "targetClassId": "active_personal_mobility",
+        "rendering": {
+          "labelText": "feeds last-mile mobility",
+          "lineColor": "#6a1b9a",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#4a148c",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": -8.35, "y": 0.25, "z": 0 },
+            { "x": -8.35, "y": 4.8, "z": 0 },
+            { "x": 0.7, "y": 4.8, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "road_rail_interchange",
+        "sourceClassId": "bus",
+        "targetClassId": "train",
+        "rendering": {
+          "labelText": "interchanges with",
+          "lineColor": "#6a1b9a",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.35,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#4a148c",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": -0.18,
+          "routePoints": [
+            { "x": -7.6, "y": 2.7, "z": 0 },
+            { "x": -7.6, "y": 0.75, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "road_rail_passenger_transfer",
+        "sourceClassId": "bus",
+        "targetClassId": "subway",
+        "rendering": {
+          "labelText": "transfers passengers to",
+          "lineColor": "#6a1b9a",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.35,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#4a148c",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": -7.25, "y": 2.45, "z": 0 },
+            { "x": -7.25, "y": 0, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "bus_bicycle_public_transit",
+        "sourceClassId": "bus",
+        "targetClassId": "bicycle",
+        "rendering": {
+          "labelText": "feeds public transit",
+          "lineColor": "#2e7d32",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#14532d",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": -0.2, "y": 2.75, "z": 0 },
+            { "x": -0.2, "y": 4.35, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "water_road_ports",
+        "sourceClassId": "water_transport",
+        "targetClassId": "road_transport",
+        "rendering": {
+          "labelText": "connects ports to roads",
+          "lineColor": "#0e7490",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#164e63",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": -8.3, "y": -3.15, "z": 0 },
+            { "x": -8.3, "y": 3.7, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "ferry_carries_vehicles",
+        "sourceClassId": "ferry",
+        "targetClassId": "car",
+        "rendering": {
+          "labelText": "carries vehicles",
+          "lineColor": "#a16207",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#713f12",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": -0.18,
+          "routePoints": [
+            { "x": -8.55, "y": -4.05, "z": 0 },
+            { "x": -8.55, "y": 4.55, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "ferry_train_passengers",
+        "sourceClassId": "ferry",
+        "targetClassId": "train",
+        "rendering": {
+          "labelText": "carries passengers",
+          "lineColor": "#a16207",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.35,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#713f12",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": -2.0, "y": -4.05, "z": 0 },
+            { "x": -2.0, "y": 0.75, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "air_road_airports",
+        "sourceClassId": "air_transport",
+        "targetClassId": "road_transport",
+        "rendering": {
+          "labelText": "connects airports to roads",
+          "lineColor": "#0e7490",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#164e63",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": 0.1, "y": 1.65, "z": 0 },
+            { "x": -2.35, "y": 1.65, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "water_rail_ports",
+        "sourceClassId": "water_transport",
+        "targetClassId": "rail_transport",
+        "rendering": {
+          "labelText": "connects ports to roads",
+          "lineColor": "#db2777",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#831843",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": -0.18,
+          "routePoints": [
+            { "x": -0.1, "y": -2.25, "z": 0 },
+            { "x": -0.1, "y": 0.0, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "air_rail_airports",
+        "sourceClassId": "air_transport",
+        "targetClassId": "rail_transport",
+        "rendering": {
+          "labelText": "connects airports to rail",
+          "lineColor": "#0e7490",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.35,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#164e63",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": 0.6, "y": -0.65, "z": 0 },
+            { "x": -2.7, "y": -0.65, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "air_water_airports",
+        "sourceClassId": "air_transport",
+        "targetClassId": "water_transport",
+        "rendering": {
+          "labelText": "connects airports",
+          "lineColor": "#0e7490",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.35,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#164e63",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": 0.4, "y": -1.35, "z": 0 },
+            { "x": 0.4, "y": -3.55, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "air_support_service",
+        "sourceClassId": "helicopter",
+        "targetClassId": "airplane",
+        "rendering": {
+          "labelText": "supports air service",
+          "lineColor": "#0e7490",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#164e63",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": 7.5, "y": -0.35, "z": 0 },
+            { "x": 7.5, "y": 0.65, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "air_regional_transfer",
+        "sourceClassId": "airplane",
+        "targetClassId": "helicopter",
+        "rendering": {
+          "labelText": "supports regional transfer",
+          "lineColor": "#0e7490",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "curveOffset": -0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#164e63",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": -0.18,
+          "routePoints": [
+            { "x": 7.85, "y": 0.65, "z": 0 },
+            { "x": 7.85, "y": -0.35, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "air_space_launch_airspace",
+        "sourceClassId": "air_transport",
+        "targetClassId": "space_transport",
+        "rendering": {
+          "labelText": "uses launch airspace",
+          "lineColor": "#db2777",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.35,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#831843",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": 4.4, "y": -1.35, "z": 0 },
+            { "x": 4.4, "y": -2.25, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "space_launches_from",
+        "sourceClassId": "spaceship",
+        "targetClassId": "air_transport",
+        "rendering": {
+          "labelText": "launches from",
+          "lineColor": "#db2777",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.35,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#831843",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": -0.18,
+          "routePoints": [
+            { "x": 6.9, "y": -3.55, "z": 0 },
+            { "x": 6.9, "y": -0.15, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "water_space_waterways",
+        "sourceClassId": "water_transport",
+        "targetClassId": "space_transport",
+        "rendering": {
+          "labelText": "shares waterways with",
+          "lineColor": "#1d4ed8",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#1e3a8a",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": 0.18,
+          "routePoints": [
+            { "x": -0.5, "y": -4.35, "z": 0 },
+            { "x": 2.3, "y": -4.35, "z": 0 }
+          ]
+        }
+      },
+      {
+        "id": "space_ground_logistics",
+        "sourceClassId": "space_transport",
+        "targetClassId": "water_transport",
+        "rendering": {
+          "labelText": "requires ground logistics",
+          "lineColor": "#db2777",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "curveOffset": -0.45,
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#831843",
+          "labelBackgroundColor": "rgba(255,255,255,0.95)",
+          "labelOffsetFromPath": -0.18,
+          "routePoints": [
+            { "x": 2.2, "y": -4.9, "z": 0 },
+            { "x": -1.4, "y": -4.9, "z": 0 }
+          ]
+        }
+      }
+    ]
+  }
+}

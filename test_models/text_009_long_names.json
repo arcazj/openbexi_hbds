@@ -1,0 +1,191 @@
+{
+  "metadata": {
+    "name": "Text 009 Long Names",
+    "purpose": "Checks clean truncation for class and hyperclass titles with metallic surfaces.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "text",
+      "long"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "hyper_long_name",
+        "name": "Exceptionally Long Hyperclass Name For Regression Layout Boundaries",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "hyper_long_name_attr_1",
+            "name": "organizational governance status"
+          }
+        ],
+        "children": [
+          "class_long_a",
+          "class_long_b"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 13.2,
+          "height": 4.1
+        },
+        "rendering": {
+          "class": {
+            "color": "#dbeafe",
+            "metallicColor": "#c7d2fe",
+            "material": "metallic",
+            "borderColor": "#2563eb",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#2563eb",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#2563eb",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "class_long_a",
+        "name": "Extremely Long Class Name That Should Truncate Cleanly",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_long_a_attr_1",
+            "name": "identity"
+          },
+          {
+            "id": "class_long_a_attr_2",
+            "name": "lifecycleStatus"
+          }
+        ],
+        "parentClassId": "hyper_long_name",
+        "position": {
+          "x": -3.4,
+          "y": 0.1,
+          "z": 0
+        },
+        "size": {
+          "width": 1.75,
+          "height": 1.8
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_long_b",
+        "name": "Another Very Long Class Name With Several Important Words",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_long_b_attr_1",
+            "name": "referenceCode"
+          },
+          {
+            "id": "class_long_b_attr_2",
+            "name": "updatedAt"
+          }
+        ],
+        "parentClassId": "hyper_long_name",
+        "position": {
+          "x": 3.4,
+          "y": 0.1,
+          "z": 0
+        },
+        "size": {
+          "width": 1.75,
+          "height": 1.8
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_long_names",
+        "sourceClassId": "class_long_a",
+        "targetClassId": "class_long_b",
+        "name": "relationship label",
+        "rendering": {
+          "labelText": "relationship label",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

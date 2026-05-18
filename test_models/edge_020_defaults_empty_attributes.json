@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "name": "Edge 020 Defaults Empty Attributes",
+    "purpose": "Exercises default rendering fallback, empty attributes, mixed attribute formats, and save/load consistency.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "edge",
+      "defaults"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "edge_minimal_class",
+        "name": "Minimal Defaults",
+        "attributes": [],
+        "position": {
+          "x": -2.1,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "id": "edge_missing_name_attr",
+        "name": "Fallback Attributes",
+        "attributes": [
+          {
+            "id": "only_id"
+          },
+          null,
+          true,
+          42
+        ],
+        "position": {
+          "x": 2.1,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 1.55,
+          "height": 2
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_edge_defaults",
+        "sourceClassId": "edge_minimal_class",
+        "targetClassId": "edge_missing_name_attr",
+        "name": "default link",
+        "rendering": {
+          "labelText": "default link",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

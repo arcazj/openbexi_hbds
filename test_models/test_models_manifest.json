@@ -1,0 +1,242 @@
+{
+  "models": [
+    {
+      "value": "test_models/layout_001_single_class_few_attributes.json",
+      "label": "Layout 001 Single Class Few Attributes",
+      "description": "One metallic class with a few attributes.",
+      "tags": [
+        "layout",
+        "class"
+      ]
+    },
+    {
+      "value": "test_models/layout_002_single_class_many_attributes.json",
+      "label": "Layout 002 Single Class Many Attributes",
+      "description": "One class with twenty attributes and readable attribute routing.",
+      "tags": [
+        "layout",
+        "attributes"
+      ]
+    },
+    {
+      "value": "test_models/layout_003_two_classes_attributes.json",
+      "label": "Layout 003 Two Classes Attributes",
+      "description": "Two classes, both with attributes and a simple relationship.",
+      "tags": [
+        "layout",
+        "links"
+      ]
+    },
+    {
+      "value": "test_models/layout_004_many_classes_11.json",
+      "label": "Layout 004 Many Classes 11",
+      "description": "Eleven classes, each with attributes, for grid optimization.",
+      "tags": [
+        "layout",
+        "grid"
+      ]
+    },
+    {
+      "value": "test_models/layout_005_hyperclass_two_children.json",
+      "label": "Layout 005 Hyperclass Two Children",
+      "description": "One hyperclass with attributes and two child classes.",
+      "tags": [
+        "hyperclass",
+        "children"
+      ]
+    },
+    {
+      "value": "test_models/layout_006_hyperclass_many_children.json",
+      "label": "Layout 006 Hyperclass Many Children",
+      "description": "One hyperclass containing multiple child classes with attributes.",
+      "tags": [
+        "hyperclass",
+        "many-children"
+      ]
+    },
+    {
+      "value": "test_models/layout_007_nested_hyperclasses.json",
+      "label": "Layout 007 Nested Hyperclasses",
+      "description": "Nested hyperclasses containing hyperclasses and classes.",
+      "tags": [
+        "nested",
+        "hyperclass"
+      ]
+    },
+    {
+      "value": "test_models/text_008_short_names.json",
+      "label": "Text 008 Short Names",
+      "description": "Short class and attribute names.",
+      "tags": [
+        "text",
+        "short"
+      ]
+    },
+    {
+      "value": "test_models/text_009_long_names.json",
+      "label": "Text 009 Long Names",
+      "description": "Very long class and hyperclass names.",
+      "tags": [
+        "text",
+        "long"
+      ]
+    },
+    {
+      "value": "test_models/text_010_short_and_long_attributes.json",
+      "label": "Text 010 Short And Long Attributes",
+      "description": "Short and long attribute text together.",
+      "tags": [
+        "text",
+        "attributes"
+      ]
+    },
+    {
+      "value": "test_models/links_011_short_labels.json",
+      "label": "Links 011 Short Labels",
+      "description": "Links with very short labels.",
+      "tags": [
+        "links",
+        "short-labels"
+      ]
+    },
+    {
+      "value": "test_models/links_012_long_labels.json",
+      "label": "Links 012 Long Labels",
+      "description": "Links with very long labels.",
+      "tags": [
+        "links",
+        "long-labels"
+      ]
+    },
+    {
+      "value": "test_models/links_013_class_to_class.json",
+      "label": "Links 013 Class To Class",
+      "description": "Direct relationship between two classes.",
+      "tags": [
+        "links"
+      ]
+    },
+    {
+      "value": "test_models/links_014_class_to_hyperclass.json",
+      "label": "Links 014 Class To Hyperclass",
+      "description": "Relationship between a class and a hyperclass.",
+      "tags": [
+        "links",
+        "hyperclass"
+      ]
+    },
+    {
+      "value": "test_models/links_015_hyperclass_to_hyperclass.json",
+      "label": "Links 015 Hyperclass To Hyperclass",
+      "description": "Relationship between two hyperclasses.",
+      "tags": [
+        "links",
+        "hyperclass"
+      ]
+    },
+    {
+      "value": "test_models/links_016_hub_fan_multiple_links.json",
+      "label": "Links 016 Hub Fan Multiple Links",
+      "description": "Multiple links connected to the same red hub.",
+      "tags": [
+        "links",
+        "hubs"
+      ]
+    },
+    {
+      "value": "test_models/links_017_bidirectional_same_elements.json",
+      "label": "Links 017 Bidirectional Same Elements",
+      "description": "Bidirectional links between the same elements.",
+      "tags": [
+        "links",
+        "bidirectional"
+      ]
+    },
+    {
+      "value": "test_models/links_018_orthogonal_routing_avoidance.json",
+      "label": "Links 018 Orthogonal Routing Avoidance",
+      "description": "Rounded orthogonal routing around diagram obstacles.",
+      "tags": [
+        "links",
+        "orthogonal"
+      ]
+    },
+    {
+      "value": "test_models/links_023_relationship_edge_ports_reference.json",
+      "label": "Links 023 Relationship Edge Ports Reference",
+      "description": "Reference layout where relationships use hollow edge ports and attributes keep red hubs.",
+      "tags": [
+        "links",
+        "relationship-ports",
+        "attributes"
+      ]
+    },
+    {
+      "value": "test_models/links_024_dense_relationship_edge_ports.json",
+      "label": "Links 024 Dense Relationship Edge Ports",
+      "description": "Dense class-to-class routing through hollow relationship ports.",
+      "tags": [
+        "links",
+        "relationship-ports",
+        "dense"
+      ]
+    },
+    {
+      "value": "test_models/links_025_hyperclass_relationship_edge_ports_dense.json",
+      "label": "Links 025 Hyperclass Relationship Edge Ports Dense",
+      "description": "Mixed class and hyperclass relationship routing through hollow edge ports.",
+      "tags": [
+        "links",
+        "relationship-ports",
+        "hyperclass",
+        "dense"
+      ]
+    },
+    {
+      "value": "test_models/render_019_metallic_palette.json",
+      "label": "Render 019 Metallic Palette",
+      "description": "Metallic palette across class and hyperclass panels.",
+      "tags": [
+        "rendering",
+        "metallic"
+      ]
+    },
+    {
+      "value": "test_models/edge_020_defaults_empty_attributes.json",
+      "label": "Edge 020 Defaults Empty Attributes",
+      "description": "Missing optional rendering fields and empty attributes.",
+      "tags": [
+        "edge",
+        "defaults"
+      ]
+    },
+    {
+      "value": "test_models/stress_021_dense_mixed_diagram.json",
+      "label": "Stress 021 Dense Mixed Diagram",
+      "description": "Dense diagram with classes, attributes, hyperclasses, and links.",
+      "tags": [
+        "stress",
+        "dense"
+      ]
+    },
+    {
+      "value": "test_models/stress_022_large_performance.json",
+      "label": "Stress 022 Large Performance",
+      "description": "Large stress case with many elements and links.",
+      "tags": [
+        "stress",
+        "performance"
+      ]
+    },
+    {
+      "value": "test_models/fit_026_saved_view_metadata.json",
+      "label": "Fit 026 Saved View Metadata",
+      "description": "Saved metadata.layout.fit values must be applied on load.",
+      "tags": [
+        "fit",
+        "metadata",
+        "camera"
+      ]
+    }
+  ]
+}

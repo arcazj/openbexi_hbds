@@ -1,0 +1,828 @@
+{
+  "metadata": {
+    "name": "Stress 021 Dense Mixed Diagram",
+    "purpose": "A practical dense regression scene for overlap avoidance, link routing, labels, hubs, and save/load.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "stress",
+      "dense",
+      "mixed"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "dense_core",
+        "name": "Dense Core",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "dense_core_attr_1",
+            "name": "domain"
+          },
+          {
+            "id": "dense_core_attr_2",
+            "name": "owner"
+          },
+          {
+            "id": "dense_core_attr_3",
+            "name": "status"
+          }
+        ],
+        "children": [
+          "dense_c1",
+          "dense_c2",
+          "dense_c3",
+          "dense_c4",
+          "dense_c5",
+          "dense_c6"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 8.2,
+          "height": 6
+        },
+        "rendering": {
+          "class": {
+            "color": "#dbeafe",
+            "metallicColor": "#c7d2fe",
+            "material": "metallic",
+            "borderColor": "#2563eb",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#2563eb",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#2563eb",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_satellite",
+        "name": "Dense Satellite",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "dense_satellite_attr_1",
+            "name": "sync"
+          }
+        ],
+        "children": [
+          "dense_c7",
+          "dense_c8",
+          "dense_c9"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 8,
+          "y": 0.4,
+          "z": 0
+        },
+        "size": {
+          "width": 7,
+          "height": 4.8
+        },
+        "rendering": {
+          "class": {
+            "color": "#ecfccb",
+            "metallicColor": "#bbf7d0",
+            "material": "metallic",
+            "borderColor": "#15803d",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#15803d",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#15803d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_c1",
+        "name": "Dense Class 1",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_c1_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "dense_c1_attr_2",
+            "name": "state"
+          },
+          {
+            "id": "dense_c1_attr_3",
+            "name": "score"
+          },
+          {
+            "id": "dense_c1_attr_4",
+            "name": "policy"
+          }
+        ],
+        "parentClassId": "dense_core",
+        "position": {
+          "x": -2.75,
+          "y": 1,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_c2",
+        "name": "Dense Class 2",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_c2_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "dense_c2_attr_2",
+            "name": "state"
+          },
+          {
+            "id": "dense_c2_attr_3",
+            "name": "score"
+          },
+          {
+            "id": "dense_c2_attr_4",
+            "name": "policy"
+          }
+        ],
+        "parentClassId": "dense_core",
+        "position": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "dense_c3",
+        "name": "Dense Class 3",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_c3_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "dense_c3_attr_2",
+            "name": "state"
+          },
+          {
+            "id": "dense_c3_attr_3",
+            "name": "score"
+          },
+          {
+            "id": "dense_c3_attr_4",
+            "name": "policy"
+          }
+        ],
+        "parentClassId": "dense_core",
+        "position": {
+          "x": 2.75,
+          "y": 1,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "dense_c4",
+        "name": "Dense Class 4",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_c4_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "dense_c4_attr_2",
+            "name": "state"
+          },
+          {
+            "id": "dense_c4_attr_3",
+            "name": "score"
+          },
+          {
+            "id": "dense_c4_attr_4",
+            "name": "policy"
+          }
+        ],
+        "parentClassId": "dense_core",
+        "position": {
+          "x": -2.75,
+          "y": -1.35,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#b99bd0",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "dense_c5",
+        "name": "Dense Class 5",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_c5_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "dense_c5_attr_2",
+            "name": "state"
+          },
+          {
+            "id": "dense_c5_attr_3",
+            "name": "score"
+          },
+          {
+            "id": "dense_c5_attr_4",
+            "name": "policy"
+          }
+        ],
+        "parentClassId": "dense_core",
+        "position": {
+          "x": 0,
+          "y": -1.35,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#df86a8",
+            "metallicColor": "#ffafcc",
+            "material": "metallic",
+            "borderColor": "#8a3a57",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#8a3a57",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#8a3a57",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "dense_c6",
+        "name": "Dense Class 6",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_c6_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "dense_c6_attr_2",
+            "name": "state"
+          },
+          {
+            "id": "dense_c6_attr_3",
+            "name": "score"
+          },
+          {
+            "id": "dense_c6_attr_4",
+            "name": "policy"
+          }
+        ],
+        "parentClassId": "dense_core",
+        "position": {
+          "x": 2.75,
+          "y": -1.35,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#a8b5c7",
+            "metallicColor": "#cbd5e1",
+            "material": "metallic",
+            "borderColor": "#475569",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#475569",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#475569",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "dense_c7",
+        "name": "Dense Class 7",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_c7_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "dense_c7_attr_2",
+            "name": "state"
+          },
+          {
+            "id": "dense_c7_attr_3",
+            "name": "score"
+          },
+          {
+            "id": "dense_c7_attr_4",
+            "name": "policy"
+          }
+        ],
+        "parentClassId": "dense_satellite",
+        "position": {
+          "x": 6.45,
+          "y": 1.05,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#77c6ba",
+            "metallicColor": "#99f6e4",
+            "material": "metallic",
+            "borderColor": "#0f766e",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#0f766e",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#0f766e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "dense_c8",
+        "name": "Dense Class 8",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_c8_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "dense_c8_attr_2",
+            "name": "state"
+          },
+          {
+            "id": "dense_c8_attr_3",
+            "name": "score"
+          },
+          {
+            "id": "dense_c8_attr_4",
+            "name": "policy"
+          }
+        ],
+        "parentClassId": "dense_satellite",
+        "position": {
+          "x": 9.45,
+          "y": 1.05,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "dense_c9",
+        "name": "Dense Class 9",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "dense_c9_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "dense_c9_attr_2",
+            "name": "state"
+          },
+          {
+            "id": "dense_c9_attr_3",
+            "name": "score"
+          },
+          {
+            "id": "dense_c9_attr_4",
+            "name": "policy"
+          }
+        ],
+        "parentClassId": "dense_satellite",
+        "position": {
+          "x": 7.65,
+          "y": -1.2,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "dense_l1",
+        "sourceClassId": "dense_c1",
+        "targetClassId": "dense_c2",
+        "name": "feeds",
+        "rendering": {
+          "labelText": "feeds",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "dense_l2",
+        "sourceClassId": "dense_c2",
+        "targetClassId": "dense_c3",
+        "name": "validates",
+        "rendering": {
+          "labelText": "validates",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "dense_l3",
+        "sourceClassId": "dense_c4",
+        "targetClassId": "dense_c5",
+        "name": "syncs",
+        "rendering": {
+          "labelText": "syncs",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "dense_l4",
+        "sourceClassId": "dense_c5",
+        "targetClassId": "dense_c6",
+        "name": "routes",
+        "rendering": {
+          "labelText": "routes",
+          "lineColor": "#874a17",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "dense_l5",
+        "sourceClassId": "dense_c3",
+        "targetClassId": "dense_c7",
+        "name": "publishes handoff",
+        "rendering": {
+          "labelText": "publishes handoff",
+          "lineColor": "#694b7d",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 1.05,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12,
+          "routeSide": "top"
+        }
+      },
+      {
+        "id": "dense_l6",
+        "sourceClassId": "dense_c8",
+        "targetClassId": "dense_c2",
+        "name": "returns status",
+        "rendering": {
+          "labelText": "returns status",
+          "lineColor": "#be185d",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "dense_l7",
+        "sourceClassId": "dense_core",
+        "targetClassId": "dense_satellite",
+        "name": "domain sync",
+        "rendering": {
+          "labelText": "domain sync",
+          "lineColor": "#334155",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 1.1,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "dense_l8",
+        "sourceClassId": "dense_c9",
+        "targetClassId": "dense_c7",
+        "name": "alerts",
+        "rendering": {
+          "labelText": "alerts",
+          "lineColor": "#0f766e",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.7,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12,
+          "routeSide": "bottom"
+        }
+      }
+    ]
+  }
+}

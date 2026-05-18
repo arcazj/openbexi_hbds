@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "name": "Text 010 Short And Long Attributes",
+    "purpose": "Catches [object Object] regressions and long attribute readability problems.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "text",
+      "attributes",
+      "fallback"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "class_attribute_text",
+        "name": "Attribute Text Cases",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_attribute_text_attr_1",
+            "name": "x"
+          },
+          {
+            "id": "att_object_name",
+            "name": "status1"
+          },
+          {
+            "id": "class_attribute_text_attr_3",
+            "name": "a very long attribute name that should stay readable beside the class"
+          },
+          {
+            "id": "att_label_fallback",
+            "label": "label fallback should render as text"
+          },
+          {
+            "id": "att_id_fallback"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2.6
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      }
+    ],
+    "link": []
+  }
+}

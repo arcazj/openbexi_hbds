@@ -1,0 +1,400 @@
+{
+  "metadata": {
+    "name": "Links 025 Hyperclass Relationship Edge Ports Dense",
+    "purpose": "Mixed class, hyperclass, and nested child routing through hollow relationship ports.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "relationship-ports",
+      "hyperclass",
+      "dense"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "ports_hyper_ground",
+        "name": "Ground Network",
+        "type": "hyperclass",
+        "children": [
+          "ports_train",
+          "ports_bus"
+        ],
+        "attributes": [
+          {
+            "id": "ports_hyper_ground_policy",
+            "name": "policy"
+          },
+          {
+            "id": "ports_hyper_ground_region",
+            "name": "region"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -2.55,
+          "y": 0.15,
+          "z": 0
+        },
+        "size": {
+          "width": 4.2,
+          "height": 3.9
+        },
+        "rendering": {
+          "class": {
+            "color": "#d9e9f6",
+            "metallicColor": "#d9e9f6",
+            "material": "metallic",
+            "borderColor": "#1d4ed8",
+            "opacity": 0.28,
+            "cornerRadius": 0.22,
+            "metalness": 0.46,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#1d4ed8",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#1d4ed8",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "ports_hyper_service",
+        "name": "Service Network",
+        "type": "hyperclass",
+        "children": [
+          "ports_air",
+          "ports_water"
+        ],
+        "attributes": [
+          {
+            "id": "ports_hyper_service_owner",
+            "name": "owner"
+          },
+          {
+            "id": "ports_hyper_service_state",
+            "name": "state"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 2.55,
+          "y": 0.15,
+          "z": 0
+        },
+        "size": {
+          "width": 4.2,
+          "height": 3.9
+        },
+        "rendering": {
+          "class": {
+            "color": "#e4f6df",
+            "metallicColor": "#e4f6df",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "opacity": 0.3,
+            "cornerRadius": 0.22,
+            "metalness": 0.45,
+            "roughness": 0.25
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "ports_train",
+        "name": "Train",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "ports_train_line",
+            "name": "line"
+          },
+          {
+            "id": "ports_train_capacity",
+            "name": "capacity"
+          }
+        ],
+        "parentClassId": "ports_hyper_ground",
+        "position": {
+          "x": -3.35,
+          "y": 0.65,
+          "z": 0.1
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.45
+        },
+        "rendering": {
+          "class": {
+            "color": "#8ecae6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.12,
+            "metalness": 0.52,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "ports_bus",
+        "name": "Bus",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "ports_bus_route",
+            "name": "route"
+          },
+          {
+            "id": "ports_bus_headway",
+            "name": "headway"
+          }
+        ],
+        "parentClassId": "ports_hyper_ground",
+        "position": {
+          "x": -1.75,
+          "y": -0.85,
+          "z": 0.1
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.45
+        },
+        "rendering": {
+          "class": {
+            "color": "#ffd166",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.12,
+            "metalness": 0.52,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "ports_air",
+        "name": "Air",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "ports_air_code",
+            "name": "code"
+          },
+          {
+            "id": "ports_air_gate",
+            "name": "gate"
+          }
+        ],
+        "parentClassId": "ports_hyper_service",
+        "position": {
+          "x": 1.75,
+          "y": 0.65,
+          "z": 0.1
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.45
+        },
+        "rendering": {
+          "class": {
+            "color": "#f4a261",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.12,
+            "metalness": 0.52,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "ports_water",
+        "name": "Water",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "ports_water_dock",
+            "name": "dock"
+          },
+          {
+            "id": "ports_water_depth",
+            "name": "depth"
+          }
+        ],
+        "parentClassId": "ports_hyper_service",
+        "position": {
+          "x": 3.35,
+          "y": -0.85,
+          "z": 0.1
+        },
+        "size": {
+          "width": 1.25,
+          "height": 1.45
+        },
+        "rendering": {
+          "class": {
+            "color": "#b7e4c7",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.12,
+            "metalness": 0.5,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "ports_hyper_link_syncs",
+        "sourceClassId": "ports_hyper_ground",
+        "targetClassId": "ports_hyper_service",
+        "name": "syncs network",
+        "rendering": {
+          "labelText": "syncs network",
+          "lineColor": "#1d4ed8",
+          "lineWidth": 2,
+          "sourcePortSide": "top",
+          "targetPortSide": "top",
+          "routeSide": "top",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.9,
+          "relationshipCornerRadius": 0.2
+        }
+      },
+      {
+        "id": "ports_train_to_service",
+        "sourceClassId": "ports_train",
+        "targetClassId": "ports_hyper_service",
+        "name": "feeds service",
+        "rendering": {
+          "labelText": "feeds service",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.72,
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "ports_air_to_ground",
+        "sourceClassId": "ports_air",
+        "targetClassId": "ports_hyper_ground",
+        "name": "regional transfer",
+        "rendering": {
+          "labelText": "regional transfer",
+          "lineColor": "#874a17",
+          "lineWidth": 2,
+          "sourcePortSide": "left",
+          "targetPortSide": "right",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.82,
+          "relationshipCornerRadius": 0.18
+        }
+      },
+      {
+        "id": "ports_bus_to_water",
+        "sourceClassId": "ports_bus",
+        "targetClassId": "ports_water",
+        "name": "last mile",
+        "rendering": {
+          "labelText": "last mile",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "sourcePortSide": "bottom",
+          "targetPortSide": "bottom",
+          "routeSide": "bottom",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.7,
+          "relationshipCornerRadius": 0.2
+        }
+      },
+      {
+        "id": "ports_water_to_train",
+        "sourceClassId": "ports_water",
+        "targetClassId": "ports_train",
+        "name": "bulk interchange",
+        "rendering": {
+          "labelText": "bulk interchange",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "routeSide": "bottom",
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 1.15,
+          "relationshipCornerRadius": 0.22
+        }
+      }
+    ]
+  }
+}

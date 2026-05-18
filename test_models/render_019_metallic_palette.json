@@ -1,0 +1,319 @@
+{
+  "metadata": {
+    "name": "Render 019 Metallic Palette",
+    "purpose": "Visual regression for metallic colors, contrast, red hubs, and attribute distinction.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "rendering",
+      "metallic"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "metal_hyper",
+        "name": "Metallic Collection",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "metal_hyper_attr_1",
+            "name": "finish"
+          },
+          {
+            "id": "metal_hyper_attr_2",
+            "name": "contrast"
+          }
+        ],
+        "children": [
+          "metal_gold",
+          "metal_blue",
+          "metal_green",
+          "metal_copper"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 6.7,
+          "height": 4.6
+        },
+        "rendering": {
+          "class": {
+            "color": "#dbeafe",
+            "metallicColor": "#c7d2fe",
+            "material": "metallic",
+            "borderColor": "#2563eb",
+            "cornerRadius": 0.24,
+            "opacity": 0.38,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#2563eb",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#2563eb",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "metal_gold",
+        "name": "Gold",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "metal_gold_attr_1",
+            "name": "warm"
+          },
+          {
+            "id": "metal_gold_attr_2",
+            "name": "readable"
+          }
+        ],
+        "parentClassId": "metal_hyper",
+        "position": {
+          "x": -2,
+          "y": 0.6,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "metal_blue",
+        "name": "Steel Blue",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "metal_blue_attr_1",
+            "name": "cool"
+          },
+          {
+            "id": "metal_blue_attr_2",
+            "name": "readable"
+          }
+        ],
+        "parentClassId": "metal_hyper",
+        "position": {
+          "x": 0.2,
+          "y": 0.6,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "metal_green",
+        "name": "Mint Steel",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "metal_green_attr_1",
+            "name": "fresh"
+          },
+          {
+            "id": "metal_green_attr_2",
+            "name": "readable"
+          }
+        ],
+        "parentClassId": "metal_hyper",
+        "position": {
+          "x": -2,
+          "y": -1.25,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "metal_copper",
+        "name": "Copper",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "metal_copper_attr_1",
+            "name": "warm"
+          },
+          {
+            "id": "metal_copper_attr_2",
+            "name": "readable"
+          }
+        ],
+        "parentClassId": "metal_hyper",
+        "position": {
+          "x": 0.2,
+          "y": -1.25,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_metal_1",
+        "sourceClassId": "metal_gold",
+        "targetClassId": "metal_blue",
+        "name": "contrasts",
+        "rendering": {
+          "labelText": "contrasts",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      },
+      {
+        "id": "link_metal_2",
+        "sourceClassId": "metal_green",
+        "targetClassId": "metal_copper",
+        "name": "balances",
+        "rendering": {
+          "labelText": "balances",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "orthogonalClearance": 0.55,
+          "parallelRouteGap": 0.26,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 12
+        }
+      }
+    ]
+  }
+}

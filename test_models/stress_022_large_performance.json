@@ -1,0 +1,1764 @@
+{
+  "metadata": {
+    "name": "Stress 022 Large Performance",
+    "purpose": "Performance regression fixture with 26 nodes, many attributes, many links, and nested child layout.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "stress",
+      "performance"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "large_hyper_a",
+        "name": "Large Test A",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "large_hyper_a_attr_1",
+            "name": "domain"
+          }
+        ],
+        "children": [
+          "large_class_1",
+          "large_class_2",
+          "large_class_3",
+          "large_class_4",
+          "large_class_5",
+          "large_class_6",
+          "large_class_7",
+          "large_class_8",
+          "large_class_9",
+          "large_class_10",
+          "large_class_11",
+          "large_class_12"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -5.6,
+          "y": 1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 8.2,
+          "height": 5.8
+        },
+        "rendering": {
+          "class": {
+            "color": "#dbeafe",
+            "metallicColor": "#c7d2fe",
+            "material": "metallic",
+            "borderColor": "#2563eb",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#2563eb",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#2563eb",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "large_hyper_b",
+        "name": "Large Test B",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "large_hyper_b_attr_1",
+            "name": "domain"
+          }
+        ],
+        "children": [
+          "large_class_13",
+          "large_class_14",
+          "large_class_15",
+          "large_class_16",
+          "large_class_17",
+          "large_class_18",
+          "large_class_19",
+          "large_class_20",
+          "large_class_21",
+          "large_class_22",
+          "large_class_23",
+          "large_class_24"
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 5.6,
+          "y": 1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 8.2,
+          "height": 5.8
+        },
+        "rendering": {
+          "class": {
+            "color": "#ecfccb",
+            "metallicColor": "#bbf7d0",
+            "material": "metallic",
+            "borderColor": "#15803d",
+            "cornerRadius": 0.24,
+            "opacity": 0.32,
+            "metalness": 0.46,
+            "roughness": 0.24,
+            "emissiveIntensity": 0.025
+          },
+          "attributes": {
+            "checkboxColor": "#15803d",
+            "metalness": 0.32,
+            "roughness": 0.36,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#15803d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "large_class_1",
+        "name": "L1",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_1_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_1_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -8.3,
+          "y": 2.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_2",
+        "name": "L2",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_2_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_2_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -6.500000000000001,
+          "y": 2.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "large_class_3",
+        "name": "L3",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_3_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_3_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -4.700000000000001,
+          "y": 2.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "large_class_4",
+        "name": "L4",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_4_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_4_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -2.9000000000000004,
+          "y": 2.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_5",
+        "name": "L5",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_5_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_5_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -8.3,
+          "y": 1.15,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#b99bd0",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_6",
+        "name": "L6",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_6_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_6_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -6.500000000000001,
+          "y": 1.15,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#df86a8",
+            "metallicColor": "#ffafcc",
+            "material": "metallic",
+            "borderColor": "#8a3a57",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#8a3a57",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#8a3a57",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_7",
+        "name": "L7",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_7_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_7_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -4.700000000000001,
+          "y": 1.15,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#a8b5c7",
+            "metallicColor": "#cbd5e1",
+            "material": "metallic",
+            "borderColor": "#475569",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#475569",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#475569",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_8",
+        "name": "L8",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_8_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_8_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -2.9000000000000004,
+          "y": 1.15,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#77c6ba",
+            "metallicColor": "#99f6e4",
+            "material": "metallic",
+            "borderColor": "#0f766e",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#0f766e",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#0f766e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "large_class_9",
+        "name": "L9",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_9_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_9_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -8.3,
+          "y": -0.6000000000000001,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_10",
+        "name": "L10",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_10_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_10_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -6.500000000000001,
+          "y": -0.6000000000000001,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "large_class_11",
+        "name": "L11",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_11_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_11_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -4.700000000000001,
+          "y": -0.6000000000000001,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "large_class_12",
+        "name": "L12",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_12_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_12_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_a",
+        "position": {
+          "x": -2.9000000000000004,
+          "y": -0.6000000000000001,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_13",
+        "name": "L13",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_13_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_13_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 2.8999999999999995,
+          "y": 2.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#b99bd0",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_14",
+        "name": "L14",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_14_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_14_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 4.699999999999999,
+          "y": 2.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#df86a8",
+            "metallicColor": "#ffafcc",
+            "material": "metallic",
+            "borderColor": "#8a3a57",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#8a3a57",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#8a3a57",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_15",
+        "name": "L15",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_15_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_15_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 6.5,
+          "y": 2.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#a8b5c7",
+            "metallicColor": "#cbd5e1",
+            "material": "metallic",
+            "borderColor": "#475569",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#475569",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#475569",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_16",
+        "name": "L16",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_16_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_16_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 8.3,
+          "y": 2.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#77c6ba",
+            "metallicColor": "#99f6e4",
+            "material": "metallic",
+            "borderColor": "#0f766e",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#0f766e",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#0f766e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "large_class_17",
+        "name": "L17",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_17_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_17_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 2.8999999999999995,
+          "y": 1.15,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#f6c64a",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_18",
+        "name": "L18",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_18_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_18_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 4.699999999999999,
+          "y": 1.15,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#77b6d6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "large_class_19",
+        "name": "L19",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_19_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_19_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 6.5,
+          "y": 1.15,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#9ed8b3",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0b1720"
+        }
+      },
+      {
+        "id": "large_class_20",
+        "name": "L20",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_20_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_20_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 8.3,
+          "y": 1.15,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#ef9656",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_21",
+        "name": "L21",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_21_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_21_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 2.8999999999999995,
+          "y": -0.6000000000000001,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#b99bd0",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_22",
+        "name": "L22",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_22_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_22_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 4.699999999999999,
+          "y": -0.6000000000000001,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#df86a8",
+            "metallicColor": "#ffafcc",
+            "material": "metallic",
+            "borderColor": "#8a3a57",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#8a3a57",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#8a3a57",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_23",
+        "name": "L23",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_23_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_23_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 6.5,
+          "y": -0.6000000000000001,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#a8b5c7",
+            "metallicColor": "#cbd5e1",
+            "material": "metallic",
+            "borderColor": "#475569",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#475569",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#475569",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "large_class_24",
+        "name": "L24",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "large_class_24_attr_1",
+            "name": "id"
+          },
+          {
+            "id": "large_class_24_attr_2",
+            "name": "state"
+          }
+        ],
+        "parentClassId": "large_hyper_b",
+        "position": {
+          "x": 8.3,
+          "y": -0.6000000000000001,
+          "z": 0
+        },
+        "size": {
+          "width": 1.05,
+          "height": 1.32
+        },
+        "rendering": {
+          "class": {
+            "color": "#77c6ba",
+            "metallicColor": "#99f6e4",
+            "material": "metallic",
+            "borderColor": "#0f766e",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.22,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#0f766e",
+            "metalness": 0.35,
+            "roughness": 0.35,
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#0f766e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "large_link_1",
+        "sourceClassId": "large_class_1",
+        "targetClassId": "large_class_2",
+        "name": "l1",
+        "rendering": {
+          "labelText": "l1",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_2",
+        "sourceClassId": "large_class_2",
+        "targetClassId": "large_class_3",
+        "name": "l2",
+        "rendering": {
+          "labelText": "l2",
+          "lineColor": "#874a17",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_3",
+        "sourceClassId": "large_class_3",
+        "targetClassId": "large_class_4",
+        "name": "l3",
+        "rendering": {
+          "labelText": "l3",
+          "lineColor": "#694b7d",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_4",
+        "sourceClassId": "large_class_5",
+        "targetClassId": "large_class_6",
+        "name": "l4",
+        "rendering": {
+          "labelText": "l4",
+          "lineColor": "#be185d",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_5",
+        "sourceClassId": "large_class_6",
+        "targetClassId": "large_class_7",
+        "name": "l5",
+        "rendering": {
+          "labelText": "l5",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_6",
+        "sourceClassId": "large_class_7",
+        "targetClassId": "large_class_8",
+        "name": "l6",
+        "rendering": {
+          "labelText": "l6",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_7",
+        "sourceClassId": "large_class_9",
+        "targetClassId": "large_class_10",
+        "name": "l7",
+        "rendering": {
+          "labelText": "l7",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_8",
+        "sourceClassId": "large_class_10",
+        "targetClassId": "large_class_11",
+        "name": "l8",
+        "rendering": {
+          "labelText": "l8",
+          "lineColor": "#874a17",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_9",
+        "sourceClassId": "large_class_11",
+        "targetClassId": "large_class_12",
+        "name": "l9",
+        "rendering": {
+          "labelText": "l9",
+          "lineColor": "#694b7d",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_10",
+        "sourceClassId": "large_class_13",
+        "targetClassId": "large_class_14",
+        "name": "l10",
+        "rendering": {
+          "labelText": "l10",
+          "lineColor": "#be185d",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_11",
+        "sourceClassId": "large_class_14",
+        "targetClassId": "large_class_15",
+        "name": "l11",
+        "rendering": {
+          "labelText": "l11",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_12",
+        "sourceClassId": "large_class_15",
+        "targetClassId": "large_class_16",
+        "name": "l12",
+        "rendering": {
+          "labelText": "l12",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_13",
+        "sourceClassId": "large_class_17",
+        "targetClassId": "large_class_18",
+        "name": "l13",
+        "rendering": {
+          "labelText": "l13",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_14",
+        "sourceClassId": "large_class_18",
+        "targetClassId": "large_class_19",
+        "name": "l14",
+        "rendering": {
+          "labelText": "l14",
+          "lineColor": "#874a17",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_15",
+        "sourceClassId": "large_class_19",
+        "targetClassId": "large_class_20",
+        "name": "l15",
+        "rendering": {
+          "labelText": "l15",
+          "lineColor": "#694b7d",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_16",
+        "sourceClassId": "large_class_21",
+        "targetClassId": "large_class_22",
+        "name": "l16",
+        "rendering": {
+          "labelText": "l16",
+          "lineColor": "#be185d",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_17",
+        "sourceClassId": "large_class_22",
+        "targetClassId": "large_class_23",
+        "name": "l17",
+        "rendering": {
+          "labelText": "l17",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_link_18",
+        "sourceClassId": "large_class_23",
+        "targetClassId": "large_class_24",
+        "name": "l18",
+        "rendering": {
+          "labelText": "l18",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      },
+      {
+        "id": "large_hyper_link",
+        "sourceClassId": "large_hyper_a",
+        "targetClassId": "large_hyper_b",
+        "name": "large domain bridge",
+        "rendering": {
+          "labelText": "large domain bridge",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.55,
+          "maxArrowheadSize": 0.1,
+          "orthogonalStyle": "auto",
+          "routeSide": "top",
+          "orthogonalClearance": 0.75,
+          "parallelRouteGap": 0.28,
+          "labelBackgroundColor": "rgba(255,255,255,0.92)",
+          "labelColor": "#111827",
+          "labelFontSize": 10
+        }
+      }
+    ]
+  }
+}
