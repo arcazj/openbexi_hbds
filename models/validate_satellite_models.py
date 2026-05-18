@@ -49,7 +49,7 @@ def validate(path):
         assert r['sourceClassId'] in by, f"Missing source {r['id']}"
         assert r['targetClassId'] in by, f"Missing target {r['id']}"
     layout=d.get('metadata',{}).get('layout',{})
-    assert layout.get('mode')=='grid', 'Layout mode is not grid'
+    assert layout.get('mode') in {'grid','Grid','radial','Radial'}, 'Layout mode must be grid or radial'
     print(f'OK: {path}')
 
 if __name__=='__main__':
