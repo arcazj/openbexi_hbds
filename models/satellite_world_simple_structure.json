@@ -1,0 +1,100 @@
+{
+  "$schema": "https://openbexi.local/hbds/model/v1",
+  "metadata": {
+    "id": "satellite_world_simple_structure",
+    "name": "Satellite World Simple Structure",
+    "version": "2026.05.18-simple-grid-metallic",
+    "description": "Simple HBDS satellite model aligned to CelesTrak-style satellite metadata.",
+    "layout": {
+      "algorithm": "grid",
+      "mode": "grid"
+    },
+    "style": {
+      "classMaterial": "metallic",
+      "classPalette": "domain-colored",
+      "hyperclassMaterial": "metallic"
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "hc_satellite_catalog",
+        "name": "Satellite Catalog",
+        "type": "hyperclass",
+        "attributes": ["Catalog authority", "Object identity", "Launch lineage"],
+        "children": ["satellite", "launch_vehicle", "organization"],
+        "position": {"x": -6.0, "y": 0.0, "z": 0.0},
+        "size": {"width": 10.0, "height": 6.0},
+        "rendering": {"class": {"color": "#DBEAFE", "material": "metallic", "borderColor": "#1D4ED8", "borderWidth": 0.025, "cornerRadius": 0.12}}
+      },
+      {
+        "id": "hc_orbit_payload",
+        "name": "Orbit / Payload",
+        "type": "hyperclass",
+        "attributes": ["Orbital state", "Payload mission", "TLE traceability"],
+        "children": ["tle_set", "payload_profile"],
+        "position": {"x": 6.0, "y": 0.0, "z": 0.0},
+        "size": {"width": 7.0, "height": 6.0},
+        "rendering": {"class": {"color": "#DCFCE7", "material": "metallic", "borderColor": "#15803D", "borderWidth": 0.025, "cornerRadius": 0.12}}
+      },
+      {
+        "id": "satellite",
+        "name": "Satellite",
+        "type": "roundedRectangle",
+        "parentClassId": "hc_satellite_catalog",
+        "attributes": ["noradCatalogId", "satelliteName", "payloadType", "capacityClass", "launchDateUtc", "manufacturerOrgId"],
+        "position": {"x": -8.0, "y": 1.0, "z": 0.1},
+        "size": {"width": 2.8, "height": 1.6},
+        "rendering": {"class": {"color": "#2563EB", "material": "metallic", "borderColor": "#1E293B", "borderWidth": 0.025, "cornerRadius": 0.12}}
+      },
+      {
+        "id": "launch_vehicle",
+        "name": "Launch Vehicle",
+        "type": "roundedRectangle",
+        "parentClassId": "hc_satellite_catalog",
+        "attributes": ["rocketName", "rocketFamily", "launchSite", "launchProvider", "launchSuccess"],
+        "position": {"x": -4.0, "y": 1.0, "z": 0.1},
+        "size": {"width": 2.8, "height": 1.6},
+        "rendering": {"class": {"color": "#3B82F6", "material": "metallic", "borderColor": "#1E293B", "borderWidth": 0.025, "cornerRadius": 0.12}}
+      },
+      {
+        "id": "organization",
+        "name": "Organization",
+        "type": "roundedRectangle",
+        "parentClassId": "hc_satellite_catalog",
+        "attributes": ["organizationId", "name", "country", "role"],
+        "position": {"x": -6.0, "y": -1.3, "z": 0.1},
+        "size": {"width": 2.8, "height": 1.6},
+        "rendering": {"class": {"color": "#60A5FA", "material": "metallic", "borderColor": "#1E293B", "borderWidth": 0.025, "cornerRadius": 0.12}}
+      },
+      {
+        "id": "tle_set",
+        "name": "TLE Set",
+        "type": "roundedRectangle",
+        "parentClassId": "hc_orbit_payload",
+        "attributes": ["tleEpochUtc", "tleLine1", "tleLine2", "inclinationDeg", "meanMotionRevPerDay"],
+        "position": {"x": 4.6, "y": 0.8, "z": 0.1},
+        "size": {"width": 2.8, "height": 1.6},
+        "rendering": {"class": {"color": "#22C55E", "material": "metallic", "borderColor": "#1E293B", "borderWidth": 0.025, "cornerRadius": 0.12}}
+      },
+      {
+        "id": "payload_profile",
+        "name": "Payload Profile",
+        "type": "roundedRectangle",
+        "parentClassId": "hc_orbit_payload",
+        "attributes": ["payloadType", "missionClass", "capacityDescriptor", "operatorOrgId"],
+        "position": {"x": 7.4, "y": 0.8, "z": 0.1},
+        "size": {"width": 2.8, "height": 1.6},
+        "rendering": {"class": {"color": "#4ADE80", "material": "metallic", "borderColor": "#1E293B", "borderWidth": 0.025, "cornerRadius": 0.12}}
+      }
+    ],
+    "relationship": [
+      {"id": "rel_simple_001", "sourceClassId": "satellite", "targetClassId": "launch_vehicle", "name": "launched_by"},
+      {"id": "rel_simple_002", "sourceClassId": "satellite", "targetClassId": "organization", "name": "manufactured_by"},
+      {"id": "rel_simple_003", "sourceClassId": "satellite", "targetClassId": "tle_set", "name": "tracked_by_tle"},
+      {"id": "rel_simple_004", "sourceClassId": "satellite", "targetClassId": "payload_profile", "name": "carries_payload"},
+      {"id": "rel_simple_005", "sourceClassId": "organization", "targetClassId": "payload_profile", "name": "operates_payload"},
+      {"id": "rel_simple_006", "sourceClassId": "hc_satellite_catalog", "targetClassId": "hc_orbit_payload", "name": "supplies_orbital_payload_context"}
+    ]
+  }
+}
