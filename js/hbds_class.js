@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
 const ICON_EXTENSIONS = ['png', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
+const DEFAULT_EMPTY_ICON_PATH = './icons/empty.PNG';
 
 /* ─────────────────────────────── Loader ──────────────────────────────── */
 export const Loader = {
@@ -276,7 +277,6 @@ export function createIconTitleLabel(classData, options = {}) {
 
 function installOptionalIcon(label, labelObj, classData, options) {
     const candidates = getIconCandidatePaths(classData);
-    if (!candidates.length) return;
     const name = classData?.name ?? '';
     const estimatedTitleWidth = Math.max(130, String(name).length * 14 + (options.iconSize ? options.iconSize * 20 : 38));
 
@@ -407,6 +407,7 @@ function getIconCandidatePaths(classData) {
             paths.push(path);
         }
     }
+    if (!seen.has(DEFAULT_EMPTY_ICON_PATH)) paths.push(DEFAULT_EMPTY_ICON_PATH);
     return paths;
 }
 
