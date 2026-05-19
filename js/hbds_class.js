@@ -8,7 +8,6 @@ const iconExistenceCache = new Map();
 
 async function iconPathExists(path) {
     if (!path) return false;
-    if (path === DEFAULT_EMPTY_ICON_PATH) return true;
     if (iconExistenceCache.has(path)) return iconExistenceCache.get(path);
 
     const existsPromise = fetch(path, {method: 'HEAD'})
@@ -20,10 +19,9 @@ async function iconPathExists(path) {
 
 async function resolveIconPath(candidates) {
     for (const candidate of candidates) {
-        if (candidate === DEFAULT_EMPTY_ICON_PATH) return candidate;
         if (await iconPathExists(candidate)) return candidate;
     }
-    return DEFAULT_EMPTY_ICON_PATH;
+    return null;
 }
 
 /* ─────────────────────────────── Loader ──────────────────────────────── */
@@ -363,9 +361,14 @@ function installOptionalIcon(label, labelObj, classData, options) {
         options.onIconLoaded?.(labelObj, label);
     };
     img.onerror = () => {
-        if (img.src !== DEFAULT_EMPTY_ICON_PATH) img.src = DEFAULT_EMPTY_ICON_PATH;
+        if (img.dataset.fallbackAttempted === 'true') return;
+        img.dataset.fallbackAttempted = 'true';
+        iconPathExists(DEFAULT_EMPTY_ICON_PATH).then((exists) => {
+            if (exists && img.src !== DEFAULT_EMPTY_ICON_PATH) img.src = DEFAULT_EMPTY_ICON_PATH;
+        });
     };
     resolveIconPath(candidates).then((resolvedPath) => {
+        if (!resolvedPath) return;
         img.src = resolvedPath;
     });
 }
