@@ -32,15 +32,17 @@ export function createLinkBetweenClass(linkData, classById) {
 
   const rendering = linkData.rendering ?? {};
   const lineStyle = rendering.lineStyle ?? 'solid';
-  const Material = lineStyle === 'dashed' || lineStyle === 'dotted'
-    ? THREE.LineDashedMaterial
-    : THREE.LineBasicMaterial;
-  const mat = new Material({
+  const isDashed = lineStyle === 'dashed' || lineStyle === 'dotted';
+  const Material = isDashed ? THREE.LineDashedMaterial : THREE.LineBasicMaterial;
+  const materialOptions = {
     color: rendering.lineColor ?? '#333333',
-    linewidth: rendering.lineWidth ?? 2,
-    dashSize: lineStyle === 'dotted' ? 0.04 : 0.18,
-    gapSize: lineStyle === 'dotted' ? 0.08 : 0.12
-  });
+    linewidth: rendering.lineWidth ?? 2
+  };
+  if (isDashed) {
+    materialOptions.dashSize = lineStyle === 'dotted' ? 0.04 : 0.18;
+    materialOptions.gapSize = lineStyle === 'dotted' ? 0.08 : 0.12;
+  }
+  const mat = new Material(materialOptions);
 
   const geometry = new THREE.BufferGeometry();
   const line = new THREE.Line(geometry, mat);
