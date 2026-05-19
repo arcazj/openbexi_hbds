@@ -4,6 +4,27 @@ import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
 const ICON_EXTENSIONS = ['png', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
 const DEFAULT_EMPTY_ICON_PATH = './icons/empty.PNG';
+const iconExistenceCache = new Map();
+
+async function iconPathExists(path) {
+    if (!path) return false;
+    if (path === DEFAULT_EMPTY_ICON_PATH) return true;
+    if (iconExistenceCache.has(path)) return iconExistenceCache.get(path);
+
+    const existsPromise = fetch(path, {method: 'HEAD'})
+        .then(response => response.ok)
+        .catch(() => false);
+    iconExistenceCache.set(path, existsPromise);
+    return existsPromise;
+}
+
+async function resolveIconPath(candidates) {
+    for (const candidate of candidates) {
+        if (candidate === DEFAULT_EMPTY_ICON_PATH) return candidate;
+        if (await iconPathExists(candidate)) return candidate;
+    }
+    return DEFAULT_EMPTY_ICON_PATH;
+}
 
 /* ─────────────────────────────── Loader ──────────────────────────────── */
 export const Loader = {
@@ -281,11 +302,6 @@ function installOptionalIcon(label, labelObj, classData, options) {
     const estimatedTitleWidth = Math.max(130, String(name).length * 14 + (options.iconSize ? options.iconSize * 20 : 38));
 
     const img = new Image();
-    let index = 0;
-    const tryNext = () => {
-        if (index >= candidates.length) return;
-        img.src = candidates[index++];
-    };
 
     img.onload = () => {
         const icon = img.cloneNode(false);
@@ -346,8 +362,12 @@ function installOptionalIcon(label, labelObj, classData, options) {
         if (options.iconPosition) labelObj.position.copy(options.iconPosition);
         options.onIconLoaded?.(labelObj, label);
     };
-    img.onerror = tryNext;
-    tryNext();
+    img.onerror = () => {
+        if (img.src !== DEFAULT_EMPTY_ICON_PATH) img.src = DEFAULT_EMPTY_ICON_PATH;
+    };
+    resolveIconPath(candidates).then((resolvedPath) => {
+        img.src = resolvedPath;
+    });
 }
 
 function getTransparentPngSource(image) {
