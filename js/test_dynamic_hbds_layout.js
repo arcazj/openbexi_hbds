@@ -73,6 +73,7 @@ const HYPER_COLORS = [
 const ATTRIBUTE_NAMES = ['status', 'owner', 'priority', 'version', 'region', 'createdAt', 'score', 'policy'];
 const LINK_NAMES = ['depends on', 'feeds', 'validates', 'routes to', 'owns', 'syncs'];
 const ICON_EXTENSIONS = ['png', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
+const DEFAULT_EMPTY_ICON_PATH = './icons/empty.PNG';
 const TEST_MODEL_ROOT = 'test_models/';
 const TEST_MODEL_MANIFEST = 'test_models/test_models_manifest.json';
 const TEST_MODEL_HIDDEN_VALUES = [
@@ -764,6 +765,7 @@ function iconCandidatePaths(model) {
       paths.push(path);
     }
   }
+  if (!seen.has(DEFAULT_EMPTY_ICON_PATH)) paths.push(DEFAULT_EMPTY_ICON_PATH);
   return paths;
 }
 
