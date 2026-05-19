@@ -58,8 +58,11 @@ export function normalizeData(inputData){
     }
     if(Array.isArray(m.hypergraph.class)) flattened.push(...m.hypergraph.class);
     m.hypergraph.class=flattened;
-    m.hypergraph.link=Array.isArray(m.hypergraph.relationships)
-      ? m.hypergraph.relationships.map(rel=>({
+    const legacyRelationships=Array.isArray(m.hypergraph.relationships)
+      ? m.hypergraph.relationships
+      : (Array.isArray(m.hypergraph.relationship)?m.hypergraph.relationship:[]);
+    m.hypergraph.link=legacyRelationships.length
+      ? legacyRelationships.map(rel=>({
           ...rel,
           sourceClassId:rel.sourceClassId??rel.source,
           targetClassId:rel.targetClassId??rel.target,
@@ -724,7 +727,25 @@ async function loadTextResource(path){
   }
   throw new Error('No browser request API available');
 }
-export async function loadAndRenderScene(modelName, context, options={}){ const raw=await loadModelData(modelName,options); setData(raw,{context,refresh:true}); return getData(); }
+export async function loadAndRenderScene(modelName, context, options={}){
+  const raw=await loadModelData(modelName,options);
+  setData(raw,{context,refresh:true});
+  const loaded=getData();
+  const layoutAlgorithm=loaded?.metadata?.layout?.algorithm || 'none';
+  if(options.autoApplyLayout!==false && layoutAlgorithm!=='none' && modelNeedsLayoutPlacement(loaded)){
+    await optimizeAndRefreshLayout(context,{ algorithm:layoutAlgorithm });
+  }
+  return getData();
+}
+
+function modelNeedsLayoutPlacement(model){
+  const nodes=Array.isArray(model?.hypergraph?.class)?model.hypergraph.class:[];
+  if(!nodes.length) return false;
+  return nodes.some(node=>{
+    const p=node?.position;
+    return !p || !Number.isFinite(Number(p.x)) || !Number.isFinite(Number(p.y));
+  });
+}
 export function saveScene(context, options={}){ if(options.updateFitMetadata!==false) updateFitMetadataFromContext(context,options); const snapshot=getData(); const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=options.fileName||'hbds_saved_model.json'; a.click(); URL.revokeObjectURL(url); return snapshot; }
 function getNodeSize(node){
   return getNodeBodySize(node);
