@@ -121,7 +121,7 @@ export function recalculateAllLinks() {
       });
       separateLinkLabel(route, occupiedLabels, link.linkData.rendering ?? {});
 
-      link.line.geometry.setFromPoints(route.points);
+      replaceLineGeometry(link.line, route.points);
       link.line.userData.baseRoutePoints = route.basePoints.map(point => point.clone());
       link.line.userData.relationshipPorts = {
         sourceSide: portPair.source.side,
@@ -142,6 +142,14 @@ export function recalculateAllLinks() {
       }
     });
   }
+}
+
+function replaceLineGeometry(line, points) {
+  const nextGeometry = new THREE.BufferGeometry().setFromPoints(points);
+  if (line.geometry) {
+    line.geometry.dispose();
+  }
+  line.geometry = nextGeometry;
 }
 
 function createRelationshipPortMarker(kind, rendering = {}) {
