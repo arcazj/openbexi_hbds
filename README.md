@@ -4,7 +4,7 @@ An interactive browser-based simulator for **Hypergraph-Based Data Structures (H
 
 [Live Demo](https://arcazj.github.io/openbexi_hbds/index.html)
 
-![HBDS Human class](pictures/HBDS_Model.JPG)
+![HBDS Bridge and road model](pictures/HBDS_Model.JPG)
 
 ## Features
 
