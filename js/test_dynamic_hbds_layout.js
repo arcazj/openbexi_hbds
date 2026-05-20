@@ -73,7 +73,7 @@ const HYPER_COLORS = [
 const ATTRIBUTE_NAMES = ['status', 'owner', 'priority', 'version', 'region', 'createdAt', 'score', 'policy'];
 const LINK_NAMES = ['depends on', 'feeds', 'validates', 'routes to', 'owns', 'syncs'];
 const ICON_EXTENSIONS = ['png', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
-const DEFAULT_EMPTY_ICON_PATH = './icons/empty.PNG';
+const DEFAULT_EMPTY_ICON_PATH = './icons/empty.png';
 const TEST_MODEL_ROOT = 'test_models/';
 const TEST_MODEL_MANIFEST = 'test_models/test_models_manifest.json';
 const TEST_MODEL_HIDDEN_VALUES = [
@@ -347,6 +347,27 @@ function updateStats() {
   $('stat-attribute-count').textContent = String(countAttributes());
   $('stat-hyperclass-count').textContent = String(nodes().filter(node => node.type === 'hyperclass').length);
   document.body.classList.toggle('has-model', nodeCount > 0);
+}
+
+function getCurrentStats() {
+  const allNodes = nodes();
+  return {
+    nodes: allNodes.length,
+    classes: allNodes.filter(node => node.type !== 'hyperclass').length,
+    hyperclasses: allNodes.filter(node => node.type === 'hyperclass').length,
+    links: links().length,
+    attributes: countAttributes()
+  };
+}
+
+function setStatus(message, tone = 'ok') {
+  const status = $('validation-status');
+  if (!status) return;
+  status.className = 'status-chip';
+  if (tone === 'ok' || tone === 'warn' || tone === 'error') {
+    status.classList.add(tone);
+  }
+  status.textContent = message;
 }
 
 function updateValidationStatus() {
@@ -1499,6 +1520,60 @@ async function handleLoadModel() {
   });
 }
 
+async function runScenarioSuite() {
+  if (!availableModels.length) {
+    setStatus('No test models available', 'warn');
+    return;
+  }
+  const suiteButton = $('run-scenario-suite-button');
+  if (suiteButton) suiteButton.disabled = true;
+  const previousValue = $('test-model-select').value;
+  const failures = [];
+  let passed = 0;
+  addLog(`Scenario suite started (${availableModels.length} models)`);
+
+  for (const item of availableModels) {
+    try {
+      const loadedModel = await loadAndRenderScene(item.value, ctx(), {
+        allowedBasePath: TEST_MODEL_ROOT,
+        defaultBasePath: TEST_MODEL_ROOT
+      });
+      const stats = getCurrentStats();
+      const validation = validateData(getData());
+      if (!validation.valid) {
+        failures.push(`${item.label || item.value}: ${validation.errors.join('; ')}`);
+        continue;
+      }
+      if (stats.classes + stats.hyperclasses <= 0) {
+        failures.push(`${item.label || item.value}: rendered no class-like elements`);
+        continue;
+      }
+      const algorithm = getLayoutAlgorithm();
+      if (algorithm !== 'none') {
+        await optimizeAndRefreshLayout(ctx(), { algorithm });
+      }
+      if (!hasFitMetadata(loadedModel)) fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
+      passed += 1;
+    } catch (error) {
+      failures.push(`${item.label || item.value}: ${error?.message || String(error)}`);
+    }
+  }
+
+  $('test-model-select').value = previousValue;
+  updateModelSummary();
+  if (previousValue) await handleLoadModel();
+  if (suiteButton) suiteButton.disabled = false;
+
+  if (failures.length) {
+    addLog(`Scenario suite failed (${passed}/${availableModels.length} passed)`);
+    setStatus(`Scenario suite: ${passed}/${availableModels.length} passed`, 'warn');
+    failures.forEach(failure => addLog(`Scenario failure: ${failure}`));
+  } else {
+    addLog(`Scenario suite passed (${passed}/${availableModels.length})`);
+    setStatus(`Scenario suite: ${passed}/${availableModels.length} passed`, 'ok');
+  }
+}
+
 function clearLinkBuilder() {
   selectedLinkSourceId = null;
   selectedLinkTargetId = null;
@@ -1666,6 +1741,7 @@ function bindUi() {
   $('seed-demo-button').addEventListener('click', () => runAction(handleSeedDemo));
   $('empty-seed-demo-button').addEventListener('click', () => runAction(handleSeedDemo));
   $('load-model-button').addEventListener('click', () => runAction(handleLoadModel));
+  $('run-scenario-suite-button').addEventListener('click', () => runAction(runScenarioSuite));
   $('clear-link-button').addEventListener('click', clearLinkBuilder);
   $('link-pick-button').addEventListener('click', handleLinkPickButton);
   $('selected-color-input')?.addEventListener('input', event => runAction(() => handleSelectedColorChange(event)));
