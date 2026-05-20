@@ -1526,50 +1526,61 @@ async function runScenarioSuite() {
     return;
   }
   const suiteButton = $('run-scenario-suite-button');
+  const modelSelect = $('test-model-select');
   if (suiteButton) suiteButton.disabled = true;
-  const previousValue = $('test-model-select').value;
+  if (modelSelect) modelSelect.disabled = true;
+  const previousValue = modelSelect?.value || '';
   const failures = [];
   let passed = 0;
+  const startedAt = performance.now();
   addLog(`Scenario suite started (${availableModels.length} models)`);
 
-  for (const item of availableModels) {
-    try {
-      const loadedModel = await loadAndRenderScene(item.value, ctx(), {
-        allowedBasePath: TEST_MODEL_ROOT,
-        defaultBasePath: TEST_MODEL_ROOT
-      });
-      const stats = getCurrentStats();
-      const validation = validateData(getData());
-      if (!validation.valid) {
-        failures.push(`${item.label || item.value}: ${validation.errors.join('; ')}`);
-        continue;
+  try {
+    for (const item of availableModels) {
+      const label = item.label || item.value;
+      try {
+        const loadedModel = await loadAndRenderScene(item.value, ctx(), {
+          allowedBasePath: TEST_MODEL_ROOT,
+          defaultBasePath: TEST_MODEL_ROOT
+        });
+        const stats = getCurrentStats();
+        const validation = validateData(getData());
+        if (!validation.valid) {
+          failures.push(`${label}: ${validation.errors.join('; ')}`);
+          continue;
+        }
+        if (stats.classes + stats.hyperclasses <= 0) {
+          failures.push(`${label}: rendered no class-like elements`);
+          continue;
+        }
+        const algorithm = getLayoutAlgorithm();
+        if (algorithm !== 'none') {
+          await optimizeAndRefreshLayout(ctx(), { algorithm });
+        }
+        if (!hasFitMetadata(loadedModel)) fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
+        passed += 1;
+      } catch (error) {
+        failures.push(`${label}: ${error?.message || String(error)}`);
       }
-      if (stats.classes + stats.hyperclasses <= 0) {
-        failures.push(`${item.label || item.value}: rendered no class-like elements`);
-        continue;
-      }
-      const algorithm = getLayoutAlgorithm();
-      if (algorithm !== 'none') {
-        await optimizeAndRefreshLayout(ctx(), { algorithm });
-      }
-      if (!hasFitMetadata(loadedModel)) fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
-      passed += 1;
-    } catch (error) {
-      failures.push(`${item.label || item.value}: ${error?.message || String(error)}`);
     }
+  } finally {
+    if (modelSelect) {
+      const hasPreviousOption = [...modelSelect.options].some(option => option.value === previousValue);
+      modelSelect.value = hasPreviousOption ? previousValue : '';
+      modelSelect.disabled = false;
+    }
+    updateModelSummary();
+    await handleLoadModel();
+    if (suiteButton) suiteButton.disabled = false;
   }
 
-  $('test-model-select').value = previousValue;
-  updateModelSummary();
-  if (previousValue) await handleLoadModel();
-  if (suiteButton) suiteButton.disabled = false;
-
+  const elapsedMs = Math.round(performance.now() - startedAt);
   if (failures.length) {
-    addLog(`Scenario suite failed (${passed}/${availableModels.length} passed)`);
+    addLog(`Scenario suite failed (${passed}/${availableModels.length} passed in ${elapsedMs}ms)`);
     setStatus(`Scenario suite: ${passed}/${availableModels.length} passed`, 'warn');
     failures.forEach(failure => addLog(`Scenario failure: ${failure}`));
   } else {
-    addLog(`Scenario suite passed (${passed}/${availableModels.length})`);
+    addLog(`Scenario suite passed (${passed}/${availableModels.length} in ${elapsedMs}ms)`);
     setStatus(`Scenario suite: ${passed}/${availableModels.length} passed`, 'ok');
   }
 }
