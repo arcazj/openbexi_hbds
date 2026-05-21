@@ -14,7 +14,9 @@ import {
   updateHyperclass,
   deleteHyperclass,
   createAttribute,
+  updateAttribute,
   createLink,
+  updateLink,
   refreshSceneFromData,
   saveScene,
   optimizeAndRefreshLayout,
@@ -40,6 +42,8 @@ let selectedParentHyperclassId = null;
 let selectedAttributeOwnerId = null;
 let selectedLinkSourceId = null;
 let selectedLinkTargetId = null;
+let selectedAttributeKey = null;
+let selectedLinkId = null;
 let editMode = 'full';
 let linkPickActive = false;
 let pointerStart = null;
@@ -436,6 +440,53 @@ function updateSmartMenusFromData() {
   setSelectOptions('attribute-owner-select', allNodes, selectedAttributeOwnerId, 'Select owner');
   setSelectOptions('link-source-select', allNodes, selectedLinkSourceId, 'Select source');
   setSelectOptions('link-target-select', allNodes, selectedLinkTargetId, 'Select target');
+  syncAttributeAndLinkMenus();
+}
+
+function syncAttributeAndLinkMenus() {
+  const owner = nodeById(selectedAttributeOwnerId) || nodeById(selectedElementId);
+  const attrs = owner?.attributes || [];
+  const attrItems = attrs.map((attribute, index) => {
+    const id = typeof attribute === 'object' && attribute ? (attribute.id ?? `idx-${index}`) : `idx-${index}`;
+    return { id: String(id), name: attributeDisplayName(attribute, index), attribute, index };
+  });
+  const attrSelect = $('selected-attribute-select');
+  if (attrSelect) {
+    attrSelect.innerHTML = '<option value="">Select attribute</option>';
+    attrItems.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = item.name;
+      attrSelect.appendChild(option);
+    });
+    if (!attrItems.some(item => sameId(item.id, selectedAttributeKey))) selectedAttributeKey = null;
+    attrSelect.value = selectedAttributeKey ? String(selectedAttributeKey) : '';
+  }
+  const selectedAttr = attrItems.find(item => sameId(item.id, selectedAttributeKey)) || null;
+  const attrNameInput = $('selected-attribute-name-input');
+  if (attrNameInput) {
+    attrNameInput.disabled = editMode === 'readonly' || !selectedAttr || !owner;
+    attrNameInput.value = selectedAttr ? selectedAttr.name : '';
+  }
+
+  const linkSelect = $('selected-link-select');
+  if (linkSelect) {
+    const availableLinks = links().map(link => ({
+      id: link.id,
+      name: `${link.rendering?.labelText || link.name || link.id} (${link.sourceClassId} -> ${link.targetClassId})`,
+      link
+    }));
+    linkSelect.innerHTML = '<option value="">Select link</option>';
+    availableLinks.forEach(item => {
+      const option = document.createElement('option');
+      option.value = String(item.id);
+      option.textContent = item.name;
+      linkSelect.appendChild(option);
+    });
+    if (!availableLinks.some(item => sameId(item.id, selectedLinkId))) selectedLinkId = null;
+    linkSelect.value = selectedLinkId ? String(selectedLinkId) : '';
+  }
+  syncLinkEditControls();
 }
 
 function updateSelectedCard() {
@@ -506,6 +557,11 @@ function updateModeControls() {
   disable('add-link-button', isReadOnly || structureOnly || !canCreateLink);
   disable('delete-selected-button', isReadOnly || !selected);
   disable('selected-color-input', isReadOnly || !selected);
+  disable('selected-border-color-input', isReadOnly || !selected);
+  disable('selected-opacity-input', isReadOnly || !selected);
+  disable('selected-corner-radius-input', isReadOnly || !selected);
+  disable('selected-text-color-input', isReadOnly || !selected);
+  disable('selected-name-input', isReadOnly || !selected);
   disable('seed-demo-button', isReadOnly);
   disable('empty-seed-demo-button', isReadOnly);
   disable('reset-model-button', isReadOnly);
@@ -584,28 +640,116 @@ function normalizeHexColor(value) {
 }
 
 function syncSelectedColorControl(selected) {
-  const input = $('selected-color-input');
-  if (!input) return;
-  input.disabled = !selected || editMode === 'readonly';
-  input.value = selected ? getNodeSurfaceColor(selected) : '#ffd166';
+  const readOnly = !selected || editMode === 'readonly';
+  const fill = $('selected-color-input');
+  const border = $('selected-border-color-input');
+  const opacity = $('selected-opacity-input');
+  const corner = $('selected-corner-radius-input');
+  const textColor = $('selected-text-color-input');
+  const nameInput = $('selected-name-input');
+  const renderingClass = selected?.rendering?.class || {};
+  if (fill) {
+    fill.disabled = readOnly;
+    fill.value = selected ? getNodeSurfaceColor(selected) : '#ffd166';
+  }
+  if (border) {
+    border.disabled = readOnly;
+    border.value = normalizeHexColor(renderingClass.borderColor || '#7a4f00');
+  }
+  if (opacity) {
+    opacity.disabled = readOnly;
+    opacity.value = String(Number(renderingClass.opacity ?? 1));
+  }
+  if (corner) {
+    corner.disabled = readOnly;
+    corner.value = String(Number(renderingClass.cornerRadius ?? 0.1));
+  }
+  if (textColor) {
+    textColor.disabled = readOnly;
+    textColor.value = normalizeHexColor(selected?.rendering?.textColor || '#111827');
+  }
+  if (nameInput) {
+    nameInput.disabled = readOnly;
+    nameInput.value = selected?.name || '';
+  }
 }
 
-async function handleSelectedColorChange(event) {
+async function handleSelectedRenderingChange() {
   const selected = nodeById(selectedElementId);
   if (!selected) return;
-  const color = normalizeHexColor(event.target.value);
+  const color = normalizeHexColor($('selected-color-input')?.value);
+  const borderColor = normalizeHexColor($('selected-border-color-input')?.value);
+  const opacity = Number($('selected-opacity-input')?.value ?? 1);
+  const cornerRadius = Number($('selected-corner-radius-input')?.value ?? 0.1);
+  const textColor = normalizeHexColor($('selected-text-color-input')?.value);
   const currentRendering = selected.rendering || {};
   const nextRendering = {
     ...currentRendering,
     class: {
       ...(currentRendering.class || {}),
       color,
-      metallicColor: color
-    }
+      metallicColor: color,
+      borderColor,
+      opacity: Number.isFinite(opacity) ? opacity : 1,
+      cornerRadius: Number.isFinite(cornerRadius) ? cornerRadius : 0.1
+    },
+    textColor
   };
   const updater = selected.type === 'hyperclass' ? updateHyperclass : updateClass;
   await updater(selected.id, { rendering: nextRendering }, { context: ctx(), refresh: false });
-  await refreshWorkspace(`Updated ${selected.name || selected.id} color`, { refresh: true, fit: false });
+  await refreshWorkspace(`Updated rendering for ${selected.name || selected.id}`, { refresh: true, fit: false });
+}
+
+function syncLinkEditControls() {
+  const selectedLink = links().find(link => sameId(link.id, selectedLinkId));
+  const disabled = editMode === 'readonly' || !selectedLink;
+  const nameInput = $('selected-link-name-input');
+  const colorInput = $('selected-link-color-input');
+  const widthInput = $('selected-link-width-input');
+  if (nameInput) {
+    nameInput.disabled = disabled;
+    nameInput.value = selectedLink ? (selectedLink.rendering?.labelText || selectedLink.name || '') : '';
+  }
+  if (colorInput) {
+    colorInput.disabled = disabled;
+    colorInput.value = normalizeHexColor(selectedLink?.rendering?.lineColor || '#334155');
+  }
+  if (widthInput) {
+    widthInput.disabled = disabled;
+    widthInput.value = String(Number(selectedLink?.rendering?.lineWidth ?? 0.01));
+  }
+}
+
+async function handleSelectedNameChange() {
+  const selected = nodeById(selectedElementId);
+  if (!selected) return;
+  const nextName = String($('selected-name-input')?.value || '').trim();
+  if (!nextName || nextName === selected.name) return;
+  const updater = selected.type === 'hyperclass' ? updateHyperclass : updateClass;
+  await updater(selected.id, { name: nextName }, { context: ctx(), refresh: false });
+  await refreshWorkspace(`Renamed ${selected.id} to ${nextName}`, { refresh: true, fit: false });
+}
+
+async function handleSelectedAttributeRename() {
+  const owner = nodeById(selectedAttributeOwnerId) || nodeById(selectedElementId);
+  if (!owner || selectedAttributeKey == null) return;
+  const value = String($('selected-attribute-name-input')?.value || '').trim();
+  if (!value) return;
+  const key = String(selectedAttributeKey).startsWith('idx-') ? Number(String(selectedAttributeKey).slice(4)) : selectedAttributeKey;
+  await updateAttribute(owner.id, key, { name: value }, { context: ctx(), refresh: false });
+  await refreshWorkspace(`Renamed attribute on ${owner.name || owner.id}`, { refresh: true, fit: false });
+}
+
+async function handleSelectedLinkUpdate() {
+  if (!selectedLinkId) return;
+  const name = String($('selected-link-name-input')?.value || '').trim();
+  const color = normalizeHexColor($('selected-link-color-input')?.value || '#334155');
+  const lineWidth = Number($('selected-link-width-input')?.value ?? 0.01);
+  await updateLink(selectedLinkId, {
+    name,
+    rendering: { labelText: name, lineColor: color, lineWidth: Number.isFinite(lineWidth) ? lineWidth : 0.01 }
+  }, { context: ctx(), refresh: false });
+  await refreshWorkspace('Updated link style', { refresh: true, fit: false });
 }
 
 function normalizeClassSurfaceMaterials() {
@@ -1595,6 +1739,16 @@ function clearLinkBuilder() {
 }
 
 function handleSelectChange(id, value) {
+  if (id === 'selected-attribute-select') {
+    selectedAttributeKey = value || null;
+    updateInterface({ json: false });
+    return;
+  }
+  if (id === 'selected-link-select') {
+    selectedLinkId = value || null;
+    updateInterface({ json: false });
+    return;
+  }
   const resolved = resolveNodeId(value);
   if (id === 'selected-element-select') {
     if (resolved) selectElement(resolved, { log: false });
@@ -1757,7 +1911,13 @@ function bindUi() {
   $('run-scenario-suite-button').addEventListener('click', () => runAction(runScenarioSuite));
   $('clear-link-button').addEventListener('click', clearLinkBuilder);
   $('link-pick-button').addEventListener('click', handleLinkPickButton);
-  $('selected-color-input')?.addEventListener('input', event => runAction(() => handleSelectedColorChange(event)));
+  ['selected-color-input', 'selected-border-color-input', 'selected-opacity-input', 'selected-corner-radius-input', 'selected-text-color-input']
+    .forEach(id => $(id)?.addEventListener('input', () => runAction(handleSelectedRenderingChange)));
+  $('selected-name-input')?.addEventListener('change', () => runAction(handleSelectedNameChange));
+  $('selected-attribute-name-input')?.addEventListener('change', () => runAction(handleSelectedAttributeRename));
+  $('selected-link-name-input')?.addEventListener('change', () => runAction(handleSelectedLinkUpdate));
+  $('selected-link-color-input')?.addEventListener('input', () => runAction(handleSelectedLinkUpdate));
+  $('selected-link-width-input')?.addEventListener('input', () => runAction(handleSelectedLinkUpdate));
   $('reset-scene-settings-button')?.addEventListener('click', handleResetSceneSettings);
 
   [
@@ -1802,7 +1962,7 @@ function bindUi() {
     updateInterface({ json: false });
   });
 
-  ['selected-element-select', 'parent-hyperclass-select', 'attribute-owner-select', 'link-source-select', 'link-target-select'].forEach(id => {
+  ['selected-element-select', 'parent-hyperclass-select', 'attribute-owner-select', 'link-source-select', 'link-target-select', 'selected-attribute-select', 'selected-link-select'].forEach(id => {
     $(id).addEventListener('change', event => handleSelectChange(id, event.target.value));
   });
 }
