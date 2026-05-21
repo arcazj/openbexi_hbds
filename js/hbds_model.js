@@ -343,7 +343,18 @@ function updateFitMetadataFromContext(context, options = {}) {
   if (!context?.diagramGroup || !context?.camera) return getLayoutSettings();
   const box = new THREE.Box3().setFromObject(context.diagramGroup);
   if (box.isEmpty()) return getLayoutSettings();
-  return saveFitMetadata(calculateFitMetrics(box, context.camera, options)).fit;
+  const fit = calculateFitMetrics(box, context.camera, options);
+  const center = context.orbitControls?.target
+    ? context.orbitControls.target.clone()
+    : box.getCenter(new THREE.Vector3());
+  const cameraDistance = context.camera.position.distanceTo(center);
+  fit.center = {
+    x: roundFitNumber(center.x),
+    y: roundFitNumber(center.y),
+    z: roundFitNumber(center.z)
+  };
+  fit.distance = roundFitNumber(cameraDistance);
+  return saveFitMetadata(fit).fit;
 }
 
 function hasUsableFitSettings(fit) {
