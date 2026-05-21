@@ -7,12 +7,52 @@
     "description": "Simple HBDS satellite model with richer lifecycle/spacecraft metadata and radial layout.",
     "layout": {
       "algorithm": "radial",
-      "mode": "Radial"
+      "mode": "Radial",
+      "fit": {
+        "padding": 1.15,
+        "fitHeightDistance": 23.1417,
+        "fitWidthDistance": 10.8092,
+        "distance": 23.1417,
+        "diagramWidth": 16.435,
+        "diagramHeight": 9.06,
+        "diagramDepth": 0.13,
+        "radius": 9.3836,
+        "center": {
+          "x": 0.11,
+          "y": 0,
+          "z": 0.065
+        },
+        "cameraAspect": 2.1409,
+        "cameraFov": 50
+      }
     },
     "style": {
       "classMaterial": "metallic",
       "classPalette": "domain-colored",
       "hyperclassMaterial": "metallic"
+    },
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
     }
   },
   "hypergraph": {
@@ -32,13 +72,13 @@
           "organization"
         ],
         "position": {
-          "x": -6.0,
-          "y": 0.0,
-          "z": 0.0
+          "x": -5,
+          "y": 6.123233995736766e-16,
+          "z": 0
         },
         "size": {
-          "width": 10.0,
-          "height": 6.0
+          "width": 6.215,
+          "height": 9.06
         },
         "rendering": {
           "class": {
@@ -46,7 +86,9 @@
             "material": "metallic",
             "borderColor": "#1D4ED8",
             "borderWidth": 0.025,
-            "cornerRadius": 0.12
+            "cornerRadius": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           }
         }
       },
@@ -64,13 +106,13 @@
           "payload_profile"
         ],
         "position": {
-          "x": 6.0,
-          "y": 0.0,
-          "z": 0.0
+          "x": 5,
+          "y": 0,
+          "z": 0
         },
         "size": {
-          "width": 7.0,
-          "height": 6.0
+          "width": 5.995,
+          "height": 5.8100000000000005
         },
         "rendering": {
           "class": {
@@ -78,7 +120,9 @@
             "material": "metallic",
             "borderColor": "#15803D",
             "borderWidth": 0.025,
-            "cornerRadius": 0.12
+            "cornerRadius": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           }
         }
       },
@@ -102,13 +146,13 @@
           "decayedDateUtc"
         ],
         "position": {
-          "x": -8.0,
-          "y": 1.0,
-          "z": 0.1
+          "x": -6.0575,
+          "y": -2.744999999999999,
+          "z": 0
         },
         "size": {
           "width": 2.8,
-          "height": 1.6
+          "height": 2.4699999999999998
         },
         "rendering": {
           "class": {
@@ -136,13 +180,13 @@
           "firstFlightDate"
         ],
         "position": {
-          "x": -4.0,
-          "y": 1.0,
-          "z": 0.1
+          "x": -5.8925,
+          "y": 2.715000000000001,
+          "z": 0
         },
         "size": {
           "width": 2.8,
-          "height": 1.6
+          "height": 1.83
         },
         "rendering": {
           "class": {
@@ -168,13 +212,13 @@
           "foundedDate"
         ],
         "position": {
-          "x": -6.0,
-          "y": -1.3,
-          "z": 0.1
+          "x": -5.865,
+          "y": 0.1450000000000009,
+          "z": 0
         },
         "size": {
           "width": 2.8,
-          "height": 1.6
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -202,13 +246,13 @@
           "argPerigeeDeg"
         ],
         "position": {
-          "x": 4.6,
-          "y": 0.8,
-          "z": 0.1
+          "x": 4.052499999999999,
+          "y": -1.44,
+          "z": 0
         },
         "size": {
           "width": 2.8,
-          "height": 1.6
+          "height": 1.83
         },
         "rendering": {
           "class": {
@@ -235,13 +279,13 @@
           "operatorOrgId"
         ],
         "position": {
-          "x": 7.4,
-          "y": 0.8,
-          "z": 0.1
+          "x": 4.079999999999999,
+          "y": 1.1300000000000003,
+          "z": 0
         },
         "size": {
           "width": 2.8,
-          "height": 1.6
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -333,6 +377,7 @@
         "targetClassId": "satellite",
         "name": "describes_satellite_orbital_mission_state"
       }
-    ]
+    ],
+    "link": []
   }
 }

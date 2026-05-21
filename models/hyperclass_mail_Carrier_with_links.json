@@ -14,13 +14,13 @@
           "Phone number"
         ],
         "position": {
-          "x": 4.6906674878449515,
-          "y": 10.111402315940646,
+          "x": 0,
+          "y": 0,
           "z": 0
         },
         "size": {
           "width": 3.2,
-          "height": 1.25
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -59,13 +59,13 @@
           "Email"
         ],
         "position": {
-          "x": 12.001873860478952,
-          "y": 9.28484996310145,
+          "x": 5.04,
+          "y": 0,
           "z": 0
         },
         "size": {
           "width": 3.2,
-          "height": 1.25
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -110,22 +110,24 @@
           5
         ],
         "position": {
-          "x": 9.1900428676853,
-          "y": 4.6450214338426505,
+          "x": -5.04,
+          "y": 0,
           "z": 0
         },
         "size": {
-          "width": 4.1,
-          "height": 5.3
+          "width": 5.265000000000001,
+          "height": 5.73
         },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
-            "material": "flat",
+            "material": "metallic",
             "borderColor": "#000000",
             "borderWidth": 0.02,
             "cornerRadius": 0.3,
-            "opacity": 0.12
+            "opacity": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -156,13 +158,13 @@
         ],
         "parentClassId": 3,
         "position": {
-          "x": 8.3145254167389,
-          "y": 5.158922230421902,
+          "x": -5.9725,
+          "y": 1.0900000000000003,
           "z": 0
         },
         "size": {
           "width": 2.1,
-          "height": 1.25
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -203,13 +205,13 @@
         ],
         "parentClassId": 3,
         "position": {
-          "x": 8.331745257423051,
-          "y": 3.220538884789051,
+          "x": -5.8625,
+          "y": -1.44,
           "z": 0
         },
         "size": {
           "width": 2.1,
-          "height": 1.25
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -242,6 +244,8 @@
         "sourceClassId": 1,
         "targetClassId": 3,
         "rendering": {
+          "labelText": "sends",
+          "orthogonalStyle": "auto",
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -249,7 +253,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "sends",
           "labelFontSize": 13,
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
@@ -257,12 +260,15 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "sourceClassId": 3,
         "targetClassId": 2,
         "rendering": {
+          "labelText": "receives",
+          "orthogonalStyle": "auto",
           "lineColor": "#000000",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -270,7 +276,6 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelText": "receives",
           "labelFontSize": 13,
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
@@ -278,8 +283,54 @@
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "allowSelfLink": true
       }
     ]
+  },
+  "metadata": {
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "hierarchy",
+      "fit": {
+        "padding": 1.15,
+        "fitHeightDistance": 20.1237,
+        "fitWidthDistance": 9.3995,
+        "distance": 20.1237,
+        "diagramWidth": 14.7725,
+        "diagramHeight": 6.934,
+        "diagramDepth": 0.16,
+        "radius": 8.1599,
+        "center": {
+          "x": -0.2862,
+          "y": 0,
+          "z": 0.07
+        },
+        "cameraAspect": 2.1409,
+        "cameraFov": 50
+      }
+    }
   }
 }
