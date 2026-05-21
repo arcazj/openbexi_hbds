@@ -42,6 +42,15 @@ export const getData=()=>data;
 export function normalizeData(inputData){
   const m=clone(inputData||{}); m.hypergraph=m.hypergraph||{};
   m.metadata=normalizeModelMetadata({ ...(m.hypergraph.metadata||{}), ...(m.metadata||{}) });
+  const legacyRelationships=Array.isArray(m.hypergraph.relationships)
+    ? m.hypergraph.relationships
+    : (Array.isArray(m.hypergraph.relationship)?m.hypergraph.relationship:[]);
+  const normalizedLegacyLinks=legacyRelationships.map(rel=>({
+    ...rel,
+    sourceClassId:rel.sourceClassId??rel.source,
+    targetClassId:rel.targetClassId??rel.target,
+    name:rel.name||rel.label||''
+  }));
   if(Array.isArray(m.hypergraph.hyperclass) && (!Array.isArray(m.hypergraph.class) || m.hypergraph.class.length===0)){
     const flattened=[];
     for(const rawHyperclass of m.hypergraph.hyperclass){
@@ -58,20 +67,14 @@ export function normalizeData(inputData){
     }
     if(Array.isArray(m.hypergraph.class)) flattened.push(...m.hypergraph.class);
     m.hypergraph.class=flattened;
-    const legacyRelationships=Array.isArray(m.hypergraph.relationships)
-      ? m.hypergraph.relationships
-      : (Array.isArray(m.hypergraph.relationship)?m.hypergraph.relationship:[]);
-    m.hypergraph.link=legacyRelationships.length
-      ? legacyRelationships.map(rel=>({
-          ...rel,
-          sourceClassId:rel.sourceClassId??rel.source,
-          targetClassId:rel.targetClassId??rel.target,
-          name:rel.name||rel.label||''
-        }))
+    m.hypergraph.link=normalizedLegacyLinks.length
+      ? normalizedLegacyLinks
       : (Array.isArray(m.hypergraph.link)?m.hypergraph.link:[]);
   }
   m.hypergraph.class=Array.isArray(m.hypergraph.class)?m.hypergraph.class:[];
-  m.hypergraph.link=Array.isArray(m.hypergraph.link)?m.hypergraph.link:[];
+  m.hypergraph.link=normalizedLegacyLinks.length
+    ? normalizedLegacyLinks
+    : (Array.isArray(m.hypergraph.link)?m.hypergraph.link:[]);
   const ids=new Set(); const byId=new Map();
   m.hypergraph.class=m.hypergraph.class.map((n,i)=>{let x=clone(n||{}); if(x.type==='hyperclass') x=normalizeHyperclassData(x); else x=normalizeClassData(x); x.id=x.id??nextId('node'); while(ids.has(x.id)) x.id=nextId('node'); ids.add(x.id); x.name=x.name||`Node ${i+1}`; x.attributes=Array.isArray(x.attributes)?x.attributes:[]; if(x.type==='hyperclass') x.children=Array.isArray(x.children)?x.children:[]; byId.set(x.id,x); return x;});
   for(const n of m.hypergraph.class){ if(n.parentClassId && (!byId.has(n.parentClassId)||byId.get(n.parentClassId).type!=='hyperclass')) n.parentClassId=null; }
@@ -343,7 +346,18 @@ function updateFitMetadataFromContext(context, options = {}) {
   if (!context?.diagramGroup || !context?.camera) return getLayoutSettings();
   const box = new THREE.Box3().setFromObject(context.diagramGroup);
   if (box.isEmpty()) return getLayoutSettings();
-  return saveFitMetadata(calculateFitMetrics(box, context.camera, options)).fit;
+  const fit = calculateFitMetrics(box, context.camera, options);
+  const center = context.orbitControls?.target
+    ? context.orbitControls.target.clone()
+    : box.getCenter(new THREE.Vector3());
+  const cameraDistance = context.camera.position.distanceTo(center);
+  fit.center = {
+    x: roundFitNumber(center.x),
+    y: roundFitNumber(center.y),
+    z: roundFitNumber(center.z)
+  };
+  fit.distance = roundFitNumber(cameraDistance);
+  return saveFitMetadata(fit).fit;
 }
 
 function hasUsableFitSettings(fit) {
