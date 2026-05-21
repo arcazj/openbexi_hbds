@@ -70,13 +70,19 @@ Navigation:
 
 ## Models
 
-Models live in the `models/` directory as JSON files. The main page currently lists its available models in `index.html`; the helper `models/models_manifest.json` is available for pages or tools that want manifest-based model discovery.
+Models live in the `models/` directory as JSON files. The main page discovers its models from `models/models_manifest.json` at runtime.
 
 When adding a new model for the main simulator:
 
 1. Add the JSON file under `models/`.
-2. Add an `<option>` for it in the `model-select` dropdown in `index.html`.
+2. Add an entry to `models/models_manifest.json`.
 3. Serve the app locally and verify the model loads.
+
+You can validate model manifest integrity with:
+
+```sh
+python3 tools/validate_manifests.py
+```
 
 ## Project Structure
 
