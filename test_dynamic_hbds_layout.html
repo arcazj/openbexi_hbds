@@ -145,6 +145,30 @@
       display: block;
     }
 
+    #canvas-model-title {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      z-index: 18;
+      max-width: calc(100% - 32px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 17px;
+      font-weight: 780;
+      color: #1f2a37;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(152, 162, 179, 0.35);
+      border-radius: 7px;
+      padding: 5px 10px;
+      backdrop-filter: blur(3px);
+      display: none;
+    }
+
+    body.has-model #canvas-model-title {
+      display: inline-block;
+    }
+
     .label-layer {
       position: absolute;
       inset: 0;
@@ -164,38 +188,6 @@
       box-shadow: 0 0 0 1px rgba(23, 105, 224, 0.35);
     }
 
-    #canvas-empty-state {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      z-index: 12;
-      width: min(440px, calc(100% - 40px));
-      padding: 18px;
-      border: 1px solid rgba(122, 139, 160, 0.38);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.92);
-      box-shadow: 0 18px 44px rgba(40, 54, 72, 0.12);
-      transform: translate(-50%, -50%);
-    }
-
-    body.has-model #canvas-empty-state {
-      display: none;
-    }
-
-    .empty-title {
-      margin: 0 0 6px;
-      font-size: 20px;
-      line-height: 1.2;
-    }
-
-    .empty-copy {
-      margin: 0 0 14px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .empty-actions,
     .control-row,
     .two-col {
       display: grid;
@@ -239,15 +231,15 @@
       height: 100%;
       overflow: auto;
       border-left: 1px solid rgba(152, 162, 179, 0.45);
-      background: rgba(251, 252, 254, 0.94);
+      background: linear-gradient(180deg, #f7f9fc 0%, #f2f7fb 100%);
       box-shadow: -18px 0 48px rgba(40, 54, 72, 0.1);
       padding: 16px;
     }
 
     .panel-header {
       display: grid;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 4px;
+      margin-bottom: 10px;
     }
 
     .eyebrow {
@@ -258,15 +250,8 @@
 
     h1 {
       margin: 0;
-      font-size: 22px;
+      font-size: 20px;
       line-height: 1.15;
-    }
-
-    .panel-subtitle {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
     }
 
     .stats-grid {
@@ -280,7 +265,7 @@
       min-height: 56px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #ffffff;
+      background: #fdfefe;
       padding: 8px;
     }
 
@@ -306,7 +291,7 @@
       margin-bottom: 10px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #ffffff;
+      background: #fbfdff;
       color: var(--muted);
       font-size: 12px;
       font-weight: 700;
@@ -336,7 +321,7 @@
       margin-bottom: 10px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #ffffff;
+      background: #f9fcff;
       padding: 10px;
     }
 
@@ -430,7 +415,7 @@
     .mode-segment button.active {
       border-color: #c7d7ef;
       color: var(--accent-strong);
-      background: #ffffff;
+      background: #f7fbff;
       box-shadow: 0 1px 3px rgba(40, 54, 72, 0.1);
     }
 
@@ -595,14 +580,7 @@
 </head>
 <body>
   <main id="container">
-    <section id="canvas-empty-state" aria-live="polite">
-      <h2 class="empty-title">Empty workspace</h2>
-      <p class="empty-copy">Create an HBDS element or seed a sample model to begin editing the layout.</p>
-      <div class="empty-actions">
-        <button id="empty-add-hyperclass-button" type="button" class="primary">Hyperclass</button>
-        <button id="empty-seed-demo-button" type="button">Seed Sample</button>
-      </div>
-    </section>
+    <div id="canvas-model-title" aria-live="polite"></div>
   </main>
 
   <div id="model-overview" aria-label="Model overview">
@@ -614,7 +592,6 @@
     <header class="panel-header">
       <div class="eyebrow">HBDS Lab</div>
       <h1>Dynamic Layout Test</h1>
-      <p class="panel-subtitle">Build, link, validate, and reshape HBDS models in one live workspace.</p>
     </header>
 
     <div class="stats-grid" aria-label="Model statistics">
@@ -628,15 +605,11 @@
 
     <section class="control-group">
       <div class="section-title">Model</div>
-      <label for="test-model-select">HBDS Model</label>
+      <label for="test-model-select">Select a HBDS Model</label>
       <select id="test-model-select">
         <option value="">Blank workspace</option>
       </select>
       <div id="model-summary" class="section-meta">Blank workspace</div>
-      <div class="control-row">
-        <button id="load-model-button" type="button">Load</button>
-        <button id="seed-demo-button" type="button">Seed Sample</button>
-      </div>
       <button id="run-scenario-suite-button" type="button" class="quiet">Run Scenario Suite</button>
     </section>
 

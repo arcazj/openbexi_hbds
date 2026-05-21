@@ -301,7 +301,7 @@ function compactControlSections() {
     if (!title) return;
     const details = document.createElement('details');
     details.className = section.className;
-    if (section.dataset.defaultOpen === 'true' || ['Model', 'Selection'].some(label => title.textContent.includes(label))) {
+    if (section.dataset.defaultOpen === 'true' || title.textContent.includes('Model')) {
       details.open = true;
     }
     const summary = document.createElement('summary');
@@ -351,6 +351,18 @@ function updateStats() {
   $('stat-attribute-count').textContent = String(countAttributes());
   $('stat-hyperclass-count').textContent = String(nodes().filter(node => node.type === 'hyperclass').length);
   document.body.classList.toggle('has-model', nodeCount > 0);
+}
+
+function updateCanvasTitle() {
+  const title = $('canvas-model-title');
+  if (!title) return;
+  const selectedOption = $('test-model-select')?.selectedOptions?.[0];
+  const selectedText = selectedOption?.textContent?.trim();
+  if (nodes().length <= 0) {
+    title.textContent = '';
+    return;
+  }
+  title.textContent = selectedText && selectedText !== 'Blank workspace' ? selectedText : 'Untitled Model';
 }
 
 function getCurrentStats() {
@@ -551,7 +563,6 @@ function updateModeControls() {
   };
 
   disable('add-hyperclass-button', isReadOnly);
-  disable('empty-add-hyperclass-button', isReadOnly);
   disable('add-class-button', isReadOnly);
   disable('add-attribute-button', isReadOnly || structureOnly || !owner);
   disable('add-link-button', isReadOnly || structureOnly || !canCreateLink);
@@ -562,8 +573,6 @@ function updateModeControls() {
   disable('selected-corner-radius-input', isReadOnly || !selected);
   disable('selected-text-color-input', isReadOnly || !selected);
   disable('selected-name-input', isReadOnly || !selected);
-  disable('seed-demo-button', isReadOnly);
-  disable('empty-seed-demo-button', isReadOnly);
   disable('reset-model-button', isReadOnly);
   disable('apply-json-button', isReadOnly);
   disable('link-pick-button', isReadOnly || structureOnly);
@@ -598,6 +607,7 @@ function updateInterface(options = {}) {
   normalizeClassSurfaceMaterials();
   applySelectionHighlight();
   updateModelSummary();
+  updateCanvasTitle();
   if (options.json !== false) updateJsonPreviewFromData();
   updateRenderDiagnostics();
 }
@@ -1487,6 +1497,8 @@ function handleFitModel() {
 
 async function handleResetModel() {
   await resetData({ context: ctx(), refresh: false });
+  applyModelLayoutSettings({ algorithm: 'grid' });
+  setLayoutSettings({ ...getLayoutSettings(), algorithm: 'grid' }, { applyContext: false });
   selectedElementId = null;
   selectedParentHyperclassId = null;
   selectedAttributeOwnerId = null;
@@ -1895,7 +1907,6 @@ function setupDrag() {
 function bindUi() {
   $('add-class-button').addEventListener('click', () => runAction(handleAddClass));
   $('add-hyperclass-button').addEventListener('click', () => runAction(handleAddHyperclass));
-  $('empty-add-hyperclass-button').addEventListener('click', () => runAction(handleAddHyperclass));
   $('add-attribute-button').addEventListener('click', () => runAction(handleAddAttribute));
   $('add-link-button').addEventListener('click', () => runAction(handleAddLink));
   $('delete-selected-button').addEventListener('click', () => runAction(handleDeleteSelected));
@@ -1905,9 +1916,6 @@ function bindUi() {
   $('export-json-button').addEventListener('click', handleExportJson);
   $('apply-json-button').addEventListener('click', () => runAction(handleApplyJson));
   $('reset-model-button').addEventListener('click', () => runAction(handleResetModel));
-  $('seed-demo-button').addEventListener('click', () => runAction(handleSeedDemo));
-  $('empty-seed-demo-button').addEventListener('click', () => runAction(handleSeedDemo));
-  $('load-model-button').addEventListener('click', () => runAction(handleLoadModel));
   $('run-scenario-suite-button').addEventListener('click', () => runAction(runScenarioSuite));
   $('clear-link-button').addEventListener('click', clearLinkBuilder);
   $('link-pick-button').addEventListener('click', handleLinkPickButton);
@@ -2003,6 +2011,8 @@ async function init() {
   installDebugHooks();
   window.addEventListener('resize', resizeRenderers);
 
+  applyModelLayoutSettings({ algorithm: 'grid' });
+  setLayoutSettings({ ...getLayoutSettings(), algorithm: 'grid' }, { applyContext: false });
   await resetData({ context: ctx(), refresh: true });
   initModelOverview(ctx());
   clearOverview();
