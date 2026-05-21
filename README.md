@@ -84,6 +84,12 @@ You can validate model manifest integrity with:
 python3 tools/validate_manifests.py
 ```
 
+You can lint naming consistency (HBDS/HDBS labels, spaced values, missing files) with:
+
+```sh
+python3 tools/lint_model_naming.py
+```
+
 ## Project Structure
 
 ```text
