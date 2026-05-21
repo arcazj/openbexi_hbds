@@ -361,7 +361,7 @@ function getCurrentStats() {
 }
 
 function setStatus(message, tone = 'ok') {
-  const status = $('validation-status');
+  const status = $('scenario-status');
   if (!status) return;
   status.className = 'status-chip';
   if (tone === 'ok' || tone === 'warn' || tone === 'error') {
@@ -1534,6 +1534,7 @@ async function runScenarioSuite() {
   let passed = 0;
   const startedAt = performance.now();
   addLog(`Scenario suite started (${availableModels.length} models)`);
+  setStatus(`Running suite: 0/${availableModels.length}`, 'warn');
 
   try {
     for (const item of availableModels) {
@@ -1559,6 +1560,7 @@ async function runScenarioSuite() {
         }
         if (!hasFitMetadata(loadedModel)) fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
         passed += 1;
+        setStatus(`Running suite: ${passed}/${availableModels.length}`, 'warn');
       } catch (error) {
         failures.push(`${label}: ${error?.message || String(error)}`);
       }
