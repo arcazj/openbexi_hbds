@@ -294,8 +294,8 @@
 
     function bindKeyboardShortcuts() {
         window.addEventListener('keydown', event => {
-            if (event.target && ['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target.tagName)) return;
             if (event.key === 'Escape') return toggleHelpOverlay(false);
+            if (event.target && ['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target.tagName)) return;
             if (event.key.toLowerCase() === 'h') return toggleHelpOverlay(true);
             if (event.key.toLowerCase() === 'f') return document.getElementById('fit-model-button')?.click();
             if (event.key.toLowerCase() === 'o') return document.getElementById('optimize-layout-button')?.click();
@@ -576,3 +576,6 @@
         const shortcutsButton = document.getElementById('help-shortcuts-button');
         shortcutsButton.addEventListener('click', () => toggleHelpOverlay(true));
         document.getElementById('close-help-button').addEventListener('click', () => toggleHelpOverlay(false));
+        document.getElementById('keyboard-help').addEventListener('click', event => {
+            if (event.target?.id === 'keyboard-help') toggleHelpOverlay(false);
+        });

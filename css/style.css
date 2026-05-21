@@ -72,6 +72,10 @@ canvas {
   place-items: center;
 }
 
+.help-overlay[hidden] {
+  display: none !important;
+}
+
 .help-card {
   width: min(460px, calc(100% - 28px));
   border-radius: 8px;
