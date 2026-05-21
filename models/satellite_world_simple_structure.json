@@ -303,79 +303,79 @@
         "id": "rel_simple_001",
         "sourceClassId": "satellite",
         "targetClassId": "launch_vehicle",
-        "name": "launched_by"
+        "name": "is_launched_by"
       },
       {
         "id": "rel_simple_002",
         "sourceClassId": "satellite",
         "targetClassId": "organization",
-        "name": "manufactured_by"
+        "name": "is_manufactured_by"
       },
       {
         "id": "rel_simple_003",
         "sourceClassId": "satellite",
         "targetClassId": "tle_set",
-        "name": "tracked_by_tle"
+        "name": "is_tracked_by"
       },
       {
         "id": "rel_simple_004",
         "sourceClassId": "satellite",
         "targetClassId": "payload_profile",
-        "name": "carries_payload"
+        "name": "carries"
       },
       {
         "id": "rel_simple_005",
         "sourceClassId": "organization",
         "targetClassId": "payload_profile",
-        "name": "operates_payload"
+        "name": "operates"
       },
       {
         "id": "rel_simple_006",
         "sourceClassId": "hc_satellite_catalog",
         "targetClassId": "hc_orbit_payload",
-        "name": "supplies_orbital_payload_context"
+        "name": "supplies_context_for"
       },
       {
         "id": "rel_simple_007",
         "sourceClassId": "satellite",
         "targetClassId": "organization",
-        "name": "operated_by"
+        "name": "is_operated_by"
       },
       {
         "id": "rel_simple_008",
         "sourceClassId": "satellite",
         "targetClassId": "organization",
-        "name": "owned_by"
+        "name": "is_owned_by"
       },
       {
         "id": "rel_simple_009",
         "sourceClassId": "launch_vehicle",
         "targetClassId": "organization",
-        "name": "provided_by"
+        "name": "is_provided_by"
       },
       {
         "id": "rel_simple_010",
         "sourceClassId": "organization",
         "targetClassId": "launch_vehicle",
-        "name": "procures_launch"
+        "name": "procures_launch_with"
       },
       {
         "id": "rel_simple_011",
         "sourceClassId": "payload_profile",
         "targetClassId": "tle_set",
-        "name": "characterized_by_orbit_solution"
+        "name": "is_characterized_by"
       },
       {
         "id": "rel_simple_012",
         "sourceClassId": "launch_vehicle",
         "targetClassId": "payload_profile",
-        "name": "deploys_payload_profile"
+        "name": "deploys"
       },
       {
         "id": "rel_simple_013",
         "sourceClassId": "hc_orbit_payload",
         "targetClassId": "satellite",
-        "name": "describes_satellite_orbital_mission_state"
+        "name": "describes_orbital_state_of"
       }
     ],
     "link": []
