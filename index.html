@@ -14,24 +14,15 @@
 </div>
 <div id="controls-panel">
     <div class="control-group">
-        <label for="model-select">Select HDBS Model</label>
+        <div id="load-status" class="status-chip" aria-live="polite">Load status: idle</div>
+        <div id="validation-status-main" class="status-chip" aria-live="polite">Validation: pending</div>
+    </div>
+    <div class="control-group">
+        <label for="model-select">Select HBDS Model</label>
         <select id="model-select">
-            <option value="models/human.json">human</option>
-            <option value="models/human_and_car.json">human_and_car</option>
-            <option value="models/human_and_car_and_more.json">human and car and more</option>
-            <option value="models/transportation.json">transportation</option>
-            <option value="models/transportation_links.json">transportation and links</option>
-            <option value="models/multimodal_transportation_diagram.json">multimodal transportation diagram</option>
-            <option value="models/human_and_car_links.json">human and car links</option>
-            <option value="models/bridge_road_links.json">bridge road links</option>
-            <option value="models/hyperclass_mail_Carrier.json">Hyperclass Mail Carrier</option>
-            <option value="models/hyperclass_mail_Carrier_with_links.json">Hyperclass Mail Carrier with links</option>
-            <option value="models/complex_hyperclass_mail_Carrier_with_links.json">Complex Hyperclass Mail Carrier with links</option>
-            <option value="models/satellite_world_compact_structure.json">satellite world compact structure</option>
-            <option value="models/satellite_world_complete_structure.json">satellite world complete structure</option>
-            <option value="models/opera_de Paris.json">opera_de Paris</option>
-            <option value="models/TGV.json">TGV</option>
+            <option value="">Loading models...</option>
         </select>
+        <div id="model-select-diagnostics" class="status-note">Loading model manifest…</div>
     </div>
     <div class="control-group">
         <label class="checkbox-wrapper" for="view-toggle">
@@ -87,6 +78,22 @@
     </div>
     <div class="control-group">
         <button id="fit-model-button">Fit Model</button>
+        <button id="help-shortcuts-button" type="button">Keyboard Help</button>
+    </div>
+</div>
+<div id="keyboard-help" class="help-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="help-card">
+        <h2 id="help-title">Keyboard Shortcuts</h2>
+        <ul>
+            <li><kbd>H</kbd> Toggle this help</li>
+            <li><kbd>F</kbd> Fit model</li>
+            <li><kbd>O</kbd> Optimize layout</li>
+            <li><kbd>S</kbd> Save model</li>
+            <li><kbd>V</kbd> Toggle 2D/3D view</li>
+            <li><kbd>Esc</kbd> Close help</li>
+        </ul>
+        <p class="status-note">Focus order: model selector → view/edit toggles → actions → settings.</p>
+        <button id="close-help-button" type="button">Close</button>
     </div>
 </div>
 <script type="importmap">
@@ -116,6 +123,7 @@
     const draggableObjects = [];
     let lightingState = normalizeSceneSettings();
     let sceneLights = {};
+    let modelsLoadOk = false;
 
     /* ---------- MAIN APPLICATION ---------- */
     async function init() {
@@ -175,21 +183,7 @@
         });
         bindSceneSettingsControls();
         document.getElementById('model-select').addEventListener('change', async e => {
-            const loadedModel = await loadAndRenderScene(e.target.value, getModelContext(), {
-                allowedBasePath: 'models/'
-            });
-            const preserveLayout = Boolean(loadedModel?.metadata?.preserveLayout || loadedModel?.hypergraph?.metadata?.preserveLayout);
-            const algorithm = document.getElementById('layout-algorithm-select').value;
-            let didOptimize = false;
-            if (!preserveLayout && document.getElementById('auto-optimize-toggle').checked && algorithm !== 'none') {
-                await optimizeAndRefreshLayout(getModelContext(), {
-                    algorithm
-                });
-                didOptimize = true;
-            }
-            if (didOptimize || !hasFitMetadata(loadedModel)) {
-                fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-            }
+            await loadSelectedModel(e.target.value);
         });
         document.getElementById('fit-model-button').addEventListener('click', () => {
             fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
@@ -200,13 +194,8 @@
         initModelOverview(getModelContext());
         await populateModelSelect();
         const initialModel = document.getElementById('model-select').value;
-        loadAndRenderScene(initialModel, getModelContext(), {
-            allowedBasePath: 'models/'
-        }).then(loadedModel => {
-            if (!hasFitMetadata(loadedModel)) {
-                fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-            }
-        });
+        if (initialModel) await loadSelectedModel(initialModel);
+        bindKeyboardShortcuts();
     }
 
     function hasFitMetadata(model) {
@@ -216,23 +205,104 @@
 
     async function populateModelSelect() {
         const select = document.getElementById('model-select');
+        const diagnostics = document.getElementById('model-select-diagnostics');
         const selectedValue = select.value;
-        const models = await listAvailableModels({
-            manifestPath: 'models/models_manifest.json',
-            modelsPath: 'models/'
-        });
-        if (!models.length) return;
+        try {
+            const models = await listAvailableModels({
+                manifestPath: 'models/models_manifest.json',
+                modelsPath: 'models/'
+            });
+            if (!models.length) {
+                setLoadStatus('Load status: no models found', 'warn');
+                diagnostics.textContent = 'Manifest loaded but no usable models were found.';
+                select.innerHTML = '<option value="">No models available</option>';
+                modelsLoadOk = false;
+                return;
+            }
 
-        select.innerHTML = '';
-        models.forEach(model => {
-            const option = document.createElement('option');
-            option.value = model.value;
-            option.textContent = model.label || model.value;
-            select.appendChild(option);
+            select.innerHTML = '';
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.value;
+                option.textContent = model.label || model.value;
+                select.appendChild(option);
+            });
+            select.value = models.some(model => model.value === selectedValue)
+                ? selectedValue
+                : models[0].value;
+            diagnostics.textContent = `Loaded ${models.length} models from manifest.`;
+            setLoadStatus('Load status: manifest loaded', 'ok');
+            modelsLoadOk = true;
+        } catch (error) {
+            select.innerHTML = '<option value="">Failed to load models</option>';
+            diagnostics.textContent = `Manifest error: ${error?.message || String(error)}`;
+            setLoadStatus('Load status: manifest error', 'error');
+            modelsLoadOk = false;
+        }
+    }
+
+    async function loadSelectedModel(modelPath) {
+        if (!modelPath) return;
+        setLoadStatus(`Load status: loading ${modelPath}`, 'warn');
+        try {
+            const loadedModel = await loadAndRenderScene(modelPath, getModelContext(), { allowedBasePath: 'models/' });
+            const validation = validateLoadedModel(loadedModel);
+            setValidationStatus(validation.message, validation.tone);
+            const preserveLayout = Boolean(loadedModel?.metadata?.preserveLayout || loadedModel?.hypergraph?.metadata?.preserveLayout);
+            const algorithm = document.getElementById('layout-algorithm-select').value;
+            let didOptimize = false;
+            if (!preserveLayout && document.getElementById('auto-optimize-toggle').checked && algorithm !== 'none') {
+                await optimizeAndRefreshLayout(getModelContext(), { algorithm });
+                didOptimize = true;
+            }
+            if (didOptimize || !hasFitMetadata(loadedModel)) {
+                fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
+            }
+            setLoadStatus(`Load status: loaded ${modelPath}`, 'ok');
+        } catch (error) {
+            setLoadStatus(`Load status: failed ${modelPath}`, 'error');
+            setValidationStatus(`Validation: load error (${error?.message || String(error)})`, 'error');
+        }
+    }
+
+    function validateLoadedModel(model) {
+        const classes = Array.isArray(model?.hypergraph?.class) ? model.hypergraph.class.length : 0;
+        const links = Array.isArray(model?.hypergraph?.link) ? model.hypergraph.link.length : 0;
+        if (classes <= 0) return { message: 'Validation: warning (no classes)', tone: 'warn' };
+        const dangling = (model?.hypergraph?.link || []).filter(link => !link?.sourceClassId || !link?.targetClassId).length;
+        if (dangling > 0) return { message: `Validation: warning (${dangling} incomplete links)`, tone: 'warn' };
+        return { message: `Validation: ok (${classes} classes, ${links} links)`, tone: 'ok' };
+    }
+
+    function setLoadStatus(message, tone) { setStatusChip('load-status', message, tone); }
+    function setValidationStatus(message, tone) { setStatusChip('validation-status-main', message, tone); }
+    function setStatusChip(id, message, tone = 'ok') {
+        const chip = document.getElementById(id);
+        if (!chip) return;
+        chip.className = 'status-chip';
+        if (['ok', 'warn', 'error'].includes(tone)) chip.classList.add(tone);
+        chip.textContent = message;
+    }
+
+    function toggleHelpOverlay(show) {
+        const overlay = document.getElementById('keyboard-help');
+        if (!overlay) return;
+        overlay.hidden = !show;
+        if (show) document.getElementById('close-help-button')?.focus();
+        else document.getElementById('help-shortcuts-button')?.focus();
+    }
+
+    function bindKeyboardShortcuts() {
+        window.addEventListener('keydown', event => {
+            if (event.target && ['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target.tagName)) return;
+            if (event.key === 'Escape') return toggleHelpOverlay(false);
+            if (event.key.toLowerCase() === 'h') return toggleHelpOverlay(true);
+            if (event.key.toLowerCase() === 'f') return document.getElementById('fit-model-button')?.click();
+            if (event.key.toLowerCase() === 'o') return document.getElementById('optimize-layout-button')?.click();
+            if (event.key.toLowerCase() === 's') return document.getElementById('save-model-button')?.click();
+            if (event.key.toLowerCase() === 'v') return document.getElementById('view-toggle')?.click();
         });
-        select.value = models.some(model => model.value === selectedValue)
-            ? selectedValue
-            : models[0].value;
+        if (!modelsLoadOk) setValidationStatus('Validation: pending (manifest not ready)', 'warn');
     }
 
 
@@ -503,3 +573,6 @@
 </script>
 </body>
 </html>
+        const shortcutsButton = document.getElementById('help-shortcuts-button');
+        shortcutsButton.addEventListener('click', () => toggleHelpOverlay(true));
+        document.getElementById('close-help-button').addEventListener('click', () => toggleHelpOverlay(false));

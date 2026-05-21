@@ -40,6 +40,56 @@ canvas {
   gap: 8px;
 }
 
+.status-chip {
+  min-height: 28px;
+  border: 1px solid #d5dbe3;
+  border-radius: 6px;
+  background: #fff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+}
+
+.status-chip.ok { border-color: #b7e4c7; color: #087443; background: #f1fbf5; }
+.status-chip.warn { border-color: #f7d89d; color: #a15c07; background: #fff8e8; }
+.status-chip.error { border-color: #f3b8b0; color: #b42318; background: #fff5f3; }
+
+.status-note {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(15, 23, 42, 0.42);
+  display: grid;
+  place-items: center;
+}
+
+.help-card {
+  width: min(460px, calc(100% - 28px));
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  padding: 14px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, .2);
+}
+
+.help-card kbd {
+  border: 1px solid #94a3b8;
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 12px;
+  background: #f8fafc;
+}
+
 .control-group label {
   font-weight: 600;
   font-size: 14px;
