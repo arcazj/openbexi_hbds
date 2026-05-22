@@ -17,6 +17,7 @@ import {
   updateAttribute,
   createLink,
   updateLink,
+  moveChildToHyperclass,
   refreshSceneFromData,
   saveScene,
   optimizeAndRefreshLayout,
@@ -31,7 +32,7 @@ import {
   normalizeSceneSettings,
   getLayoutSettings,
   setLayoutSettings
-} from './hbds_model.js?v=fit-font-20260517i';
+} from './hbds_model.js?v=2d-inspector-20260522a';
 import { recalculateAllLinks } from './hbds_class_link.js?v=fit-font-20260517i';
 
 let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
@@ -44,6 +45,8 @@ let selectedLinkSourceId = null;
 let selectedLinkTargetId = null;
 let selectedAttributeKey = null;
 let selectedLinkId = null;
+const selectedElementIds = new Set();
+let multiSelectionMode = false;
 let editMode = 'full';
 let linkPickActive = false;
 let pointerStart = null;
@@ -76,19 +79,63 @@ const HYPER_COLORS = [
 
 const ATTRIBUTE_NAMES = ['status', 'owner', 'priority', 'version', 'region', 'createdAt', 'score', 'policy'];
 const LINK_NAMES = ['depends on', 'feeds', 'validates', 'routes to', 'owns', 'syncs'];
-const ICON_EXTENSIONS = ['png', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
 const DEFAULT_EMPTY_ICON_PATH = './icons/empty.png';
+const ICON_MANIFEST_PATH = './icons/generated_icons_manifest.json';
+let iconManifestLookupPromise = null;
 const TEST_MODEL_ROOT = 'test_models/';
 const TEST_MODEL_MANIFEST = 'test_models/test_models_manifest.json';
 const TEST_MODEL_HIDDEN_VALUES = [
   'test_models/models.json',
   'test_models/transportation_links.json'
 ];
+const STRUCTURAL_PROPERTY_KEYS = new Set([
+  'id',
+  'classId',
+  'sourceClassId',
+  'targetClassId',
+  'parentClassId',
+  'children',
+  'attributes',
+  'type'
+]);
+const KNOWN_ENUMS = {
+  orthogonalStyle: ['auto', 'horizontal', 'vertical'],
+  lineStyle: ['solid', 'dashed', 'dotted']
+};
+const DEFAULT_OPEN_CONTROL_SECTIONS = new Set(['model', 'session']);
+const INSPECTOR_HISTORY_LIMIT = 40;
+const CLASS_2D_DEFAULTS = {
+  width: 1.2,
+  height: 1.6,
+  hyperWidth: 4,
+  hyperHeight: 3.2,
+  fillColor: '#ffd166',
+  borderColor: '#7a4f00',
+  borderWidth: 1,
+  cornerRadius: 0.1,
+  opacity: 1,
+  textColor: '#111827',
+  lineColor: '#334155',
+  lineWidth: 0.01,
+  visible: true,
+  locked: false
+};
+const LINK_2D_DEFAULTS = {
+  labelText: '',
+  lineColor: '#334155',
+  lineWidth: 0.01,
+  labelColor: '#111111',
+  visible: true
+};
 
 const $ = id => document.getElementById(id);
 const sameId = (a, b) => a != null && b != null && String(a) === String(b);
 const nodes = () => getData()?.hypergraph?.class || [];
 const links = () => getData()?.hypergraph?.link || [];
+const propertyUndoStack = [];
+const propertyRedoStack = [];
+const recentInspectorColors = [];
+let pendingLivePropertyEdit = null;
 
 const ctx = () => ({
   scene,
@@ -299,9 +346,12 @@ function compactControlSections() {
   document.querySelectorAll('section.control-group').forEach(section => {
     const title = section.querySelector(':scope > .section-title');
     if (!title) return;
+    const sectionTitle = getSectionTitleText(title);
+    const sectionKey = section.dataset.section || sectionKeyFromTitle(sectionTitle);
     const details = document.createElement('details');
     details.className = section.className;
-    if (section.dataset.defaultOpen === 'true' || title.textContent.includes('Model')) {
+    details.dataset.section = sectionKey;
+    if (section.dataset.defaultOpen === 'true' || DEFAULT_OPEN_CONTROL_SECTIONS.has(sectionKey)) {
       details.open = true;
     }
     const summary = document.createElement('summary');
@@ -315,6 +365,23 @@ function compactControlSections() {
     details.append(summary, body);
     section.replaceWith(details);
   });
+}
+
+function getSectionTitleText(title) {
+  const text = [...title.childNodes]
+    .filter(node => node.nodeType === Node.TEXT_NODE)
+    .map(node => node.textContent)
+    .join(' ')
+    .trim();
+  return text || title.textContent.trim();
+}
+
+function sectionKeyFromTitle(title) {
+  return String(title || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 function addLog(message) {
@@ -438,28 +505,114 @@ function setSelectOptions(id, items, selectedId, placeholder) {
 function syncSelectionIds() {
   const hasId = id => id == null || nodes().some(node => sameId(node.id, id));
   if (!hasId(selectedElementId)) selectedElementId = null;
+  if (!multiSelectionMode) {
+    selectedElementIds.clear();
+    if (selectedElementId) selectedElementIds.add(String(selectedElementId));
+  }
+  [...selectedElementIds].forEach(id => {
+    if (!hasId(id)) selectedElementIds.delete(id);
+  });
+  if (selectedElementIds.size <= 1) multiSelectionMode = false;
+  if (selectedElementId && selectedElementIds.size === 0) selectedElementIds.add(String(selectedElementId));
+  if (!selectedElementId && selectedElementIds.size > 0) selectedElementId = [...selectedElementIds][0];
   if (!hasId(selectedParentHyperclassId)) selectedParentHyperclassId = null;
   if (!hasId(selectedAttributeOwnerId)) selectedAttributeOwnerId = null;
   if (!hasId(selectedLinkSourceId)) selectedLinkSourceId = null;
   if (!hasId(selectedLinkTargetId)) selectedLinkTargetId = null;
+  if (!links().some(link => sameId(link.id, selectedLinkId))) selectedLinkId = null;
+}
+
+function setPrimarySelection(id) {
+  selectedElementIds.clear();
+  multiSelectionMode = false;
+  if (id != null) selectedElementIds.add(String(id));
+  selectedElementId = id ?? null;
+}
+
+function toggleMultiSelection(id) {
+  if (id == null) return;
+  const key = String(id);
+  if (selectedElementIds.has(key) && selectedElementIds.size > 1) selectedElementIds.delete(key);
+  else selectedElementIds.add(key);
+  multiSelectionMode = selectedElementIds.size > 1;
+  selectedElementId = key;
+  selectedAttributeOwnerId = key;
+  selectedParentHyperclassId = nodeById(key)?.parentClassId ?? null;
+  selectedAttributeKey = null;
+  selectedLinkId = null;
+}
+
+function selectedClassNodes() {
+  return nodes().filter(node => selectedElementIds.has(String(node.id)));
 }
 
 function updateSmartMenusFromData() {
   const allNodes = nodes().filter(Boolean);
-  const hyperclasses = allNodes.filter(node => node.type === 'hyperclass');
+  const selected = nodeById(selectedElementId);
+  const hyperclasses = getValidParentOptions(selected);
   setSelectOptions('selected-element-select', allNodes, selectedElementId, 'Select element');
-  setSelectOptions('parent-hyperclass-select', hyperclasses, selectedParentHyperclassId, 'No parent');
-  setSelectOptions('attribute-owner-select', allNodes, selectedAttributeOwnerId, 'Select owner');
-  setSelectOptions('link-source-select', allNodes, selectedLinkSourceId, 'Select source');
-  setSelectOptions('link-target-select', allNodes, selectedLinkTargetId, 'Select target');
+  setSelectOptions('parent-hyperclass-select', hyperclasses, selected?.parentClassId ?? null, 'No parent');
+  const parentSelect = $('parent-hyperclass-select');
+  if (parentSelect) parentSelect.disabled = editMode === 'readonly' || !selected || hyperclasses.length === 0;
   syncAttributeAndLinkMenus();
 }
 
+function getValidParentOptions(selected) {
+  if (!selected) return [];
+  const descendants = getDescendantIds(selected.id);
+  return nodes().filter(node => (
+    node.type === 'hyperclass'
+    && !sameId(node.id, selected.id)
+    && !descendants.has(String(node.id))
+  ));
+}
+
+function getDescendantIds(id) {
+  const descendants = new Set();
+  const visit = parentId => {
+    nodes().forEach(node => {
+      if (!sameId(node.parentClassId, parentId) || descendants.has(String(node.id))) return;
+      descendants.add(String(node.id));
+      visit(node.id);
+    });
+  };
+  visit(id);
+  return descendants;
+}
+
+function attributeKeyFor(attribute, index) {
+  if (attribute && typeof attribute === 'object' && attribute.id != null) return String(attribute.id);
+  return `idx-${index}`;
+}
+
+function selectedAttributeOwner() {
+  return nodeById(selectedElementId);
+}
+
+function selectedAttributeEntry() {
+  const owner = selectedAttributeOwner();
+  if (!owner || selectedAttributeKey == null) return null;
+  const attrs = owner.attributes || [];
+  const index = attrs.findIndex((attribute, idx) => sameId(attributeKeyFor(attribute, idx), selectedAttributeKey));
+  if (index < 0) return null;
+  return {
+    owner,
+    attribute: attrs[index],
+    index,
+    key: String(selectedAttributeKey).startsWith('idx-') ? index : selectedAttributeKey
+  };
+}
+
+function linksForSelectedElement() {
+  if (!selectedElementId) return [];
+  return links().filter(link => sameId(link.sourceClassId, selectedElementId) || sameId(link.targetClassId, selectedElementId));
+}
+
 function syncAttributeAndLinkMenus() {
-  const owner = nodeById(selectedAttributeOwnerId) || nodeById(selectedElementId);
+  const owner = selectedAttributeOwner();
   const attrs = owner?.attributes || [];
   const attrItems = attrs.map((attribute, index) => {
-    const id = typeof attribute === 'object' && attribute ? (attribute.id ?? `idx-${index}`) : `idx-${index}`;
+    const id = attributeKeyFor(attribute, index);
     return { id: String(id), name: attributeDisplayName(attribute, index), attribute, index };
   });
   const attrSelect = $('selected-attribute-select');
@@ -483,7 +636,7 @@ function syncAttributeAndLinkMenus() {
 
   const linkSelect = $('selected-link-select');
   if (linkSelect) {
-    const availableLinks = links().map(link => ({
+    const availableLinks = linksForSelectedElement().map(link => ({
       id: link.id,
       name: `${link.rendering?.labelText || link.name || link.id} (${link.sourceClassId} -> ${link.targetClassId})`,
       link
@@ -503,6 +656,12 @@ function syncAttributeAndLinkMenus() {
 
 function updateSelectedCard() {
   const card = $('selected-card');
+  const multiNodes = selectedClassNodes();
+  if (card && multiNodes.length > 1 && !selectedAttributeKey && !selectedLinkId) {
+    card.innerHTML = `<span class="selected-name">${multiNodes.length} selected</span><span class="selected-meta">Multi-editing 2D class properties</span>`;
+    syncSelectedColorControl(nodeById(selectedElementId));
+    return;
+  }
   const selected = nodeById(selectedElementId);
   if (!card || !selected) {
     card.innerHTML = '<span class="selected-name">No selection</span><span class="selected-meta">Select a class or hyperclass</span>';
@@ -512,42 +671,32 @@ function updateSelectedCard() {
 
   const type = selected.type === 'hyperclass' ? 'Hyperclass' : 'Class';
   const attrs = Array.isArray(selected.attributes) ? selected.attributes.length : 0;
-  card.innerHTML = `<span class="selected-name">${escapeHtml(selected.name || 'Untitled')}</span><span class="selected-meta">${type} - ${attrs} attr${attrs === 1 ? '' : 's'} - ${escapeHtml(String(selected.id))}</span>`;
+  const attr = selectedAttributeEntry();
+  const link = selectedLinkId ? links().find(item => sameId(item.id, selectedLinkId)) : null;
+  let activeLabel = `${type} - ${attrs} attr${attrs === 1 ? '' : 's'} - ${escapeHtml(String(selected.id))}`;
+  if (attr) activeLabel = `Attribute - ${escapeHtml(attributeDisplayName(attr.attribute, attr.index))} - ${escapeHtml(selected.name || selected.id)}`;
+  if (link) activeLabel = `Link - ${escapeHtml(link.rendering?.labelText || link.name || link.id)} - ${escapeHtml(String(link.sourceClassId))} -> ${escapeHtml(String(link.targetClassId))}`;
+  card.innerHTML = `<span class="selected-name">${escapeHtml(selected.name || 'Untitled')}</span><span class="selected-meta">${activeLabel}</span>`;
   syncSelectedColorControl(selected);
 }
 
 function updateLinkBuilderStatus() {
   const status = $('link-builder-status');
-  const button = $('link-pick-button');
   const source = nodeById(selectedLinkSourceId);
-  const target = nodeById(selectedLinkTargetId);
+  const actions = $('link-builder-actions');
+  actions?.classList.toggle('is-active', linkPickActive);
 
   if (linkPickActive && !source) {
-    status.textContent = 'Pick source';
-    button.textContent = 'Picking Source';
+    status.textContent = 'Select source';
     return;
   }
 
-  if (linkPickActive && source && !target) {
-    status.textContent = 'Pick target';
-    button.textContent = 'Picking Target';
-    return;
-  }
-
-  if (source && target) {
-    status.textContent = 'Ready';
-    button.textContent = 'Pick Source';
-    return;
-  }
-
-  if (source) {
-    status.textContent = 'Source set';
-    button.textContent = 'Pick Target';
+  if (linkPickActive && source) {
+    status.textContent = 'Select target or cancel';
     return;
   }
 
   status.textContent = 'Ready';
-  button.textContent = 'Pick Source';
 }
 
 function updateModeControls() {
@@ -555,7 +704,6 @@ function updateModeControls() {
   const structureOnly = editMode === 'structure';
   const selected = nodeById(selectedElementId);
   const owner = nodeById(selectedAttributeOwnerId) || selected;
-  const canCreateLink = nodeById(selectedLinkSourceId) && nodeById(selectedLinkTargetId);
 
   const disable = (id, state) => {
     const element = $(id);
@@ -565,7 +713,7 @@ function updateModeControls() {
   disable('add-hyperclass-button', isReadOnly);
   disable('add-class-button', isReadOnly);
   disable('add-attribute-button', isReadOnly || structureOnly || !owner);
-  disable('add-link-button', isReadOnly || structureOnly || !canCreateLink);
+  disable('add-link-button', isReadOnly || structureOnly || linkPickActive);
   disable('delete-selected-button', isReadOnly || !selected);
   disable('selected-color-input', isReadOnly || !selected);
   disable('selected-border-color-input', isReadOnly || !selected);
@@ -575,8 +723,7 @@ function updateModeControls() {
   disable('selected-name-input', isReadOnly || !selected);
   disable('reset-model-button', isReadOnly);
   disable('apply-json-button', isReadOnly);
-  disable('link-pick-button', isReadOnly || structureOnly);
-  disable('clear-link-button', !selectedLinkSourceId && !selectedLinkTargetId && !linkPickActive);
+  disable('cancel-link-button', !linkPickActive);
 
   ['mode-full', 'mode-structure', 'mode-readonly'].forEach(id => $(id)?.classList.remove('active'));
   $(`mode-${editMode}`)?.classList.add('active');
@@ -596,11 +743,19 @@ function updateModelSummary() {
 
 function updateInterface(options = {}) {
   syncSelectionIds();
+  if (options.lightweight === true) {
+    updateSelectedCard();
+    updateLinkBuilderStatus();
+    updateModeControls();
+    updateCanvasTitle();
+    return;
+  }
   updateSmartMenusFromData();
   updateStats();
   updateValidationStatus();
   updateSelectedCard();
   updateLinkBuilderStatus();
+  renderPropertyPanel();
   updateModeControls();
   repairAttributeLabels();
   enhanceIconTitleLabels();
@@ -620,6 +775,899 @@ function escapeHtml(value) {
     '"': '&quot;',
     "'": '&#39;'
   }[char]));
+}
+
+function cloneValue(value) {
+  return typeof structuredClone === 'function' ? structuredClone(value) : JSON.parse(JSON.stringify(value));
+}
+
+function isPlainObject(value) {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function getSelectedPropertyTarget() {
+  const link = selectedLinkId ? links().find(item => sameId(item.id, selectedLinkId)) : null;
+  if (link) {
+    return {
+      kind: 'link',
+      title: `Link: ${link.rendering?.labelText || link.name || link.id}`,
+      value: cloneValue(link)
+    };
+  }
+
+  const attr = selectedAttributeEntry();
+  if (attr) {
+    const value = isPlainObject(attr.attribute) ? cloneValue(attr.attribute) : { name: attributeDisplayName(attr.attribute, attr.index) };
+    return {
+      kind: 'attribute',
+      title: `Attribute: ${attributeDisplayName(attr.attribute, attr.index)}`,
+      value,
+      owner: attr.owner,
+      key: attr.key
+    };
+  }
+
+  const multiNodes = selectedClassNodes();
+  if (multiNodes.length > 1) {
+    return {
+      kind: 'multi-class',
+      title: `${multiNodes.length} Classes Selected`,
+      nodes: multiNodes
+    };
+  }
+
+  const selected = nodeById(selectedElementId);
+  if (!selected) return null;
+  return {
+    kind: selected.type === 'hyperclass' ? 'hyperclass' : 'class',
+    title: `${selected.type === 'hyperclass' ? 'Hyperclass' : 'Class'}: ${selected.name || selected.id}`,
+    value: cloneValue(selected),
+    node: selected
+  };
+}
+
+function renderPropertyPanel() {
+  const panel = $('property-panel');
+  if (!panel) return;
+  const target = getSelectedPropertyTarget();
+  panel.innerHTML = '';
+
+  if (!target) {
+    panel.innerHTML = '<div class="property-empty">Select an item to edit its properties.</div>';
+    return;
+  }
+
+  if (target.kind === 'class' || target.kind === 'hyperclass') {
+    renderClass2DInspector(panel, target);
+    return;
+  }
+
+  if (target.kind === 'multi-class') {
+    renderMultiClass2DInspector(panel, target);
+    return;
+  }
+
+  if (target.kind === 'link') {
+    renderLink2DInspector(panel, target);
+    return;
+  }
+
+  if (target.kind === 'attribute') {
+    renderAttribute2DInspector(panel, target);
+    return;
+  }
+
+  renderInspectorHeader(panel, target.title);
+  renderPropertyObject(panel, target.value, []);
+}
+
+function renderInspectorHeader(panel, title, subtitle = '2D properties') {
+  const header = document.createElement('div');
+  header.className = 'inspector-header';
+
+  const titleWrap = document.createElement('div');
+  const heading = document.createElement('div');
+  heading.className = 'property-panel-title';
+  heading.textContent = title;
+  const sub = document.createElement('div');
+  sub.className = 'inspector-subtitle';
+  sub.textContent = subtitle;
+  titleWrap.append(heading, sub);
+
+  const actions = document.createElement('div');
+  actions.className = 'inspector-actions';
+  actions.append(
+    createInspectorActionButton('Undo', 'undo', propertyUndoStack.length === 0),
+    createInspectorActionButton('Redo', 'redo', propertyRedoStack.length === 0)
+  );
+  header.append(titleWrap, actions);
+  panel.appendChild(header);
+}
+
+function createInspectorActionButton(label, action, disabled) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'quiet inspector-icon-button';
+  button.textContent = label;
+  button.dataset.inspectorAction = action;
+  button.disabled = disabled || editMode === 'readonly';
+  return button;
+}
+
+function renderClass2DInspector(panel, target) {
+  const node = target.value;
+  const isHyperclass = target.kind === 'hyperclass';
+  const sizeDefaults = {
+    width: isHyperclass ? CLASS_2D_DEFAULTS.hyperWidth : CLASS_2D_DEFAULTS.width,
+    height: isHyperclass ? CLASS_2D_DEFAULTS.hyperHeight : CLASS_2D_DEFAULTS.height
+  };
+  const renderingClass = node.rendering?.class || {};
+  const connections = node.rendering?.connections || {};
+
+  renderInspectorHeader(panel, 'Class Properties', isHyperclass ? 'Hyperclass 2D inspector' : 'Class 2D inspector');
+
+  const layout = createInspectorSection('Layout', true);
+  appendTextControl(layout.body, {
+    label: 'Name',
+    path: ['name'],
+    value: node.name || '',
+    placeholder: 'Class name'
+  });
+  appendNumberControl(layout.body, {
+    label: 'Width',
+    path: ['size', 'width'],
+    value: node.size?.width ?? sizeDefaults.width,
+    min: 0.4,
+    max: 12,
+    step: 0.05,
+    defaultValue: sizeDefaults.width
+  });
+  appendNumberControl(layout.body, {
+    label: 'Height',
+    path: ['size', 'height'],
+    value: node.size?.height ?? sizeDefaults.height,
+    min: 0.4,
+    max: 12,
+    step: 0.05,
+    defaultValue: sizeDefaults.height
+  });
+  panel.appendChild(layout.section);
+
+  const appearance = createInspectorSection('Appearance', true);
+  appendColorControl(appearance.body, {
+    label: 'Fill',
+    path: ['rendering', 'class', 'color'],
+    value: renderingClass.color || renderingClass.metallicColor || CLASS_2D_DEFAULTS.fillColor,
+    defaultValue: CLASS_2D_DEFAULTS.fillColor
+  });
+  appendColorControl(appearance.body, {
+    label: 'Border',
+    path: ['rendering', 'class', 'borderColor'],
+    value: renderingClass.borderColor || CLASS_2D_DEFAULTS.borderColor,
+    defaultValue: CLASS_2D_DEFAULTS.borderColor
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Border Width',
+    path: ['rendering', 'class', 'borderWidth'],
+    value: renderingClass.borderWidth ?? CLASS_2D_DEFAULTS.borderWidth,
+    min: 0,
+    max: 8,
+    step: 0.25,
+    defaultValue: CLASS_2D_DEFAULTS.borderWidth
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Corner Radius',
+    path: ['rendering', 'class', 'cornerRadius'],
+    value: renderingClass.cornerRadius ?? CLASS_2D_DEFAULTS.cornerRadius,
+    min: 0,
+    max: 0.8,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.cornerRadius
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Opacity',
+    path: ['rendering', 'class', 'opacity'],
+    value: renderingClass.opacity ?? CLASS_2D_DEFAULTS.opacity,
+    min: 0.1,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.opacity
+  });
+  appendCheckboxControl(appearance.body, {
+    label: 'Visible',
+    path: ['visible'],
+    value: node.visible !== false,
+    defaultValue: CLASS_2D_DEFAULTS.visible
+  });
+  appendCheckboxControl(appearance.body, {
+    label: 'Lock Editing',
+    path: ['locked'],
+    value: node.locked === true,
+    defaultValue: CLASS_2D_DEFAULTS.locked
+  });
+  panel.appendChild(appearance.section);
+
+  const text = createInspectorSection('Text', false);
+  appendColorControl(text.body, {
+    label: 'Text Color',
+    path: ['rendering', 'textColor'],
+    value: node.rendering?.textColor || CLASS_2D_DEFAULTS.textColor,
+    defaultValue: CLASS_2D_DEFAULTS.textColor
+  });
+  panel.appendChild(text.section);
+
+  const connectionsSection = createInspectorSection('Connections', false);
+  appendColorControl(connectionsSection.body, {
+    label: 'Line Color',
+    path: ['rendering', 'connections', 'lineColor'],
+    value: connections.lineColor || CLASS_2D_DEFAULTS.lineColor,
+    defaultValue: CLASS_2D_DEFAULTS.lineColor
+  });
+  appendSliderNumberControl(connectionsSection.body, {
+    label: 'Line Width',
+    path: ['rendering', 'connections', 'lineWidth'],
+    value: connections.lineWidth ?? CLASS_2D_DEFAULTS.lineWidth,
+    min: 0.001,
+    max: 0.08,
+    step: 0.001,
+    defaultValue: CLASS_2D_DEFAULTS.lineWidth
+  });
+  panel.appendChild(connectionsSection.section);
+}
+
+function renderMultiClass2DInspector(panel, target) {
+  const selectedNodes = target.nodes || [];
+  const first = selectedNodes[0] || {};
+  const renderingClass = first.rendering?.class || {};
+  const connections = first.rendering?.connections || {};
+  renderInspectorHeader(panel, 'Class Properties', `${selectedNodes.length} selected 2D objects`);
+
+  const layout = createInspectorSection('Layout', true);
+  appendNumberControl(layout.body, {
+    label: 'Width',
+    path: ['size', 'width'],
+    value: getCommonPropertyValue(selectedNodes, ['size', 'width'], first.size?.width ?? CLASS_2D_DEFAULTS.width),
+    min: 0.4,
+    max: 12,
+    step: 0.05,
+    defaultValue: CLASS_2D_DEFAULTS.width
+  });
+  appendNumberControl(layout.body, {
+    label: 'Height',
+    path: ['size', 'height'],
+    value: getCommonPropertyValue(selectedNodes, ['size', 'height'], first.size?.height ?? CLASS_2D_DEFAULTS.height),
+    min: 0.4,
+    max: 12,
+    step: 0.05,
+    defaultValue: CLASS_2D_DEFAULTS.height
+  });
+  panel.appendChild(layout.section);
+
+  const appearance = createInspectorSection('Appearance', true);
+  appendColorControl(appearance.body, {
+    label: 'Fill',
+    path: ['rendering', 'class', 'color'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'color'], renderingClass.color || renderingClass.metallicColor || CLASS_2D_DEFAULTS.fillColor),
+    defaultValue: CLASS_2D_DEFAULTS.fillColor
+  });
+  appendColorControl(appearance.body, {
+    label: 'Border',
+    path: ['rendering', 'class', 'borderColor'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'borderColor'], renderingClass.borderColor || CLASS_2D_DEFAULTS.borderColor),
+    defaultValue: CLASS_2D_DEFAULTS.borderColor
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Border Width',
+    path: ['rendering', 'class', 'borderWidth'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'borderWidth'], renderingClass.borderWidth ?? CLASS_2D_DEFAULTS.borderWidth),
+    min: 0,
+    max: 8,
+    step: 0.25,
+    defaultValue: CLASS_2D_DEFAULTS.borderWidth
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Corner Radius',
+    path: ['rendering', 'class', 'cornerRadius'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'cornerRadius'], renderingClass.cornerRadius ?? CLASS_2D_DEFAULTS.cornerRadius),
+    min: 0,
+    max: 0.8,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.cornerRadius
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Opacity',
+    path: ['rendering', 'class', 'opacity'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'opacity'], renderingClass.opacity ?? CLASS_2D_DEFAULTS.opacity),
+    min: 0.1,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.opacity
+  });
+  appendCheckboxControl(appearance.body, {
+    label: 'Visible',
+    path: ['visible'],
+    value: selectedNodes.every(node => node.visible !== false),
+    defaultValue: CLASS_2D_DEFAULTS.visible
+  });
+  appendCheckboxControl(appearance.body, {
+    label: 'Lock Editing',
+    path: ['locked'],
+    value: selectedNodes.every(node => node.locked === true),
+    defaultValue: CLASS_2D_DEFAULTS.locked
+  });
+  panel.appendChild(appearance.section);
+
+  const text = createInspectorSection('Text', false);
+  appendColorControl(text.body, {
+    label: 'Text Color',
+    path: ['rendering', 'textColor'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'textColor'], first.rendering?.textColor || CLASS_2D_DEFAULTS.textColor),
+    defaultValue: CLASS_2D_DEFAULTS.textColor
+  });
+  panel.appendChild(text.section);
+
+  const connectionsSection = createInspectorSection('Connections', false);
+  appendColorControl(connectionsSection.body, {
+    label: 'Line Color',
+    path: ['rendering', 'connections', 'lineColor'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'connections', 'lineColor'], connections.lineColor || CLASS_2D_DEFAULTS.lineColor),
+    defaultValue: CLASS_2D_DEFAULTS.lineColor
+  });
+  appendSliderNumberControl(connectionsSection.body, {
+    label: 'Line Width',
+    path: ['rendering', 'connections', 'lineWidth'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'connections', 'lineWidth'], connections.lineWidth ?? CLASS_2D_DEFAULTS.lineWidth),
+    min: 0.001,
+    max: 0.08,
+    step: 0.001,
+    defaultValue: CLASS_2D_DEFAULTS.lineWidth
+  });
+  panel.appendChild(connectionsSection.section);
+}
+
+function getCommonPropertyValue(items, path, fallback) {
+  if (!items.length) return fallback;
+  const first = getDeepValue(items[0], path, fallback);
+  return items.every(item => Object.is(getDeepValue(item, path, fallback), first)) ? first : fallback;
+}
+
+function getDeepValue(source, path, fallback = undefined) {
+  let current = source;
+  for (const key of path) {
+    if (!isPlainObject(current) && (typeof current !== 'object' || current == null)) return fallback;
+    current = current[key];
+    if (current === undefined) return fallback;
+  }
+  return current;
+}
+
+function renderLink2DInspector(panel, target) {
+  const link = target.value;
+  const rendering = link.rendering || {};
+  renderInspectorHeader(panel, 'Connection Properties', '2D link inspector');
+
+  const content = createInspectorSection('Connection', true);
+  appendTextControl(content.body, {
+    label: 'Label',
+    path: ['rendering', 'labelText'],
+    value: rendering.labelText || link.name || '',
+    placeholder: 'Link label',
+    defaultValue: LINK_2D_DEFAULTS.labelText
+  });
+  appendColorControl(content.body, {
+    label: 'Line Color',
+    path: ['rendering', 'lineColor'],
+    value: rendering.lineColor || LINK_2D_DEFAULTS.lineColor,
+    defaultValue: LINK_2D_DEFAULTS.lineColor
+  });
+  appendSliderNumberControl(content.body, {
+    label: 'Line Width',
+    path: ['rendering', 'lineWidth'],
+    value: rendering.lineWidth ?? LINK_2D_DEFAULTS.lineWidth,
+    min: 0.001,
+    max: 0.08,
+    step: 0.001,
+    defaultValue: LINK_2D_DEFAULTS.lineWidth
+  });
+  appendColorControl(content.body, {
+    label: 'Text Color',
+    path: ['rendering', 'labelColor'],
+    value: rendering.labelColor || LINK_2D_DEFAULTS.labelColor,
+    defaultValue: LINK_2D_DEFAULTS.labelColor
+  });
+  appendCheckboxControl(content.body, {
+    label: 'Visible',
+    path: ['visible'],
+    value: link.visible !== false,
+    defaultValue: LINK_2D_DEFAULTS.visible
+  });
+  panel.appendChild(content.section);
+}
+
+function renderAttribute2DInspector(panel, target) {
+  renderInspectorHeader(panel, 'Attribute Properties', '2D attribute inspector');
+  const content = createInspectorSection('Text', true);
+  appendTextControl(content.body, {
+    label: 'Name',
+    path: ['name'],
+    value: target.value.name || '',
+    placeholder: 'Attribute name'
+  });
+  panel.appendChild(content.section);
+}
+
+function createInspectorSection(title, open = false) {
+  const section = document.createElement('details');
+  section.className = 'inspector-section';
+  section.open = open;
+  const summary = document.createElement('summary');
+  summary.textContent = title;
+  const body = document.createElement('div');
+  body.className = 'inspector-section-body';
+  section.append(summary, body);
+  return { section, body };
+}
+
+function appendTextControl(container, config) {
+  const row = createInspectorRow(config.label);
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = String(config.value ?? '');
+  input.placeholder = config.placeholder || '';
+  applyInspectorDataset(input, config.path, 'string', false, config.defaultValue);
+  row.control.appendChild(input);
+  appendResetButton(row.control, config);
+  container.appendChild(row.element);
+}
+
+function appendNumberControl(container, config) {
+  const row = createInspectorRow(config.label);
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.inputMode = 'decimal';
+  input.min = String(config.min ?? '');
+  input.max = String(config.max ?? '');
+  input.step = String(config.step ?? 'any');
+  input.value = String(Number(config.value ?? config.defaultValue ?? 0));
+  applyInspectorDataset(input, config.path, 'number', true, config.defaultValue);
+  row.control.appendChild(input);
+  appendResetButton(row.control, config);
+  container.appendChild(row.element);
+}
+
+function appendSliderNumberControl(container, config) {
+  const row = createInspectorRow(config.label);
+  const wrapper = document.createElement('div');
+  wrapper.className = 'slider-number-control';
+  const key = JSON.stringify(config.path);
+  const value = Number(config.value ?? config.defaultValue ?? 0);
+
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = String(config.min);
+  slider.max = String(config.max);
+  slider.step = String(config.step);
+  slider.value = String(value);
+  slider.dataset.inspectorKey = key;
+  applyInspectorDataset(slider, config.path, 'number', true, config.defaultValue);
+
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.inputMode = 'decimal';
+  input.min = String(config.min);
+  input.max = String(config.max);
+  input.step = String(config.step);
+  input.value = String(value);
+  input.dataset.inspectorKey = key;
+  applyInspectorDataset(input, config.path, 'number', true, config.defaultValue);
+
+  wrapper.append(slider, input);
+  row.control.appendChild(wrapper);
+  appendResetButton(row.control, config);
+  container.appendChild(row.element);
+}
+
+function appendColorControl(container, config) {
+  const row = createInspectorRow(config.label);
+  const wrapper = document.createElement('div');
+  wrapper.className = 'color-control';
+  const key = JSON.stringify(config.path);
+  const value = normalizeColorInput(config.value, config.defaultValue || '#000000');
+
+  const picker = document.createElement('input');
+  picker.type = 'color';
+  picker.value = value;
+  picker.dataset.inspectorKey = key;
+  applyInspectorDataset(picker, config.path, 'color', true, config.defaultValue);
+
+  const text = document.createElement('input');
+  text.type = 'text';
+  text.value = value;
+  text.placeholder = '#RRGGBB or rgb()';
+  text.dataset.inspectorKey = key;
+  applyInspectorDataset(text, config.path, 'color', false, config.defaultValue);
+
+  wrapper.append(picker, text);
+  const palette = createRecentColorPalette(config.path);
+  row.control.append(wrapper, palette);
+  appendResetButton(row.control, config);
+  container.appendChild(row.element);
+}
+
+function appendCheckboxControl(container, config) {
+  const row = createInspectorRow(config.label);
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  input.checked = Boolean(config.value);
+  applyInspectorDataset(input, config.path, 'boolean', false, config.defaultValue);
+  row.control.appendChild(input);
+  appendResetButton(row.control, config);
+  container.appendChild(row.element);
+}
+
+function createInspectorRow(labelText) {
+  const element = document.createElement('label');
+  element.className = 'inspector-row';
+  const label = document.createElement('span');
+  label.textContent = labelText;
+  const control = document.createElement('div');
+  control.className = 'inspector-control';
+  element.append(label, control);
+  return { element, control };
+}
+
+function applyInspectorDataset(input, path, valueType, live = false, defaultValue = undefined) {
+  input.dataset.propertyPath = JSON.stringify(path);
+  input.dataset.valueType = valueType;
+  input.dataset.live = live ? 'true' : 'false';
+  input.disabled = editMode === 'readonly';
+  if (defaultValue !== undefined) input.dataset.resetValue = JSON.stringify(defaultValue);
+}
+
+function appendResetButton(container, config) {
+  if (config.defaultValue === undefined) return;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'quiet inspector-reset-button';
+  button.textContent = 'Reset';
+  button.dataset.resetProperty = JSON.stringify(config.path);
+  button.dataset.resetValue = JSON.stringify(config.defaultValue);
+  button.dataset.valueType = typeof config.defaultValue === 'boolean' ? 'boolean' : typeof config.defaultValue === 'number' ? 'number' : (isColorProperty(config.path, config.path.at(-1), config.defaultValue) ? 'color' : 'string');
+  button.disabled = editMode === 'readonly';
+  container.appendChild(button);
+}
+
+function createRecentColorPalette(path) {
+  const palette = document.createElement('div');
+  palette.className = 'recent-colors';
+  palette.setAttribute('aria-label', 'Recent colors');
+  recentInspectorColors.slice(0, 8).forEach(color => {
+    const swatch = document.createElement('button');
+    swatch.type = 'button';
+    swatch.className = 'color-swatch';
+    swatch.style.background = color;
+    swatch.title = color;
+    swatch.dataset.colorValue = color;
+    swatch.dataset.propertyPath = JSON.stringify(path);
+    swatch.disabled = editMode === 'readonly';
+    palette.appendChild(swatch);
+  });
+  return palette;
+}
+
+function renderPropertyObject(container, value, basePath) {
+  const entries = Object.entries(value || {}).filter(([key, entryValue]) => isEditableProperty(key, entryValue, basePath));
+  if (!entries.length) {
+    const empty = document.createElement('div');
+    empty.className = 'property-empty';
+    empty.textContent = 'No editable properties for this selection.';
+    container.appendChild(empty);
+    return;
+  }
+
+  entries.forEach(([key, entryValue]) => {
+    const path = [...basePath, key];
+    if (isPlainObject(entryValue)) {
+      const group = document.createElement('fieldset');
+      group.className = 'property-group';
+      const legend = document.createElement('legend');
+      legend.textContent = humanizePropertyName(key);
+      group.appendChild(legend);
+      renderPropertyObject(group, entryValue, path);
+      container.appendChild(group);
+      return;
+    }
+
+    const row = document.createElement('label');
+    row.className = 'property-row';
+    const caption = document.createElement('span');
+    caption.textContent = humanizePropertyName(key);
+    row.appendChild(caption);
+    row.appendChild(createPropertyInput(path, key, entryValue));
+    container.appendChild(row);
+  });
+}
+
+function isEditableProperty(key, value, basePath) {
+  if (STRUCTURAL_PROPERTY_KEYS.has(key)) return false;
+  if (Array.isArray(value)) return false;
+  if (typeof value === 'function' || value === undefined) return false;
+  return basePath.length <= 6;
+}
+
+function createPropertyInput(path, key, value) {
+  const enumOptions = getEnumOptions(path, key, value);
+  let input;
+
+  if (isColorProperty(path, key, value)) {
+    input = document.createElement('input');
+    input.type = 'color';
+    input.value = normalizeHexColor(value);
+    input.dataset.valueType = 'string';
+    input.dataset.live = 'true';
+  } else if (enumOptions.length) {
+    input = document.createElement('select');
+    enumOptions.forEach(optionValue => {
+      const option = document.createElement('option');
+      option.value = optionValue;
+      option.textContent = optionValue;
+      input.appendChild(option);
+    });
+    input.value = String(value ?? '');
+  } else if (typeof value === 'boolean') {
+    input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = value;
+    input.dataset.valueType = 'boolean';
+  } else if (typeof value === 'number') {
+    input = document.createElement('input');
+    input.type = 'number';
+    input.step = 'any';
+    input.value = String(value);
+    input.dataset.valueType = 'number';
+    input.dataset.live = 'true';
+  } else {
+    input = document.createElement('input');
+    input.type = 'text';
+    input.value = String(value ?? '');
+    input.dataset.valueType = 'string';
+  }
+
+  input.dataset.propertyPath = JSON.stringify(path);
+  input.disabled = editMode === 'readonly';
+  return input;
+}
+
+function getEnumOptions(path, key, value) {
+  const known = KNOWN_ENUMS[key] || [];
+  return [...new Set([...(known || []), String(value ?? '')].filter(Boolean))];
+}
+
+function isHexColorValue(value) {
+  return typeof value === 'string' && /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i.test(value.trim());
+}
+
+function isColorProperty(path, key, value) {
+  if (isHexColorValue(value)) return true;
+  return typeof value === 'string' && /color$/i.test(String(key)) && path.length > 0;
+}
+
+function normalizeColorInput(value, fallback = '#000000') {
+  const clean = String(value ?? '').trim();
+  if (/^#[0-9a-f]{6}$/i.test(clean)) return clean.toLowerCase();
+  if (/^#[0-9a-f]{3}$/i.test(clean)) {
+    return `#${clean.slice(1).split('').map(char => char + char).join('')}`.toLowerCase();
+  }
+  const rgb = clean.match(/^rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)(?:\s*,\s*([0-9.]+))?\s*\)$/i);
+  if (rgb) {
+    const channel = value => Math.max(0, Math.min(255, Math.round(Number(value) || 0))).toString(16).padStart(2, '0');
+    return `#${channel(rgb[1])}${channel(rgb[2])}${channel(rgb[3])}`;
+  }
+  return normalizeHexColor(fallback);
+}
+
+function humanizePropertyName(key) {
+  return String(key)
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+function setDeepValue(target, path, value) {
+  let current = target;
+  path.slice(0, -1).forEach(key => {
+    if (!isPlainObject(current[key])) current[key] = {};
+    current = current[key];
+  });
+  current[path[path.length - 1]] = value;
+  return target;
+}
+
+function readPropertyInputValue(input) {
+  if (input.dataset.valueType === 'boolean') return input.checked;
+  if (input.dataset.valueType === 'number') {
+    const value = Number(input.value);
+    return Number.isFinite(value) ? value : null;
+  }
+  if (input.dataset.valueType === 'color') {
+    return normalizeColorInput(input.value, input.dataset.resetValue ? JSON.parse(input.dataset.resetValue) : '#000000');
+  }
+  return input.value;
+}
+
+function syncInspectorControlGroup(input, value = input.value) {
+  const key = input.dataset.inspectorKey;
+  if (!key) return;
+  $('property-panel')?.querySelectorAll(`[data-inspector-key]`).forEach(peer => {
+    if (peer === input || peer.dataset.inspectorKey !== key) return;
+    if (peer.type === 'checkbox') peer.checked = Boolean(value);
+    else peer.value = String(value);
+  });
+}
+
+function rememberRecentInspectorColor(color) {
+  const normalized = normalizeColorInput(color, null);
+  if (!normalized) return;
+  const existing = recentInspectorColors.indexOf(normalized);
+  if (existing >= 0) recentInspectorColors.splice(existing, 1);
+  recentInspectorColors.unshift(normalized);
+  recentInspectorColors.splice(8);
+}
+
+function beginLivePropertyEdit(input) {
+  if (input?.dataset?.live !== 'true' || pendingLivePropertyEdit) return;
+  pendingLivePropertyEdit = {
+    before: cloneValue(getData()),
+    path: input.dataset.propertyPath || ''
+  };
+}
+
+function commitLivePropertyEdit() {
+  if (!pendingLivePropertyEdit) return;
+  const before = pendingLivePropertyEdit.before;
+  const after = cloneValue(getData());
+  pendingLivePropertyEdit = null;
+  recordPropertyHistory(before, after);
+  renderPropertyPanel();
+}
+
+function recordPropertyHistory(before, after) {
+  if (!before || JSON.stringify(before) === JSON.stringify(after)) return;
+  propertyUndoStack.push({ before, after });
+  if (propertyUndoStack.length > INSPECTOR_HISTORY_LIMIT) propertyUndoStack.shift();
+  propertyRedoStack.length = 0;
+}
+
+async function restorePropertySnapshot(snapshot) {
+  await setData(snapshot, { context: ctx(), refresh: true });
+  updateOverview();
+  updateInterface({ json: true });
+}
+
+async function undoPropertyEdit() {
+  const entry = propertyUndoStack.pop();
+  if (!entry) return;
+  propertyRedoStack.push({ before: cloneValue(getData()), after: entry.after });
+  await restorePropertySnapshot(entry.before);
+}
+
+async function redoPropertyEdit() {
+  const entry = propertyRedoStack.pop();
+  if (!entry) return;
+  const current = cloneValue(getData());
+  propertyUndoStack.push({ before: current, after: entry.after });
+  await restorePropertySnapshot(entry.after);
+}
+
+async function handlePropertyPanelAction(event) {
+  const action = event.target.closest?.('[data-inspector-action]')?.dataset?.inspectorAction;
+  if (action === 'undo') {
+    await undoPropertyEdit();
+    return;
+  }
+  if (action === 'redo') {
+    await redoPropertyEdit();
+    return;
+  }
+
+  const swatch = event.target.closest?.('[data-color-value]');
+  if (swatch) {
+    const path = JSON.parse(swatch.dataset.propertyPath || '[]');
+    await updateSelectedProperty(path, swatch.dataset.colorValue, { live: false, history: true });
+    return;
+  }
+
+  const reset = event.target.closest?.('[data-reset-property]');
+  if (reset) {
+    const path = JSON.parse(reset.dataset.resetProperty || '[]');
+    const value = JSON.parse(reset.dataset.resetValue || 'null');
+    await updateSelectedProperty(path, value, { live: false, history: true });
+  }
+}
+
+async function handlePropertyPanelChange(event, options = {}) {
+  const input = event.target.closest?.('[data-property-path]');
+  if (!input || input.disabled || editMode === 'readonly') return;
+  const path = JSON.parse(input.dataset.propertyPath || '[]');
+  if (!path.length) return;
+  const value = readPropertyInputValue(input);
+  if (value === null) return;
+  if (input.dataset.valueType === 'color') {
+    rememberRecentInspectorColor(value);
+    syncInspectorControlGroup(input, value);
+  } else {
+    syncInspectorControlGroup(input);
+  }
+  await updateSelectedProperty(path, value, {
+    live: input.dataset.live === 'true',
+    history: options.history !== false && input.dataset.live !== 'true'
+  });
+}
+
+async function updateSelectedProperty(path, value, options = {}) {
+  const target = getSelectedPropertyTarget();
+  if (!target) return;
+
+  const before = options.history === false ? null : cloneValue(getData());
+  if (target.kind === 'multi-class') {
+    for (const node of target.nodes || []) {
+      const nextNode = setDeepValue(cloneValue(node), path, value);
+      if (path.join('.') === 'rendering.class.color') {
+        nextNode.rendering = nextNode.rendering || {};
+        nextNode.rendering.class = nextNode.rendering.class || {};
+        nextNode.rendering.class.metallicColor = value;
+      }
+      const updater = nextNode.type === 'hyperclass' ? updateHyperclass : updateClass;
+      await updater(node.id, nextNode, { context: ctx(), refresh: false, saveHistory: false });
+    }
+    const after = options.history === false ? null : cloneValue(getData());
+    if (before && after) recordPropertyHistory(before, after);
+    if (options.live) {
+      refreshSceneFromData(ctx());
+      updateOverview();
+      updateJsonPreviewFromData();
+      updateStats();
+      updateValidationStatus();
+      applySelectionHighlight();
+      return;
+    }
+    await refreshWorkspace(null, { refresh: true, fit: false });
+    return;
+  }
+
+  const next = setDeepValue(cloneValue(target.value), path, value);
+  if ((target.kind === 'class' || target.kind === 'hyperclass') && path.join('.') === 'rendering.class.color') {
+    next.rendering = next.rendering || {};
+    next.rendering.class = next.rendering.class || {};
+    next.rendering.class.metallicColor = value;
+  }
+  if (target.kind === 'link' && path.join('.') === 'rendering.labelText') {
+    next.name = value;
+  }
+
+  if (target.kind === 'class' || target.kind === 'hyperclass') {
+    const updater = target.kind === 'hyperclass' ? updateHyperclass : updateClass;
+    await updater(target.node.id, next, { context: ctx(), refresh: false });
+  } else if (target.kind === 'link') {
+    await updateLink(target.value.id, next, { context: ctx(), refresh: false });
+  } else if (target.kind === 'attribute') {
+    await updateAttribute(target.owner.id, target.key, next, { context: ctx(), refresh: false });
+  }
+
+  const after = options.history === false ? null : cloneValue(getData());
+  if (before && after) recordPropertyHistory(before, after);
+
+  if (options.live) {
+    refreshSceneFromData(ctx());
+    updateOverview();
+    updateJsonPreviewFromData();
+    updateStats();
+    updateValidationStatus();
+    applySelectionHighlight();
+    return;
+  }
+
+  await refreshWorkspace(null, { refresh: true, fit: false });
 }
 
 function attributeDisplayName(attribute, index) {
@@ -806,19 +1854,8 @@ function findTitleLabelObject(object) {
 }
 
 function installIconOnLabel(label, labelObject, model) {
-  const candidates = iconCandidatePaths(model);
-  if (!candidates.length) return;
-
   label.dataset.iconState = 'loading';
   const image = new Image();
-  let index = 0;
-  const tryNext = () => {
-    if (index >= candidates.length) {
-      label.dataset.iconState = 'missing';
-      return;
-    }
-    image.src = candidates[index++];
-  };
 
   image.onload = () => {
     const icon = image.cloneNode(false);
@@ -879,8 +1916,21 @@ function installIconOnLabel(label, labelObject, model) {
     updateSceneLabelScales(ctx());
     renderOnce();
   };
-  image.onerror = tryNext;
-  tryNext();
+  image.onerror = () => {
+    if (image.dataset.fallbackAttempted === 'true') {
+      label.dataset.iconState = 'missing';
+      return;
+    }
+    image.dataset.fallbackAttempted = 'true';
+    if (isSameIconPath(image.src, DEFAULT_EMPTY_ICON_PATH)) {
+      label.dataset.iconState = 'missing';
+      return;
+    }
+    image.src = DEFAULT_EMPTY_ICON_PATH;
+  };
+  resolveIconPathForModel(model).then((resolvedPath) => {
+    image.src = resolvedPath ?? DEFAULT_EMPTY_ICON_PATH;
+  });
 }
 
 function transparentPngSource(image) {
@@ -925,23 +1975,137 @@ function isPngIconSource(src) {
   }
 }
 
-function iconCandidatePaths(model) {
-  const explicit = model.icon ?? model.iconPath ?? model.rendering?.icon ?? model.rendering?.iconPath ?? model.rendering?.class?.icon ?? model.rendering?.class?.iconPath;
-  const names = [];
-  if (explicit) names.push(String(explicit));
-  if (model.name) names.push(...iconNameVariants(String(model.name)));
-
-  const seen = new Set();
-  const paths = [];
-  for (const name of names) {
-    for (const path of expandIconPath(name)) {
-      if (seen.has(path)) continue;
-      seen.add(path);
-      paths.push(path);
-    }
+function isSameIconPath(src, path) {
+  try {
+    return new URL(src, window.location.href).href === new URL(path, window.location.href).href;
+  } catch {
+    return String(src || '') === String(path || '');
   }
-  if (!seen.has(DEFAULT_EMPTY_ICON_PATH)) paths.push(DEFAULT_EMPTY_ICON_PATH);
-  return paths;
+}
+
+async function resolveIconPathForModel(model) {
+  const explicit = explicitIconPath(model);
+  const manifestLookup = await iconManifestLookup();
+
+  if (explicit) {
+    const manifestPath = manifestIconPath(manifestLookup, explicit);
+    if (manifestPath) return manifestPath;
+
+    const directPath = directExplicitIconPath(explicit);
+    if (directPath) return directPath;
+  }
+
+  if (model?.name) {
+    const manifestPath = manifestIconPath(manifestLookup, String(model.name));
+    if (manifestPath) return manifestPath;
+  }
+
+  return DEFAULT_EMPTY_ICON_PATH;
+}
+
+function explicitIconPath(model) {
+  return model?.icon
+    ?? model?.iconPath
+    ?? model?.rendering?.icon
+    ?? model?.rendering?.iconPath
+    ?? model?.rendering?.class?.icon
+    ?? model?.rendering?.class?.iconPath
+    ?? null;
+}
+
+function iconManifestLookup() {
+  if (!iconManifestLookupPromise) {
+    iconManifestLookupPromise = fetch(ICON_MANIFEST_PATH)
+      .then(response => response.ok ? response.json() : null)
+      .then(buildIconManifestLookup)
+      .catch(() => new Map());
+  }
+  return iconManifestLookupPromise;
+}
+
+function buildIconManifestLookup(manifest) {
+  const lookup = new Map();
+  const icons = Array.isArray(manifest?.icons) ? manifest.icons : [];
+
+  icons.forEach((entry) => {
+    const iconPath = iconPathFromManifestEntry(entry);
+    if (!iconPath) return;
+    addIconLookupAlias(lookup, entry.name, iconPath);
+    addIconLookupAlias(lookup, entry.icon, iconPath);
+  });
+
+  return lookup;
+}
+
+function iconPathFromManifestEntry(entry) {
+  const icon = String(entry?.icon ?? '').trim();
+  if (!icon) return null;
+  if (isPathLike(icon)) return icon;
+  return `./icons/${encodeURIComponent(icon)}`;
+}
+
+function addIconLookupAlias(lookup, value, iconPath) {
+  for (const key of iconLookupKeys(value)) {
+    if (!lookup.has(key)) lookup.set(key, iconPath);
+  }
+}
+
+function manifestIconPath(lookup, value) {
+  for (const key of iconLookupKeys(value)) {
+    const iconPath = lookup?.get(key);
+    if (iconPath) return iconPath;
+  }
+  return null;
+}
+
+function iconLookupKeys(value) {
+  const clean = String(value ?? '').trim();
+  if (!clean) return [];
+
+  const decoded = safeDecodeURIComponent(clean);
+  const leaf = decoded.split(/[?#]/)[0].split(/[\\/]/).pop() ?? decoded;
+  const leafWithoutExtension = leaf.replace(/\.[a-z0-9]+$/i, '');
+  const aliases = [
+    clean,
+    decoded,
+    leaf,
+    leafWithoutExtension,
+    ...iconNameVariants(decoded),
+    ...iconNameVariants(leaf),
+    ...iconNameVariants(leafWithoutExtension)
+  ];
+
+  const keys = new Set();
+  aliases.forEach((alias) => {
+    const key = iconLookupKey(alias);
+    if (key) keys.add(key);
+  });
+  return [...keys];
+}
+
+function iconLookupKey(value) {
+  const clean = String(value ?? '').trim();
+  if (!clean) return '';
+  const decoded = safeDecodeURIComponent(clean);
+  const leaf = decoded.split(/[?#]/)[0].split(/[\\/]/).pop() ?? decoded;
+  return safeIconFilename(leaf.replace(/\.[a-z0-9]+$/i, ''));
+}
+
+function safeDecodeURIComponent(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function directExplicitIconPath(value) {
+  const clean = String(value ?? '').trim();
+  if (!clean) return null;
+  const hasExtension = /\.[a-z0-9]+(?:[?#].*)?$/i.test(clean);
+  if (isPathLike(clean)) return clean;
+  if (hasExtension) return `./icons/${encodeURIComponent(clean)}`;
+  return null;
 }
 
 function iconNameVariants(name) {
@@ -975,22 +2139,16 @@ function safeIconFilename(name) {
     .toLowerCase();
 }
 
-function expandIconPath(value) {
-  const clean = String(value || '').trim();
-  if (!clean) return [];
-  const hasExtension = /\.[a-z0-9]+$/i.test(clean);
-  if (/^(?:\.{0,2}\/|\/|https?:|data:)/i.test(clean) || clean.includes('/')) {
-    return hasExtension ? [clean] : ICON_EXTENSIONS.map(ext => `${clean}.${ext}`);
-  }
-  if (hasExtension) return [`./icons/${encodeURIComponent(clean)}`];
-  return ICON_EXTENSIONS.map(ext => `./icons/${encodeURIComponent(clean)}.${ext}`);
+function isPathLike(value) {
+  return /^(?:\.{0,2}\/|\/|https?:|data:)/i.test(value) || String(value).includes('/');
 }
 
 function applySelectionHighlight() {
   if (!diagramGroup) return;
+  const selectedAttr = selectedAttributeEntry();
   diagramGroup.traverse(object => {
     if (!object.userData?.isClassLike) return;
-    const selected = sameId(object.userData.hbdsId, selectedElementId);
+    const selected = sameId(object.userData.hbdsId, selectedElementId) || selectedElementIds.has(String(object.userData.hbdsId));
 
     if (object.material?.emissive) {
       object.material.emissive.set(selected ? 0x1769e0 : 0x000000);
@@ -1001,9 +2159,22 @@ function applySelectionHighlight() {
     object.renderOrder = selected ? 20 : 1;
     object.traverse(child => {
       if (child.isCSS2DObject && child.element) {
-        child.element.classList.toggle('is-selected', selected);
+        let labelSelected = selected && child.element.classList.contains('class-label');
+        if (child.userData?.labelKind === 'attribute' && selectedAttr) {
+          const labels = getAttributeLabelObjects(object);
+          const index = labels.indexOf(child);
+          labelSelected = sameId(object.userData.hbdsId, selectedAttr.owner.id)
+            && index >= 0
+            && sameId(attributeKeyFor(selectedAttr.owner.attributes[index], index), selectedAttributeKey);
+        }
+        child.element.classList.toggle('is-selected', labelSelected);
       }
     });
+  });
+  diagramGroup.traverse(object => {
+    if (!object.isCSS2DObject || !object.element?.classList?.contains('link-label')) return;
+    const linkId = object.parent?.userData?.linkData?.id ?? object.userData?.linkId;
+    object.element.classList.toggle('is-selected', sameId(linkId, selectedLinkId));
   });
   renderOnce();
 }
@@ -1367,14 +2538,11 @@ function selectElement(id, options = {}) {
   const selected = nodeById(actualId);
   if (!selected) return;
 
-  selectedElementId = selected.id;
+  setPrimarySelection(selected.id);
   selectedAttributeOwnerId = selected.id;
-
-  if (selected.type === 'hyperclass') {
-    selectedParentHyperclassId = selected.id;
-  } else if (selected.parentClassId) {
-    selectedParentHyperclassId = selected.parentClassId;
-  }
+  selectedParentHyperclassId = selected.parentClassId ?? null;
+  selectedAttributeKey = null;
+  selectedLinkId = null;
 
   updateInterface({ json: false });
   if (options.log !== false) addLog(`Selected ${selected.name || selected.id}`);
@@ -1390,10 +2558,11 @@ function syncCountersFromData() {
 
 async function handleAddClass() {
   const classIndex = nextClassNumber++;
+  const parentId = getCreationParentId();
   const created = await createClass({
     name: `Class ${classIndex}`,
     attributes: [],
-    parentClassId: selectedParentHyperclassId || null,
+    parentClassId: parentId,
     rendering: classRendering(classIndex - 1)
   }, { context: ctx(), refresh: false });
 
@@ -1404,18 +2573,25 @@ async function handleAddClass() {
 
 async function handleAddHyperclass() {
   const hyperIndex = nextHyperclassNumber++;
+  const parentId = getCreationParentId();
   const created = await createHyperclass({
     name: `Hyperclass ${hyperIndex}`,
     attributes: [],
     children: [],
-    parentClassId: selectedParentHyperclassId || null,
+    parentClassId: parentId,
     rendering: hyperclassRendering(hyperIndex - 1)
   }, { context: ctx(), refresh: false });
 
   selectedElementId = created.id;
-  selectedParentHyperclassId = created.id;
+  selectedParentHyperclassId = created.parentClassId ?? null;
   selectedAttributeOwnerId = created.id;
   await refreshWorkspace(`Added ${created.name}`, { refresh: true });
+}
+
+function getCreationParentId() {
+  const selected = nodeById(selectedElementId);
+  if (selected?.type === 'hyperclass') return selected.id;
+  return selected?.parentClassId ?? selectedParentHyperclassId ?? null;
 }
 
 async function handleAddAttribute() {
@@ -1430,6 +2606,11 @@ async function handleAddAttribute() {
   const number = nextAttributeNumber++;
   await createAttribute(owner.id, { name: `${attributeName}${number}` }, { context: ctx(), refresh: false });
   selectedElementId = owner.id;
+  selectedAttributeOwnerId = owner.id;
+  const updatedOwner = nodeById(owner.id);
+  const lastIndex = (updatedOwner?.attributes?.length ?? 0) - 1;
+  if (lastIndex >= 0) selectedAttributeKey = attributeKeyFor(updatedOwner.attributes[lastIndex], lastIndex);
+  selectedLinkId = null;
   await refreshWorkspace(`Added attribute to ${owner.name || owner.id}`, { refresh: true });
 }
 
@@ -1443,7 +2624,7 @@ async function handleAddLink() {
 
   const number = nextLinkNumber++;
   const label = LINK_NAMES[(number - 1) % LINK_NAMES.length];
-  await createLink({
+  const created = await createLink({
     id: `link${number}`,
     sourceClassId: source.id,
     targetClassId: target.id,
@@ -1452,6 +2633,8 @@ async function handleAddLink() {
   }, { context: ctx(), refresh: false });
 
   selectedElementId = target.id;
+  selectedLinkId = created?.id ?? `link${number}`;
+  selectedAttributeKey = null;
   selectedLinkSourceId = target.id;
   selectedLinkTargetId = null;
   linkPickActive = false;
@@ -1661,7 +2844,8 @@ async function handleLoadModel() {
     defaultBasePath: TEST_MODEL_ROOT
   });
   const preserveLayout = Boolean(loadedModel?.metadata?.preserveLayout || loadedModel?.hypergraph?.metadata?.preserveLayout);
-  const optimize = !preserveLayout && shouldOptimizeAfterCrud();
+  const hasSavedFit = hasFitMetadata(loadedModel);
+  const optimize = !preserveLayout && !hasSavedFit && shouldOptimizeAfterCrud();
   selectedElementId = null;
   selectedParentHyperclassId = null;
   selectedAttributeOwnerId = null;
@@ -1672,7 +2856,7 @@ async function handleLoadModel() {
   await refreshWorkspace(`Loaded ${selectedLabel}`, {
     refresh: false,
     optimize,
-    fit: optimize || !hasFitMetadata(loadedModel)
+    fit: optimize || !hasSavedFit
   });
 }
 
@@ -1711,10 +2895,11 @@ async function runScenarioSuite() {
           continue;
         }
         const algorithm = getLayoutAlgorithm();
-        if (algorithm !== 'none') {
+        const hasSavedFit = hasFitMetadata(loadedModel);
+        if (algorithm !== 'none' && !hasSavedFit) {
           await optimizeAndRefreshLayout(ctx(), { algorithm });
         }
-        if (!hasFitMetadata(loadedModel)) fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
+        if (!hasSavedFit) fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
         passed += 1;
         setStatus(`Running suite: ${passed}/${availableModels.length}`, 'warn');
       } catch (error) {
@@ -1750,40 +2935,73 @@ function clearLinkBuilder() {
   updateInterface({ json: false });
 }
 
-function handleSelectChange(id, value) {
+function startLinkCreation() {
+  selectedLinkSourceId = null;
+  selectedLinkTargetId = null;
+  selectedLinkId = null;
+  selectedAttributeKey = null;
+  linkPickActive = true;
+  updateInterface({ json: false });
+  showToast('Select source');
+}
+
+function cancelLinkCreation() {
+  clearLinkBuilder();
+  showToast('Link creation canceled');
+}
+
+async function handleSelectChange(id, value) {
   if (id === 'selected-attribute-select') {
     selectedAttributeKey = value || null;
+    selectedLinkId = null;
     updateInterface({ json: false });
     return;
   }
   if (id === 'selected-link-select') {
     selectedLinkId = value || null;
+    selectedAttributeKey = null;
+    const link = links().find(item => sameId(item.id, selectedLinkId));
+    if (link && !sameId(selectedElementId, link.sourceClassId) && !sameId(selectedElementId, link.targetClassId)) {
+      selectedElementId = link.sourceClassId;
+      selectedAttributeOwnerId = link.sourceClassId;
+    }
     updateInterface({ json: false });
     return;
   }
   const resolved = resolveNodeId(value);
   if (id === 'selected-element-select') {
     if (resolved) selectElement(resolved, { log: false });
-    else selectedElementId = null;
+    else {
+      selectedElementId = null;
+      selectedAttributeOwnerId = null;
+      selectedAttributeKey = null;
+      selectedLinkId = null;
+    }
   }
-  if (id === 'parent-hyperclass-select') selectedParentHyperclassId = resolved;
-  if (id === 'attribute-owner-select') selectedAttributeOwnerId = resolved;
-  if (id === 'link-source-select') selectedLinkSourceId = resolved;
-  if (id === 'link-target-select') selectedLinkTargetId = resolved;
+  if (id === 'parent-hyperclass-select') {
+    const selected = nodeById(selectedElementId);
+    if (selected) {
+      await moveChildToHyperclass(selected.id, resolved || null, { context: ctx(), refresh: false });
+      selectedParentHyperclassId = resolved || null;
+      await refreshWorkspace(null, { refresh: true, fit: false });
+      return;
+    }
+  }
   updateInterface({ json: false });
 }
 
-function handleLinkPickButton() {
-  linkPickActive = !linkPickActive;
-  updateInterface({ json: false });
-  showToast(linkPickActive ? 'Pick a source in the diagram' : 'Link pick stopped');
-}
-
-function handleDiagramObjectClick(object) {
+function handleDiagramObjectClick(object, event = null) {
   const id = object?.userData?.hbdsId;
   if (id == null) return;
   const clicked = nodeById(id);
   if (!clicked) return;
+
+  if (event?.shiftKey && !linkPickActive) {
+    toggleMultiSelection(clicked.id);
+    updateInterface({ json: false });
+    addLog(`Selected ${selectedElementIds.size} item${selectedElementIds.size === 1 ? '' : 's'}`);
+    return;
+  }
 
   if (linkPickActive && editMode === 'full') {
     if (!selectedLinkSourceId) {
@@ -1791,6 +3009,7 @@ function handleDiagramObjectClick(object) {
       selectedElementId = clicked.id;
       addLog(`Link source: ${clicked.name || clicked.id}`);
       updateInterface({ json: false });
+      showToast('Select target or cancel');
       return;
     }
 
@@ -1831,7 +3050,72 @@ function pickClassLikeFromEvent(event) {
   return null;
 }
 
+function getAttributeLabelObjects(ownerObject) {
+  return ownerObject?.children?.filter(child => child.isCSS2DObject && child.userData?.labelKind === 'attribute') || [];
+}
+
+function findCssLabelObject(element) {
+  let found = null;
+  if (!element || !diagramGroup) return null;
+  diagramGroup.traverse(object => {
+    if (!found && object.isCSS2DObject && object.element === element) found = object;
+  });
+  return found;
+}
+
+function handleLabelClick(event) {
+  const labelElement = event.target.closest?.('.label');
+  if (!labelElement) return;
+  const labelObject = findCssLabelObject(labelElement);
+  if (!labelObject) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (labelElement.classList.contains('link-label')) {
+    if (linkPickActive) {
+      showToast('Select a class or hyperclass for link creation');
+      return;
+    }
+    const link = labelObject.parent?.userData?.linkData || links().find(item => item.rendering?.labelText === labelElement.textContent);
+    if (!link) return;
+    selectedLinkId = link.id;
+    selectedAttributeKey = null;
+    selectedElementId = link.sourceClassId;
+    selectedAttributeOwnerId = link.sourceClassId;
+    updateInterface({ json: false });
+    addLog(`Selected link ${link.rendering?.labelText || link.name || link.id}`);
+    return;
+  }
+
+  const ownerObject = findClassLikeObject(labelObject.parent);
+  if (!ownerObject) return;
+
+  if (labelObject.userData?.labelKind === 'attribute' || labelElement.classList.contains('attribute-label')) {
+    if (linkPickActive) {
+      showToast('Select a class or hyperclass for link creation');
+      return;
+    }
+    const owner = nodeById(ownerObject.userData?.hbdsId);
+    if (!owner) return;
+    const labels = getAttributeLabelObjects(ownerObject);
+    const index = labels.indexOf(labelObject);
+    if (index < 0 || !owner.attributes?.[index]) return;
+    selectedElementId = owner.id;
+    selectedAttributeOwnerId = owner.id;
+    selectedAttributeKey = attributeKeyFor(owner.attributes[index], index);
+    selectedLinkId = null;
+    updateInterface({ json: false });
+    addLog(`Selected attribute ${attributeDisplayName(owner.attributes[index], index)}`);
+    return;
+  }
+
+  handleDiagramObjectClick(ownerObject, event);
+}
+
 function bindDiagramPicking() {
+  labelRenderer.domElement.addEventListener('pointerup', handleLabelClick);
+
   renderer.domElement.addEventListener('pointerdown', event => {
     pointerStart = { x: event.clientX, y: event.clientY };
   });
@@ -1843,7 +3127,7 @@ function bindDiagramPicking() {
     pointerStart = null;
     if (Math.hypot(dx, dy) > 5) return;
     const picked = pickClassLikeFromEvent(event);
-    if (picked) handleDiagramObjectClick(picked);
+    if (picked) handleDiagramObjectClick(picked, event);
   });
 }
 
@@ -1867,8 +3151,21 @@ function setupDrag() {
   if (dragControls) dragControls.dispose();
   dragControls = new DragControls(draggableObjects, camera, renderer.domElement);
   dragControls.transformGroup = false;
+  dragControls.recursive = false;
   let dragObjectsBackup = null;
   let dragStartZ = 0;
+  let dragFramePending = false;
+
+  const scheduleDragFrame = () => {
+    if (dragFramePending) return;
+    dragFramePending = true;
+    requestAnimationFrame(() => {
+      dragFramePending = false;
+      recalculateAllLinks();
+      renderOnce();
+      updateOverview();
+    });
+  };
 
   dragControls.addEventListener('dragstart', event => {
     dragObjectsBackup = dragControls.objects.slice();
@@ -1876,16 +3173,18 @@ function setupDrag() {
     dragStartZ = event.object?.position?.z || 0;
     orbitControls.enabled = false;
     if (event.object?.userData?.hbdsId != null) {
-      selectedElementId = event.object.userData.hbdsId;
-      updateInterface({ json: false });
+      setPrimarySelection(event.object.userData.hbdsId);
+      selectedAttributeOwnerId = selectedElementId;
+      selectedParentHyperclassId = nodeById(selectedElementId)?.parentClassId ?? null;
+      selectedAttributeKey = null;
+      selectedLinkId = null;
+      updateInterface({ json: false, lightweight: true });
     }
   });
 
   dragControls.addEventListener('drag', event => {
     if (event.object) event.object.position.z = dragStartZ;
-    recalculateAllLinks();
-    renderOnce();
-    updateOverview();
+    scheduleDragFrame();
   });
 
   dragControls.addEventListener('dragend', event => {
@@ -1896,6 +3195,7 @@ function setupDrag() {
       recalculateAllLinks();
       updateJsonPreviewFromData();
       updateOverview();
+      updateInterface({ json: false });
       const moved = nodeById(event.object.userData?.hbdsId);
       if (moved) addLog(`Moved ${moved.name || moved.id}`);
     }
@@ -1908,7 +3208,7 @@ function bindUi() {
   $('add-class-button').addEventListener('click', () => runAction(handleAddClass));
   $('add-hyperclass-button').addEventListener('click', () => runAction(handleAddHyperclass));
   $('add-attribute-button').addEventListener('click', () => runAction(handleAddAttribute));
-  $('add-link-button').addEventListener('click', () => runAction(handleAddLink));
+  $('add-link-button').addEventListener('click', startLinkCreation);
   $('delete-selected-button').addEventListener('click', () => runAction(handleDeleteSelected));
   $('optimize-layout-button').addEventListener('click', () => runAction(handleOptimizeLayout));
   $('fit-model-button').addEventListener('click', handleFitModel);
@@ -1917,15 +3217,50 @@ function bindUi() {
   $('apply-json-button').addEventListener('click', () => runAction(handleApplyJson));
   $('reset-model-button').addEventListener('click', () => runAction(handleResetModel));
   $('run-scenario-suite-button').addEventListener('click', () => runAction(runScenarioSuite));
-  $('clear-link-button').addEventListener('click', clearLinkBuilder);
-  $('link-pick-button').addEventListener('click', handleLinkPickButton);
+  $('cancel-link-button').addEventListener('click', cancelLinkCreation);
   ['selected-color-input', 'selected-border-color-input', 'selected-opacity-input', 'selected-corner-radius-input', 'selected-text-color-input']
     .forEach(id => $(id)?.addEventListener('input', () => runAction(handleSelectedRenderingChange)));
   $('selected-name-input')?.addEventListener('change', () => runAction(handleSelectedNameChange));
+  $('selected-name-input')?.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      event.target.blur();
+    }
+  });
   $('selected-attribute-name-input')?.addEventListener('change', () => runAction(handleSelectedAttributeRename));
   $('selected-link-name-input')?.addEventListener('change', () => runAction(handleSelectedLinkUpdate));
   $('selected-link-color-input')?.addEventListener('input', () => runAction(handleSelectedLinkUpdate));
   $('selected-link-width-input')?.addEventListener('input', () => runAction(handleSelectedLinkUpdate));
+  $('property-panel')?.addEventListener('pointerdown', event => {
+    const input = event.target.closest?.('[data-property-path]');
+    if (input) beginLivePropertyEdit(input);
+  });
+  $('property-panel')?.addEventListener('focusin', event => {
+    const input = event.target.closest?.('[data-property-path]');
+    if (input) beginLivePropertyEdit(input);
+  });
+  $('property-panel')?.addEventListener('click', event => {
+    runAction(() => handlePropertyPanelAction(event));
+  });
+  $('property-panel')?.addEventListener('input', event => {
+    if (event.target?.dataset?.live === 'true') runAction(() => handlePropertyPanelChange(event, { history: false }));
+  });
+  $('property-panel')?.addEventListener('change', event => {
+    if (event.target?.dataset?.live === 'true') {
+      runAction(async () => {
+        await handlePropertyPanelChange(event, { history: false });
+        commitLivePropertyEdit();
+      });
+    } else {
+      runAction(() => handlePropertyPanelChange(event));
+    }
+  });
+  $('property-panel')?.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && event.target?.matches?.('input[type="text"]')) {
+      event.preventDefault();
+      event.target.blur();
+    }
+  });
   $('reset-scene-settings-button')?.addEventListener('click', handleResetSceneSettings);
 
   [
@@ -1970,8 +3305,8 @@ function bindUi() {
     updateInterface({ json: false });
   });
 
-  ['selected-element-select', 'parent-hyperclass-select', 'attribute-owner-select', 'link-source-select', 'link-target-select', 'selected-attribute-select', 'selected-link-select'].forEach(id => {
-    $(id).addEventListener('change', event => handleSelectChange(id, event.target.value));
+  ['selected-element-select', 'parent-hyperclass-select', 'selected-attribute-select', 'selected-link-select'].forEach(id => {
+    $(id)?.addEventListener('change', event => runAction(() => handleSelectChange(id, event.target.value)));
   });
 }
 

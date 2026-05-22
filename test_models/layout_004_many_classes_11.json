@@ -7,7 +7,50 @@
       "layout",
       "many-classes",
       "grid"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "radial",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 19.9277,
+        "fitWidthDistance": 13.0247,
+        "distance": 13.5639,
+        "diagramWidth": 11.5475,
+        "diagramHeight": 11.7482,
+        "diagramDepth": 0.11,
+        "radius": 8.2368,
+        "center": {
+          "x": -0.322,
+          "y": 0.5415,
+          "z": 0.055
+        },
+        "cameraAspect": 1.53,
+        "cameraFov": 52
+      }
+    }
   },
   "hypergraph": {
     "class": [
@@ -31,8 +74,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": -3.3,
-          "y": 1.8,
+          "x": 5,
+          "y": 0,
           "z": 0
         },
         "size": {
@@ -86,8 +129,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": -1.0999999999999996,
-          "y": 1.8,
+          "x": -0.7115741913664251,
+          "y": 4.949107209404664,
           "z": 0
         },
         "size": {
@@ -141,8 +184,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 1.1000000000000005,
-          "y": 1.8,
+          "x": -3.274303669726425,
+          "y": 3.7787478717712912,
           "z": 0
         },
         "size": {
@@ -196,8 +239,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 3.3000000000000007,
-          "y": 1.8,
+          "x": -4.7974648680724865,
+          "y": 1.4086627842071484,
           "z": 0
         },
         "size": {
@@ -251,8 +294,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": -3.3,
-          "y": -0.40000000000000013,
+          "x": -4.797464868072487,
+          "y": -1.4086627842071469,
           "z": 0
         },
         "size": {
@@ -306,8 +349,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": -1.0999999999999996,
-          "y": -0.40000000000000013,
+          "x": -3.274303669726426,
+          "y": -3.778747871771291,
           "z": 0
         },
         "size": {
@@ -361,8 +404,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 1.1000000000000005,
-          "y": -0.40000000000000013,
+          "x": -0.7115741913664262,
+          "y": -4.949107209404663,
           "z": 0
         },
         "size": {
@@ -416,8 +459,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 3.3000000000000007,
-          "y": -0.40000000000000013,
+          "x": 2.07707506500943,
+          "y": -4.548159976772593,
           "z": 0
         },
         "size": {
@@ -471,8 +514,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": -3.3,
-          "y": -2.6000000000000005,
+          "x": 4.206267664155906,
+          "y": -2.703204087277987,
           "z": 0
         },
         "size": {
@@ -526,12 +569,12 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": -1.0999999999999996,
-          "y": -2.6000000000000005,
+          "x": 4.206267664155906,
+          "y": 2.703204087277988,
           "z": 0
         },
         "size": {
-          "width": 1.35,
+          "width": 1.44,
           "height": 1.85
         },
         "rendering": {
@@ -581,12 +624,12 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 1.1000000000000005,
-          "y": -2.6000000000000005,
+          "x": 2.0770750650094323,
+          "y": 4.548159976772592,
           "z": 0
         },
         "size": {
-          "width": 1.35,
+          "width": 1.44,
           "height": 1.85
         },
         "rendering": {
@@ -625,18 +668,19 @@
         "name": "feeds",
         "rendering": {
           "labelText": "feeds",
+          "orthogonalStyle": "auto",
           "lineColor": "#7c4a03",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_grid_2_6",
@@ -645,18 +689,19 @@
         "name": "validates",
         "rendering": {
           "labelText": "validates",
+          "orthogonalStyle": "auto",
           "lineColor": "#155e75",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_grid_7_11",
@@ -665,19 +710,20 @@
         "name": "routes",
         "rendering": {
           "labelText": "routes",
+          "orthogonalStyle": "auto",
           "lineColor": "#087443",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.7,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12,
           "routeSide": "bottom"
-        }
+        },
+        "allowSelfLink": true
       }
     ]
   }

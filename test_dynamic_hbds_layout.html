@@ -4,20 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Dynamic Layout Test</title>
+  <link rel="stylesheet" href="css/style.css">
   <style>
     :root {
       --panel-width: 400px;
       --panel-height: 44vh;
-      --ink: #18202a;
-      --muted: #667085;
-      --line: #d7dde5;
-      --surface: #fbfcfe;
-      --surface-soft: #f3f6fa;
-      --accent: #1769e0;
-      --accent-strong: #0f56ba;
-      --danger: #b42318;
-      --ok: #087443;
-      --warn: #a15c07;
+      --ink: var(--hbds-menu-ink);
+      --muted: var(--hbds-menu-muted);
+      --line: var(--hbds-menu-line);
+      --surface: var(--hbds-menu-surface);
+      --surface-soft: var(--hbds-menu-surface-soft);
+      --accent: var(--hbds-menu-accent);
+      --accent-strong: var(--hbds-menu-accent-strong);
+      --on-accent: var(--hbds-menu-on-accent);
+      --summary-bg: var(--hbds-menu-summary-bg);
+      --summary-open-bg: var(--hbds-menu-summary-open-bg);
+      --collapsed-bg: var(--hbds-menu-collapsed-bg);
+      --collapsed-ink: var(--hbds-menu-collapsed-ink);
+      --control-bg: var(--hbds-menu-control-bg);
+      --danger: var(--hbds-menu-danger);
+      --ok: var(--hbds-menu-ok);
+      --warn: var(--hbds-menu-warn);
     }
 
     * { box-sizing: border-box; }
@@ -29,7 +36,7 @@
       height: 100%;
       overflow: hidden;
       color: var(--ink);
-      background: #e8edf3;
+      background: var(--hbds-menu-page-bg);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -46,6 +53,16 @@
       width: 100%;
     }
 
+    input[type="text"] {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #ffffff;
+      padding: 7px 9px;
+    }
+
     button {
       min-height: 34px;
       border: 1px solid var(--line);
@@ -57,7 +74,7 @@
     }
 
     button:hover:not(:disabled) {
-      border-color: #aab4c0;
+      border-color: #cbd5e1;
       background: #f8fafc;
     }
 
@@ -90,7 +107,7 @@
     }
 
     button.quiet {
-      color: #344054;
+      color: #334155;
       background: var(--surface-soft);
     }
 
@@ -99,7 +116,7 @@
       gap: 6px;
       font-size: 12px;
       font-weight: 650;
-      color: #344054;
+      color: #333;
     }
 
     select,
@@ -138,7 +155,7 @@
       position: fixed;
       inset: 0 var(--panel-width) 0 0;
       overflow: hidden;
-      background: #eef2f6;
+      background: #f8fafc;
     }
 
     #container canvas {
@@ -148,21 +165,22 @@
     #canvas-model-title {
       position: absolute;
       top: 14px;
-      left: 16px;
+      left: 50%;
       z-index: 18;
       max-width: calc(100% - 32px);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: 17px;
+      font-size: 20px;
       font-weight: 780;
-      color: #1f2a37;
+      color: #333;
       background: rgba(255, 255, 255, 0.74);
-      border: 1px solid rgba(152, 162, 179, 0.35);
+      border: 1px solid #ddd;
       border-radius: 7px;
-      padding: 5px 10px;
+      padding: 6px 12px;
       backdrop-filter: blur(3px);
       display: none;
+      transform: translateX(-50%);
     }
 
     body.has-model #canvas-model-title {
@@ -184,8 +202,14 @@
     }
 
     .label.is-selected {
-      background: rgba(23, 105, 224, 0.14);
-      box-shadow: 0 0 0 1px rgba(23, 105, 224, 0.35);
+      background: #f8fafc;
+      box-shadow: 0 0 0 1px #cbd5e1;
+    }
+
+    .attribute-label.is-selected,
+    .link-label.is-selected {
+      outline: 2px solid #cbd5e1;
+      outline-offset: 2px;
     }
 
     .control-row,
@@ -203,9 +227,9 @@
       width: 224px;
       height: 150px;
       overflow: hidden;
-      border: 1px solid rgba(84, 96, 112, 0.24);
+      border: 1px solid #999;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(255, 255, 255, 0.88);
       box-shadow: 0 14px 34px rgba(40, 54, 72, 0.14);
     }
 
@@ -217,8 +241,8 @@
 
     #model-overview-viewport {
       position: absolute;
-      border: 1px solid var(--accent);
-      background: rgba(23, 105, 224, 0.08);
+      border: 1px solid #999;
+      background: rgba(248, 250, 252, 0.72);
       pointer-events: auto;
     }
 
@@ -230,8 +254,8 @@
       width: var(--panel-width);
       height: 100%;
       overflow: auto;
-      border-left: 1px solid rgba(152, 162, 179, 0.45);
-      background: linear-gradient(180deg, #f7f9fc 0%, #f2f7fb 100%);
+      border-left: 1px solid #ddd;
+      background: var(--hbds-menu-panel-bg);
       box-shadow: -18px 0 48px rgba(40, 54, 72, 0.1);
       padding: 16px;
     }
@@ -243,7 +267,7 @@
     }
 
     .eyebrow {
-      color: var(--accent);
+      color: #64748b;
       font-size: 12px;
       font-weight: 750;
     }
@@ -263,9 +287,9 @@
 
     .stat {
       min-height: 56px;
-      border: 1px solid var(--line);
+      border: 1px solid #ddd;
       border-radius: 8px;
-      background: #fdfefe;
+      background: #fff;
       padding: 8px;
     }
 
@@ -274,6 +298,7 @@
       font-size: 18px;
       font-weight: 750;
       line-height: 1.1;
+      color: #333;
     }
 
     .stat-label {
@@ -316,12 +341,22 @@
     }
 
     .control-group {
+      --group-accent: var(--hbds-menu-accent);
+      --group-border: var(--hbds-menu-line);
+      --group-bg: var(--hbds-menu-surface-soft);
+      --group-bg-strong: var(--hbds-menu-surface-soft);
+      --group-control-bg: var(--hbds-menu-surface-soft);
+      --group-summary-bg: var(--summary-bg);
+      --group-summary-open-bg: var(--summary-open-bg);
+      --group-collapsed-bg: var(--collapsed-bg);
+      --group-collapsed-ink: var(--collapsed-ink);
       display: grid;
       gap: 9px;
       margin-bottom: 10px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--group-border);
+      border-left: 4px solid var(--group-accent);
       border-radius: 8px;
-      background: #f9fcff;
+      background: linear-gradient(135deg, var(--group-bg-strong) 0%, var(--group-summary-bg) 100%);
       padding: 10px;
     }
 
@@ -329,6 +364,7 @@
       display: block;
       padding: 0;
       overflow: hidden;
+      background: linear-gradient(135deg, var(--group-bg-strong) 0%, var(--group-summary-bg) 100%);
     }
 
     details.control-group > summary {
@@ -342,6 +378,8 @@
       padding: 9px 10px;
       font-size: 13px;
       font-weight: 760;
+      color: var(--group-accent);
+      background: linear-gradient(90deg, var(--group-bg-strong), var(--group-summary-bg));
     }
 
     details.control-group > summary::-webkit-details-marker {
@@ -351,19 +389,40 @@
     details.control-group > summary::after {
       content: "+";
       flex: 0 0 auto;
-      color: var(--muted);
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      color: var(--group-accent);
+      background: var(--group-bg-strong);
       font-size: 16px;
       line-height: 1;
+      text-align: center;
+    }
+
+    details.control-group[open] > summary {
+      background: linear-gradient(90deg, var(--group-bg-strong) 0%, var(--group-summary-open-bg) 100%);
     }
 
     details.control-group[open] > summary::after {
       content: "-";
     }
 
+    details.control-group:not([open]) > summary {
+      color: var(--group-accent);
+      background: linear-gradient(90deg, var(--group-collapsed-bg) 0%, var(--group-summary-bg) 100%);
+      box-shadow: inset 4px 0 0 var(--group-accent);
+    }
+
+    details.control-group:not([open]) > summary::after {
+      color: var(--on-accent);
+      background: var(--group-accent);
+    }
+
     details.control-group > .details-body {
       display: grid;
       gap: 9px;
-      border-top: 1px solid var(--line);
+      border-top: 1px solid var(--group-border);
+      background: linear-gradient(160deg, var(--group-bg-strong) 0%, var(--group-summary-open-bg) 100%);
       padding: 10px;
     }
 
@@ -375,11 +434,76 @@
       margin-bottom: 1px;
       font-size: 13px;
       font-weight: 760;
+      color: var(--group-accent);
+    }
+
+    .control-group label {
+      color: #333;
+    }
+
+    .control-group select,
+    .control-group textarea,
+    .control-group input[type="text"] {
+      border-color: var(--group-border);
+      background: var(--control-bg);
+    }
+
+    .control-group button:not(.primary):not(.danger):not(.quiet) {
+      border-color: var(--group-border);
+      background: var(--control-bg);
+    }
+
+    .control-group button:not(.primary):not(.danger):not(.quiet):hover:not(:disabled) {
+      border-color: var(--group-accent);
+      color: var(--accent);
+      background: var(--group-bg-strong);
     }
 
     details.control-group > summary .section-title {
       width: 100%;
       margin: 0;
+    }
+
+    .control-group[data-section="model"] {
+      --group-accent: var(--hbds-menu-model-accent);
+      --group-bg-strong: var(--hbds-menu-model-soft);
+      --group-collapsed-bg: var(--hbds-menu-model-soft);
+    }
+
+    .control-group[data-section="mode"] {
+      --group-accent: var(--hbds-menu-mode-accent);
+      --group-bg-strong: var(--hbds-menu-mode-soft);
+      --group-collapsed-bg: var(--hbds-menu-mode-soft);
+    }
+
+    .control-group[data-section="layout-session"] {
+      --group-accent: var(--hbds-menu-layout-accent);
+      --group-bg-strong: var(--hbds-menu-layout-soft);
+      --group-collapsed-bg: var(--hbds-menu-layout-soft);
+    }
+
+    .control-group[data-section="model-builder"] {
+      --group-accent: var(--hbds-menu-builder-accent);
+      --group-bg-strong: var(--hbds-menu-builder-soft);
+      --group-collapsed-bg: var(--hbds-menu-builder-soft);
+    }
+
+    .control-group[data-section="settings"] {
+      --group-accent: var(--hbds-menu-settings-accent);
+      --group-bg-strong: var(--hbds-menu-settings-soft);
+      --group-collapsed-bg: var(--hbds-menu-settings-soft);
+    }
+
+    .control-group[data-section="json"] {
+      --group-accent: var(--hbds-menu-json-accent);
+      --group-bg-strong: var(--hbds-menu-json-soft);
+      --group-collapsed-bg: var(--hbds-menu-json-soft);
+    }
+
+    .control-group[data-section="session"] {
+      --group-accent: var(--hbds-menu-session-accent);
+      --group-bg-strong: var(--hbds-menu-session-soft);
+      --group-collapsed-bg: var(--hbds-menu-session-soft);
     }
 
     .section-meta,
@@ -395,14 +519,28 @@
       gap: 8px;
     }
 
+    .builder-separator {
+      height: 1px;
+      margin: 2px 0;
+      background: #ddd;
+    }
+
+    .link-builder-actions {
+      display: none;
+    }
+
+    .link-builder-actions.is-active {
+      display: grid;
+    }
+
     .mode-segment {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 6px;
       padding: 3px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--group-border);
       border-radius: 8px;
-      background: var(--surface-soft);
+      background: var(--group-bg-strong);
     }
 
     .mode-segment button {
@@ -413,8 +551,8 @@
     }
 
     .mode-segment button.active {
-      border-color: #c7d7ef;
-      color: var(--accent-strong);
+      border-color: #cbd5e1;
+      color: var(--accent);
       background: #f7fbff;
       box-shadow: 0 1px 3px rgba(40, 54, 72, 0.1);
     }
@@ -425,9 +563,9 @@
       justify-content: space-between;
       gap: 10px;
       min-height: 34px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--group-border);
       border-radius: 8px;
-      background: var(--surface-soft);
+      background: var(--group-control-bg);
       padding: 7px 9px;
       font-size: 12px;
       font-weight: 650;
@@ -444,9 +582,9 @@
       justify-content: space-between;
       gap: 10px;
       min-height: 34px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--group-border);
       border-radius: 8px;
-      background: var(--surface-soft);
+      background: var(--group-control-bg);
       padding: 7px 9px;
       font-size: 12px;
       font-weight: 650;
@@ -482,9 +620,9 @@
       display: grid;
       gap: 3px;
       min-height: 50px;
-      border: 1px solid #c8d7ea;
+      border: 1px solid #ddd;
       border-radius: 8px;
-      background: #f5f9ff;
+      background: #fff;
       padding: 9px;
     }
 
@@ -497,6 +635,231 @@
       overflow-wrap: anywhere;
       color: var(--muted);
       font-size: 12px;
+    }
+
+    .property-panel {
+      display: grid;
+      gap: 8px;
+      margin-top: 2px;
+      border-top: 1px solid var(--group-border);
+      padding-top: 10px;
+    }
+
+    .property-panel-title {
+      color: var(--group-accent);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .inspector-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 2px;
+    }
+
+    .inspector-subtitle {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .inspector-actions {
+      display: inline-flex;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
+    .inspector-icon-button,
+    .inspector-reset-button {
+      min-height: 26px;
+      padding: 4px 8px;
+      border-radius: 7px;
+      font-size: 11px;
+    }
+
+    .property-empty {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .property-group {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      border: 1px solid var(--group-border);
+      border-radius: 8px;
+      background: var(--group-control-bg);
+      padding: 8px;
+    }
+
+    .property-group legend {
+      padding: 0 5px;
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 760;
+    }
+
+    .property-row {
+      display: grid;
+      grid-template-columns: minmax(96px, 0.85fr) minmax(0, 1.15fr);
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      color: #333;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .property-row input[type="text"],
+    .property-row input[type="number"],
+    .property-row select {
+      width: 100%;
+      min-height: 32px;
+      border: 1px solid var(--group-border);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--control-bg);
+      padding: 6px 8px;
+      font: inherit;
+      font-weight: 500;
+    }
+
+    .property-row input[type="checkbox"] {
+      justify-self: start;
+      width: auto;
+      margin: 0;
+    }
+
+    .property-row input[type="color"] {
+      justify-self: start;
+    }
+
+    .inspector-section {
+      border: 1px solid var(--group-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.35);
+      overflow: hidden;
+    }
+
+    .inspector-section > summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 8px 10px;
+      color: var(--group-accent);
+      background: linear-gradient(90deg, var(--group-bg-strong), rgba(255, 255, 255, 0.45));
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .inspector-section > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .inspector-section-body {
+      display: grid;
+      gap: 9px;
+      padding: 10px;
+    }
+
+    .inspector-row {
+      display: grid;
+      grid-template-columns: minmax(86px, 0.72fr) minmax(0, 1.28fr);
+      align-items: center;
+      gap: 9px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 680;
+    }
+
+    .inspector-control {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .inspector-control > input[type="text"],
+    .inspector-control > input[type="number"],
+    .color-control input[type="text"],
+    .slider-number-control input[type="number"] {
+      width: 100%;
+      min-height: 32px;
+      border: 1px solid var(--group-border);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--control-bg);
+      padding: 6px 8px;
+      font: inherit;
+      font-weight: 520;
+    }
+
+    .slider-number-control {
+      display: grid;
+      grid-template-columns: minmax(72px, 1fr) 68px;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .slider-number-control input[type="range"] {
+      width: 100%;
+      accent-color: var(--group-accent);
+    }
+
+    .color-control {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .color-control input[type="color"] {
+      width: 42px;
+      height: 32px;
+      border: 1px solid var(--group-border);
+      border-radius: 8px;
+      background: var(--control-bg);
+      padding: 3px;
+      cursor: pointer;
+    }
+
+    .recent-colors {
+      display: flex;
+      grid-column: 1 / -1;
+      gap: 5px;
+      min-height: 0;
+    }
+
+    .recent-colors:empty {
+      display: none;
+    }
+
+    .color-swatch {
+      width: 20px;
+      height: 20px;
+      min-height: 20px;
+      border: 1px solid rgba(15, 23, 42, 0.22);
+      border-radius: 999px;
+      padding: 0;
+    }
+
+    .inspector-control input[type="checkbox"] {
+      justify-self: start;
+      width: auto;
+      margin: 0;
+      accent-color: var(--group-accent);
+    }
+
+    .danger-zone {
+      margin-top: 2px;
+      padding-top: 10px;
+      border-top: 1px solid #f1c6c1;
     }
 
     #layout-status {
@@ -560,7 +923,7 @@
         bottom: 0;
         width: 100%;
         height: var(--panel-height);
-        border-top: 1px solid rgba(152, 162, 179, 0.45);
+        border-top: 1px solid #ddd;
         border-left: 0;
         box-shadow: 0 -18px 48px rgba(40, 54, 72, 0.12);
       }
@@ -603,7 +966,7 @@
     <div id="validation-status" class="status-chip">No model loaded</div>
     <div id="scenario-status" class="status-chip">Scenario suite idle</div>
 
-    <section class="control-group">
+    <section class="control-group" data-default-open="true">
       <div class="section-title">Model</div>
       <label for="test-model-select">Select a HBDS Model</label>
       <select id="test-model-select">
@@ -633,17 +996,7 @@
     </section>
 
     <section class="control-group">
-      <div class="section-title">Create</div>
-      <div class="action-grid">
-        <button id="add-hyperclass-button" type="button" class="primary">Hyperclass</button>
-        <button id="add-class-button" type="button">Class</button>
-        <button id="add-attribute-button" type="button">Attribute</button>
-        <button id="add-link-button" type="button">Link</button>
-      </div>
-    </section>
-
-    <section class="control-group">
-      <div class="section-title">Layout</div>
+      <div class="section-title">Layout Session</div>
       <label for="layout-algorithm-select">Algorithm</label>
       <select id="layout-algorithm-select">
         <option value="none">None</option>
@@ -658,50 +1011,34 @@
     </section>
 
     <section class="control-group">
-      <div class="section-title">Selection</div>
+      <div class="section-title">Model Builder <span id="link-builder-status" class="section-meta">Ready</span></div>
+      <div class="action-grid">
+        <button id="add-hyperclass-button" type="button" class="primary">Hyperclass</button>
+        <button id="add-class-button" type="button">Class</button>
+        <button id="add-attribute-button" type="button">Attribute</button>
+        <button id="add-link-button" type="button">Link</button>
+      </div>
+      <div id="link-builder-actions" class="control-row link-builder-actions">
+        <button id="cancel-link-button" type="button" class="quiet">Cancel Link</button>
+      </div>
+      <div class="builder-separator" aria-hidden="true"></div>
       <div id="selected-card" class="selected-card">
         <span class="selected-name">No selection</span>
         <span class="selected-meta">Select a class or hyperclass</span>
       </div>
+      <label for="parent-hyperclass-select">Parent Selected</label>
+      <select id="parent-hyperclass-select"></select>
       <label for="selected-element-select">Selected Element</label>
       <select id="selected-element-select"></select>
-      <label for="parent-hyperclass-select">Parent Hyperclass</label>
-      <select id="parent-hyperclass-select"></select>
-      <label for="attribute-owner-select">Attribute Owner</label>
-      <select id="attribute-owner-select"></select>
-      <label class="inline-field" for="selected-color-input"><span>Surface Color</span><input type="color" id="selected-color-input" value="#ffd166" disabled></label>
-      <label class="inline-field" for="selected-border-color-input"><span>Border Color</span><input type="color" id="selected-border-color-input" value="#7a4f00" disabled></label>
-      <label class="range-field" for="selected-opacity-input"><span>Opacity</span><input type="range" id="selected-opacity-input" min="0.05" max="1" step="0.01" value="1" disabled></label>
-      <label class="range-field" for="selected-corner-radius-input"><span>Corner Radius</span><input type="range" id="selected-corner-radius-input" min="0" max="0.5" step="0.01" value="0.1" disabled></label>
-      <label class="inline-field" for="selected-text-color-input"><span>Text Color</span><input type="color" id="selected-text-color-input" value="#111827" disabled></label>
       <label for="selected-name-input">Element Name</label>
-      <input id="selected-name-input" type="text" placeholder="Selected class/hyperclass name" disabled>
-      <button id="delete-selected-button" type="button" class="danger">Delete Selected</button>
-    </section>
-
-    <section class="control-group">
-      <div class="section-title">Attributes & Links</div>
+      <input id="selected-name-input" type="text" autocomplete="off" placeholder="Select an element">
       <label for="selected-attribute-select">Attribute</label>
       <select id="selected-attribute-select"></select>
-      <label for="selected-attribute-name-input">Attribute Name</label>
-      <input id="selected-attribute-name-input" type="text" placeholder="Rename selected attribute" disabled>
       <label for="selected-link-select">Link</label>
       <select id="selected-link-select"></select>
-      <label for="selected-link-name-input">Link Name</label>
-      <input id="selected-link-name-input" type="text" placeholder="Rename selected link" disabled>
-      <label class="inline-field" for="selected-link-color-input"><span>Link Color</span><input type="color" id="selected-link-color-input" value="#334155" disabled></label>
-      <label class="range-field" for="selected-link-width-input"><span>Link Width</span><input type="range" id="selected-link-width-input" min="0.002" max="0.08" step="0.001" value="0.01" disabled></label>
-    </section>
-
-    <section class="control-group">
-      <div class="section-title">Link Builder <span id="link-builder-status" class="section-meta">Ready</span></div>
-      <label for="link-source-select">Source</label>
-      <select id="link-source-select"></select>
-      <label for="link-target-select">Target</label>
-      <select id="link-target-select"></select>
-      <div class="control-row">
-        <button id="link-pick-button" type="button">Pick Source</button>
-        <button id="clear-link-button" type="button" class="quiet">Clear</button>
+      <div id="property-panel" class="property-panel" aria-live="polite"></div>
+      <div class="danger-zone">
+        <button id="delete-selected-button" type="button" class="danger">Delete Selected</button>
       </div>
     </section>
 
@@ -723,7 +1060,7 @@
       <button id="reset-scene-settings-button" type="button" class="quiet">Reset Scene Settings</button>
     </section>
 
-    <details class="control-group" open>
+    <details class="control-group" data-section="json">
       <summary>JSON</summary>
       <div class="details-body">
         <textarea id="json-preview" spellcheck="false"></textarea>
@@ -734,7 +1071,7 @@
       </div>
     </details>
 
-    <section class="control-group">
+    <section class="control-group" data-default-open="true">
       <div class="section-title">Session</div>
       <div class="control-row">
         <button id="save-model-button" type="button">Save</button>
@@ -746,6 +1083,6 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=fit-font-20260517i"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=2d-inspector-20260522a"></script>
 </body>
 </html>

@@ -1,4 +1,39 @@
 /* ---------- General Setup ---------- */
+:root {
+  --hbds-menu-ink: #172033;
+  --hbds-menu-muted: #52616f;
+  --hbds-menu-line: #cbd7e9;
+  --hbds-menu-surface: #fff;
+  --hbds-menu-surface-soft: #f4f8fd;
+  --hbds-menu-accent: #2563eb;
+  --hbds-menu-accent-strong: #1d4ed8;
+  --hbds-menu-on-accent: #fff;
+  --hbds-menu-danger: #b42318;
+  --hbds-menu-ok: #087443;
+  --hbds-menu-warn: #a15c07;
+  --hbds-menu-panel-bg: rgba(248, 251, 255, .94);
+  --hbds-menu-page-bg: #eef4fb;
+  --hbds-menu-summary-bg: #f8fbff;
+  --hbds-menu-summary-open-bg: #f6fbff;
+  --hbds-menu-control-bg: rgba(255, 255, 255, .82);
+  --hbds-menu-collapsed-bg: #edf6ff;
+  --hbds-menu-collapsed-ink: #173b68;
+  --hbds-menu-model-accent: #2563eb;
+  --hbds-menu-model-soft: #eaf2ff;
+  --hbds-menu-mode-accent: #7c3aed;
+  --hbds-menu-mode-soft: #f3ecff;
+  --hbds-menu-layout-accent: #0f766e;
+  --hbds-menu-layout-soft: #e7f7f4;
+  --hbds-menu-builder-accent: #c2410c;
+  --hbds-menu-builder-soft: #fff1e8;
+  --hbds-menu-settings-accent: #15803d;
+  --hbds-menu-settings-soft: #ebf8ef;
+  --hbds-menu-json-accent: #475569;
+  --hbds-menu-json-soft: #f1f5f9;
+  --hbds-menu-session-accent: #be123c;
+  --hbds-menu-session-soft: #fff0f4;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;

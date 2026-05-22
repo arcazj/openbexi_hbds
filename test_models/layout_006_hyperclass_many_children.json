@@ -6,7 +6,50 @@
     "regressionTags": [
       "hyperclass",
       "many-children"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "Grid",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 11.4988,
+        "fitWidthDistance": 7.5156,
+        "distance": 6.7104,
+        "diagramWidth": 7.53,
+        "diagramHeight": 5.8,
+        "diagramDepth": 0.13,
+        "radius": 4.7528,
+        "center": {
+          "x": 0.165,
+          "y": 0,
+          "z": 0.065
+        },
+        "cameraAspect": 1.53,
+        "cameraFov": 52
+      }
+    }
   },
   "hypergraph": {
     "class": [
@@ -397,19 +440,20 @@
         "name": "assigned to",
         "rendering": {
           "labelText": "assigned to",
+          "orthogonalStyle": "auto",
           "lineColor": "#7c4a03",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.62,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12,
           "routeSide": "top"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_driver_trip",
@@ -418,19 +462,20 @@
         "name": "hands off",
         "rendering": {
           "labelText": "hands off",
+          "orthogonalStyle": "auto",
           "lineColor": "#155e75",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.62,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12,
           "routeSide": "top"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_trip_route",
@@ -439,19 +484,20 @@
         "name": "stages",
         "rendering": {
           "labelText": "stages",
+          "orthogonalStyle": "auto",
           "lineColor": "#087443",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.62,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12,
           "routeSide": "bottom"
-        }
+        },
+        "allowSelfLink": true
       }
     ]
   }

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=fit-font-20260517i';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=fit-font-20260517i';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=2d-inspector-20260522a';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=2d-inspector-20260522a';
 import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=fit-font-20260517i';
 import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=fit-font-20260517i';
 
@@ -15,7 +15,7 @@ export const DEFAULT_SCENE_SETTINGS = {
 };
 
 export const DEFAULT_LAYOUT_SETTINGS = {
-  algorithm: 'none'
+  algorithm: 'grid'
 };
 const DEFAULT_FIT_PADDING = 1.15;
 
@@ -41,7 +41,12 @@ const nextId=(p)=>`${p}_${Math.random().toString(36).slice(2,8)}`;
 export const getData=()=>data;
 export function normalizeData(inputData){
   const m=clone(inputData||{}); m.hypergraph=m.hypergraph||{};
-  m.metadata=normalizeModelMetadata({ ...(m.hypergraph.metadata||{}), ...(m.metadata||{}) });
+  m.metadata=normalizeModelMetadata({
+    ...(m.layout!==undefined?{layout:m.layout}:{}),
+    ...(m.sceneSettings!==undefined?{sceneSettings:m.sceneSettings}:{}),
+    ...(m.hypergraph.metadata||{}),
+    ...(m.metadata||{})
+  });
   const legacyRelationships=Array.isArray(m.hypergraph.relationships)
     ? m.hypergraph.relationships
     : (Array.isArray(m.hypergraph.relationship)?m.hypergraph.relationship:[]);
@@ -220,7 +225,7 @@ function applyDataMetadataToContext(context){
 export function validateData(currentData=data){const e=[],w=[]; const hg=currentData?.hypergraph; if(!Array.isArray(hg?.class)) e.push('missing hypergraph.class'); if(!Array.isArray(hg?.link)) e.push('missing hypergraph.link'); const ids=new Set(); const byId=new Map(); for(const c of hg?.class||[]){if(ids.has(c.id)) e.push(`duplicate class id ${c.id}`); ids.add(c.id); byId.set(c.id,c); if(!Array.isArray(c.attributes)) e.push(`invalid attributes for ${c.id}`);} const lids=new Set(); for(const l of hg?.link||[]){ if(l.id&&lids.has(l.id)) e.push(`duplicate link id ${l.id}`); if(l.id) lids.add(l.id); if(!byId.has(l.sourceClassId)) e.push(`missing link source ${l.sourceClassId}`); if(!byId.has(l.targetClassId)) e.push(`missing link target ${l.targetClassId}`);} return {valid:e.length===0,errors:e,warnings:w};}
 export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; clearLinkRegistry(); if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
   if(dragControls){dragControls.dispose(); setDragControls?.(null);} const dg=new THREE.Group(); scene?.add(dg); setDiagramGroup?.(dg); modelRuntime.diagramGroup=dg; modelRuntime.classById.clear(); modelRuntime.linkGroups=[];
-  for(const cd of data.hypergraph.class){ const r=cd.type==='hyperclass'?createHyperClass(null,cd):createClassMesh(cd); const m=r.classMesh; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true}; dg.add(m); modelRuntime.classById.set(cd.id,m);} 
+  for(const cd of data.hypergraph.class){ const r=cd.type==='hyperclass'?createHyperClass(null,cd):createClassMesh(cd); const m=r.classMesh; m.visible=cd.visible!==false&&cd.rendering?.visible!==false; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true,isLocked:cd.locked===true}; dg.add(m); modelRuntime.classById.set(cd.id,m);}
   for(const cd of data.hypergraph.class){
     const node=modelRuntime.classById.get(cd.id);
     if(!node) continue;
@@ -237,8 +242,8 @@ export function refreshSceneFromData(context){ if(!context) return; const {scene
     }
     node.position.set(p.x||0,p.y||0,p.z||0);
   }
-  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,ld):createLinkBetweenClass(ld,modelRuntime.classById); if(!r) continue; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(ld),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);} 
-  draggableObjects.length=0; for(const cd of data.hypergraph.class){ const o=modelRuntime.classById.get(cd.id); if(o) draggableObjects.push(o); }
+  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,ld):createLinkBetweenClass(ld,modelRuntime.classById); if(!r) continue; r.linkGroup.visible=ld.visible!==false&&ld.rendering?.visible!==false; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(ld),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);}
+  draggableObjects.length=0; for(const cd of data.hypergraph.class){ const o=modelRuntime.classById.get(cd.id); if(o&&o.visible!==false&&!o.userData?.isLocked) draggableObjects.push(o); }
   modelRuntime.draggableObjects=draggableObjects;
   context.setupDragControls?.(); recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
 export function updateLayoutFromData(context){ recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
@@ -293,7 +298,9 @@ export function applyFitMetadataToContext(context, options = {}) {
   const fit = normalizeFitSettings(options.fit ?? getLayoutSettings().fit);
   if (!hasUsableFitSettings(fit)) return false;
   const center = new THREE.Vector3(fit.center.x, fit.center.y, fit.center.z);
-  const storedDistance = Math.max(fit.distance, fit.fitHeightDistance, fit.fitWidthDistance, 1);
+  const storedDistance = fit.distance > 0
+    ? fit.distance
+    : (fit.fitHeightDistance > 0 ? fit.fitHeightDistance : (fit.fitWidthDistance > 0 ? fit.fitWidthDistance : 1));
   if (Number.isFinite(fit.cameraFov) && fit.cameraFov > 1 && options.applyFov !== false) {
     context.camera.fov = fit.cameraFov;
   }
@@ -749,6 +756,7 @@ export async function loadAndRenderScene(modelName, context, options={}){
   if(options.autoApplyLayout!==false && layoutAlgorithm!=='none' && modelNeedsLayoutPlacement(loaded)){
     await optimizeAndRefreshLayout(context,{ algorithm:layoutAlgorithm });
   }
+  applyFitMetadataToContext(context,{ updateOverview:true, preserveMetadata:true });
   return getData();
 }
 

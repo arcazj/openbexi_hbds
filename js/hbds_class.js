@@ -2,27 +2,9 @@
 import * as THREE from 'three';
 import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
-const ICON_EXTENSIONS = ['png', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
-const DEFAULT_EMPTY_ICON_PATH = './icons/empty.PNG';
-const iconExistenceCache = new Map();
-
-async function iconPathExists(path) {
-    if (!path) return false;
-    if (iconExistenceCache.has(path)) return iconExistenceCache.get(path);
-
-    const existsPromise = fetch(path, {method: 'HEAD'})
-        .then(response => response.ok)
-        .catch(() => false);
-    iconExistenceCache.set(path, existsPromise);
-    return existsPromise;
-}
-
-async function resolveIconPath(candidates) {
-    for (const candidate of candidates) {
-        if (await iconPathExists(candidate)) return candidate;
-    }
-    return null;
-}
+const DEFAULT_EMPTY_ICON_PATH = './icons/empty.png';
+const ICON_MANIFEST_PATH = './icons/generated_icons_manifest.json';
+let iconManifestLookupPromise = null;
 
 /* ─────────────────────────────── Loader ──────────────────────────────── */
 export const Loader = {
@@ -135,6 +117,16 @@ export function createClass(classData) {
     classMesh.userData.classId = classData.id;
     classMesh.userData.classType = 'class';
     classMesh.userData.isHyperClass = false;
+    const border = new THREE.LineSegments(
+        new THREE.EdgesGeometry(extrudeGeom),
+        new THREE.LineBasicMaterial({
+            color: cfg.class.borderColor ?? '#000080',
+            linewidth: cfg.class.borderWidth ?? 1
+        })
+    );
+    border.name = 'class-border';
+    border.raycast = () => {};
+    classMesh.add(border);
 
     const titleObj = createIconTitleLabel(classData, {
         className: 'label class-label',
@@ -295,7 +287,6 @@ export function createIconTitleLabel(classData, options = {}) {
 }
 
 function installOptionalIcon(label, labelObj, classData, options) {
-    const candidates = getIconCandidatePaths(classData);
     const name = classData?.name ?? '';
     const estimatedTitleWidth = Math.max(130, String(name).length * 14 + (options.iconSize ? options.iconSize * 20 : 38));
 
@@ -363,13 +354,10 @@ function installOptionalIcon(label, labelObj, classData, options) {
     img.onerror = () => {
         if (img.dataset.fallbackAttempted === 'true') return;
         img.dataset.fallbackAttempted = 'true';
-        iconPathExists(DEFAULT_EMPTY_ICON_PATH).then((exists) => {
-            if (exists && img.src !== DEFAULT_EMPTY_ICON_PATH) img.src = DEFAULT_EMPTY_ICON_PATH;
-        });
+        if (!isSameIconPath(img.src, DEFAULT_EMPTY_ICON_PATH)) img.src = DEFAULT_EMPTY_ICON_PATH;
     };
-    resolveIconPath(candidates).then((resolvedPath) => {
-        if (!resolvedPath) return;
-        img.src = resolvedPath;
+    resolveIconPathForClass(classData).then((resolvedPath) => {
+        img.src = resolvedPath ?? DEFAULT_EMPTY_ICON_PATH;
     });
 }
 
@@ -415,23 +403,137 @@ function isPngIcon(src) {
     }
 }
 
-function getIconCandidatePaths(classData) {
-    const explicit = classData?.icon ?? classData?.iconPath ?? classData?.rendering?.icon ?? classData?.rendering?.iconPath ?? classData?.rendering?.class?.icon ?? classData?.rendering?.class?.iconPath;
-    const names = [];
-    if (explicit) names.push(String(explicit));
-    if (classData?.name) names.push(...getIconNameVariants(String(classData.name)));
-
-    const seen = new Set();
-    const paths = [];
-    for (const name of names) {
-        for (const path of expandIconPath(name)) {
-            if (seen.has(path)) continue;
-            seen.add(path);
-            paths.push(path);
-        }
+function isSameIconPath(src, path) {
+    try {
+        return new URL(src, window.location.href).href === new URL(path, window.location.href).href;
+    } catch {
+        return String(src || '') === String(path || '');
     }
-    if (!seen.has(DEFAULT_EMPTY_ICON_PATH)) paths.push(DEFAULT_EMPTY_ICON_PATH);
-    return paths;
+}
+
+async function resolveIconPathForClass(classData) {
+    const explicit = getExplicitIconPath(classData);
+    const manifestLookup = await getIconManifestLookup();
+
+    if (explicit) {
+        const manifestPath = getManifestIconPath(manifestLookup, explicit);
+        if (manifestPath) return manifestPath;
+
+        const directPath = getDirectExplicitIconPath(explicit);
+        if (directPath) return directPath;
+    }
+
+    if (classData?.name) {
+        const manifestPath = getManifestIconPath(manifestLookup, String(classData.name));
+        if (manifestPath) return manifestPath;
+    }
+
+    return DEFAULT_EMPTY_ICON_PATH;
+}
+
+function getExplicitIconPath(classData) {
+    return classData?.icon
+        ?? classData?.iconPath
+        ?? classData?.rendering?.icon
+        ?? classData?.rendering?.iconPath
+        ?? classData?.rendering?.class?.icon
+        ?? classData?.rendering?.class?.iconPath
+        ?? null;
+}
+
+function getIconManifestLookup() {
+    if (!iconManifestLookupPromise) {
+        iconManifestLookupPromise = fetch(ICON_MANIFEST_PATH)
+            .then(response => response.ok ? response.json() : null)
+            .then(buildIconManifestLookup)
+            .catch(() => new Map());
+    }
+    return iconManifestLookupPromise;
+}
+
+function buildIconManifestLookup(manifest) {
+    const lookup = new Map();
+    const icons = Array.isArray(manifest?.icons) ? manifest.icons : [];
+
+    icons.forEach((entry) => {
+        const iconPath = getIconPathFromManifestEntry(entry);
+        if (!iconPath) return;
+        addIconLookupAlias(lookup, entry.name, iconPath);
+        addIconLookupAlias(lookup, entry.icon, iconPath);
+    });
+
+    return lookup;
+}
+
+function getIconPathFromManifestEntry(entry) {
+    const icon = String(entry?.icon ?? '').trim();
+    if (!icon) return null;
+    if (isPathLike(icon)) return icon;
+    return `./icons/${encodeURIComponent(icon)}`;
+}
+
+function addIconLookupAlias(lookup, value, iconPath) {
+    for (const key of getIconLookupKeys(value)) {
+        if (!lookup.has(key)) lookup.set(key, iconPath);
+    }
+}
+
+function getManifestIconPath(lookup, value) {
+    for (const key of getIconLookupKeys(value)) {
+        const iconPath = lookup?.get(key);
+        if (iconPath) return iconPath;
+    }
+    return null;
+}
+
+function getIconLookupKeys(value) {
+    const clean = String(value ?? '').trim();
+    if (!clean) return [];
+
+    const decoded = safeDecodeURIComponent(clean);
+    const leaf = decoded.split(/[?#]/)[0].split(/[\\/]/).pop() ?? decoded;
+    const leafWithoutExtension = leaf.replace(/\.[a-z0-9]+$/i, '');
+    const aliases = [
+        clean,
+        decoded,
+        leaf,
+        leafWithoutExtension,
+        ...getIconNameVariants(decoded),
+        ...getIconNameVariants(leaf),
+        ...getIconNameVariants(leafWithoutExtension)
+    ];
+
+    const keys = new Set();
+    aliases.forEach((alias) => {
+        const key = getIconLookupKey(alias);
+        if (key) keys.add(key);
+    });
+    return [...keys];
+}
+
+function getIconLookupKey(value) {
+    const clean = String(value ?? '').trim();
+    if (!clean) return '';
+    const decoded = safeDecodeURIComponent(clean);
+    const leaf = decoded.split(/[?#]/)[0].split(/[\\/]/).pop() ?? decoded;
+    return getSafeIconFilename(leaf.replace(/\.[a-z0-9]+$/i, ''));
+}
+
+function safeDecodeURIComponent(value) {
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return value;
+    }
+}
+
+function getDirectExplicitIconPath(value) {
+    const clean = String(value ?? '').trim();
+    if (!clean) return null;
+    const hasExtension = /\.[a-z0-9]+(?:[?#].*)?$/i.test(clean);
+    if (isPathLike(clean)) return clean;
+    if (hasExtension) return `./icons/${encodeURIComponent(clean)}`;
+    return null;
 }
 
 function getIconNameVariants(name) {
@@ -463,15 +565,6 @@ function getSafeIconFilename(name) {
         .replace(/[^a-z0-9]+/gi, '_')
         .replace(/^_+|_+$/g, '')
         .toLowerCase();
-}
-
-function expandIconPath(value) {
-    const clean = String(value || '').trim();
-    if (!clean) return [];
-    const hasExtension = /\.[a-z0-9]+$/i.test(clean);
-    if (isPathLike(clean)) return hasExtension ? [clean] : ICON_EXTENSIONS.map(ext => `${clean}.${ext}`);
-    if (hasExtension) return [`./icons/${encodeURIComponent(clean)}`];
-    return ICON_EXTENSIONS.map(ext => `./icons/${encodeURIComponent(clean)}.${ext}`);
 }
 
 function isPathLike(value) {

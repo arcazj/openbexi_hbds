@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { attachAttributesToMesh, createIconTitleLabel } from './hbds_class.js?v=fit-font-20260517i';
+import { attachAttributesToMesh, createIconTitleLabel } from './hbds_class.js?v=icon-manifest-20260521a';
 
 const hyperclassLabels = [];
 let lastSizingCamera = null;
@@ -48,8 +48,13 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
 
   const border = new THREE.LineSegments(
     new THREE.EdgesGeometry(geom),
-    new THREE.LineBasicMaterial({ color: classCfg.borderColor ?? '#111111' })
+    new THREE.LineBasicMaterial({
+      color: classCfg.borderColor ?? '#111111',
+      linewidth: classCfg.borderWidth ?? 1
+    })
   );
+  border.name = 'hyperclass-border';
+  border.raycast = () => {};
   hyperMesh.add(border);
 
   const title = createIconTitleLabel(hyperClassData, {
