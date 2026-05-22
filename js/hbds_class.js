@@ -31,6 +31,8 @@ export const Loader = {
                         },
                         attributes: {
                             checkboxColor: '#A9A9A9',
+                            checkboxMaterial: 'metallic',
+                            shape: 'square',
                             size: {width: 0.1, height: 0.1}
                         },
                         connections: {
@@ -68,7 +70,14 @@ export function createClass(classData) {
         size: {width: 1, height: 2},
         rendering: {
             class: {color: '#FFD700', cornerRadius: 0.1},
-            attributes: {checkboxColor: '#A9A9A9', size: {width: 0.1, height: 0.1}},
+            attributes: {
+                checkboxColor: '#A9A9A9',
+                checkboxMaterial: 'metallic',
+                shape: 'square',
+                metalness: 0.2,
+                roughness: 0.5,
+                size: {width: 0.1, height: 0.1}
+            },
             connections: {lineColor: '#000000', lineWidth: 0.01},
             textColor: '#000000'
         }
@@ -189,7 +198,7 @@ export function createClass(classData) {
 
 export function attachAttributesToMesh(classMesh, attributes, options = {}) {
     const size = options.size ?? {width: 1, height: 2};
-    const attrCfg = options.attributes ?? {checkboxColor: "#A9A9A9", size: {width: 0.1, height: 0.1}};
+    const attrCfg = normalizeAttributeRenderingConfig(options.attributes);
     const connCfg = options.connections ?? {lineColor: "#000000", lineWidth: 0.01};
     const textColor = options.textColor ?? "#000000";
 
@@ -205,23 +214,22 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
         const attrName = getAttributeDisplayName(attribute, idx);
         const y = startY - idx * gapY;
 
-        // checkbox cube
-        const cube = new THREE.Mesh(
-            new THREE.BoxGeometry(cbW, cbH, cbW),
-            new THREE.MeshStandardMaterial({
-                color: attrCfg.checkboxColor,
-                metalness: attrCfg.metalness ?? 0.2,
-                roughness: attrCfg.roughness ?? 0.5
-            })
+        const marker = new THREE.Mesh(
+            createAttributeMarkerGeometry(attrCfg),
+            createAttributeMarkerMaterial(attrCfg)
         );
-        cube.position.set(colX, y, z);
-        cube.raycast = () => {
+        marker.name = 'attribute-marker';
+        marker.userData.attributeName = attrName;
+        marker.userData.attributeIndex = idx;
+        marker.userData.attributeShape = attrCfg.shape;
+        marker.position.set(colX, y, z);
+        marker.raycast = () => {
         };
-        classMesh.add(cube);
+        classMesh.add(marker);
 
         // connecting line
         const line = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints([hubPos, cube.position.clone()]),
+            new THREE.BufferGeometry().setFromPoints([hubPos, marker.position.clone()]),
             new THREE.LineBasicMaterial({
                 color: connCfg.lineColor,
                 linewidth: connCfg.lineWidth
@@ -359,6 +367,93 @@ function installOptionalIcon(label, labelObj, classData, options) {
     resolveIconPathForClass(classData).then((resolvedPath) => {
         img.src = resolvedPath ?? DEFAULT_EMPTY_ICON_PATH;
     });
+}
+
+function normalizeAttributeRenderingConfig(config = {}) {
+    const source = config && typeof config === 'object' ? config : {};
+    const size = source.size && typeof source.size === 'object' ? source.size : {};
+    const width = toPositiveNumber(size.width, 0.1);
+    const height = toPositiveNumber(size.height ?? size.width, width);
+    return {
+        ...source,
+        checkboxColor: source.checkboxColor ?? '#A9A9A9',
+        checkboxMaterial: source.checkboxMaterial ?? source.material ?? 'metallic',
+        shape: source.shape ?? 'square',
+        metalness: toFiniteNumber(source.metalness, 0.2),
+        roughness: toFiniteNumber(source.roughness, 0.5),
+        opacity: toFiniteNumber(source.opacity, 1),
+        size: {width, height}
+    };
+}
+
+function createAttributeMarkerGeometry(attrCfg) {
+    const width = attrCfg.size.width;
+    const height = attrCfg.size.height ?? width;
+    const shape = String(attrCfg.shape || 'square').toLowerCase();
+
+    if (shape === 'circle' || shape === 'ellipse') {
+        const geometry = new THREE.CircleGeometry(0.5, 32);
+        geometry.scale(width, height, 1);
+        return geometry;
+    }
+
+    if (shape === 'diamond') {
+        return createAttributeShapeGeometry([
+            [0, height / 2],
+            [width / 2, 0],
+            [0, -height / 2],
+            [-width / 2, 0]
+        ]);
+    }
+
+    if (shape === 'triangle') {
+        return createAttributeShapeGeometry([
+            [0, height / 2],
+            [width / 2, -height / 2],
+            [-width / 2, -height / 2]
+        ]);
+    }
+
+    return new THREE.BoxGeometry(width, height, width);
+}
+
+function createAttributeShapeGeometry(points) {
+    const shape = new THREE.Shape();
+    points.forEach(([x, y], index) => {
+        if (index === 0) shape.moveTo(x, y);
+        else shape.lineTo(x, y);
+    });
+    shape.closePath();
+    return new THREE.ShapeGeometry(shape);
+}
+
+function createAttributeMarkerMaterial(attrCfg) {
+    const transparent = attrCfg.opacity < 1;
+    const base = {
+        color: attrCfg.checkboxColor,
+        side: THREE.DoubleSide,
+        transparent,
+        opacity: attrCfg.opacity
+    };
+    const material = String(attrCfg.checkboxMaterial || 'metallic').toLowerCase();
+    if (material === 'flat' || material === 'basic') {
+        return new THREE.MeshBasicMaterial(base);
+    }
+    return new THREE.MeshStandardMaterial({
+        ...base,
+        metalness: attrCfg.metalness,
+        roughness: attrCfg.roughness
+    });
+}
+
+function toFiniteNumber(value, fallback) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : fallback;
+}
+
+function toPositiveNumber(value, fallback) {
+    const number = toFiniteNumber(value, fallback);
+    return number > 0 ? number : fallback;
 }
 
 function getTransparentPngSource(image) {

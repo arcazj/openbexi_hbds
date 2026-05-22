@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { attachAttributesToMesh, createIconTitleLabel } from './hbds_class.js?v=icon-manifest-20260521a';
+import { attachAttributesToMesh, createIconTitleLabel } from './hbds_class.js?v=attribute-rendering-20260522a';
 
 const hyperclassLabels = [];
 let lastSizingCamera = null;
@@ -19,6 +19,7 @@ export const Loader = {
 export function createHyperClass(scene, hyperClassData, options = {}) {
   const sz = hyperClassData.size ?? { width: 4, height: 4 };
   const classCfg = hyperClassData.rendering?.class ?? {};
+  const attrRendering = hyperClassData.rendering?.attributes ?? {};
   const textColor = hyperClassData.rendering?.textColor ?? '#000000';
 
   const shape = roundedRect(sz.width, sz.height, classCfg.cornerRadius ?? 0.3);
@@ -110,10 +111,13 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
   attachAttributesToMesh(hyperMesh, hyperClassData.attributes ?? [], {
     size: sz,
     attributes: {
-      checkboxColor: hyperClassData.rendering?.attributes?.checkboxColor ?? '#A9A9A9',
+      ...attrRendering,
+      checkboxColor: attrRendering.checkboxColor ?? '#A9A9A9',
+      checkboxMaterial: attrRendering.checkboxMaterial ?? attrRendering.material ?? 'metallic',
+      shape: attrRendering.shape ?? 'square',
       size: {
-        width: hyperClassData.rendering?.attributes?.size?.width ?? 0.1,
-        height: hyperClassData.rendering?.attributes?.size?.height ?? hyperClassData.rendering?.attributes?.size?.width ?? 0.1
+        width: attrRendering.size?.width ?? 0.1,
+        height: attrRendering.size?.height ?? attrRendering.size?.width ?? 0.1
       }
     },
     connections: {

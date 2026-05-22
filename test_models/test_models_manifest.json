@@ -193,6 +193,16 @@
       ]
     },
     {
+      "value": "test_models/links_027_full_rendering_properties.json",
+      "label": "Links 027 Full Rendering Properties",
+      "description": "Complete link rendering property surface for the 2D inspector.",
+      "tags": [
+        "links",
+        "rendering",
+        "inspector"
+      ]
+    },
+    {
       "value": "test_models/render_019_metallic_palette.json",
       "label": "Render 019 Metallic Palette",
       "description": "Metallic palette across class and hyperclass panels.",

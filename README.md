@@ -2,9 +2,12 @@
 
 An interactive browser-based simulator for **Hypergraph-Based Data Structures (HBDS)**. The app renders HBDS models as editable 2D diagrams and optional 3D scenes using Three.js.
 
-[Live Demo](https://arcazj.github.io/openbexi_hbds/index.html)
+[Live Demo to go throught diferrent model](https://arcazj.github.io/openbexi_hbds/index.html)
 
 ![HBDS Bridge and road model](pictures/HBDS_Model.JPG)
+
+[Live Demo to build a new HDBS model](https://arcazj.github.io/openbexi_hbds/test_dynamic_hbds_layout.html)
+![HDBS builder Lab](pictures/HBDS_LAB.PNG)
 
 ## Features
 

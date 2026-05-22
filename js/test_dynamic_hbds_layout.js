@@ -32,8 +32,8 @@ import {
   normalizeSceneSettings,
   getLayoutSettings,
   setLayoutSettings
-} from './hbds_model.js?v=2d-inspector-20260522a';
-import { recalculateAllLinks } from './hbds_class_link.js?v=fit-font-20260517i';
+} from './hbds_model.js?v=attribute-rendering-20260522a';
+import { recalculateAllLinks } from './hbds_class_link.js?v=link-rendering-20260522a';
 
 let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
 const draggableObjects = [];
@@ -46,6 +46,7 @@ let selectedLinkTargetId = null;
 let selectedAttributeKey = null;
 let selectedLinkId = null;
 const selectedElementIds = new Set();
+let canvasTitleOverride = null;
 let multiSelectionMode = false;
 let editMode = 'full';
 let linkPickActive = false;
@@ -100,7 +101,18 @@ const STRUCTURAL_PROPERTY_KEYS = new Set([
 ]);
 const KNOWN_ENUMS = {
   orthogonalStyle: ['auto', 'horizontal', 'vertical'],
-  lineStyle: ['solid', 'dashed', 'dotted']
+  lineStyle: ['solid', 'dashed', 'dotted'],
+  routeSide: ['top', 'right', 'bottom', 'left'],
+  sourcePortSide: ['top', 'right', 'bottom', 'left'],
+  targetPortSide: ['top', 'right', 'bottom', 'left'],
+  sourcePort: ['top', 'right', 'bottom', 'left'],
+  targetPort: ['top', 'right', 'bottom', 'left'],
+  labelRotationBehavior: ['fixed', 'follow'],
+  labelPlacement: ['best-segment', 'path'],
+  labelStrategy: ['best-segment', 'path'],
+  arrowheadType: ['triangle', 'cone', 'diamond', 'none'],
+  checkboxMaterial: ['metallic', 'flat'],
+  shape: ['square', 'circle', 'diamond', 'triangle']
 };
 const DEFAULT_OPEN_CONTROL_SECTIONS = new Set(['model', 'session']);
 const INSPECTOR_HISTORY_LIMIT = 40;
@@ -115,6 +127,13 @@ const CLASS_2D_DEFAULTS = {
   cornerRadius: 0.1,
   opacity: 1,
   textColor: '#111827',
+  attributeCheckboxColor: '#A9A9A9',
+  attributeCheckboxMaterial: 'metallic',
+  attributeShape: 'square',
+  attributeWidth: 0.1,
+  attributeHeight: 0.1,
+  attributeMetalness: 0.2,
+  attributeRoughness: 0.5,
   lineColor: '#334155',
   lineWidth: 0.01,
   visible: true,
@@ -123,8 +142,47 @@ const CLASS_2D_DEFAULTS = {
 const LINK_2D_DEFAULTS = {
   labelText: '',
   lineColor: '#334155',
-  lineWidth: 0.01,
+  lineWidth: 2,
+  lineStyle: 'solid',
+  zIndex: 5,
+  renderingVisible: true,
+  arrowheadVisibility: true,
+  arrowheadType: 'triangle',
+  arrowheadSize: 0.1,
+  arrowheadScale: 0.6,
+  maxArrowheadSize: 0.12,
+  labelFontSize: 12,
   labelColor: '#111111',
+  textColor: '#111111',
+  labelBackgroundColor: 'rgba(255,255,255,0.9)',
+  labelPositionAlongPath: 0.5,
+  labelOffsetFromPath: 0.1,
+  labelRotationBehavior: 'fixed',
+  labelPlacement: 'best-segment',
+  labelStrategy: 'best-segment',
+  labelCollisionWidth: 0.85,
+  labelCollisionHeight: 0.42,
+  labelCollisionMargin: 0.06,
+  orthogonalStyle: 'auto',
+  orthogonalClearance: 0.55,
+  parallelRouteGap: 0.28,
+  globalRouteGap: 0.28,
+  obstacleRouteGap: 0.28,
+  routeSide: '',
+  curveOffset: 0,
+  curveRadius: 0.16,
+  cornerRadius: 0.16,
+  relationshipCornerRadius: 0.16,
+  routePoints: [],
+  sourcePortSide: '',
+  targetPortSide: '',
+  sourcePort: '',
+  targetPort: '',
+  relationshipPortRadius: 0.065,
+  relationshipPortStub: 0.24,
+  relationshipPortFill: '#ffffff',
+  relationshipPortStroke: '#475569',
+  relationshipPortOpacity: 0.98,
   visible: true
 };
 
@@ -172,7 +230,14 @@ function classRendering(index) {
   const color = CLASS_COLORS[index % CLASS_COLORS.length];
   return {
     class: { color: color.fill, borderColor: color.border, cornerRadius: 0.1 },
-    attributes: { checkboxColor: color.border, size: { width: 0.1, height: 0.1 } },
+    attributes: {
+      checkboxColor: color.border,
+      checkboxMaterial: CLASS_2D_DEFAULTS.attributeCheckboxMaterial,
+      shape: CLASS_2D_DEFAULTS.attributeShape,
+      metalness: CLASS_2D_DEFAULTS.attributeMetalness,
+      roughness: CLASS_2D_DEFAULTS.attributeRoughness,
+      size: { width: CLASS_2D_DEFAULTS.attributeWidth, height: CLASS_2D_DEFAULTS.attributeHeight }
+    },
     connections: { lineColor: color.border, lineWidth: 0.01 },
     textColor: '#111827'
   };
@@ -182,7 +247,14 @@ function hyperclassRendering(index) {
   const color = HYPER_COLORS[index % HYPER_COLORS.length];
   return {
     class: { color: color.fill, borderColor: color.border, opacity: 0.2, cornerRadius: 0.22 },
-    attributes: { checkboxColor: color.border, size: { width: 0.1, height: 0.1 } },
+    attributes: {
+      checkboxColor: color.border,
+      checkboxMaterial: CLASS_2D_DEFAULTS.attributeCheckboxMaterial,
+      shape: CLASS_2D_DEFAULTS.attributeShape,
+      metalness: CLASS_2D_DEFAULTS.attributeMetalness,
+      roughness: CLASS_2D_DEFAULTS.attributeRoughness,
+      size: { width: CLASS_2D_DEFAULTS.attributeWidth, height: CLASS_2D_DEFAULTS.attributeHeight }
+    },
     connections: { lineColor: color.border, lineWidth: 0.01 },
     textColor: '#111827'
   };
@@ -367,6 +439,20 @@ function compactControlSections() {
   });
 }
 
+function revealModelBuilderProperties(options = {}) {
+  const builder = document.querySelector('.control-group[data-section="model-builder"]');
+  if (builder?.tagName?.toLowerCase() === 'details') builder.open = true;
+  if (options.scroll === false) return;
+
+  requestAnimationFrame(() => {
+    const target = $('property-panel') || builder;
+    target?.scrollIntoView?.({
+      block: 'nearest',
+      behavior: options.instant ? 'auto' : 'smooth'
+    });
+  });
+}
+
 function getSectionTitleText(title) {
   const text = [...title.childNodes]
     .filter(node => node.nodeType === Node.TEXT_NODE)
@@ -417,12 +503,17 @@ function updateStats() {
   $('stat-link-count').textContent = String(links().length);
   $('stat-attribute-count').textContent = String(countAttributes());
   $('stat-hyperclass-count').textContent = String(nodes().filter(node => node.type === 'hyperclass').length);
-  document.body.classList.toggle('has-model', nodeCount > 0);
+  document.body.classList.toggle('has-model', nodeCount > 0 || Boolean(canvasTitleOverride));
 }
 
 function updateCanvasTitle() {
   const title = $('canvas-model-title');
   if (!title) return;
+  if (canvasTitleOverride) {
+    title.textContent = canvasTitleOverride;
+    document.body.classList.add('has-model');
+    return;
+  }
   const selectedOption = $('test-model-select')?.selectedOptions?.[0];
   const selectedText = selectedOption?.textContent?.trim();
   if (nodes().length <= 0) {
@@ -430,6 +521,11 @@ function updateCanvasTitle() {
     return;
   }
   title.textContent = selectedText && selectedText !== 'Blank workspace' ? selectedText : 'Untitled Model';
+}
+
+function setCanvasTitleOverride(text) {
+  canvasTitleOverride = text ? String(text) : null;
+  updateCanvasTitle();
 }
 
 function getCurrentStats() {
@@ -902,6 +998,7 @@ function renderClass2DInspector(panel, target) {
     height: isHyperclass ? CLASS_2D_DEFAULTS.hyperHeight : CLASS_2D_DEFAULTS.height
   };
   const renderingClass = node.rendering?.class || {};
+  const attributesRendering = node.rendering?.attributes || {};
   const connections = node.rendering?.connections || {};
 
   renderInspectorHeader(panel, 'Class Properties', isHyperclass ? 'Hyperclass 2D inspector' : 'Class 2D inspector');
@@ -996,6 +1093,65 @@ function renderClass2DInspector(panel, target) {
   });
   panel.appendChild(text.section);
 
+  const attributesSection = createInspectorSection('Attributes', false);
+  appendColorControl(attributesSection.body, {
+    label: 'Checkbox Color',
+    path: ['rendering', 'attributes', 'checkboxColor'],
+    value: attributesRendering.checkboxColor || CLASS_2D_DEFAULTS.attributeCheckboxColor,
+    defaultValue: CLASS_2D_DEFAULTS.attributeCheckboxColor
+  });
+  appendSelectControl(attributesSection.body, {
+    label: 'Checkbox Material',
+    path: ['rendering', 'attributes', 'checkboxMaterial'],
+    value: attributesRendering.checkboxMaterial || attributesRendering.material || CLASS_2D_DEFAULTS.attributeCheckboxMaterial,
+    options: KNOWN_ENUMS.checkboxMaterial,
+    defaultValue: CLASS_2D_DEFAULTS.attributeCheckboxMaterial
+  });
+  appendSelectControl(attributesSection.body, {
+    label: 'Shape',
+    path: ['rendering', 'attributes', 'shape'],
+    value: attributesRendering.shape || CLASS_2D_DEFAULTS.attributeShape,
+    options: KNOWN_ENUMS.shape,
+    defaultValue: CLASS_2D_DEFAULTS.attributeShape
+  });
+  appendSliderNumberControl(attributesSection.body, {
+    label: 'Width',
+    path: ['rendering', 'attributes', 'size', 'width'],
+    value: attributesRendering.size?.width ?? CLASS_2D_DEFAULTS.attributeWidth,
+    min: 0.02,
+    max: 0.6,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.attributeWidth
+  });
+  appendSliderNumberControl(attributesSection.body, {
+    label: 'Height',
+    path: ['rendering', 'attributes', 'size', 'height'],
+    value: attributesRendering.size?.height ?? attributesRendering.size?.width ?? CLASS_2D_DEFAULTS.attributeHeight,
+    min: 0.02,
+    max: 0.6,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.attributeHeight
+  });
+  appendSliderNumberControl(attributesSection.body, {
+    label: 'Metalness',
+    path: ['rendering', 'attributes', 'metalness'],
+    value: attributesRendering.metalness ?? CLASS_2D_DEFAULTS.attributeMetalness,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.attributeMetalness
+  });
+  appendSliderNumberControl(attributesSection.body, {
+    label: 'Roughness',
+    path: ['rendering', 'attributes', 'roughness'],
+    value: attributesRendering.roughness ?? CLASS_2D_DEFAULTS.attributeRoughness,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.attributeRoughness
+  });
+  panel.appendChild(attributesSection.section);
+
   const connectionsSection = createInspectorSection('Connections', false);
   appendColorControl(connectionsSection.body, {
     label: 'Line Color',
@@ -1019,6 +1175,7 @@ function renderMultiClass2DInspector(panel, target) {
   const selectedNodes = target.nodes || [];
   const first = selectedNodes[0] || {};
   const renderingClass = first.rendering?.class || {};
+  const attributesRendering = first.rendering?.attributes || {};
   const connections = first.rendering?.connections || {};
   renderInspectorHeader(panel, 'Class Properties', `${selectedNodes.length} selected 2D objects`);
 
@@ -1106,6 +1263,65 @@ function renderMultiClass2DInspector(panel, target) {
   });
   panel.appendChild(text.section);
 
+  const attributesSection = createInspectorSection('Attributes', false);
+  appendColorControl(attributesSection.body, {
+    label: 'Checkbox Color',
+    path: ['rendering', 'attributes', 'checkboxColor'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'attributes', 'checkboxColor'], attributesRendering.checkboxColor || CLASS_2D_DEFAULTS.attributeCheckboxColor),
+    defaultValue: CLASS_2D_DEFAULTS.attributeCheckboxColor
+  });
+  appendSelectControl(attributesSection.body, {
+    label: 'Checkbox Material',
+    path: ['rendering', 'attributes', 'checkboxMaterial'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'attributes', 'checkboxMaterial'], attributesRendering.checkboxMaterial || attributesRendering.material || CLASS_2D_DEFAULTS.attributeCheckboxMaterial),
+    options: KNOWN_ENUMS.checkboxMaterial,
+    defaultValue: CLASS_2D_DEFAULTS.attributeCheckboxMaterial
+  });
+  appendSelectControl(attributesSection.body, {
+    label: 'Shape',
+    path: ['rendering', 'attributes', 'shape'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'attributes', 'shape'], attributesRendering.shape || CLASS_2D_DEFAULTS.attributeShape),
+    options: KNOWN_ENUMS.shape,
+    defaultValue: CLASS_2D_DEFAULTS.attributeShape
+  });
+  appendSliderNumberControl(attributesSection.body, {
+    label: 'Width',
+    path: ['rendering', 'attributes', 'size', 'width'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'attributes', 'size', 'width'], attributesRendering.size?.width ?? CLASS_2D_DEFAULTS.attributeWidth),
+    min: 0.02,
+    max: 0.6,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.attributeWidth
+  });
+  appendSliderNumberControl(attributesSection.body, {
+    label: 'Height',
+    path: ['rendering', 'attributes', 'size', 'height'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'attributes', 'size', 'height'], attributesRendering.size?.height ?? attributesRendering.size?.width ?? CLASS_2D_DEFAULTS.attributeHeight),
+    min: 0.02,
+    max: 0.6,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.attributeHeight
+  });
+  appendSliderNumberControl(attributesSection.body, {
+    label: 'Metalness',
+    path: ['rendering', 'attributes', 'metalness'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'attributes', 'metalness'], attributesRendering.metalness ?? CLASS_2D_DEFAULTS.attributeMetalness),
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.attributeMetalness
+  });
+  appendSliderNumberControl(attributesSection.body, {
+    label: 'Roughness',
+    path: ['rendering', 'attributes', 'roughness'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'attributes', 'roughness'], attributesRendering.roughness ?? CLASS_2D_DEFAULTS.attributeRoughness),
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.attributeRoughness
+  });
+  panel.appendChild(attributesSection.section);
+
   const connectionsSection = createInspectorSection('Connections', false);
   appendColorControl(connectionsSection.body, {
     label: 'Line Color',
@@ -1146,42 +1362,372 @@ function renderLink2DInspector(panel, target) {
   const rendering = link.rendering || {};
   renderInspectorHeader(panel, 'Connection Properties', '2D link inspector');
 
-  const content = createInspectorSection('Connection', true);
-  appendTextControl(content.body, {
+  const connection = createInspectorSection('Connection', true);
+  appendTextControl(connection.body, {
     label: 'Label',
     path: ['rendering', 'labelText'],
     value: rendering.labelText || link.name || '',
     placeholder: 'Link label',
     defaultValue: LINK_2D_DEFAULTS.labelText
   });
-  appendColorControl(content.body, {
+  appendColorControl(connection.body, {
     label: 'Line Color',
     path: ['rendering', 'lineColor'],
     value: rendering.lineColor || LINK_2D_DEFAULTS.lineColor,
     defaultValue: LINK_2D_DEFAULTS.lineColor
   });
-  appendSliderNumberControl(content.body, {
+  appendSliderNumberControl(connection.body, {
     label: 'Line Width',
     path: ['rendering', 'lineWidth'],
     value: rendering.lineWidth ?? LINK_2D_DEFAULTS.lineWidth,
-    min: 0.001,
-    max: 0.08,
-    step: 0.001,
+    min: 0.1,
+    max: 8,
+    step: 0.1,
     defaultValue: LINK_2D_DEFAULTS.lineWidth
   });
-  appendColorControl(content.body, {
-    label: 'Text Color',
-    path: ['rendering', 'labelColor'],
-    value: rendering.labelColor || LINK_2D_DEFAULTS.labelColor,
-    defaultValue: LINK_2D_DEFAULTS.labelColor
+  appendSelectControl(connection.body, {
+    label: 'Line Style',
+    path: ['rendering', 'lineStyle'],
+    value: rendering.lineStyle || LINK_2D_DEFAULTS.lineStyle,
+    options: KNOWN_ENUMS.lineStyle,
+    defaultValue: LINK_2D_DEFAULTS.lineStyle
   });
-  appendCheckboxControl(content.body, {
+  appendCheckboxControl(connection.body, {
     label: 'Visible',
     path: ['visible'],
     value: link.visible !== false,
     defaultValue: LINK_2D_DEFAULTS.visible
   });
-  panel.appendChild(content.section);
+  appendCheckboxControl(connection.body, {
+    label: 'Rendering Visible',
+    path: ['rendering', 'visible'],
+    value: rendering.visible !== false,
+    defaultValue: LINK_2D_DEFAULTS.renderingVisible
+  });
+  appendNumberControl(connection.body, {
+    label: 'Z Index',
+    path: ['rendering', 'zIndex'],
+    value: rendering.zIndex ?? LINK_2D_DEFAULTS.zIndex,
+    min: 0,
+    max: 100,
+    step: 1,
+    defaultValue: LINK_2D_DEFAULTS.zIndex
+  });
+  panel.appendChild(connection.section);
+
+  const arrowhead = createInspectorSection('Arrowhead', false);
+  appendCheckboxControl(arrowhead.body, {
+    label: 'Visible',
+    path: ['rendering', 'arrowheadVisibility'],
+    value: rendering.arrowheadVisibility !== false,
+    defaultValue: LINK_2D_DEFAULTS.arrowheadVisibility
+  });
+  appendSelectControl(arrowhead.body, {
+    label: 'Type',
+    path: ['rendering', 'arrowheadType'],
+    value: rendering.arrowheadType || LINK_2D_DEFAULTS.arrowheadType,
+    options: KNOWN_ENUMS.arrowheadType,
+    defaultValue: LINK_2D_DEFAULTS.arrowheadType
+  });
+  appendSliderNumberControl(arrowhead.body, {
+    label: 'Size',
+    path: ['rendering', 'arrowheadSize'],
+    value: rendering.arrowheadSize ?? LINK_2D_DEFAULTS.arrowheadSize,
+    min: 0.02,
+    max: 0.5,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.arrowheadSize
+  });
+  appendSliderNumberControl(arrowhead.body, {
+    label: 'Scale',
+    path: ['rendering', 'arrowheadScale'],
+    value: rendering.arrowheadScale ?? LINK_2D_DEFAULTS.arrowheadScale,
+    min: 0.1,
+    max: 2,
+    step: 0.05,
+    defaultValue: LINK_2D_DEFAULTS.arrowheadScale
+  });
+  appendSliderNumberControl(arrowhead.body, {
+    label: 'Max Size',
+    path: ['rendering', 'maxArrowheadSize'],
+    value: rendering.maxArrowheadSize ?? LINK_2D_DEFAULTS.maxArrowheadSize,
+    min: 0.02,
+    max: 0.5,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.maxArrowheadSize
+  });
+  panel.appendChild(arrowhead.section);
+
+  const label = createInspectorSection('Label', true);
+  appendSliderNumberControl(label.body, {
+    label: 'Font Size',
+    path: ['rendering', 'labelFontSize'],
+    value: rendering.labelFontSize ?? LINK_2D_DEFAULTS.labelFontSize,
+    min: 6,
+    max: 24,
+    step: 1,
+    defaultValue: LINK_2D_DEFAULTS.labelFontSize
+  });
+  appendColorControl(label.body, {
+    label: 'Label Color',
+    path: ['rendering', 'labelColor'],
+    value: rendering.labelColor || rendering.textColor || LINK_2D_DEFAULTS.labelColor,
+    defaultValue: LINK_2D_DEFAULTS.labelColor
+  });
+  appendColorControl(label.body, {
+    label: 'Text Color',
+    path: ['rendering', 'textColor'],
+    value: rendering.textColor || rendering.labelColor || LINK_2D_DEFAULTS.textColor,
+    defaultValue: LINK_2D_DEFAULTS.textColor
+  });
+  appendTextControl(label.body, {
+    label: 'Background',
+    path: ['rendering', 'labelBackgroundColor'],
+    value: rendering.labelBackgroundColor || LINK_2D_DEFAULTS.labelBackgroundColor,
+    placeholder: 'CSS color',
+    defaultValue: LINK_2D_DEFAULTS.labelBackgroundColor
+  });
+  appendSliderNumberControl(label.body, {
+    label: 'Position',
+    path: ['rendering', 'labelPositionAlongPath'],
+    value: rendering.labelPositionAlongPath ?? LINK_2D_DEFAULTS.labelPositionAlongPath,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.labelPositionAlongPath
+  });
+  appendSliderNumberControl(label.body, {
+    label: 'Offset',
+    path: ['rendering', 'labelOffsetFromPath'],
+    value: rendering.labelOffsetFromPath ?? LINK_2D_DEFAULTS.labelOffsetFromPath,
+    min: -1,
+    max: 1,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.labelOffsetFromPath
+  });
+  appendSelectControl(label.body, {
+    label: 'Rotation',
+    path: ['rendering', 'labelRotationBehavior'],
+    value: rendering.labelRotationBehavior || LINK_2D_DEFAULTS.labelRotationBehavior,
+    options: KNOWN_ENUMS.labelRotationBehavior,
+    defaultValue: LINK_2D_DEFAULTS.labelRotationBehavior
+  });
+  appendSelectControl(label.body, {
+    label: 'Placement',
+    path: ['rendering', 'labelPlacement'],
+    value: rendering.labelPlacement || LINK_2D_DEFAULTS.labelPlacement,
+    options: KNOWN_ENUMS.labelPlacement,
+    defaultValue: LINK_2D_DEFAULTS.labelPlacement
+  });
+  appendSelectControl(label.body, {
+    label: 'Strategy',
+    path: ['rendering', 'labelStrategy'],
+    value: rendering.labelStrategy || LINK_2D_DEFAULTS.labelStrategy,
+    options: KNOWN_ENUMS.labelStrategy,
+    defaultValue: LINK_2D_DEFAULTS.labelStrategy
+  });
+  panel.appendChild(label.section);
+
+  const routing = createInspectorSection('Routing', false);
+  appendSelectControl(routing.body, {
+    label: 'Orthogonal Style',
+    path: ['rendering', 'orthogonalStyle'],
+    value: rendering.orthogonalStyle || LINK_2D_DEFAULTS.orthogonalStyle,
+    options: KNOWN_ENUMS.orthogonalStyle,
+    defaultValue: LINK_2D_DEFAULTS.orthogonalStyle
+  });
+  appendSliderNumberControl(routing.body, {
+    label: 'Clearance',
+    path: ['rendering', 'orthogonalClearance'],
+    value: rendering.orthogonalClearance ?? LINK_2D_DEFAULTS.orthogonalClearance,
+    min: 0,
+    max: 2.5,
+    step: 0.05,
+    defaultValue: LINK_2D_DEFAULTS.orthogonalClearance
+  });
+  appendSliderNumberControl(routing.body, {
+    label: 'Parallel Gap',
+    path: ['rendering', 'parallelRouteGap'],
+    value: rendering.parallelRouteGap ?? LINK_2D_DEFAULTS.parallelRouteGap,
+    min: 0.05,
+    max: 1.5,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.parallelRouteGap
+  });
+  appendSliderNumberControl(routing.body, {
+    label: 'Global Gap',
+    path: ['rendering', 'globalRouteGap'],
+    value: rendering.globalRouteGap ?? LINK_2D_DEFAULTS.globalRouteGap,
+    min: 0.05,
+    max: 1.5,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.globalRouteGap
+  });
+  appendSliderNumberControl(routing.body, {
+    label: 'Obstacle Gap',
+    path: ['rendering', 'obstacleRouteGap'],
+    value: rendering.obstacleRouteGap ?? LINK_2D_DEFAULTS.obstacleRouteGap,
+    min: 0.05,
+    max: 1.5,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.obstacleRouteGap
+  });
+  appendSelectControl(routing.body, {
+    label: 'Route Side',
+    path: ['rendering', 'routeSide'],
+    value: rendering.routeSide ?? LINK_2D_DEFAULTS.routeSide,
+    options: ['', ...KNOWN_ENUMS.routeSide],
+    optionLabels: { '': 'auto' },
+    defaultValue: LINK_2D_DEFAULTS.routeSide
+  });
+  appendSliderNumberControl(routing.body, {
+    label: 'Curve Offset',
+    path: ['rendering', 'curveOffset'],
+    value: rendering.curveOffset ?? LINK_2D_DEFAULTS.curveOffset,
+    min: -1,
+    max: 1,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.curveOffset
+  });
+  appendSliderNumberControl(routing.body, {
+    label: 'Curve Radius',
+    path: ['rendering', 'curveRadius'],
+    value: rendering.curveRadius ?? LINK_2D_DEFAULTS.curveRadius,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.curveRadius
+  });
+  appendSliderNumberControl(routing.body, {
+    label: 'Corner Radius',
+    path: ['rendering', 'cornerRadius'],
+    value: rendering.cornerRadius ?? LINK_2D_DEFAULTS.cornerRadius,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.cornerRadius
+  });
+  appendSliderNumberControl(routing.body, {
+    label: 'Relationship Radius',
+    path: ['rendering', 'relationshipCornerRadius'],
+    value: rendering.relationshipCornerRadius ?? LINK_2D_DEFAULTS.relationshipCornerRadius,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.relationshipCornerRadius
+  });
+  appendJsonControl(routing.body, {
+    label: 'Route Points',
+    path: ['rendering', 'routePoints'],
+    value: rendering.routePoints ?? LINK_2D_DEFAULTS.routePoints,
+    defaultValue: LINK_2D_DEFAULTS.routePoints,
+    valueShape: 'array'
+  });
+  panel.appendChild(routing.section);
+
+  const ports = createInspectorSection('Ports', false);
+  appendSelectControl(ports.body, {
+    label: 'Source Side',
+    path: ['rendering', 'sourcePortSide'],
+    value: rendering.sourcePortSide ?? LINK_2D_DEFAULTS.sourcePortSide,
+    options: ['', ...KNOWN_ENUMS.sourcePortSide],
+    optionLabels: { '': 'auto' },
+    defaultValue: LINK_2D_DEFAULTS.sourcePortSide
+  });
+  appendSelectControl(ports.body, {
+    label: 'Target Side',
+    path: ['rendering', 'targetPortSide'],
+    value: rendering.targetPortSide ?? LINK_2D_DEFAULTS.targetPortSide,
+    options: ['', ...KNOWN_ENUMS.targetPortSide],
+    optionLabels: { '': 'auto' },
+    defaultValue: LINK_2D_DEFAULTS.targetPortSide
+  });
+  appendSelectControl(ports.body, {
+    label: 'Source Port',
+    path: ['rendering', 'sourcePort'],
+    value: rendering.sourcePort ?? LINK_2D_DEFAULTS.sourcePort,
+    options: ['', ...KNOWN_ENUMS.sourcePort],
+    optionLabels: { '': 'auto' },
+    defaultValue: LINK_2D_DEFAULTS.sourcePort
+  });
+  appendSelectControl(ports.body, {
+    label: 'Target Port',
+    path: ['rendering', 'targetPort'],
+    value: rendering.targetPort ?? LINK_2D_DEFAULTS.targetPort,
+    options: ['', ...KNOWN_ENUMS.targetPort],
+    optionLabels: { '': 'auto' },
+    defaultValue: LINK_2D_DEFAULTS.targetPort
+  });
+  appendSliderNumberControl(ports.body, {
+    label: 'Port Radius',
+    path: ['rendering', 'relationshipPortRadius'],
+    value: rendering.relationshipPortRadius ?? LINK_2D_DEFAULTS.relationshipPortRadius,
+    min: 0.01,
+    max: 0.3,
+    step: 0.005,
+    defaultValue: LINK_2D_DEFAULTS.relationshipPortRadius
+  });
+  appendSliderNumberControl(ports.body, {
+    label: 'Port Stub',
+    path: ['rendering', 'relationshipPortStub'],
+    value: rendering.relationshipPortStub ?? LINK_2D_DEFAULTS.relationshipPortStub,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.relationshipPortStub
+  });
+  appendColorControl(ports.body, {
+    label: 'Port Fill',
+    path: ['rendering', 'relationshipPortFill'],
+    value: rendering.relationshipPortFill || LINK_2D_DEFAULTS.relationshipPortFill,
+    defaultValue: LINK_2D_DEFAULTS.relationshipPortFill
+  });
+  appendColorControl(ports.body, {
+    label: 'Port Stroke',
+    path: ['rendering', 'relationshipPortStroke'],
+    value: rendering.relationshipPortStroke || LINK_2D_DEFAULTS.relationshipPortStroke,
+    defaultValue: LINK_2D_DEFAULTS.relationshipPortStroke
+  });
+  appendSliderNumberControl(ports.body, {
+    label: 'Port Opacity',
+    path: ['rendering', 'relationshipPortOpacity'],
+    value: rendering.relationshipPortOpacity ?? LINK_2D_DEFAULTS.relationshipPortOpacity,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.relationshipPortOpacity
+  });
+  panel.appendChild(ports.section);
+
+  const collisions = createInspectorSection('Label Collision', false);
+  appendSliderNumberControl(collisions.body, {
+    label: 'Width',
+    path: ['rendering', 'labelCollisionWidth'],
+    value: rendering.labelCollisionWidth ?? LINK_2D_DEFAULTS.labelCollisionWidth,
+    min: 0.2,
+    max: 4,
+    step: 0.05,
+    defaultValue: LINK_2D_DEFAULTS.labelCollisionWidth
+  });
+  appendSliderNumberControl(collisions.body, {
+    label: 'Height',
+    path: ['rendering', 'labelCollisionHeight'],
+    value: rendering.labelCollisionHeight ?? LINK_2D_DEFAULTS.labelCollisionHeight,
+    min: 0.1,
+    max: 2,
+    step: 0.05,
+    defaultValue: LINK_2D_DEFAULTS.labelCollisionHeight
+  });
+  appendSliderNumberControl(collisions.body, {
+    label: 'Margin',
+    path: ['rendering', 'labelCollisionMargin'],
+    value: rendering.labelCollisionMargin ?? LINK_2D_DEFAULTS.labelCollisionMargin,
+    min: 0,
+    max: 0.6,
+    step: 0.01,
+    defaultValue: LINK_2D_DEFAULTS.labelCollisionMargin
+  });
+  panel.appendChild(collisions.section);
 }
 
 function renderAttribute2DInspector(panel, target) {
@@ -1300,6 +1846,36 @@ function appendCheckboxControl(container, config) {
   input.type = 'checkbox';
   input.checked = Boolean(config.value);
   applyInspectorDataset(input, config.path, 'boolean', false, config.defaultValue);
+  row.control.appendChild(input);
+  appendResetButton(row.control, config);
+  container.appendChild(row.element);
+}
+
+function appendSelectControl(container, config) {
+  const row = createInspectorRow(config.label);
+  const input = document.createElement('select');
+  const options = [...new Set([...(config.options || []), String(config.value ?? '')])];
+  options.forEach(optionValue => {
+    const option = document.createElement('option');
+    option.value = optionValue;
+    option.textContent = config.optionLabels?.[optionValue] ?? optionValue;
+    input.appendChild(option);
+  });
+  input.value = String(config.value ?? '');
+  applyInspectorDataset(input, config.path, 'string', false, config.defaultValue);
+  row.control.appendChild(input);
+  appendResetButton(row.control, config);
+  container.appendChild(row.element);
+}
+
+function appendJsonControl(container, config) {
+  const row = createInspectorRow(config.label);
+  const input = document.createElement('textarea');
+  input.rows = config.rows ?? 4;
+  input.spellcheck = false;
+  input.value = JSON.stringify(config.value ?? config.defaultValue ?? null, null, 2);
+  applyInspectorDataset(input, config.path, 'json', false, config.defaultValue);
+  if (config.valueShape) input.dataset.valueShape = config.valueShape;
   row.control.appendChild(input);
   appendResetButton(row.control, config);
   container.appendChild(row.element);
@@ -1488,6 +2064,21 @@ function readPropertyInputValue(input) {
   if (input.dataset.valueType === 'number') {
     const value = Number(input.value);
     return Number.isFinite(value) ? value : null;
+  }
+  if (input.dataset.valueType === 'json') {
+    try {
+      const raw = input.value.trim();
+      const parsed = raw ? JSON.parse(raw) : (input.dataset.valueShape === 'array' ? [] : null);
+      if (input.dataset.valueShape === 'array' && !Array.isArray(parsed)) {
+        throw new Error('Expected a JSON array');
+      }
+      input.setCustomValidity?.('');
+      return parsed;
+    } catch (error) {
+      input.setCustomValidity?.(error?.message || 'Invalid JSON');
+      input.reportValidity?.();
+      return null;
+    }
   }
   if (input.dataset.valueType === 'color') {
     return normalizeColorInput(input.value, input.dataset.resetValue ? JSON.parse(input.dataset.resetValue) : '#000000');
@@ -1774,7 +2365,7 @@ function syncLinkEditControls() {
   }
   if (widthInput) {
     widthInput.disabled = disabled;
-    widthInput.value = String(Number(selectedLink?.rendering?.lineWidth ?? 0.01));
+    widthInput.value = String(Number(selectedLink?.rendering?.lineWidth ?? LINK_2D_DEFAULTS.lineWidth));
   }
 }
 
@@ -1802,10 +2393,10 @@ async function handleSelectedLinkUpdate() {
   if (!selectedLinkId) return;
   const name = String($('selected-link-name-input')?.value || '').trim();
   const color = normalizeHexColor($('selected-link-color-input')?.value || '#334155');
-  const lineWidth = Number($('selected-link-width-input')?.value ?? 0.01);
+  const lineWidth = Number($('selected-link-width-input')?.value ?? LINK_2D_DEFAULTS.lineWidth);
   await updateLink(selectedLinkId, {
     name,
-    rendering: { labelText: name, lineColor: color, lineWidth: Number.isFinite(lineWidth) ? lineWidth : 0.01 }
+    rendering: { labelText: name, lineColor: color, lineWidth: Number.isFinite(lineWidth) ? lineWidth : LINK_2D_DEFAULTS.lineWidth }
   }, { context: ctx(), refresh: false });
   await refreshWorkspace('Updated link style', { refresh: true, fit: false });
 }
@@ -2545,6 +3136,7 @@ function selectElement(id, options = {}) {
   selectedLinkId = null;
 
   updateInterface({ json: false });
+  revealModelBuilderProperties({ instant: options.instant === true });
   if (options.log !== false) addLog(`Selected ${selected.name || selected.id}`);
 }
 
@@ -2875,10 +3467,13 @@ async function runScenarioSuite() {
   const startedAt = performance.now();
   addLog(`Scenario suite started (${availableModels.length} models)`);
   setStatus(`Running suite: 0/${availableModels.length}`, 'warn');
+  setCanvasTitleOverride('Scenario Suite');
 
   try {
     for (const item of availableModels) {
       const label = item.label || item.value;
+      setCanvasTitleOverride(`Scenario: ${label}`);
+      setStatus(`Running suite: ${passed}/${availableModels.length} - ${label}`, 'warn');
       try {
         const loadedModel = await loadAndRenderScene(item.value, ctx(), {
           allowedBasePath: TEST_MODEL_ROOT,
@@ -2901,7 +3496,7 @@ async function runScenarioSuite() {
         }
         if (!hasSavedFit) fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
         passed += 1;
-        setStatus(`Running suite: ${passed}/${availableModels.length}`, 'warn');
+        setStatus(`Running suite: ${passed}/${availableModels.length} - ${label}`, 'warn');
       } catch (error) {
         failures.push(`${label}: ${error?.message || String(error)}`);
       }
@@ -2913,7 +3508,11 @@ async function runScenarioSuite() {
       modelSelect.disabled = false;
     }
     updateModelSummary();
-    await handleLoadModel();
+    try {
+      await handleLoadModel();
+    } finally {
+      setCanvasTitleOverride(null);
+    }
     if (suiteButton) suiteButton.disabled = false;
   }
 
@@ -2955,6 +3554,7 @@ async function handleSelectChange(id, value) {
     selectedAttributeKey = value || null;
     selectedLinkId = null;
     updateInterface({ json: false });
+    revealModelBuilderProperties();
     return;
   }
   if (id === 'selected-link-select') {
@@ -2966,6 +3566,7 @@ async function handleSelectChange(id, value) {
       selectedAttributeOwnerId = link.sourceClassId;
     }
     updateInterface({ json: false });
+    revealModelBuilderProperties();
     return;
   }
   const resolved = resolveNodeId(value);
@@ -3084,6 +3685,7 @@ function handleLabelClick(event) {
     selectedElementId = link.sourceClassId;
     selectedAttributeOwnerId = link.sourceClassId;
     updateInterface({ json: false });
+    revealModelBuilderProperties();
     addLog(`Selected link ${link.rendering?.labelText || link.name || link.id}`);
     return;
   }
@@ -3106,6 +3708,7 @@ function handleLabelClick(event) {
     selectedAttributeKey = attributeKeyFor(owner.attributes[index], index);
     selectedLinkId = null;
     updateInterface({ json: false });
+    revealModelBuilderProperties();
     addLog(`Selected attribute ${attributeDisplayName(owner.attributes[index], index)}`);
     return;
   }

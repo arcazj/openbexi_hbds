@@ -49,16 +49,16 @@ export function createLinkBetweenClass(linkData, classById) {
   line.name = 'link-route';
   line.renderOrder = rendering.zIndex ?? 5;
 
+  const arrowheadType = normalizeArrowheadType(rendering.arrowheadType);
   const rawArrowheadSize = rendering.arrowheadSize ?? 0.1;
   const arrowheadSize = Math.min(rawArrowheadSize * (rendering.arrowheadScale ?? 0.6), rendering.maxArrowheadSize ?? 0.12);
-  const arrowGeometry = new THREE.ConeGeometry(arrowheadSize * 0.45, arrowheadSize, 12);
-  arrowGeometry.translate(0, -arrowheadSize / 2, 0);
+  const arrowGeometry = createArrowheadGeometry(arrowheadType, arrowheadSize);
   const arrow = new THREE.Mesh(
     arrowGeometry,
     new THREE.MeshBasicMaterial({ color: rendering.lineColor ?? '#333333' })
   );
   arrow.name = 'link-arrowhead';
-  arrow.visible = rendering.arrowheadVisibility !== false;
+  arrow.visible = rendering.arrowheadVisibility !== false && arrowheadType !== 'none';
   arrow.renderOrder = (rendering.zIndex ?? 5) + 1;
   arrow.userData.relationshipArrow = true;
 
@@ -69,7 +69,7 @@ export function createLinkBetweenClass(linkData, classById) {
   labelDiv.className = 'label link-label';
   labelDiv.textContent = rendering.labelText ?? '';
   labelDiv.style.font = `${rendering.labelFontSize ?? 12}px Arial`;
-  labelDiv.style.color = rendering.labelColor ?? '#111111';
+  labelDiv.style.color = rendering.labelColor ?? rendering.textColor ?? '#111111';
   labelDiv.style.background = rendering.labelBackgroundColor ?? 'rgba(255,255,255,0.9)';
   labelDiv.style.padding = '2px 8px';
   labelDiv.style.borderRadius = '999px';
@@ -150,6 +150,37 @@ function replaceLineGeometry(line, points) {
     line.geometry.dispose();
   }
   line.geometry = nextGeometry;
+}
+
+function normalizeArrowheadType(type) {
+  const clean = String(type || 'triangle').toLowerCase();
+  return ['triangle', 'cone', 'diamond', 'none'].includes(clean) ? clean : 'triangle';
+}
+
+function createArrowheadGeometry(type, size) {
+  if (type === 'cone') {
+    const geometry = new THREE.ConeGeometry(size * 0.45, size, 12);
+    geometry.translate(0, -size / 2, 0);
+    return geometry;
+  }
+
+  const shape = new THREE.Shape();
+  if (type === 'diamond') {
+    shape.moveTo(0, 0);
+    shape.lineTo(size * 0.45, -size * 0.5);
+    shape.lineTo(0, -size);
+    shape.lineTo(-size * 0.45, -size * 0.5);
+    shape.lineTo(0, 0);
+  } else {
+    shape.moveTo(0, 0);
+    shape.lineTo(-size * 0.48, -size);
+    shape.lineTo(size * 0.48, -size);
+    shape.lineTo(0, 0);
+  }
+
+  const geometry = new THREE.ShapeGeometry(shape);
+  geometry.translate(0, 0, 0.002);
+  return geometry;
 }
 
 function createRelationshipPortMarker(kind, rendering = {}) {
@@ -329,7 +360,7 @@ function buildOrthogonalRoute({ link, p0, p1, parent, index, count, lane, occupi
   points = separateSharedRouteLane(points, rendering, occupiedLanes);
   points = avoidObstacleIntersections(points, obstacleBoxes, rendering);
   const basePoints = compactPoints(points);
-  const roundedPoints = roundOrthogonalCorners(basePoints, rendering.relationshipCornerRadius ?? rendering.cornerRadius ?? 0.16);
+  const roundedPoints = roundOrthogonalCorners(basePoints, rendering.relationshipCornerRadius ?? rendering.curveRadius ?? rendering.cornerRadius ?? 0.16);
   const label = getLabelPlacement(basePoints, rendering, lane);
   return {
     points: roundedPoints,

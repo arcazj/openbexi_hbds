@@ -470,6 +470,12 @@
       --group-collapsed-bg: var(--hbds-menu-model-soft);
     }
 
+    .control-group[data-section="scenario-suite"] {
+      --group-accent: var(--hbds-menu-layout-accent);
+      --group-bg-strong: var(--hbds-menu-layout-soft);
+      --group-collapsed-bg: var(--hbds-menu-layout-soft);
+    }
+
     .control-group[data-section="mode"] {
       --group-accent: var(--hbds-menu-mode-accent);
       --group-bg-strong: var(--hbds-menu-mode-soft);
@@ -785,6 +791,8 @@
 
     .inspector-control > input[type="text"],
     .inspector-control > input[type="number"],
+    .inspector-control > select,
+    .inspector-control > textarea,
     .color-control input[type="text"],
     .slider-number-control input[type="number"] {
       width: 100%;
@@ -796,6 +804,15 @@
       padding: 6px 8px;
       font: inherit;
       font-weight: 520;
+    }
+
+    .inspector-control > textarea {
+      min-height: 96px;
+      resize: vertical;
+      line-height: 1.35;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      grid-column: 1 / -1;
     }
 
     .slider-number-control {
@@ -964,7 +981,12 @@
       <div class="stat"><span class="stat-value" id="stat-hyperclass-count">0</span><span class="stat-label">Groups</span></div>
     </div>
     <div id="validation-status" class="status-chip">No model loaded</div>
-    <div id="scenario-status" class="status-chip">Scenario suite idle</div>
+
+    <section class="control-group" data-default-open="true" data-section="scenario-suite">
+      <div class="section-title">Scenario Suite</div>
+      <button id="run-scenario-suite-button" type="button" class="quiet">Run Scenario Suite</button>
+      <div id="scenario-status" class="status-chip">Scenario suite idle</div>
+    </section>
 
     <section class="control-group" data-default-open="true">
       <div class="section-title">Model</div>
@@ -973,7 +995,6 @@
         <option value="">Blank workspace</option>
       </select>
       <div id="model-summary" class="section-meta">Blank workspace</div>
-      <button id="run-scenario-suite-button" type="button" class="quiet">Run Scenario Suite</button>
     </section>
 
     <section class="control-group">
@@ -1083,6 +1104,6 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=2d-inspector-20260522a"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=attribute-rendering-20260522a"></script>
 </body>
 </html>

@@ -7,7 +7,50 @@
       "layout",
       "attributes",
       "density"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "grid",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 6.352,
+        "fitWidthDistance": 3.5482,
+        "distance": 7.2831,
+        "diagramWidth": 2.53,
+        "diagramHeight": 4.6,
+        "diagramDepth": 0.11,
+        "radius": 2.6255,
+        "center": {
+          "x": -0.405,
+          "y": 0,
+          "z": 0.055
+        },
+        "cameraAspect": 1.7902,
+        "cameraFov": 52
+      }
+    }
   },
   "hypergraph": {
     "class": [
@@ -99,12 +142,12 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 0,
+          "x": -0.605,
           "y": 0,
           "z": 0
         },
         "size": {
-          "width": 1.8,
+          "width": 2.13,
           "height": 4.6
         },
         "rendering": {
@@ -112,11 +155,12 @@
             "color": "#77b6d6",
             "metallicColor": "#8ecae6",
             "material": "metallic",
-            "borderColor": "#155e75",
-            "cornerRadius": 0.13,
+            "borderColor": "#f81616",
+            "cornerRadius": 0.43,
             "metalness": 0.52,
             "roughness": 0.22,
-            "emissiveIntensity": 0.035
+            "emissiveIntensity": 0.035,
+            "borderWidth": 8
           },
           "attributes": {
             "checkboxColor": "#155e75",

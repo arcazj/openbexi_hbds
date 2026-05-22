@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=2d-inspector-20260522a';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=2d-inspector-20260522a';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=fit-font-20260517i';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=fit-font-20260517i';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=attribute-rendering-20260522a';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=attribute-rendering-20260522a';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=link-rendering-20260522a';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=link-rendering-20260522a';
 
 export const DEFAULT_SCENE_SETTINGS = {
   background: '#eef2f6',
