@@ -44,6 +44,7 @@
       <select id="test-model-select">
         <option value="">Blank workspace</option>
       </select>
+      <label class="toggle-row" for="view-toggle"><span>Enable 3-D View</span><input type="checkbox" id="view-toggle"></label>
       <div id="model-summary" class="section-meta">Blank workspace</div>
     </section>
 
@@ -98,8 +99,8 @@
       </div>
     </section>
 
-    <section class="control-group" data-default-open="false">
-      <div class="section-title">Settings</div>
+    <section class="control-group" data-default-open="false" data-section="settings">
+      <div class="section-title">Setting</div>
       <div class="settings-subtitle">Font</div>
       <label class="range-field" for="model-font-size-input"><span>Size</span><span class="range-control"><input type="range" id="model-font-size-input" min="6" max="48" step="1" value="12"><output id="model-font-size-value" class="range-value" for="model-font-size-input">12px</output></span></label>
       <label class="inline-field" for="model-font-family-input"><span>Family</span><input type="text" id="model-font-family-input" value="Arial, sans-serif"></label>

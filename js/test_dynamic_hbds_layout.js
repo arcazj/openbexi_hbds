@@ -96,12 +96,18 @@ const LINK_NAMES = ['depends on', 'feeds', 'validates', 'routes to', 'owns', 'sy
 const DEFAULT_EMPTY_ICON_PATH = './icons/empty.png';
 const ICON_MANIFEST_PATH = './icons/generated_icons_manifest.json';
 let iconManifestLookupPromise = null;
-const TEST_MODEL_ROOT = 'test_models/';
-const TEST_MODEL_MANIFEST = 'test_models/test_models_manifest.json';
-const TEST_MODEL_HIDDEN_VALUES = [
+const DEFAULT_TEST_MODEL_ROOT = 'test_models/';
+const DEFAULT_TEST_MODEL_HIDDEN_VALUES = [
   'test_models/models.json',
   'test_models/transportation_links.json'
 ];
+const MODEL_SOURCE_CONFIG = getModelSourceConfig();
+const TEST_MODEL_ROOT = MODEL_SOURCE_CONFIG.root;
+const TEST_MODEL_MANIFEST = MODEL_SOURCE_CONFIG.manifest;
+const TEST_MODEL_HIDDEN_VALUES = MODEL_SOURCE_CONFIG.hiddenValues;
+const HIDE_SCENARIO_SUITE = TEST_MODEL_ROOT === 'models/';
+const EMBEDDED_SHELL_MENU = new URLSearchParams(window.location.search).get('embeddedShell') === '1';
+if (EMBEDDED_SHELL_MENU) document.body.classList.add('embedded-shell-menu');
 const STRUCTURAL_PROPERTY_KEYS = new Set([
   'id',
   'classId',
@@ -203,6 +209,44 @@ const KNOWN_ENUMS = {
   checkboxMaterial: ['metallic', 'flat'],
   shape: ['square', 'circle', 'diamond', 'triangle']
 };
+
+function getModelSourceConfig() {
+  const params = new URLSearchParams(window.location.search);
+  const root = normalizeRelativeModelPath(
+    params.get('modelsPath') || params.get('modelRoot') || params.get('modelsRoot'),
+    DEFAULT_TEST_MODEL_ROOT,
+    { directory: true }
+  );
+  const defaultManifest = root === 'models/' ? `${root}models_manifest.json` : `${root}test_models_manifest.json`;
+  const manifest = normalizeRelativeModelPath(
+    params.get('manifestPath') || params.get('modelManifest'),
+    defaultManifest
+  );
+  return {
+    root,
+    manifest,
+    hiddenValues: parseHiddenModelValues(params.get('hiddenValues'), root)
+  };
+}
+
+function normalizeRelativeModelPath(value, fallback, options = {}) {
+  let clean = String(value ?? '').trim();
+  if (!clean) clean = fallback;
+  clean = clean.replace(/\\/g, '/').replace(/^\.\/+/, '').replace(/^\/+/, '');
+  if (options.directory && !clean.endsWith('/')) clean += '/';
+  return clean;
+}
+
+function parseHiddenModelValues(value, root) {
+  if (value === null) return root === DEFAULT_TEST_MODEL_ROOT ? [...DEFAULT_TEST_MODEL_HIDDEN_VALUES] : [];
+  const clean = String(value).trim();
+  if (!clean) return [];
+  return clean
+    .split(',')
+    .map(item => normalizeRelativeModelPath(item, ''))
+    .filter(Boolean);
+}
+
 const KNOWN_CLASS_IMAGE_SOURCES = [
   './images/class_car.png',
   './images/class_satellite.png',
@@ -310,6 +354,7 @@ const ctx = () => ({
   setDiagramGroup: group => { diagramGroup = group; },
   setDragControls: controls => { dragControls = controls; },
   setupDragControls: setupDrag,
+  setCamera2D,
   applyModelSceneSettings,
   applyModelLayoutSettings,
   applyModelFontSettings,
@@ -404,6 +449,49 @@ function resizeRenderers() {
   labelRenderer.setSize(size.width, size.height);
   renderOnce();
   updateOverview();
+}
+
+function is3DViewEnabled() {
+  return $('view-toggle')?.checked === true;
+}
+
+function updateDragControlsEnabled() {
+  const isReadOnly = editMode === 'readonly';
+  if (dragControls) dragControls.enabled = !isReadOnly && !is3DViewEnabled();
+}
+
+function handleViewToggle(event) {
+  const is3D = event?.target?.checked === true;
+  if (orbitControls) {
+    orbitControls.enableRotate = is3D;
+    orbitControls.enabled = true;
+  }
+  updateDragControlsEnabled();
+  if (!is3D) setCamera2D();
+  updateOverview();
+  renderOnce();
+}
+
+function setCamera2D() {
+  if (!camera || !orbitControls) return;
+  const sphere = diagramGroup?.userData?.boundingSphere;
+  if (!sphere || sphere.radius === 0) {
+    camera.position.set(0, 0, 12);
+    camera.lookAt(0, 0, 0);
+    orbitControls.target.set(0, 0, 0);
+    orbitControls.update();
+    renderOnce();
+    return;
+  }
+
+  const fovR = camera.fov * Math.PI / 180;
+  const distance = Math.max(1, Math.abs(sphere.radius / Math.sin(fovR / 2)) * 1.2);
+  camera.position.set(sphere.center.x, sphere.center.y, sphere.center.z + distance);
+  camera.lookAt(sphere.center);
+  orbitControls.target.copy(sphere.center);
+  camera.updateProjectionMatrix();
+  orbitControls.update();
+  renderOnce();
 }
 
 function normalizeSimplifiedSceneSettings(settings = {}) {
@@ -1147,7 +1235,7 @@ function updateModeControls() {
   $(`mode-${editMode}`)?.classList.add('active');
   const editModeSelect = $('edit-mode-select');
   if (editModeSelect) editModeSelect.value = editMode;
-  if (dragControls) dragControls.enabled = !isReadOnly;
+  updateDragControlsEnabled();
 }
 
 function updateJsonPreviewFromData() {
@@ -1322,6 +1410,11 @@ function applyClassInspectorAccordion(panel, targetKey) {
       });
     });
   });
+}
+
+function removeEditOnlySections() {
+  if (!HIDE_SCENARIO_SUITE) return;
+  document.querySelector('[data-section="scenario-suite"]')?.remove();
 }
 
 function getInspectorSectionTitle(section) {
@@ -4496,7 +4589,7 @@ function bindUi() {
   $('export-json-button').addEventListener('click', handleExportJson);
   $('apply-json-button').addEventListener('click', () => runAction(handleApplyJson));
   $('reset-model-button').addEventListener('click', () => runAction(handleResetModel));
-  $('run-scenario-suite-button').addEventListener('click', () => runAction(runScenarioSuite));
+  $('run-scenario-suite-button')?.addEventListener('click', () => runAction(runScenarioSuite));
   $('cancel-link-button').addEventListener('click', cancelLinkCreation);
   ['selected-color-input', 'selected-border-color-input', 'selected-opacity-input', 'selected-corner-radius-input', 'selected-text-color-input']
     .forEach(id => $(id)?.addEventListener('input', () => runAction(handleSelectedRenderingChange)));
@@ -4561,6 +4654,7 @@ function bindUi() {
   ].forEach(id => $(id)?.addEventListener('input', handleFontSettingInput));
 
   $('layout-algorithm-select')?.addEventListener('change', handleLayoutSettingChange);
+  $('view-toggle')?.addEventListener('change', handleViewToggle);
 
   $('test-model-select').addEventListener('change', () => {
     updateModelSummary();
@@ -4620,10 +4714,12 @@ async function init() {
     updateSceneLabelScales(ctx());
     updateOverview();
   });
+  $('view-toggle').checked = false;
 
   ensureLighting();
   applySceneSettings({ syncControls: true });
   syncFontSettingsControls();
+  removeEditOnlySections();
   compactControlSections();
   bindUi();
   bindDiagramPicking();
@@ -4639,7 +4735,7 @@ async function init() {
   updateInterface();
   addLog('Ready');
   const params = new URLSearchParams(window.location.search);
-  if (params.has('runScenarioSuite')) {
+  if (!HIDE_SCENARIO_SUITE && params.has('runScenarioSuite')) {
     setTimeout(() => runAction(runScenarioSuite), 0);
   }
   if (params.has('runSatelliteFontRegression')) {

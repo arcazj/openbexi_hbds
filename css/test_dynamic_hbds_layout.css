@@ -1,6 +1,7 @@
 :root {
   --panel-width: 400px;
   --panel-height: 44vh;
+  --shell-menu-height: 76px;
   --ink: var(--hbds-menu-ink);
   --muted: var(--hbds-menu-muted);
   --line: var(--hbds-menu-line);
@@ -252,6 +253,19 @@ body.has-model #canvas-model-title {
   padding: 16px;
 }
 
+body.embedded-shell-menu #dynamic-test-panel {
+  top: var(--shell-menu-height);
+  height: calc(100% - var(--shell-menu-height));
+  border-top: 0;
+  box-shadow: -18px 0 48px rgba(40, 54, 72, 0.1);
+}
+
+@media (max-width: 720px) {
+  :root {
+    --shell-menu-height: 74px;
+  }
+}
+
 .panel-header {
   display: grid;
   gap: 4px;
@@ -494,10 +508,11 @@ details.control-group > summary .section-title {
 
 .control-group[data-section="settings"] {
   --group-accent: var(--hbds-menu-settings-accent);
-  --group-bg-strong: #ebf8ef;
-  --group-summary-bg: #f8fcf9;
-  --group-summary-open-bg: #eef9f2;
-  --group-collapsed-bg: #e1f4e8;
+  --group-bg-strong: #fffef7;
+  --group-summary-bg: #fffffb;
+  --group-summary-open-bg: #fffdf0;
+  --group-collapsed-bg: #fff8d8;
+  --group-collapsed-ink: #5f370e;
 }
 
 .control-group[data-section="json"] {

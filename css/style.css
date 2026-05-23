@@ -26,12 +26,14 @@
   --hbds-menu-layout-soft: #e7f7f4;
   --hbds-menu-builder-accent: #c2410c;
   --hbds-menu-builder-soft: #fff1e8;
-  --hbds-menu-settings-accent: #15803d;
-  --hbds-menu-settings-soft: #ebf8ef;
+  --hbds-menu-settings-accent: #eab308;
+  --hbds-menu-settings-soft: #fffef7;
   --hbds-menu-json-accent: #475569;
   --hbds-menu-json-soft: #f1f5f9;
   --hbds-menu-session-accent: #be123c;
   --hbds-menu-session-soft: #fff0f4;
+  --shell-menu-height: 76px;
+  --shell-menu-width: 400px;
 }
 
 body {
@@ -92,6 +94,28 @@ canvas {
   display: flex;
   flex-direction: column;
   gap: 15px;
+}
+
+body.embedded-shell-menu #controls-panel {
+  z-index: 30;
+  box-sizing: border-box;
+  top: var(--shell-menu-height);
+  right: 0;
+  width: var(--shell-menu-width);
+  max-height: calc(100% - var(--shell-menu-height));
+  overflow: auto;
+  overflow-x: hidden;
+  background: #ffffff;
+  border-top: 0;
+  border-right: 0;
+  border-radius: 0;
+  box-shadow: -18px 0 48px rgba(40, 54, 72, 0.1);
+}
+
+@media (max-width: 720px) {
+  :root {
+    --shell-menu-height: 74px;
+  }
 }
 
 .control-group {
@@ -165,11 +189,16 @@ canvas {
 
 .settings-group {
   gap: 0;
+  border: 1px solid #fef3c7;
+  background: #fffef7;
+  border-left: 4px solid var(--hbds-menu-settings-accent);
+  border-radius: 6px;
+  padding: 8px;
 }
 
 .settings-title,
 .settings-subtitle {
-  color: #64748b;
+  color: #5f370e;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
