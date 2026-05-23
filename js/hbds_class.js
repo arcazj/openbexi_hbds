@@ -4,6 +4,24 @@ import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
 const DEFAULT_EMPTY_ICON_PATH = './icons/empty.png';
 const ICON_MANIFEST_PATH = './icons/generated_icons_manifest.json';
+const CLASS_BODY_TYPES = new Set(['rectangle', 'image', 'shape']);
+const CLASS_IMAGE_FITS = new Set(['contain', 'cover']);
+const CLASS_SHAPE_TYPES = new Set([
+    'roundedRectangle',
+    'rectangle',
+    'square',
+    'circle',
+    'ellipse',
+    'diamond',
+    'triangle',
+    'pentagon',
+    'hexagon',
+    'octagon',
+    'star',
+    'capsule',
+    'parallelogram',
+    'trapezoid'
+]);
 let iconManifestLookupPromise = null;
 
 /* ─────────────────────────────── Loader ──────────────────────────────── */
@@ -102,32 +120,18 @@ export function createClass(classData) {
     const Z_OVERLAY = 0.06;
 
     /* — Rounded rectangle mesh (draggable) — */
-    const shape = roundedRect(sz.width, sz.height, cfg.class.cornerRadius);
-    const extrudeGeom = new THREE.ExtrudeGeometry(shape, {
-        depth: 0.05,
-        bevelEnabled: false
-    });
+    const bodyRendering = normalizeClassBodyRendering(classData, cfg.class);
+    const hitGeom = createExtrudedClassBodyGeometry('roundedRectangle', sz, cfg.class.cornerRadius);
     const classColor = new THREE.Color(cfg.class.metallicColor ?? cfg.class.color);
     const classOpacity = cfg.class.opacity ?? 1;
-    const classMat = new THREE.MeshStandardMaterial({
-        color: classColor,
-        metalness: cfg.class.metalness ?? 0.46,
-        roughness: cfg.class.roughness ?? 0.24,
-        emissive: classColor,
-        emissiveIntensity: cfg.class.emissiveIntensity ?? 0.035,
-        side: THREE.DoubleSide,
-        transparent: classOpacity < 1,
-        opacity: classOpacity
-    });
-    classMat.userData.hbdsMetallicPanel = true;
-    classMat.userData.hbdsClassPanel = true;
-    const classMesh = new THREE.Mesh(extrudeGeom, classMat);
+    const classMat = createClassPanelMaterial(cfg.class, classColor, classOpacity);
+    const classMesh = new THREE.Mesh(hitGeom, classMat);
     classMesh.position.z = Z_BASE;
     classMesh.userData.classId = classData.id;
     classMesh.userData.classType = 'class';
     classMesh.userData.isHyperClass = false;
     const border = new THREE.LineSegments(
-        new THREE.EdgesGeometry(extrudeGeom),
+        new THREE.EdgesGeometry(hitGeom),
         new THREE.LineBasicMaterial({
             color: cfg.class.borderColor ?? '#000080',
             linewidth: cfg.class.borderWidth ?? 1
@@ -136,6 +140,7 @@ export function createClass(classData) {
     border.name = 'class-border';
     border.raycast = () => {};
     classMesh.add(border);
+    applyClassBodyRendering(classMesh, border, bodyRendering, cfg.class, sz, classColor, classOpacity);
 
     const titleObj = createIconTitleLabel(classData, {
         className: 'label class-label',
@@ -194,6 +199,291 @@ export function createClass(classData) {
     });
 
     return {classMesh};
+}
+
+function normalizeClassBodyRendering(classData, classRendering = {}) {
+    const rawBodyType = String(classRendering.bodyType ?? classData?.bodyType ?? 'rectangle').trim();
+    let bodyType = CLASS_BODY_TYPES.has(rawBodyType) ? rawBodyType : 'rectangle';
+    const imageSrc = normalizeClassImageSource(classRendering.imageSrc ?? classRendering.image ?? classData?.imageSrc);
+    const imageFit = CLASS_IMAGE_FITS.has(classRendering.imageFit) ? classRendering.imageFit : 'contain';
+    const shapeType = CLASS_SHAPE_TYPES.has(classRendering.shapeType) ? classRendering.shapeType : 'roundedRectangle';
+
+    if (bodyType === 'image' && !imageSrc) bodyType = 'rectangle';
+    return { bodyType, imageSrc, imageFit, shapeType };
+}
+
+function normalizeClassImageSource(value) {
+    const clean = String(value ?? '').trim();
+    if (!clean) return '';
+    if (/^https?:\/\//i.test(clean) || /^data:image\/png[;,]/i.test(clean)) return clean;
+    const normalized = clean.replace(/\\/g, '/').replace(/^\.\//, '');
+    if (!normalized.toLowerCase().startsWith('images/')) return '';
+    if (!/\.png(?:[?#].*)?$/i.test(normalized)) return '';
+    return `./${normalized}`;
+}
+
+function createClassPanelMaterial(classCfg, classColor, classOpacity) {
+    const classMat = new THREE.MeshStandardMaterial({
+        color: classColor,
+        metalness: classCfg.metalness ?? 0.46,
+        roughness: classCfg.roughness ?? 0.24,
+        emissive: classColor,
+        emissiveIntensity: classCfg.emissiveIntensity ?? 0.035,
+        side: THREE.DoubleSide,
+        transparent: classOpacity < 1,
+        opacity: classOpacity
+    });
+    classMat.userData.hbdsMetallicPanel = true;
+    classMat.userData.hbdsClassPanel = true;
+    return classMat;
+}
+
+function createClassHitMaterial() {
+    return new THREE.MeshBasicMaterial({
+        color: '#ffffff',
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.001,
+        depthWrite: false
+    });
+}
+
+function applyClassBodyRendering(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity) {
+    classMesh.userData.classBodyType = bodyRendering.bodyType;
+    classMesh.userData.classBodyShapeType = bodyRendering.shapeType;
+    classMesh.userData.classBodyImageSrc = bodyRendering.imageSrc;
+    classMesh.userData.classBodyImageFit = bodyRendering.imageFit;
+
+    if (bodyRendering.bodyType === 'shape') {
+        installShapeClassBody(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity);
+        return;
+    }
+
+    if (bodyRendering.bodyType === 'image') {
+        installImageClassBody(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity);
+    }
+}
+
+function activateTransparentClassHitBody(classMesh, border) {
+    classMesh.material?.dispose?.();
+    classMesh.material = createClassHitMaterial();
+    classMesh.material.userData.hbdsClassHitBody = true;
+    if (border) border.visible = false;
+}
+
+function installShapeClassBody(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity) {
+    activateTransparentClassHitBody(classMesh, border);
+    const visualGeometry = createExtrudedClassBodyGeometry(bodyRendering.shapeType, size, classCfg.cornerRadius);
+    const visualMaterial = createClassPanelMaterial(classCfg, classColor, classOpacity);
+    const visual = new THREE.Mesh(visualGeometry, visualMaterial);
+    visual.name = 'class-shape-body';
+    visual.userData.isClassBodyVisual = true;
+    visual.raycast = () => {};
+    const visualBorder = new THREE.LineSegments(
+        new THREE.EdgesGeometry(visualGeometry),
+        new THREE.LineBasicMaterial({
+            color: classCfg.borderColor ?? '#000080',
+            linewidth: classCfg.borderWidth ?? 1
+        })
+    );
+    visualBorder.name = 'class-shape-border';
+    visualBorder.raycast = () => {};
+    visual.add(visualBorder);
+    classMesh.add(visual);
+}
+
+function installImageClassBody(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity) {
+    classMesh.userData.classBodyImageState = 'loading';
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin?.('anonymous');
+    loader.load(
+        bodyRendering.imageSrc,
+        texture => {
+            classMesh.userData.classBodyImageState = 'loaded';
+            activateTransparentClassHitBody(classMesh, border);
+            texture.colorSpace = THREE.SRGBColorSpace ?? texture.colorSpace;
+            texture.needsUpdate = true;
+            const imageSize = getTextureImageSize(texture);
+            const targetSize = getImageBodyVisualSize(imageSize, size, bodyRendering.imageFit);
+            if (bodyRendering.imageFit === 'cover') applyCoverTextureCrop(texture, imageSize, size);
+            const visual = new THREE.Mesh(
+                new THREE.PlaneGeometry(targetSize.width, targetSize.height),
+                createImageBodyMaterial(texture, classCfg, classOpacity)
+            );
+            visual.name = 'class-image-body';
+            visual.userData.isClassBodyVisual = true;
+            visual.position.z = 0.004;
+            visual.raycast = () => {};
+            classMesh.add(visual);
+        },
+        undefined,
+        () => {
+            classMesh.userData.classBodyImageState = 'failed';
+        }
+    );
+}
+
+function createImageBodyMaterial(texture, classCfg, classOpacity) {
+    const material = new THREE.MeshStandardMaterial({
+        map: texture,
+        color: '#ffffff',
+        metalness: classCfg.metalness ?? 0.18,
+        roughness: classCfg.roughness ?? 0.42,
+        emissive: '#ffffff',
+        emissiveIntensity: 0,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: classOpacity,
+        alphaTest: 0.02,
+        depthWrite: false
+    });
+    material.userData.hbdsImageClassBody = true;
+    return material;
+}
+
+function getTextureImageSize(texture) {
+    const image = texture?.image || {};
+    return {
+        width: Math.max(1, image.naturalWidth || image.videoWidth || image.width || 1),
+        height: Math.max(1, image.naturalHeight || image.videoHeight || image.height || 1)
+    };
+}
+
+function getImageBodyVisualSize(imageSize, targetSize, fit) {
+    if (fit === 'cover') return { width: targetSize.width, height: targetSize.height };
+    const scale = Math.min(targetSize.width / imageSize.width, targetSize.height / imageSize.height);
+    return {
+        width: imageSize.width * scale,
+        height: imageSize.height * scale
+    };
+}
+
+function applyCoverTextureCrop(texture, imageSize, targetSize) {
+    const imageAspect = imageSize.width / imageSize.height;
+    const targetAspect = targetSize.width / targetSize.height;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.repeat.set(1, 1);
+    texture.offset.set(0, 0);
+    if (imageAspect > targetAspect) {
+        const repeatX = targetAspect / imageAspect;
+        texture.repeat.x = repeatX;
+        texture.offset.x = (1 - repeatX) / 2;
+    } else if (imageAspect < targetAspect) {
+        const repeatY = imageAspect / targetAspect;
+        texture.repeat.y = repeatY;
+        texture.offset.y = (1 - repeatY) / 2;
+    }
+}
+
+function createExtrudedClassBodyGeometry(shapeType, size, cornerRadius = 0.1) {
+    return new THREE.ExtrudeGeometry(createClassBodyShape(shapeType, size, cornerRadius), {
+        depth: 0.05,
+        bevelEnabled: false
+    });
+}
+
+function createClassBodyShape(shapeType, size, cornerRadius = 0.1) {
+    const type = CLASS_SHAPE_TYPES.has(shapeType) ? shapeType : 'roundedRectangle';
+    if (type === 'rectangle') {
+        return roundedRect(size.width, size.height, 0);
+    }
+    if (type === 'square') {
+        const side = Math.min(size.width, size.height);
+        return roundedRect(side, side, 0);
+    }
+    if (type === 'capsule') {
+        return roundedRect(size.width, size.height, Math.min(size.width, size.height) / 2);
+    }
+    if (type === 'circle' || type === 'ellipse') {
+        const shape = new THREE.Shape();
+        const radiusX = type === 'circle' ? Math.min(size.width, size.height) / 2 : size.width / 2;
+        const radiusY = type === 'circle' ? Math.min(size.width, size.height) / 2 : size.height / 2;
+        shape.absellipse(0, 0, radiusX, radiusY, 0, Math.PI * 2, false, 0);
+        return shape;
+    }
+    if (type === 'diamond') {
+        return createClassPolygonShape([
+            [0, size.height / 2],
+            [size.width / 2, 0],
+            [0, -size.height / 2],
+            [-size.width / 2, 0]
+        ]);
+    }
+    if (type === 'triangle') {
+        return createClassPolygonShape([
+            [0, size.height / 2],
+            [size.width / 2, -size.height / 2],
+            [-size.width / 2, -size.height / 2]
+        ]);
+    }
+    if (type === 'pentagon') {
+        return createRegularPolygonShape(5, size, -Math.PI / 2);
+    }
+    if (type === 'hexagon') {
+        return createRegularPolygonShape(6, size, Math.PI / 6);
+    }
+    if (type === 'octagon') {
+        return createRegularPolygonShape(8, size, Math.PI / 8);
+    }
+    if (type === 'star') {
+        return createStarShape(size);
+    }
+    if (type === 'parallelogram') {
+        const skew = size.width * 0.18;
+        return createClassPolygonShape([
+            [-size.width / 2 + skew, size.height / 2],
+            [size.width / 2, size.height / 2],
+            [size.width / 2 - skew, -size.height / 2],
+            [-size.width / 2, -size.height / 2]
+        ]);
+    }
+    if (type === 'trapezoid') {
+        const inset = size.width * 0.18;
+        return createClassPolygonShape([
+            [-size.width / 2 + inset, size.height / 2],
+            [size.width / 2 - inset, size.height / 2],
+            [size.width / 2, -size.height / 2],
+            [-size.width / 2, -size.height / 2]
+        ]);
+    }
+    return roundedRect(size.width, size.height, cornerRadius);
+}
+
+function createRegularPolygonShape(sides, size, rotation = 0) {
+    const points = [];
+    for (let index = 0; index < sides; index += 1) {
+        const angle = rotation + index * Math.PI * 2 / sides;
+        points.push([Math.cos(angle) * size.width / 2, Math.sin(angle) * size.height / 2]);
+    }
+    return createClassPolygonShape(points);
+}
+
+function createStarShape(size) {
+    const points = [];
+    const outerX = size.width / 2;
+    const outerY = size.height / 2;
+    const innerX = outerX * 0.48;
+    const innerY = outerY * 0.48;
+    for (let index = 0; index < 10; index += 1) {
+        const outer = index % 2 === 0;
+        const angle = -Math.PI / 2 + index * Math.PI / 5;
+        points.push([
+            Math.cos(angle) * (outer ? outerX : innerX),
+            Math.sin(angle) * (outer ? outerY : innerY)
+        ]);
+    }
+    return createClassPolygonShape(points);
+}
+
+function createClassPolygonShape(points) {
+    const shape = new THREE.Shape();
+    points.forEach(([x, y], index) => {
+        if (index === 0) shape.moveTo(x, y);
+        else shape.lineTo(x, y);
+    });
+    shape.closePath();
+    return shape;
 }
 
 export function attachAttributesToMesh(classMesh, attributes, options = {}) {

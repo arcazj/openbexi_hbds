@@ -36,6 +36,24 @@ const HIDDEN_MODEL_VALUES = new Set([
   'models/hyperclasse_human_and_car.json',
   'models/hyperclasse_link_human_and_car.json'
 ]);
+const CLASS_BODY_TYPES = new Set(['rectangle','image','shape']);
+const CLASS_IMAGE_FITS = new Set(['contain','cover']);
+const CLASS_SHAPE_TYPES = new Set([
+  'roundedRectangle',
+  'rectangle',
+  'square',
+  'circle',
+  'ellipse',
+  'diamond',
+  'triangle',
+  'pentagon',
+  'hexagon',
+  'octagon',
+  'star',
+  'capsule',
+  'parallelogram',
+  'trapezoid'
+]);
 const clone=(v)=>typeof structuredClone==='function'?structuredClone(v):JSON.parse(JSON.stringify(v));
 const nextId=(p)=>`${p}_${Math.random().toString(36).slice(2,8)}`;
 export const getData=()=>data;
@@ -222,7 +240,56 @@ function applyDataMetadataToContext(context){
   context.applyModelLayoutSettings?.(getLayoutSettings());
   applyFitMetadataToContext(context,{ updateOverview:true, preserveMetadata:true });
 }
-export function validateData(currentData=data){const e=[],w=[]; const hg=currentData?.hypergraph; if(!Array.isArray(hg?.class)) e.push('missing hypergraph.class'); if(!Array.isArray(hg?.link)) e.push('missing hypergraph.link'); const ids=new Set(); const byId=new Map(); for(const c of hg?.class||[]){if(ids.has(c.id)) e.push(`duplicate class id ${c.id}`); ids.add(c.id); byId.set(c.id,c); if(!Array.isArray(c.attributes)) e.push(`invalid attributes for ${c.id}`);} const lids=new Set(); for(const l of hg?.link||[]){ if(l.id&&lids.has(l.id)) e.push(`duplicate link id ${l.id}`); if(l.id) lids.add(l.id); if(!byId.has(l.sourceClassId)) e.push(`missing link source ${l.sourceClassId}`); if(!byId.has(l.targetClassId)) e.push(`missing link target ${l.targetClassId}`);} return {valid:e.length===0,errors:e,warnings:w};}
+export function validateData(currentData=data){
+  const e=[],w=[];
+  const hg=currentData?.hypergraph;
+  if(!Array.isArray(hg?.class)) e.push('missing hypergraph.class');
+  if(!Array.isArray(hg?.link)) e.push('missing hypergraph.link');
+  const ids=new Set();
+  const byId=new Map();
+  for(const c of hg?.class||[]){
+    if(ids.has(c.id)) e.push(`duplicate class id ${c.id}`);
+    ids.add(c.id);
+    byId.set(c.id,c);
+    if(!Array.isArray(c.attributes)) e.push(`invalid attributes for ${c.id}`);
+    validateClassBodyRendering(c,w);
+  }
+  const lids=new Set();
+  for(const l of hg?.link||[]){
+    if(l.id&&lids.has(l.id)) e.push(`duplicate link id ${l.id}`);
+    if(l.id) lids.add(l.id);
+    if(!byId.has(l.sourceClassId)) e.push(`missing link source ${l.sourceClassId}`);
+    if(!byId.has(l.targetClassId)) e.push(`missing link target ${l.targetClassId}`);
+  }
+  return {valid:e.length===0,errors:e,warnings:w};
+}
+function validateClassBodyRendering(node,warnings){
+  const renderingClass=node?.rendering?.class||{};
+  const hasBodyFields=['bodyType','imageSrc','imageFit','shapeType'].some(key=>renderingClass[key]!==undefined);
+  if(node?.type==='hyperclass'){
+    if(hasBodyFields) warnings.push(`hyperclass ${node.id} ignores image/shape body rendering fields`);
+    return;
+  }
+  const bodyType=renderingClass.bodyType;
+  if(bodyType!==undefined&&!CLASS_BODY_TYPES.has(bodyType)){
+    warnings.push(`class ${node.id} has unsupported bodyType ${bodyType}`);
+    return;
+  }
+  if(bodyType==='image'){
+    if(!renderingClass.imageSrc) warnings.push(`class ${node.id} image body is missing imageSrc`);
+    else if(!isAllowedClassImageSource(renderingClass.imageSrc)) warnings.push(`class ${node.id} imageSrc should be a PNG under ./images or an http(s) URL`);
+    if(renderingClass.imageFit!==undefined&&!CLASS_IMAGE_FITS.has(renderingClass.imageFit)) warnings.push(`class ${node.id} has unsupported imageFit ${renderingClass.imageFit}`);
+  }
+  if(bodyType==='shape'&&renderingClass.shapeType!==undefined&&!CLASS_SHAPE_TYPES.has(renderingClass.shapeType)){
+    warnings.push(`class ${node.id} has unsupported shapeType ${renderingClass.shapeType}`);
+  }
+}
+function isAllowedClassImageSource(value){
+  const clean=String(value||'').trim();
+  if(/^https?:\/\//i.test(clean)||/^data:image\/png[;,]/i.test(clean)) return true;
+  const normalized=clean.replace(/\\/g,'/').replace(/^\.\//,'');
+  return normalized.toLowerCase().startsWith('images/')&&/\.png(?:[?#].*)?$/i.test(normalized);
+}
 export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; clearLinkRegistry(); if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
   if(dragControls){dragControls.dispose(); setDragControls?.(null);} const dg=new THREE.Group(); scene?.add(dg); setDiagramGroup?.(dg); modelRuntime.diagramGroup=dg; modelRuntime.classById.clear(); modelRuntime.linkGroups=[];
   for(const cd of data.hypergraph.class){ const r=cd.type==='hyperclass'?createHyperClass(null,cd):createClassMesh(cd); const m=r.classMesh; m.visible=cd.visible!==false&&cd.rendering?.visible!==false; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true,isLocked:cd.locked===true}; dg.add(m); modelRuntime.classById.set(cd.id,m);}

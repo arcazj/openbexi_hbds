@@ -1,0 +1,720 @@
+{
+  "metadata": {
+    "name": "Render 029 Image Shape Class Bodies",
+    "purpose": "Regression model for regular classes rendered as transparent PNG bodies or predefined Three.js shapes while preserving HBDS behavior.",
+    "preserveLayout": true,
+    "layout": {
+      "algorithm": "grid",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 26.5166,
+        "fitWidthDistance": 14.34,
+        "distance": 15.8765,
+        "diagramWidth": 19.96,
+        "diagramHeight": 9.06,
+        "diagramDepth": 0.13,
+        "radius": 10.9602,
+        "center": {
+          "x": -0.7875,
+          "y": 0.4,
+          "z": 0.065
+        },
+        "cameraAspect": 1.8491,
+        "cameraFov": 52
+      }
+    },
+    "regressionTags": [
+      "rendering",
+      "images",
+      "shapes",
+      "classes",
+      "fallback",
+      "links"
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "body_regression_hyper",
+        "name": "Regular Class Body Regression",
+        "type": "hyperclass",
+        "children": [
+          "body_rect_default",
+          "body_image_car",
+          "body_image_satellite",
+          "body_image_missing",
+          "body_shape_round",
+          "body_shape_circle",
+          "body_shape_ellipse",
+          "body_shape_diamond",
+          "body_shape_triangle",
+          "body_shape_hexagon"
+        ],
+        "attributes": [
+          {
+            "id": "body_hyper_scope",
+            "name": "hyperclass unaffected"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.6223,
+          "y": 0.1188,
+          "z": 0
+        },
+        "size": {
+          "width": 19.63,
+          "height": 8.260000000000002
+        },
+        "rendering": {
+          "class": {
+            "color": "#eef2ff",
+            "metallicColor": "#e0e7ff",
+            "material": "metallic",
+            "borderColor": "#4338ca",
+            "borderWidth": 2,
+            "opacity": 0.24,
+            "cornerRadius": 0.28,
+            "metalness": 0.42,
+            "roughness": 0.28
+          },
+          "attributes": {
+            "checkboxColor": "#4338ca",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#4338ca",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "body_rect_default",
+        "name": "Default Rectangle",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_rect_status",
+            "name": "status"
+          },
+          {
+            "id": "body_rect_owner",
+            "name": "owner"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": -11.5498,
+          "y": 2.4738,
+          "z": 0
+        },
+        "size": {
+          "width": 2.475,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "rectangle",
+            "color": "#ffd166",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "borderWidth": 1,
+            "cornerRadius": 0.14,
+            "metalness": 0.52,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "body_image_car",
+        "name": "Image Car",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_image_car_speed",
+            "name": "speed"
+          },
+          {
+            "id": "body_image_car_route",
+            "name": "route"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": -6.8673,
+          "y": 2.4738,
+          "z": 0
+        },
+        "size": {
+          "width": 1.65,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_car.png",
+            "imageFit": "contain",
+            "color": "#8ecae6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "borderWidth": 1,
+            "cornerRadius": 0.14,
+            "metalness": 0.36,
+            "roughness": 0.38
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.012
+          },
+          "textColor": "#082f49"
+        }
+      },
+      {
+        "id": "body_image_satellite",
+        "name": "Image Satellite",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_image_sat_orbit",
+            "name": "orbit"
+          },
+          {
+            "id": "body_image_sat_payload",
+            "name": "payload"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": -2.2998,
+          "y": 2.4738,
+          "z": 0
+        },
+        "size": {
+          "width": 2.245,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_satellite.png",
+            "imageFit": "cover",
+            "color": "#a5b4fc",
+            "metallicColor": "#a5b4fc",
+            "material": "metallic",
+            "borderColor": "#4338ca",
+            "borderWidth": 1,
+            "cornerRadius": 0.14,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#4338ca",
+            "checkboxMaterial": "metallic",
+            "shape": "diamond",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#4338ca",
+            "lineWidth": 0.012
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "body_image_missing",
+        "name": "Missing Image Fallback",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_image_missing_fallback",
+            "name": "fallback"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": 2.7077,
+          "y": 2.4738,
+          "z": 0
+        },
+        "size": {
+          "width": 3.0500000000000003,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/missing_class_body.png",
+            "imageFit": "contain",
+            "color": "#e5e7eb",
+            "metallicColor": "#d1d5db",
+            "material": "metallic",
+            "borderColor": "#374151",
+            "borderWidth": 2,
+            "cornerRadius": 0.14,
+            "metalness": 0.3,
+            "roughness": 0.48
+          },
+          "attributes": {
+            "checkboxColor": "#374151",
+            "checkboxMaterial": "flat",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#374151",
+            "lineWidth": 0.012
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "body_shape_round",
+        "name": "Shape Round",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_shape_round_attr",
+            "name": "round"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": -11.5598,
+          "y": -2.5862,
+          "z": 0
+        },
+        "size": {
+          "width": 1.7850000000000001,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "roundedRectangle",
+            "color": "#f4a261",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "borderWidth": 2,
+            "cornerRadius": 0.32,
+            "metalness": 0.5,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "checkboxMaterial": "metallic",
+            "shape": "triangle",
+            "size": {
+              "width": 0.11,
+              "height": 0.11
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.012
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "body_shape_circle",
+        "name": "Shape Circle",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_shape_circle_attr",
+            "name": "circle"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": -11.5498,
+          "y": -0.0562,
+          "z": 0
+        },
+        "size": {
+          "width": 1.9000000000000001,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "circle",
+            "color": "#b7e4c7",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "borderWidth": 2,
+            "cornerRadius": 0.12,
+            "metalness": 0.45,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.012
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "body_shape_ellipse",
+        "name": "Shape Ellipse",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_shape_ellipse_attr",
+            "name": "ellipse"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": -2.3398,
+          "y": -0.0562,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "ellipse",
+            "color": "#ffafcc",
+            "metallicColor": "#ffafcc",
+            "material": "metallic",
+            "borderColor": "#8a3a57",
+            "borderWidth": 2,
+            "cornerRadius": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
+          },
+          "attributes": {
+            "checkboxColor": "#8a3a57",
+            "checkboxMaterial": "metallic",
+            "shape": "ellipse",
+            "size": {
+              "width": 0.14,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#8a3a57",
+            "lineWidth": 0.012
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "body_shape_diamond",
+        "name": "Shape Diamond",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_shape_diamond_attr",
+            "name": "diamond"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": -6.8773,
+          "y": -0.0562,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "diamond",
+            "color": "#cdb4db",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.48,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "checkboxMaterial": "metallic",
+            "shape": "diamond",
+            "size": {
+              "width": 0.11,
+              "height": 0.11
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.012
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "body_shape_triangle",
+        "name": "Shape Triangle",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_shape_triangle_attr",
+            "name": "triangle"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": -6.8873,
+          "y": -2.5862,
+          "z": 0
+        },
+        "size": {
+          "width": 2.13,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "triangle",
+            "color": "#fb7185",
+            "metallicColor": "#fb7185",
+            "material": "metallic",
+            "borderColor": "#9f1239",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.44,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#9f1239",
+            "checkboxMaterial": "flat",
+            "shape": "triangle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#9f1239",
+            "lineWidth": 0.012
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "body_shape_hexagon",
+        "name": "Shape Hexagon",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "body_shape_hex_attr",
+            "name": "hexagon"
+          }
+        ],
+        "parentClassId": "body_regression_hyper",
+        "position": {
+          "x": 2.7077,
+          "y": -0.0562,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "hexagon",
+            "color": "#60a5fa",
+            "metallicColor": "#60a5fa",
+            "material": "metallic",
+            "borderColor": "#1d4ed8",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.5,
+            "roughness": 0.25
+          },
+          "attributes": {
+            "checkboxColor": "#1d4ed8",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#1d4ed8",
+            "lineWidth": 0.012
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "body_link_rect_image",
+        "sourceClassId": "body_rect_default",
+        "targetClassId": "body_image_car",
+        "name": "rect to image",
+        "rendering": {
+          "labelText": "rect to image",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "orthogonalClearance": 0.5,
+          "relationshipCornerRadius": 0.16
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "body_link_image_shape",
+        "sourceClassId": "body_image_car",
+        "targetClassId": "body_shape_circle",
+        "name": "image to shape",
+        "rendering": {
+          "labelText": "image to shape",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "sourcePortSide": "bottom",
+          "targetPortSide": "top",
+          "orthogonalClearance": 0.58,
+          "relationshipCornerRadius": 0.18
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "body_link_shape_shape",
+        "sourceClassId": "body_shape_diamond",
+        "targetClassId": "body_shape_triangle",
+        "name": "shape to shape",
+        "rendering": {
+          "labelText": "shape to shape",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#694b7d",
+          "lineWidth": 2,
+          "lineStyle": "dotted",
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "orthogonalClearance": 0.55,
+          "relationshipCornerRadius": 0.18
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "body_link_fallback_shape",
+        "sourceClassId": "body_image_missing",
+        "targetClassId": "body_shape_hexagon",
+        "name": "fallback to shape",
+        "rendering": {
+          "labelText": "fallback to shape",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#374151",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "sourcePortSide": "bottom",
+          "targetPortSide": "top",
+          "routeSide": "right",
+          "orthogonalClearance": 0.66,
+          "relationshipCornerRadius": 0.18
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "body_link_hyper_image",
+        "sourceClassId": "body_regression_hyper",
+        "targetClassId": "body_image_satellite",
+        "name": "hyper unchanged",
+        "rendering": {
+          "labelText": "hyper unchanged",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#4338ca",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "sourcePortSide": "top",
+          "targetPortSide": "top",
+          "routeSide": "top",
+          "orthogonalClearance": 0.8,
+          "relationshipCornerRadius": 0.18
+        },
+        "allowSelfLink": true
+      }
+    ]
+  }
+}

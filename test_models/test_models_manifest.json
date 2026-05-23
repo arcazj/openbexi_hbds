@@ -212,6 +212,44 @@
       ]
     },
     {
+      "value": "test_models/render_028_full_dense_rendering_properties.json",
+      "label": "Render 028 Full Dense Rendering Properties",
+      "description": "Dense all-element rendering regression covering class, hyperclass, attributes, icons, labels, relationship ports, link styles, routes, arrowheads, and scene lighting.",
+      "tags": [
+        "rendering",
+        "dense",
+        "class",
+        "hyperclass",
+        "attributes",
+        "links",
+        "inspector"
+      ]
+    },
+    {
+      "value": "test_models/render_029_image_shape_class_bodies.json",
+      "label": "Render 029 Image Shape Class Bodies",
+      "description": "Regular classes rendered as transparent PNG bodies or predefined Three.js shapes, including fallback and hyperclass isolation cases.",
+      "tags": [
+        "rendering",
+        "images",
+        "shapes",
+        "classes",
+        "fallback",
+        "links"
+      ]
+    },
+    {
+      "value": "test_models/render_030_extended_shape_class_bodies.json",
+      "label": "Render 030 Extended Shape Class Bodies",
+      "description": "Expanded predefined shape catalog for regular class bodies.",
+      "tags": [
+        "rendering",
+        "shapes",
+        "classes",
+        "extended-shapes"
+      ]
+    },
+    {
       "value": "test_models/edge_020_defaults_empty_attributes.json",
       "label": "Edge 020 Defaults Empty Attributes",
       "description": "Missing optional rendering fields and empty attributes.",

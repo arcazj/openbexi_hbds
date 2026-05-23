@@ -61,6 +61,8 @@ const activityLog = [];
 let lightingState = normalizeSceneSettings();
 const defaultLightingState = normalizeSceneSettings();
 let sceneLights = {};
+let propertyPanelTargetKey = null;
+let propertyPanelOpenSection = null;
 
 const CLASS_COLORS = [
   { fill: '#ffd166', border: '#7a4f00' },
@@ -111,6 +113,40 @@ const KNOWN_ENUMS = {
   labelPlacement: ['best-segment', 'path'],
   labelStrategy: ['best-segment', 'path'],
   arrowheadType: ['triangle', 'cone', 'diamond', 'none'],
+  bodyType: ['rectangle', 'image', 'shape'],
+  imageFit: ['contain', 'cover'],
+  classShapeType: [
+    'roundedRectangle',
+    'rectangle',
+    'square',
+    'circle',
+    'ellipse',
+    'diamond',
+    'triangle',
+    'pentagon',
+    'hexagon',
+    'octagon',
+    'star',
+    'capsule',
+    'parallelogram',
+    'trapezoid'
+  ],
+  shapeType: [
+    'roundedRectangle',
+    'rectangle',
+    'square',
+    'circle',
+    'ellipse',
+    'diamond',
+    'triangle',
+    'pentagon',
+    'hexagon',
+    'octagon',
+    'star',
+    'capsule',
+    'parallelogram',
+    'trapezoid'
+  ],
   checkboxMaterial: ['metallic', 'flat'],
   shape: ['square', 'circle', 'diamond', 'triangle']
 };
@@ -127,6 +163,10 @@ const CLASS_2D_DEFAULTS = {
   cornerRadius: 0.1,
   opacity: 1,
   textColor: '#111827',
+  bodyType: 'rectangle',
+  imageSrc: '',
+  imageFit: 'contain',
+  shapeType: 'roundedRectangle',
   attributeCheckboxColor: '#A9A9A9',
   attributeCheckboxMaterial: 'metallic',
   attributeShape: 'square',
@@ -926,6 +966,11 @@ function renderPropertyPanel() {
   const panel = $('property-panel');
   if (!panel) return;
   const target = getSelectedPropertyTarget();
+  const targetKey = getPropertyPanelTargetKey(target);
+  if (targetKey !== propertyPanelTargetKey) {
+    propertyPanelTargetKey = targetKey;
+    propertyPanelOpenSection = null;
+  }
   panel.innerHTML = '';
 
   if (!target) {
@@ -935,11 +980,13 @@ function renderPropertyPanel() {
 
   if (target.kind === 'class' || target.kind === 'hyperclass') {
     renderClass2DInspector(panel, target);
+    applyClassInspectorAccordion(panel, targetKey);
     return;
   }
 
   if (target.kind === 'multi-class') {
     renderMultiClass2DInspector(panel, target);
+    applyClassInspectorAccordion(panel, targetKey);
     return;
   }
 
@@ -955,6 +1002,47 @@ function renderPropertyPanel() {
 
   renderInspectorHeader(panel, target.title);
   renderPropertyObject(panel, target.value, []);
+}
+
+function getPropertyPanelTargetKey(target) {
+  if (!target) return '';
+  if (target.kind === 'class' || target.kind === 'hyperclass') return `${target.kind}:${target.node?.id ?? ''}`;
+  if (target.kind === 'multi-class') return `multi-class:${(target.nodes || []).map(node => node.id).sort().join('|')}`;
+  if (target.kind === 'link') return `link:${target.value?.id ?? ''}`;
+  if (target.kind === 'attribute') return `attribute:${target.owner?.id ?? ''}:${target.key ?? ''}`;
+  return target.kind || '';
+}
+
+function applyClassInspectorAccordion(panel, targetKey) {
+  const sections = [...panel.querySelectorAll('details.inspector-section')];
+  if (!sections.length) return;
+  sections.forEach(section => {
+    section.dataset.inspectorSection = getInspectorSectionTitle(section);
+  });
+  const requested = propertyPanelOpenSection && sections.find(section => section.dataset.inspectorSection === propertyPanelOpenSection);
+  const defaultOpen = sections.find(section => section.open) || sections[0];
+  const active = requested || defaultOpen;
+  sections.forEach(section => {
+    section.open = section === active;
+  });
+  propertyPanelOpenSection = active?.dataset.inspectorSection || null;
+  sections.forEach(section => {
+    section.addEventListener('toggle', () => {
+      if (propertyPanelTargetKey !== targetKey) return;
+      if (!section.open) {
+        if (propertyPanelOpenSection === section.dataset.inspectorSection) propertyPanelOpenSection = null;
+        return;
+      }
+      propertyPanelOpenSection = section.dataset.inspectorSection;
+      sections.forEach(peer => {
+        if (peer !== section) peer.open = false;
+      });
+    });
+  });
+}
+
+function getInspectorSectionTitle(section) {
+  return section.querySelector(':scope > summary')?.textContent?.trim() || '';
 }
 
 function renderInspectorHeader(panel, title, subtitle = '2D properties') {
@@ -1084,6 +1172,11 @@ function renderClass2DInspector(panel, target) {
   });
   panel.appendChild(appearance.section);
 
+  if (!isHyperclass) {
+    appendClassImagesInspectorSection(panel, renderingClass);
+    appendClassShapesInspectorSection(panel, renderingClass);
+  }
+
   const text = createInspectorSection('Text', false);
   appendColorControl(text.body, {
     label: 'Text Color',
@@ -1171,6 +1264,59 @@ function renderClass2DInspector(panel, target) {
   panel.appendChild(connectionsSection.section);
 }
 
+function appendClassImagesInspectorSection(panel, renderingClass = {}, selectedNodes = null) {
+  const getValue = (path, fallback) => {
+    if (!selectedNodes) return getDeepValue({ rendering: { class: renderingClass } }, path, fallback);
+    return getCommonPropertyValue(selectedNodes, path, fallback);
+  };
+  const images = createInspectorSection('Images', false);
+  appendSelectControl(images.body, {
+    label: 'Body Type',
+    path: ['rendering', 'class', 'bodyType'],
+    value: getValue(['rendering', 'class', 'bodyType'], CLASS_2D_DEFAULTS.bodyType),
+    options: ['rectangle', 'image'],
+    defaultValue: CLASS_2D_DEFAULTS.bodyType
+  });
+  appendTextControl(images.body, {
+    label: 'Image Source',
+    path: ['rendering', 'class', 'imageSrc'],
+    value: getValue(['rendering', 'class', 'imageSrc'], CLASS_2D_DEFAULTS.imageSrc),
+    placeholder: './images/class.png or https://...',
+    defaultValue: CLASS_2D_DEFAULTS.imageSrc
+  });
+  appendSelectControl(images.body, {
+    label: 'Image Fit',
+    path: ['rendering', 'class', 'imageFit'],
+    value: getValue(['rendering', 'class', 'imageFit'], CLASS_2D_DEFAULTS.imageFit),
+    options: KNOWN_ENUMS.imageFit,
+    defaultValue: CLASS_2D_DEFAULTS.imageFit
+  });
+  panel.appendChild(images.section);
+}
+
+function appendClassShapesInspectorSection(panel, renderingClass = {}, selectedNodes = null) {
+  const getValue = (path, fallback) => {
+    if (!selectedNodes) return getDeepValue({ rendering: { class: renderingClass } }, path, fallback);
+    return getCommonPropertyValue(selectedNodes, path, fallback);
+  };
+  const shapes = createInspectorSection('Shapes', false);
+  appendSelectControl(shapes.body, {
+    label: 'Body Type',
+    path: ['rendering', 'class', 'bodyType'],
+    value: getValue(['rendering', 'class', 'bodyType'], CLASS_2D_DEFAULTS.bodyType),
+    options: ['rectangle', 'shape'],
+    defaultValue: CLASS_2D_DEFAULTS.bodyType
+  });
+  appendSelectControl(shapes.body, {
+    label: 'Shape',
+    path: ['rendering', 'class', 'shapeType'],
+    value: getValue(['rendering', 'class', 'shapeType'], CLASS_2D_DEFAULTS.shapeType),
+    options: KNOWN_ENUMS.classShapeType,
+    defaultValue: CLASS_2D_DEFAULTS.shapeType
+  });
+  panel.appendChild(shapes.section);
+}
+
 function renderMultiClass2DInspector(panel, target) {
   const selectedNodes = target.nodes || [];
   const first = selectedNodes[0] || {};
@@ -1253,6 +1399,11 @@ function renderMultiClass2DInspector(panel, target) {
     defaultValue: CLASS_2D_DEFAULTS.locked
   });
   panel.appendChild(appearance.section);
+
+  if (selectedNodes.every(node => node.type !== 'hyperclass')) {
+    appendClassImagesInspectorSection(panel, renderingClass, selectedNodes);
+    appendClassShapesInspectorSection(panel, renderingClass, selectedNodes);
+  }
 
   const text = createInspectorSection('Text', false);
   appendColorControl(text.body, {
@@ -2741,11 +2892,12 @@ function applySelectionHighlight() {
     if (!object.userData?.isClassLike) return;
     const selected = sameId(object.userData.hbdsId, selectedElementId) || selectedElementIds.has(String(object.userData.hbdsId));
 
-    if (object.material?.emissive) {
-      object.material.emissive.set(selected ? 0x1769e0 : 0x000000);
-      object.material.emissiveIntensity = selected ? 0.24 : 0;
-      object.material.needsUpdate = true;
-    }
+    [object, ...object.children.filter(child => child.userData?.isClassBodyVisual)].forEach(target => {
+      if (!target.material?.emissive) return;
+      target.material.emissive.set(selected ? 0x1769e0 : 0x000000);
+      target.material.emissiveIntensity = selected ? 0.24 : 0;
+      target.material.needsUpdate = true;
+    });
 
     object.renderOrder = selected ? 20 : 1;
     object.traverse(child => {

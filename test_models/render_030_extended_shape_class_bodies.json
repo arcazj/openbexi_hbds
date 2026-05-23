@@ -1,0 +1,853 @@
+{
+  "metadata": {
+    "name": "Render 030 Extended Shape Class Bodies",
+    "purpose": "Regression model covering the expanded predefined shape body catalog for regular classes.",
+    "preserveLayout": true,
+    "layout": {
+      "algorithm": "radial",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 25.9662,
+        "fitWidthDistance": 14.0424,
+        "distance": 14.7696,
+        "diagramWidth": 18.515,
+        "diagramHeight": 10.86,
+        "diagramDepth": 0.13,
+        "radius": 10.7327,
+        "center": {
+          "x": 5.165,
+          "y": -0.035,
+          "z": 0.065
+        },
+        "cameraAspect": 1.8491,
+        "cameraFov": 52
+      }
+    },
+    "regressionTags": [
+      "rendering",
+      "shapes",
+      "classes",
+      "extended-shapes"
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "shape_catalog_hyper",
+        "name": "Shape Catalog",
+        "type": "hyperclass",
+        "children": [
+          "shape_body_rounded_rectangle",
+          "shape_body_rectangle",
+          "shape_body_square",
+          "shape_body_circle",
+          "shape_body_ellipse",
+          "shape_body_diamond",
+          "shape_body_triangle",
+          "shape_body_pentagon",
+          "shape_body_hexagon",
+          "shape_body_octagon",
+          "shape_body_star",
+          "shape_body_capsule",
+          "shape_body_parallelogram",
+          "shape_body_trapezoid"
+        ],
+        "attributes": [
+          {
+            "id": "shape_catalog_note",
+            "name": "regular classes only"
+          }
+        ],
+        "position": {
+          "x": 2.129,
+          "y": -1.4355,
+          "z": 0
+        },
+        "size": {
+          "width": 18.185,
+          "height": 10.790000000000001
+        },
+        "rendering": {
+          "class": {
+            "color": "#f8fafc",
+            "metallicColor": "#e2e8f0",
+            "borderColor": "#475569",
+            "borderWidth": 2,
+            "opacity": 0.24,
+            "cornerRadius": 0.28,
+            "metalness": 0.36,
+            "roughness": 0.34,
+            "material": "metallic"
+          },
+          "attributes": {
+            "checkboxColor": "#475569",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#475569",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "shape_body_rounded_rectangle",
+        "name": "Rounded Rectangle",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_rounded_rectangle_attr",
+            "name": "roundedRectangle"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": -0.986,
+          "y": -2.8755,
+          "z": 0
+        },
+        "size": {
+          "width": 2.475,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "roundedRectangle",
+            "color": "#ffd166",
+            "metallicColor": "#ffd166",
+            "borderColor": "#7c4a03",
+            "borderWidth": 2,
+            "cornerRadius": 0.28,
+            "metalness": 0.48,
+            "roughness": 0.26
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_rectangle",
+        "name": "Rectangle",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_rectangle_attr",
+            "name": "rectangle"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": -5.456,
+          "y": -2.8755,
+          "z": 0
+        },
+        "size": {
+          "width": 1.5550000000000002,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "rectangle",
+            "color": "#8ecae6",
+            "metallicColor": "#8ecae6",
+            "borderColor": "#155e75",
+            "borderWidth": 2,
+            "cornerRadius": 0,
+            "metalness": 0.42,
+            "roughness": 0.32
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#082f49"
+        }
+      },
+      {
+        "id": "shape_body_square",
+        "name": "Square",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_square_attr",
+            "name": "square"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": 4.1465,
+          "y": -2.8755,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "square",
+            "color": "#b7e4c7",
+            "metallicColor": "#b7e4c7",
+            "borderColor": "#087443",
+            "borderWidth": 2,
+            "cornerRadius": 0,
+            "metalness": 0.42,
+            "roughness": 0.32
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "shape_body_circle",
+        "name": "Circle",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_circle_attr",
+            "name": "circle"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": -0.776,
+          "y": 2.1845,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "circle",
+            "color": "#f4a261",
+            "metallicColor": "#f4a261",
+            "borderColor": "#874a17",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.46,
+            "roughness": 0.28
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_ellipse",
+        "name": "Ellipse",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_ellipse_attr",
+            "name": "ellipse"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": 8.4215,
+          "y": 2.1845,
+          "z": 0
+        },
+        "size": {
+          "width": 1.6,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "ellipse",
+            "color": "#cdb4db",
+            "metallicColor": "#cdb4db",
+            "borderColor": "#694b7d",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.46,
+            "roughness": 0.28
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "checkboxMaterial": "flat",
+            "shape": "ellipse",
+            "size": {
+              "width": 0.12,
+              "height": 0.08
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_diamond",
+        "name": "Diamond",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_diamond_attr",
+            "name": "diamond"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": 4.1465,
+          "y": 2.1845,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "diamond",
+            "color": "#ffafcc",
+            "metallicColor": "#ffafcc",
+            "borderColor": "#8a3a57",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.46,
+            "roughness": 0.28
+          },
+          "attributes": {
+            "checkboxColor": "#8a3a57",
+            "checkboxMaterial": "metallic",
+            "shape": "diamond",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#8a3a57",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_triangle",
+        "name": "Triangle",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_triangle_attr",
+            "name": "triangle"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": -0.786,
+          "y": -5.4055,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "triangle",
+            "color": "#fb7185",
+            "metallicColor": "#fb7185",
+            "borderColor": "#9f1239",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.46,
+            "roughness": 0.28
+          },
+          "attributes": {
+            "checkboxColor": "#9f1239",
+            "checkboxMaterial": "flat",
+            "shape": "triangle",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#9f1239",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_pentagon",
+        "name": "Pentagon",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_pentagon_attr",
+            "name": "pentagon"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": 8.4515,
+          "y": -0.3455,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "pentagon",
+            "color": "#fde68a",
+            "metallicColor": "#fde68a",
+            "borderColor": "#92400e",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.42,
+            "roughness": 0.32
+          },
+          "attributes": {
+            "checkboxColor": "#92400e",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#92400e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_hexagon",
+        "name": "Hexagon",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_hexagon_attr",
+            "name": "hexagon"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": -5.4385,
+          "y": -0.3455,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "hexagon",
+            "color": "#60a5fa",
+            "metallicColor": "#60a5fa",
+            "borderColor": "#1d4ed8",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.48,
+            "roughness": 0.26
+          },
+          "attributes": {
+            "checkboxColor": "#1d4ed8",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#1d4ed8",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_octagon",
+        "name": "Octagon",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_octagon_attr",
+            "name": "octagon"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": -0.776,
+          "y": -0.3455,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "octagon",
+            "color": "#99f6e4",
+            "metallicColor": "#99f6e4",
+            "borderColor": "#0f766e",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#0f766e",
+            "checkboxMaterial": "metallic",
+            "shape": "diamond",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#0f766e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#042f2e"
+        }
+      },
+      {
+        "id": "shape_body_star",
+        "name": "Star",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_star_attr",
+            "name": "star"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": 8.4415,
+          "y": -2.8755,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "star",
+            "color": "#facc15",
+            "metallicColor": "#facc15",
+            "borderColor": "#854d0e",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.5,
+            "roughness": 0.22
+          },
+          "attributes": {
+            "checkboxColor": "#854d0e",
+            "checkboxMaterial": "metallic",
+            "shape": "triangle",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#854d0e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_capsule",
+        "name": "Capsule",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_capsule_attr",
+            "name": "capsule"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": -5.4385,
+          "y": 2.1845,
+          "z": 0
+        },
+        "size": {
+          "width": 1.75,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "capsule",
+            "color": "#a7f3d0",
+            "metallicColor": "#a7f3d0",
+            "borderColor": "#047857",
+            "borderWidth": 2,
+            "cornerRadius": 0.55,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#047857",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#047857",
+            "lineWidth": 0.01
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "shape_body_parallelogram",
+        "name": "Parallelogram",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_parallelogram_attr",
+            "name": "parallelogram"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": 4.019,
+          "y": -0.3455,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "parallelogram",
+            "color": "#f9a8d4",
+            "metallicColor": "#f9a8d4",
+            "borderColor": "#be185d",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#be185d",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#be185d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_trapezoid",
+        "name": "Trapezoid",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_trapezoid_attr",
+            "name": "trapezoid"
+          }
+        ],
+        "parentClassId": "shape_catalog_hyper",
+        "position": {
+          "x": -5.456,
+          "y": -5.4055,
+          "z": 0
+        },
+        "size": {
+          "width": 1.65,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "trapezoid",
+            "color": "#d8b4fe",
+            "metallicColor": "#d8b4fe",
+            "borderColor": "#7e22ce",
+            "borderWidth": 2,
+            "cornerRadius": 0.1,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#7e22ce",
+            "checkboxMaterial": "flat",
+            "shape": "diamond",
+            "size": {
+              "width": 0.09,
+              "height": 0.09
+            }
+          },
+          "connections": {
+            "lineColor": "#7e22ce",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "shape_catalog_top_link",
+        "sourceClassId": "shape_body_rounded_rectangle",
+        "targetClassId": "shape_body_triangle",
+        "name": "top shapes",
+        "rendering": {
+          "labelText": "top shapes",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#475569",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "sourcePortSide": "top",
+          "targetPortSide": "top",
+          "routeSide": "top",
+          "orthogonalClearance": 0.6,
+          "relationshipCornerRadius": 0.18
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "shape_catalog_bottom_link",
+        "sourceClassId": "shape_body_pentagon",
+        "targetClassId": "shape_body_trapezoid",
+        "name": "new shapes",
+        "rendering": {
+          "labelText": "new shapes",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#7e22ce",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "sourcePortSide": "bottom",
+          "targetPortSide": "bottom",
+          "routeSide": "bottom",
+          "orthogonalClearance": 0.62,
+          "relationshipCornerRadius": 0.18
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "shape_catalog_cross_link",
+        "sourceClassId": "shape_body_star",
+        "targetClassId": "shape_body_capsule",
+        "name": "star to capsule",
+        "rendering": {
+          "labelText": "star to capsule",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#854d0e",
+          "lineWidth": 2,
+          "lineStyle": "dotted",
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "orthogonalClearance": 0.5,
+          "relationshipCornerRadius": 0.16
+        },
+        "allowSelfLink": true
+      }
+    ]
+  }
+}

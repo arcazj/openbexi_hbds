@@ -1,0 +1,471 @@
+{
+  "metadata": {
+    "name": "Links 027 Full Rendering Properties",
+    "purpose": "Complete link rendering property surface for the 2D inspector.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "links",
+      "rendering",
+      "inspector"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "link_props_source",
+        "name": "Source",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "link_props_source_attr_state",
+            "name": "state"
+          },
+          {
+            "id": "link_props_source_attr_owner",
+            "name": "owner"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.2,
+          "y": 1.45,
+          "z": 0
+        },
+        "size": {
+          "width": 1.65,
+          "height": 1.9
+        },
+        "rendering": {
+          "class": {
+            "color": "#8ecae6",
+            "metallicColor": "#8ecae6",
+            "material": "metallic",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "link_props_target",
+        "name": "Target",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "link_props_target_attr_mode",
+            "name": "mode"
+          },
+          {
+            "id": "link_props_target_attr_score",
+            "name": "score"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 3.2,
+          "y": 1.45,
+          "z": 0
+        },
+        "size": {
+          "width": 1.65,
+          "height": 1.9
+        },
+        "rendering": {
+          "class": {
+            "color": "#b7e4c7",
+            "metallicColor": "#b7e4c7",
+            "material": "metallic",
+            "borderColor": "#087443",
+            "cornerRadius": 0.13,
+            "metalness": 0.5,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "link_props_sink",
+        "name": "Sink",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "link_props_sink_attr_queue",
+            "name": "queue"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": 3.2,
+          "y": -1.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.55,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#ffd166",
+            "metallicColor": "#ffd166",
+            "material": "metallic",
+            "borderColor": "#7c4a03",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#7c4a03",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#7c4a03",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "link_props_anchor",
+        "name": "Anchor",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "link_props_anchor_attr_route",
+            "name": "route"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.2,
+          "y": -1.9,
+          "z": 0
+        },
+        "size": {
+          "width": 1.55,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#f4a261",
+            "metallicColor": "#f4a261",
+            "material": "metallic",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.13,
+            "metalness": 0.52,
+            "roughness": 0.24
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "link_props_obstacle",
+        "name": "Obstacle",
+        "type": "roundedRectangle",
+        "attributes": [],
+        "parentClassId": null,
+        "position": {
+          "x": 0,
+          "y": -0.2,
+          "z": 0
+        },
+        "size": {
+          "width": 1.45,
+          "height": 1.55
+        },
+        "rendering": {
+          "class": {
+            "color": "#cdb4db",
+            "metallicColor": "#cdb4db",
+            "material": "metallic",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.13,
+            "metalness": 0.48,
+            "roughness": 0.26
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "link_props_full_path",
+        "sourceClassId": "link_props_source",
+        "targetClassId": "link_props_target",
+        "name": "full path",
+        "visible": true,
+        "rendering": {
+          "labelText": "full path",
+          "lineColor": "#155e75",
+          "lineWidth": 3,
+          "lineStyle": "dashed",
+          "zIndex": 8,
+          "visible": true,
+          "arrowheadVisibility": true,
+          "arrowheadType": "diamond",
+          "arrowheadSize": 0.16,
+          "arrowheadScale": 0.7,
+          "maxArrowheadSize": 0.14,
+          "labelFontSize": 13,
+          "labelColor": "#0f172a",
+          "textColor": "#0f172a",
+          "labelBackgroundColor": "rgba(219,234,254,0.95)",
+          "labelPositionAlongPath": 0.42,
+          "labelOffsetFromPath": 0.18,
+          "labelRotationBehavior": "follow",
+          "labelPlacement": "path",
+          "labelStrategy": "path",
+          "labelCollisionWidth": 1.05,
+          "labelCollisionHeight": 0.46,
+          "labelCollisionMargin": 0.08,
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.78,
+          "parallelRouteGap": 0.34,
+          "globalRouteGap": 0.38,
+          "obstacleRouteGap": 0.42,
+          "routeSide": "top",
+          "curveOffset": 0.2,
+          "curveRadius": 0.2,
+          "cornerRadius": 0.18,
+          "relationshipCornerRadius": 0.22,
+          "routePoints": [
+            {
+              "x": -1.6,
+              "y": 3.05,
+              "z": 0
+            },
+            {
+              "x": 1.6,
+              "y": 3.05,
+              "z": 0
+            }
+          ],
+          "sourcePortSide": "top",
+          "targetPortSide": "top",
+          "sourcePort": "top",
+          "targetPort": "top",
+          "relationshipPortRadius": 0.085,
+          "relationshipPortStub": 0.3,
+          "relationshipPortFill": "#ffffff",
+          "relationshipPortStroke": "#155e75",
+          "relationshipPortOpacity": 0.96
+        }
+      },
+      {
+        "id": "link_props_vertical_cone",
+        "sourceClassId": "link_props_target",
+        "targetClassId": "link_props_sink",
+        "name": "vertical cone",
+        "visible": true,
+        "rendering": {
+          "labelText": "vertical cone",
+          "lineColor": "#087443",
+          "lineWidth": 2,
+          "lineStyle": "dotted",
+          "zIndex": 7,
+          "visible": true,
+          "arrowheadVisibility": true,
+          "arrowheadType": "cone",
+          "arrowheadSize": 0.14,
+          "arrowheadScale": 0.65,
+          "maxArrowheadSize": 0.12,
+          "labelFontSize": 12,
+          "labelColor": "#064e3b",
+          "textColor": "#064e3b",
+          "labelBackgroundColor": "rgba(220,252,231,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": -0.14,
+          "labelRotationBehavior": "fixed",
+          "labelPlacement": "best-segment",
+          "labelStrategy": "best-segment",
+          "labelCollisionWidth": 1.15,
+          "labelCollisionHeight": 0.42,
+          "labelCollisionMargin": 0.06,
+          "orthogonalStyle": "vertical",
+          "orthogonalClearance": 0.68,
+          "parallelRouteGap": 0.3,
+          "globalRouteGap": 0.32,
+          "obstacleRouteGap": 0.34,
+          "routeSide": "right",
+          "curveOffset": -0.15,
+          "curveRadius": 0.16,
+          "cornerRadius": 0.16,
+          "relationshipCornerRadius": 0.2,
+          "routePoints": [],
+          "sourcePortSide": "right",
+          "targetPortSide": "right",
+          "sourcePort": "right",
+          "targetPort": "right",
+          "relationshipPortRadius": 0.075,
+          "relationshipPortStub": 0.28,
+          "relationshipPortFill": "#f0fdf4",
+          "relationshipPortStroke": "#087443",
+          "relationshipPortOpacity": 0.9
+        }
+      },
+      {
+        "id": "link_props_bottom_triangle",
+        "sourceClassId": "link_props_sink",
+        "targetClassId": "link_props_anchor",
+        "name": "bottom triangle",
+        "visible": true,
+        "rendering": {
+          "labelText": "bottom triangle",
+          "lineColor": "#7c4a03",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "zIndex": 6,
+          "visible": true,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.13,
+          "arrowheadScale": 0.6,
+          "maxArrowheadSize": 0.11,
+          "labelFontSize": 12,
+          "labelColor": "#451a03",
+          "textColor": "#451a03",
+          "labelBackgroundColor": "rgba(254,243,199,0.95)",
+          "labelPositionAlongPath": 0.62,
+          "labelOffsetFromPath": 0.12,
+          "labelRotationBehavior": "fixed",
+          "labelPlacement": "best-segment",
+          "labelStrategy": "best-segment",
+          "labelCollisionWidth": 1.2,
+          "labelCollisionHeight": 0.42,
+          "labelCollisionMargin": 0.06,
+          "orthogonalStyle": "horizontal",
+          "orthogonalClearance": 0.72,
+          "parallelRouteGap": 0.3,
+          "globalRouteGap": 0.32,
+          "obstacleRouteGap": 0.36,
+          "routeSide": "bottom",
+          "curveOffset": 0,
+          "curveRadius": 0.18,
+          "cornerRadius": 0.18,
+          "relationshipCornerRadius": 0.2,
+          "routePoints": [
+            {
+              "x": 1.4,
+              "y": -3.35,
+              "z": 0
+            },
+            {
+              "x": -1.4,
+              "y": -3.35,
+              "z": 0
+            }
+          ],
+          "sourcePortSide": "bottom",
+          "targetPortSide": "bottom",
+          "sourcePort": "bottom",
+          "targetPort": "bottom",
+          "relationshipPortRadius": 0.07,
+          "relationshipPortStub": 0.26,
+          "relationshipPortFill": "#fffbeb",
+          "relationshipPortStroke": "#7c4a03",
+          "relationshipPortOpacity": 0.94
+        }
+      },
+      {
+        "id": "link_props_no_arrow_left",
+        "sourceClassId": "link_props_anchor",
+        "targetClassId": "link_props_source",
+        "name": "no arrow left",
+        "visible": true,
+        "rendering": {
+          "labelText": "no arrow left",
+          "lineColor": "#874a17",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "zIndex": 5,
+          "visible": true,
+          "arrowheadVisibility": false,
+          "arrowheadType": "none",
+          "arrowheadSize": 0.12,
+          "arrowheadScale": 0.6,
+          "maxArrowheadSize": 0.1,
+          "labelFontSize": 12,
+          "labelColor": "#431407",
+          "textColor": "#431407",
+          "labelBackgroundColor": "rgba(255,237,213,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": -0.12,
+          "labelRotationBehavior": "fixed",
+          "labelPlacement": "best-segment",
+          "labelStrategy": "best-segment",
+          "labelCollisionWidth": 1.05,
+          "labelCollisionHeight": 0.42,
+          "labelCollisionMargin": 0.06,
+          "orthogonalStyle": "vertical",
+          "orthogonalClearance": 0.7,
+          "parallelRouteGap": 0.28,
+          "globalRouteGap": 0.3,
+          "obstacleRouteGap": 0.34,
+          "routeSide": "left",
+          "curveOffset": -0.1,
+          "curveRadius": 0.16,
+          "cornerRadius": 0.16,
+          "relationshipCornerRadius": 0.18,
+          "routePoints": [],
+          "sourcePortSide": "left",
+          "targetPortSide": "left",
+          "sourcePort": "left",
+          "targetPort": "left",
+          "relationshipPortRadius": 0.065,
+          "relationshipPortStub": 0.24,
+          "relationshipPortFill": "#fff7ed",
+          "relationshipPortStroke": "#874a17",
+          "relationshipPortOpacity": 0.92
+        }
+      }
+    ]
+  }
+}

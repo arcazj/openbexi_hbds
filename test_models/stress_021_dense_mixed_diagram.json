@@ -7,7 +7,50 @@
       "stress",
       "dense",
       "mixed"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "radial",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 26.0612,
+        "fitWidthDistance": 14.0938,
+        "distance": 15.4027,
+        "diagramWidth": 18.6747,
+        "diagramHeight": 10.7415,
+        "diagramDepth": 0.13,
+        "radius": 10.772,
+        "center": {
+          "x": 1.2588,
+          "y": -0.335,
+          "z": 0.065
+        },
+        "cameraAspect": 1.8491,
+        "cameraFov": 52
+      }
+    }
   },
   "hypergraph": {
     "class": [
@@ -39,13 +82,13 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 0,
-          "y": 0,
+          "x": 3.7889,
+          "y": -0.4815,
           "z": 0
         },
         "size": {
-          "width": 8.2,
-          "height": 6
+          "width": 9,
+          "height": 9.16
         },
         "rendering": {
           "class": {
@@ -92,13 +135,13 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 8,
-          "y": 0.4,
+          "x": -7.7433,
+          "y": -0.9631,
           "z": 0
         },
         "size": {
-          "width": 7,
-          "height": 4.8
+          "width": 4.625,
+          "height": 9.16
         },
         "rendering": {
           "class": {
@@ -152,12 +195,12 @@
         ],
         "parentClassId": "dense_core",
         "position": {
-          "x": -2.75,
-          "y": 1,
+          "x": 0.9464,
+          "y": 2.1735,
           "z": 0
         },
         "size": {
-          "width": 1.45,
+          "width": 2.015,
           "height": 2.05
         },
         "rendering": {
@@ -211,12 +254,12 @@
         ],
         "parentClassId": "dense_core",
         "position": {
-          "x": 0,
-          "y": 1,
+          "x": 5.3214,
+          "y": 2.1735,
           "z": 0
         },
         "size": {
-          "width": 1.45,
+          "width": 2.015,
           "height": 2.05
         },
         "rendering": {
@@ -270,12 +313,12 @@
         ],
         "parentClassId": "dense_core",
         "position": {
-          "x": 2.75,
-          "y": 1,
+          "x": 0.9464,
+          "y": -0.6565,
           "z": 0
         },
         "size": {
-          "width": 1.45,
+          "width": 2.015,
           "height": 2.05
         },
         "rendering": {
@@ -329,12 +372,12 @@
         ],
         "parentClassId": "dense_core",
         "position": {
-          "x": -2.75,
-          "y": -1.35,
+          "x": 5.3214,
+          "y": -0.6565,
           "z": 0
         },
         "size": {
-          "width": 1.45,
+          "width": 2.015,
           "height": 2.05
         },
         "rendering": {
@@ -388,12 +431,12 @@
         ],
         "parentClassId": "dense_core",
         "position": {
-          "x": 0,
-          "y": -1.35,
+          "x": 0.9464,
+          "y": -3.4865,
           "z": 0
         },
         "size": {
-          "width": 1.45,
+          "width": 2.015,
           "height": 2.05
         },
         "rendering": {
@@ -447,12 +490,12 @@
         ],
         "parentClassId": "dense_core",
         "position": {
-          "x": 2.75,
-          "y": -1.35,
+          "x": 5.3214,
+          "y": -3.4865,
           "z": 0
         },
         "size": {
-          "width": 1.45,
+          "width": 2.015,
           "height": 2.05
         },
         "rendering": {
@@ -506,12 +549,12 @@
         ],
         "parentClassId": "dense_satellite",
         "position": {
-          "x": 6.45,
-          "y": 1.05,
+          "x": -8.3983,
+          "y": 1.6919,
           "z": 0
         },
         "size": {
-          "width": 1.45,
+          "width": 2.015,
           "height": 2.05
         },
         "rendering": {
@@ -565,12 +608,12 @@
         ],
         "parentClassId": "dense_satellite",
         "position": {
-          "x": 9.45,
-          "y": 1.05,
+          "x": -8.3983,
+          "y": -1.1381,
           "z": 0
         },
         "size": {
-          "width": 1.45,
+          "width": 2.015,
           "height": 2.05
         },
         "rendering": {
@@ -624,12 +667,12 @@
         ],
         "parentClassId": "dense_satellite",
         "position": {
-          "x": 7.65,
-          "y": -1.2,
+          "x": -8.3983,
+          "y": -3.9681,
           "z": 0
         },
         "size": {
-          "width": 1.45,
+          "width": 2.015,
           "height": 2.05
         },
         "rendering": {
@@ -668,18 +711,19 @@
         "name": "feeds",
         "rendering": {
           "labelText": "feeds",
+          "orthogonalStyle": "auto",
           "lineColor": "#7c4a03",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "dense_l2",
@@ -688,18 +732,19 @@
         "name": "validates",
         "rendering": {
           "labelText": "validates",
+          "orthogonalStyle": "auto",
           "lineColor": "#155e75",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "dense_l3",
@@ -708,18 +753,19 @@
         "name": "syncs",
         "rendering": {
           "labelText": "syncs",
+          "orthogonalStyle": "auto",
           "lineColor": "#087443",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "dense_l4",
@@ -728,18 +774,19 @@
         "name": "routes",
         "rendering": {
           "labelText": "routes",
+          "orthogonalStyle": "auto",
           "lineColor": "#874a17",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "dense_l5",
@@ -748,19 +795,20 @@
         "name": "publishes handoff",
         "rendering": {
           "labelText": "publishes handoff",
+          "orthogonalStyle": "auto",
           "lineColor": "#694b7d",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 1.05,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12,
           "routeSide": "top"
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "dense_l6",
@@ -769,18 +817,19 @@
         "name": "returns status",
         "rendering": {
           "labelText": "returns status",
+          "orthogonalStyle": "auto",
           "lineColor": "#be185d",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "dense_l7",
@@ -789,18 +838,19 @@
         "name": "domain sync",
         "rendering": {
           "labelText": "domain sync",
+          "orthogonalStyle": "auto",
           "lineColor": "#334155",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 1.1,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "dense_l8",
@@ -809,19 +859,20 @@
         "name": "alerts",
         "rendering": {
           "labelText": "alerts",
+          "orthogonalStyle": "auto",
           "lineColor": "#0f766e",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.7,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12,
           "routeSide": "bottom"
-        }
+        },
+        "allowSelfLink": true
       }
     ]
   }
