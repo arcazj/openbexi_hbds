@@ -7,7 +7,57 @@
       "links",
       "fan",
       "hubs"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 12.9213,
+        "fitWidthDistance": 7.4987,
+        "distance": 8.7949,
+        "diagramWidth": 7.75,
+        "diagramHeight": 7.35,
+        "diagramDepth": 0.11,
+        "radius": 5.3408,
+        "center": {
+          "x": 0.6915,
+          "y": 0.0786,
+          "z": 0.055
+        },
+        "cameraAspect": 1.7232,
+        "cameraFov": 52
+      }
+    },
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
   },
   "hypergraph": {
     "class": [
@@ -27,12 +77,12 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 0,
-          "y": 0,
+          "x": 0.0258,
+          "y": -0.0086,
           "z": 0
         },
         "size": {
-          "width": 1.55,
+          "width": 1.6700000000000002,
           "height": 1.9
         },
         "rendering": {
@@ -259,18 +309,19 @@
         "name": "n feeds",
         "rendering": {
           "labelText": "n feeds",
+          "orthogonalStyle": "auto",
           "lineColor": "#7c4a03",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_east_center",
@@ -279,18 +330,19 @@
         "name": "e feeds",
         "rendering": {
           "labelText": "e feeds",
+          "orthogonalStyle": "auto",
           "lineColor": "#155e75",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_south_center",
@@ -299,18 +351,19 @@
         "name": "s feeds",
         "rendering": {
           "labelText": "s feeds",
+          "orthogonalStyle": "auto",
           "lineColor": "#087443",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_west_center",
@@ -319,18 +372,19 @@
         "name": "w feeds",
         "rendering": {
           "labelText": "w feeds",
+          "orthogonalStyle": "auto",
           "lineColor": "#874a17",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_center_east",
@@ -339,18 +393,19 @@
         "name": "returns",
         "rendering": {
           "labelText": "returns",
+          "orthogonalStyle": "auto",
           "lineColor": "#694b7d",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       }
     ]
   }

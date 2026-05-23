@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div id="container"></div>
+<div id="container">
+    <div id="canvas-model-title" aria-live="polite"></div>
+</div>
 <div id="model-overview">
     <canvas id="model-overview-canvas"></canvas>
     <div id="model-overview-viewport"></div>
@@ -15,7 +17,6 @@
 <div id="controls-panel">
     <div class="control-group">
         <div id="load-status" class="status-chip" aria-live="polite">Load status: idle</div>
-        <div id="validation-status-main" class="status-chip" aria-live="polite">Validation: pending</div>
     </div>
     <div class="control-group">
         <label for="model-select">Select HBDS Model</label>
@@ -31,18 +32,6 @@
         </label>
     </div>
     <div class="control-group">
-        <label class="checkbox-wrapper" for="editable-toggle">
-            <input type="checkbox" id="editable-toggle" checked>
-            <span>Editable mode</span>
-        </label>
-    </div>
-    <div class="control-group">
-        <button id="save-model-button">Save Model</button>
-    </div>
-    <div class="control-group">
-        <button id="optimize-layout-button">Optimize Layout</button>
-    </div>
-    <div class="control-group">
         <label for="layout-algorithm-select">Layout Algorithm</label>
         <select id="layout-algorithm-select">
             <option value="none">None</option>
@@ -54,30 +43,17 @@
     <details class="control-group settings-group">
         <summary class="settings-title">Settings</summary>
         <div class="settings-body">
-            <label class="inline-field" for="scene-background-input"><span>Background</span><input type="color" id="scene-background-input" value="#eef2f6"></label>
-            <label class="range-field" for="ambient-light-input"><span>Ambient</span><input type="range" id="ambient-light-input" min="0" max="1.5" step="0.01" value="0.82"></label>
-            <label class="range-field" for="front-light-input"><span>Front Light</span><input type="range" id="front-light-input" min="0" max="1.5" step="0.01" value="0.16"></label>
-            <span class="settings-subtitle">Source 1</span>
-            <label class="range-field" for="source-one-intensity-input"><span>Intensity</span><input type="range" id="source-one-intensity-input" min="0" max="1.5" step="0.01" value="0.14"></label>
-            <label class="range-field" for="source-one-x-input"><span>X</span><input type="range" id="source-one-x-input" min="-20" max="20" step="0.1" value="-5"></label>
-            <label class="range-field" for="source-one-y-input"><span>Y</span><input type="range" id="source-one-y-input" min="-20" max="20" step="0.1" value="7"></label>
-            <label class="range-field" for="source-one-z-input"><span>Z</span><input type="range" id="source-one-z-input" min="-20" max="30" step="0.1" value="13"></label>
-            <span class="settings-subtitle">Source 2</span>
-            <label class="range-field" for="source-two-intensity-input"><span>Intensity</span><input type="range" id="source-two-intensity-input" min="0" max="1.5" step="0.01" value="0.10"></label>
-            <label class="range-field" for="source-two-x-input"><span>X</span><input type="range" id="source-two-x-input" min="-20" max="20" step="0.1" value="8"></label>
-            <label class="range-field" for="source-two-y-input"><span>Y</span><input type="range" id="source-two-y-input" min="-20" max="20" step="0.1" value="-6"></label>
-            <label class="range-field" for="source-two-z-input"><span>Z</span><input type="range" id="source-two-z-input" min="-20" max="30" step="0.1" value="10"></label>
+            <span class="settings-subtitle">Lighting</span>
+            <label class="range-field" for="horizontal-light-intensity-input"><span>Horizontal Strength</span><input type="range" id="horizontal-light-intensity-input" min="0" max="2" step="0.01" value="1"></label>
+            <label class="range-field" for="horizontal-light-angle-input"><span>Horizontal Angle</span><span class="range-control"><input type="range" id="horizontal-light-angle-input" min="0" max="360" step="1" value="0"><output id="horizontal-light-angle-value" class="range-value" for="horizontal-light-angle-input">0deg</output></span></label>
+            <label class="range-field" for="vertical-light-intensity-input"><span>Vertical Strength</span><input type="range" id="vertical-light-intensity-input" min="0" max="2" step="0.01" value="0.6"></label>
+            <label class="range-field" for="vertical-light-angle-input"><span>Vertical Angle</span><span class="range-control"><input type="range" id="vertical-light-angle-input" min="0" max="360" step="1" value="45"><output id="vertical-light-angle-value" class="range-value" for="vertical-light-angle-input">45deg</output></span></label>
             <button id="reset-scene-settings-button" type="button">Reset Scene Settings</button>
         </div>
     </details>
     <div class="control-group">
-        <label class="checkbox-wrapper" for="auto-optimize-toggle">
-            <input type="checkbox" id="auto-optimize-toggle">
-            <span>Auto optimize on model load</span>
-        </label>
-    </div>
-    <div class="control-group">
         <button id="fit-model-button">Fit Model</button>
+        <button id="save-model-button">Save Model</button>
         <button id="help-shortcuts-button" type="button">Keyboard Help</button>
     </div>
 </div>
@@ -87,12 +63,11 @@
         <ul>
             <li><kbd>H</kbd> Toggle this help</li>
             <li><kbd>F</kbd> Fit model</li>
-            <li><kbd>O</kbd> Optimize layout</li>
             <li><kbd>S</kbd> Save model</li>
             <li><kbd>V</kbd> Toggle 2D/3D view</li>
             <li><kbd>Esc</kbd> Close help</li>
         </ul>
-        <p class="status-note">Focus order: model selector → view/edit toggles → actions → settings.</p>
+        <p class="status-note">Focus order: model selector → view toggle → layout → settings → actions.</p>
         <button id="close-help-button" type="button">Close</button>
     </div>
 </div>
@@ -111,17 +86,24 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {updateLabelFontSizes} from './js/hbds_class.js?v=attribute-rendering-20260522a';
-    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=attribute-rendering-20260522a';
-    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=link-rendering-20260522a';
-    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=link-rendering-20260522a';
-    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings } from './js/hbds_model.js?v=attribute-rendering-20260522a';
+    import {updateLabelFontSizes} from './js/hbds_class.js?v=font-zoom-20260523a';
+    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=font-zoom-20260523a';
+    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=font-zoom-20260523a';
+    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=font-zoom-20260523a';
+    import { loadAndRenderScene, saveScene, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings } from './js/hbds_model.js?v=font-zoom-20260523a';
 
     /* ---------- Globals ---------- */
     let scene, camera, renderer, css2DRenderer, orbitControls, dragControls;
     let diagramGroup = new THREE.Group();
     const draggableObjects = [];
-    let lightingState = normalizeSceneSettings();
+    const LIGHT_CIRCLE_RADIUS = 16;
+    const LIGHT_CIRCLE_ELEVATION = 7;
+    const DEFAULT_HORIZONTAL_LIGHT_INTENSITY = 1;
+    const DEFAULT_VERTICAL_LIGHT_INTENSITY = 0.6;
+    const DEFAULT_VERTICAL_LIGHT_ANGLE = 45;
+    let lightingState = normalizeSimplifiedSceneSettings();
+    const defaultLightingState = normalizeSimplifiedSceneSettings();
+    let fontState = normalizeFontSettings();
     let sceneLights = {};
     let modelsLoadOk = false;
 
@@ -152,7 +134,7 @@
         orbitControls.addEventListener('change', () => {
             updateLabelFontSizes(camera, renderer);
             updateHyperClassLabelFontSizes(camera, renderer);
-            updateLinkFontSizes(camera);
+            updateLinkFontSizes(camera, renderer);
             updateHyperClassLinkFontSizes(camera, renderer);
             renderOnce();
             updateModelOverview(getModelContext());
@@ -168,19 +150,10 @@
                 ? selectedModelValue.split('/').pop()
                 : `${selectedModelValue}.json`;
 
+            setSceneSettings(lightingState, { applyContext: false });
             saveScene(getModelContext(), { fileName });
         });
-        document.getElementById('optimize-layout-button').addEventListener('click', async () => {
-            const algorithm = document.getElementById('layout-algorithm-select').value;
-            await optimizeAndRefreshLayout(getModelContext(), {
-                algorithm,
-                fitAfterOptimize: true
-            });
-            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-        });
-        document.getElementById('layout-algorithm-select').addEventListener('change', () => {
-            setLayoutSettings({ ...getLayoutSettings(), algorithm: document.getElementById('layout-algorithm-select').value }, { applyContext: false });
-        });
+        document.getElementById('layout-algorithm-select').addEventListener('change', handleLayoutAlgorithmChange);
         bindSceneSettingsControls();
         document.getElementById('model-select').addEventListener('change', async e => {
             await loadSelectedModel(e.target.value);
@@ -188,7 +161,11 @@
         document.getElementById('fit-model-button').addEventListener('click', () => {
             fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
         });
-        document.getElementById('editable-toggle').addEventListener('change', toggleEditableMode);
+        document.getElementById('help-shortcuts-button')?.addEventListener('click', () => toggleHelpOverlay(true));
+        document.getElementById('close-help-button')?.addEventListener('click', () => toggleHelpOverlay(false));
+        document.getElementById('keyboard-help')?.addEventListener('click', event => {
+            if (event.target?.id === 'keyboard-help') toggleHelpOverlay(false);
+        });
 
         setupCanvasPanControls(getModelContext());
         initModelOverview(getModelContext());
@@ -201,6 +178,17 @@
     function hasFitMetadata(model) {
         const fit = model?.metadata?.layout?.fit;
         return Boolean(fit && (fit.distance > 0 || fit.fitHeightDistance > 0 || fit.fitWidthDistance > 0));
+    }
+
+    async function handleLayoutAlgorithmChange() {
+        const algorithm = document.getElementById('layout-algorithm-select').value;
+        setLayoutSettings({ ...getLayoutSettings(), algorithm }, { applyContext: false });
+        if (algorithm === 'none') {
+            updateModelOverview(getModelContext());
+            return;
+        }
+        await optimizeAndRefreshLayout(getModelContext(), { algorithm });
+        fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
     }
 
     async function populateModelSelect() {
@@ -246,42 +234,33 @@
         setLoadStatus(`Load status: loading ${modelPath}`, 'warn');
         try {
             const loadedModel = await loadAndRenderScene(modelPath, getModelContext(), { allowedBasePath: 'models/' });
-            const validation = validateLoadedModel(loadedModel);
-            setValidationStatus(validation.message, validation.tone);
-            const preserveLayout = Boolean(loadedModel?.metadata?.preserveLayout || loadedModel?.hypergraph?.metadata?.preserveLayout);
-            const algorithm = document.getElementById('layout-algorithm-select').value;
-            let didOptimize = false;
-            if (!preserveLayout && document.getElementById('auto-optimize-toggle').checked && algorithm !== 'none') {
-                await optimizeAndRefreshLayout(getModelContext(), { algorithm });
-                didOptimize = true;
-            }
-            if (didOptimize || !hasFitMetadata(loadedModel)) {
+            updateCanvasModelTitle();
+            if (!hasFitMetadata(loadedModel)) {
                 fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
             }
             setLoadStatus(`Load status: loaded ${modelPath}`, 'ok');
         } catch (error) {
             setLoadStatus(`Load status: failed ${modelPath}`, 'error');
-            setValidationStatus(`Validation: load error (${error?.message || String(error)})`, 'error');
+            updateCanvasModelTitle('');
         }
     }
 
-    function validateLoadedModel(model) {
-        const classes = Array.isArray(model?.hypergraph?.class) ? model.hypergraph.class.length : 0;
-        const links = Array.isArray(model?.hypergraph?.link) ? model.hypergraph.link.length : 0;
-        if (classes <= 0) return { message: 'Validation: warning (no classes)', tone: 'warn' };
-        const dangling = (model?.hypergraph?.link || []).filter(link => !link?.sourceClassId || !link?.targetClassId).length;
-        if (dangling > 0) return { message: `Validation: warning (${dangling} incomplete links)`, tone: 'warn' };
-        return { message: `Validation: ok (${classes} classes, ${links} links)`, tone: 'ok' };
-    }
-
     function setLoadStatus(message, tone) { setStatusChip('load-status', message, tone); }
-    function setValidationStatus(message, tone) { setStatusChip('validation-status-main', message, tone); }
     function setStatusChip(id, message, tone = 'ok') {
         const chip = document.getElementById(id);
         if (!chip) return;
         chip.className = 'status-chip';
         if (['ok', 'warn', 'error'].includes(tone)) chip.classList.add(tone);
         chip.textContent = message;
+    }
+
+    function updateCanvasModelTitle(titleText) {
+        const title = document.getElementById('canvas-model-title');
+        if (!title) return;
+        const selectedOption = document.getElementById('model-select')?.selectedOptions?.[0];
+        const text = titleText ?? selectedOption?.textContent?.trim() ?? '';
+        title.textContent = text;
+        document.body.classList.toggle('has-model', Boolean(text));
     }
 
     function toggleHelpOverlay(show) {
@@ -298,11 +277,9 @@
             if (event.target && ['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target.tagName)) return;
             if (event.key.toLowerCase() === 'h') return toggleHelpOverlay(true);
             if (event.key.toLowerCase() === 'f') return document.getElementById('fit-model-button')?.click();
-            if (event.key.toLowerCase() === 'o') return document.getElementById('optimize-layout-button')?.click();
             if (event.key.toLowerCase() === 's') return document.getElementById('save-model-button')?.click();
             if (event.key.toLowerCase() === 'v') return document.getElementById('view-toggle')?.click();
         });
-        if (!modelsLoadOk) setValidationStatus('Validation: pending (manifest not ready)', 'warn');
     }
 
 
@@ -327,8 +304,112 @@
             setCamera2D,
             applyModelSceneSettings,
             applyModelLayoutSettings,
+            applyModelFontSettings,
             renderOnce
         };
+    }
+
+    function normalizeSimplifiedSceneSettings(settings = {}) {
+        const source = settings && typeof settings === 'object' ? settings : {};
+        const hasExplicitSettings = Object.keys(source).length > 0;
+        const normalized = normalizeSceneSettings(source);
+        const horizontalSource = normalized.sources?.[0] || {};
+        const verticalSource = normalized.sources?.[1] || {};
+        const legacyLayeredLighting = normalized.ambient > 0 || normalized.front > 0;
+        const horizontalAngle = horizontalLightAngleFromDirection(horizontalSource.direction);
+        const verticalAngle = hasExplicitSettings && !legacyLayeredLighting
+            ? verticalLightAngleFromDirection(verticalSource.direction)
+            : DEFAULT_VERTICAL_LIGHT_ANGLE;
+        const horizontalIntensity = normalizeLightIntensity(
+            horizontalSource.intensity,
+            DEFAULT_HORIZONTAL_LIGHT_INTENSITY,
+            hasExplicitSettings,
+            legacyLayeredLighting
+        );
+        const verticalIntensity = normalizeLightIntensity(
+            verticalSource.intensity,
+            DEFAULT_VERTICAL_LIGHT_INTENSITY,
+            hasExplicitSettings,
+            legacyLayeredLighting
+        );
+        return {
+            ...normalized,
+            ambient: 0,
+            front: 0,
+            sources: [
+                { intensity: horizontalIntensity, direction: horizontalLightDirectionFromAngle(horizontalAngle) },
+                { intensity: verticalIntensity, direction: verticalLightDirectionFromAngle(verticalAngle) }
+            ]
+        };
+    }
+
+    function normalizeLightIntensity(value, defaultValue, hasExplicitSettings, legacyLayeredLighting) {
+        const intensity = clampNumber(value, 0, 2, defaultValue);
+        if (!hasExplicitSettings) return defaultValue;
+        return legacyLayeredLighting && intensity <= 0.25 ? defaultValue : intensity;
+    }
+
+    function clampNumber(value, min, max, fallback = min) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return fallback;
+        return Math.min(max, Math.max(min, number));
+    }
+
+    function normalizeLightAngle(value) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return 0;
+        if (number === 360) return 360;
+        return ((number % 360) + 360) % 360;
+    }
+
+    function horizontalLightDirectionFromAngle(angle) {
+        const radians = normalizeLightAngle(angle) * Math.PI / 180;
+        return {
+            x: Number((Math.sin(radians) * LIGHT_CIRCLE_RADIUS).toFixed(3)),
+            y: LIGHT_CIRCLE_ELEVATION,
+            z: Number((Math.cos(radians) * LIGHT_CIRCLE_RADIUS).toFixed(3))
+        };
+    }
+
+    function verticalLightDirectionFromAngle(angle) {
+        const radians = normalizeLightAngle(angle) * Math.PI / 180;
+        return {
+            x: 0,
+            y: Number((Math.sin(radians) * LIGHT_CIRCLE_RADIUS).toFixed(3)),
+            z: Number((Math.cos(radians) * LIGHT_CIRCLE_RADIUS).toFixed(3))
+        };
+    }
+
+    function horizontalLightAngleFromDirection(direction = {}) {
+        const x = Number(direction.x ?? 0);
+        const z = Number(direction.z ?? LIGHT_CIRCLE_RADIUS);
+        if (!Number.isFinite(x) || !Number.isFinite(z)) return 0;
+        return normalizeLightAngle(Math.round(Math.atan2(x, z) * 180 / Math.PI));
+    }
+
+    function verticalLightAngleFromDirection(direction = {}) {
+        const y = Number(direction.y ?? 0);
+        const z = Number(direction.z ?? LIGHT_CIRCLE_RADIUS);
+        if (!Number.isFinite(y) || !Number.isFinite(z)) return DEFAULT_VERTICAL_LIGHT_ANGLE;
+        return normalizeLightAngle(Math.round(Math.atan2(y, z) * 180 / Math.PI));
+    }
+
+    function horizontalLightSource() {
+        return lightingState.sources?.[0] || {
+            intensity: DEFAULT_HORIZONTAL_LIGHT_INTENSITY,
+            direction: horizontalLightDirectionFromAngle(0)
+        };
+    }
+
+    function verticalLightSource() {
+        return lightingState.sources?.[1] || {
+            intensity: DEFAULT_VERTICAL_LIGHT_INTENSITY,
+            direction: verticalLightDirectionFromAngle(DEFAULT_VERTICAL_LIGHT_ANGLE)
+        };
+    }
+
+    function effectiveLightIntensity(source, fallback) {
+        return source.direction?.z < 0 ? 0 : clampNumber(source.intensity, 0, 2, fallback);
     }
 
     function ensureLighting() {
@@ -341,14 +422,20 @@
         front.position.set(-3, 2, 16);
         scene.add(front);
 
-        const sourceOne = new THREE.DirectionalLight(0xffffff, lightingState.sources[0].intensity);
+        const sourceOne = new THREE.DirectionalLight(
+            0xffffff,
+            effectiveLightIntensity(horizontalLightSource(), DEFAULT_HORIZONTAL_LIGHT_INTENSITY)
+        );
         sourceOne.name = 'hbds-source-one-light';
-        sourceOne.position.copy(directionToVector(lightingState.sources[0].direction));
+        sourceOne.position.copy(directionToVector(horizontalLightSource().direction));
         scene.add(sourceOne);
 
-        const sourceTwo = new THREE.DirectionalLight(0xffffff, lightingState.sources[1].intensity);
+        const sourceTwo = new THREE.DirectionalLight(
+            0xffffff,
+            effectiveLightIntensity(verticalLightSource(), DEFAULT_VERTICAL_LIGHT_INTENSITY)
+        );
         sourceTwo.name = 'hbds-source-two-light';
-        sourceTwo.position.copy(directionToVector(lightingState.sources[1].direction));
+        sourceTwo.position.copy(directionToVector(verticalLightSource().direction));
         scene.add(sourceTwo);
         sceneLights = { ambient, front, sourceOne, sourceTwo };
     }
@@ -358,12 +445,14 @@
         if (sceneLights.ambient) sceneLights.ambient.intensity = lightingState.ambient;
         if (sceneLights.front) sceneLights.front.intensity = lightingState.front;
         if (sceneLights.sourceOne) {
-            sceneLights.sourceOne.intensity = lightingState.sources[0].intensity;
-            sceneLights.sourceOne.position.copy(directionToVector(lightingState.sources[0].direction));
+            sceneLights.sourceOne.intensity = effectiveLightIntensity(horizontalLightSource(), DEFAULT_HORIZONTAL_LIGHT_INTENSITY);
+            sceneLights.sourceOne.visible = sceneLights.sourceOne.intensity > 0;
+            sceneLights.sourceOne.position.copy(directionToVector(horizontalLightSource().direction));
         }
         if (sceneLights.sourceTwo) {
-            sceneLights.sourceTwo.intensity = lightingState.sources[1].intensity;
-            sceneLights.sourceTwo.position.copy(directionToVector(lightingState.sources[1].direction));
+            sceneLights.sourceTwo.intensity = effectiveLightIntensity(verticalLightSource(), DEFAULT_VERTICAL_LIGHT_INTENSITY);
+            sceneLights.sourceTwo.visible = sceneLights.sourceTwo.intensity > 0;
+            sceneLights.sourceTwo.position.copy(directionToVector(verticalLightSource().direction));
         }
         if (options.syncControls) syncSceneSettingsControls();
         renderOnce();
@@ -378,17 +467,30 @@
             const input = document.getElementById(id);
             if (input) input.value = String(value);
         };
-        bind('scene-background-input', lightingState.background);
-        bind('ambient-light-input', lightingState.ambient);
-        bind('front-light-input', lightingState.front);
-        bind('source-one-intensity-input', lightingState.sources[0].intensity);
-        bind('source-one-x-input', lightingState.sources[0].direction.x);
-        bind('source-one-y-input', lightingState.sources[0].direction.y);
-        bind('source-one-z-input', lightingState.sources[0].direction.z);
-        bind('source-two-intensity-input', lightingState.sources[1].intensity);
-        bind('source-two-x-input', lightingState.sources[1].direction.x);
-        bind('source-two-y-input', lightingState.sources[1].direction.y);
-        bind('source-two-z-input', lightingState.sources[1].direction.z);
+        const horizontal = horizontalLightSource();
+        const vertical = verticalLightSource();
+        bind('horizontal-light-intensity-input', horizontal.intensity);
+        bind('horizontal-light-angle-input', horizontalLightAngleFromDirection(horizontal.direction));
+        bind('vertical-light-intensity-input', vertical.intensity);
+        bind('vertical-light-angle-input', verticalLightAngleFromDirection(vertical.direction));
+        updateHorizontalLightAngleValue();
+        updateVerticalLightAngleValue();
+    }
+
+    function updateHorizontalLightAngleValue(angle = horizontalLightAngleFromDirection(horizontalLightSource().direction)) {
+        const output = document.getElementById('horizontal-light-angle-value');
+        if (!output) return;
+        const label = `${Math.round(normalizeLightAngle(angle))}deg`;
+        output.value = label;
+        output.textContent = label;
+    }
+
+    function updateVerticalLightAngleValue(angle = verticalLightAngleFromDirection(verticalLightSource().direction)) {
+        const output = document.getElementById('vertical-light-angle-value');
+        if (!output) return;
+        const label = `${Math.round(normalizeLightAngle(angle))}deg`;
+        output.value = label;
+        output.textContent = label;
     }
 
     function readSceneSettingsControls() {
@@ -396,29 +498,39 @@
             const value = Number(document.getElementById(id)?.value);
             return Number.isFinite(value) ? value : fallback;
         };
-        lightingState = normalizeSceneSettings({
-            background: document.getElementById('scene-background-input')?.value || lightingState.background,
-            ambient: numberValue('ambient-light-input', lightingState.ambient),
-            front: numberValue('front-light-input', lightingState.front),
+        const currentHorizontal = horizontalLightSource();
+        const currentVertical = verticalLightSource();
+        const horizontalAngle = normalizeLightAngle(numberValue(
+            'horizontal-light-angle-input',
+            horizontalLightAngleFromDirection(currentHorizontal.direction)
+        ));
+        const verticalAngle = normalizeLightAngle(numberValue(
+            'vertical-light-angle-input',
+            verticalLightAngleFromDirection(currentVertical.direction)
+        ));
+        const horizontalIntensity = clampNumber(
+            numberValue('horizontal-light-intensity-input', currentHorizontal.intensity),
+            0,
+            2,
+            DEFAULT_HORIZONTAL_LIGHT_INTENSITY
+        );
+        const verticalIntensity = clampNumber(
+            numberValue('vertical-light-intensity-input', currentVertical.intensity),
+            0,
+            2,
+            DEFAULT_VERTICAL_LIGHT_INTENSITY
+        );
+        lightingState = normalizeSimplifiedSceneSettings({
+            background: lightingState.background,
+            ambient: 0,
+            front: 0,
             sources: [
-                {
-                    intensity: numberValue('source-one-intensity-input', lightingState.sources[0].intensity),
-                    direction: {
-                        x: numberValue('source-one-x-input', lightingState.sources[0].direction.x),
-                        y: numberValue('source-one-y-input', lightingState.sources[0].direction.y),
-                        z: numberValue('source-one-z-input', lightingState.sources[0].direction.z)
-                    }
-                },
-                {
-                    intensity: numberValue('source-two-intensity-input', lightingState.sources[1].intensity),
-                    direction: {
-                        x: numberValue('source-two-x-input', lightingState.sources[1].direction.x),
-                        y: numberValue('source-two-y-input', lightingState.sources[1].direction.y),
-                        z: numberValue('source-two-z-input', lightingState.sources[1].direction.z)
-                    }
-                }
+                { intensity: horizontalIntensity, direction: horizontalLightDirectionFromAngle(horizontalAngle) },
+                { intensity: verticalIntensity, direction: verticalLightDirectionFromAngle(verticalAngle) }
             ]
         });
+        updateHorizontalLightAngleValue(horizontalAngle);
+        updateVerticalLightAngleValue(verticalAngle);
     }
 
     function handleSceneSettingInput() {
@@ -428,30 +540,23 @@
     }
 
     function handleResetSceneSettings() {
-        lightingState = normalizeSceneSettings();
+        lightingState = normalizeSimplifiedSceneSettings(defaultLightingState);
         setSceneSettings(lightingState, { applyContext: false });
         applySceneSettings({ syncControls: true });
     }
 
     function bindSceneSettingsControls() {
         [
-            'scene-background-input',
-            'ambient-light-input',
-            'front-light-input',
-            'source-one-intensity-input',
-            'source-one-x-input',
-            'source-one-y-input',
-            'source-one-z-input',
-            'source-two-intensity-input',
-            'source-two-x-input',
-            'source-two-y-input',
-            'source-two-z-input'
+            'horizontal-light-intensity-input',
+            'horizontal-light-angle-input',
+            'vertical-light-intensity-input',
+            'vertical-light-angle-input'
         ].forEach(id => document.getElementById(id)?.addEventListener('input', handleSceneSettingInput));
         document.getElementById('reset-scene-settings-button')?.addEventListener('click', handleResetSceneSettings);
     }
 
     function applyModelSceneSettings(settings) {
-        lightingState = normalizeSceneSettings(settings || getSceneSettings());
+        lightingState = normalizeSimplifiedSceneSettings(settings || getSceneSettings());
         applySceneSettings({ syncControls: true });
     }
 
@@ -459,6 +564,10 @@
         const select = document.getElementById('layout-algorithm-select');
         const algorithm = settings?.algorithm || getLayoutSettings().algorithm || 'none';
         if (select) select.value = [...select.options].some(option => option.value === algorithm) ? algorithm : 'none';
+    }
+
+    function applyModelFontSettings(settings) {
+        fontState = normalizeFontSettings(settings || getFontSettings());
     }
 
     function setupDragControls() {
@@ -521,7 +630,7 @@
         css2DRenderer.setSize(window.innerWidth, window.innerHeight);
         updateLabelFontSizes(camera, renderer);
         updateHyperClassLabelFontSizes(camera, renderer);
-        updateLinkFontSizes(camera);
+        updateLinkFontSizes(camera, renderer);
         updateHyperClassLinkFontSizes(camera, renderer);
         recalculateAllLinks();
         renderOnce();
@@ -537,12 +646,6 @@
         if (!is3D) setCamera2D();
         updateModelOverview(getModelContext());
     }
-    function toggleEditableMode(e) {
-        const editable = e.target.checked;
-        if (dragControls) dragControls.enabled = editable && !document.getElementById('view-toggle').checked;
-        orbitControls.enabled = !editable;
-    }
-
     function setCamera2D() {
         const sphere = diagramGroup.userData.boundingSphere;
         if (!sphere || sphere.radius === 0) {
@@ -573,9 +676,3 @@
 </script>
 </body>
 </html>
-        const shortcutsButton = document.getElementById('help-shortcuts-button');
-        shortcutsButton.addEventListener('click', () => toggleHelpOverlay(true));
-        document.getElementById('close-help-button').addEventListener('click', () => toggleHelpOverlay(false));
-        document.getElementById('keyboard-help').addEventListener('click', event => {
-            if (event.target?.id === 'keyboard-help') toggleHelpOverlay(false);
-        });

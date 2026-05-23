@@ -67,14 +67,6 @@
       ]
     },
     {
-      "value": "models/complex_HDBS_Structure.json",
-      "label": "Complex HBDS Structure",
-      "description": "Complex HBDS structure sample",
-      "tags": [
-        "complex"
-      ]
-    },
-    {
       "value": "models/hyperclass_mail_Carrier.json",
       "label": "Hyperclass Mail Carrier",
       "description": "Hyperclass sample",

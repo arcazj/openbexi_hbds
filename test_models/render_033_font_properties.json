@@ -1,0 +1,180 @@
+{
+  "metadata": {
+    "layout": {
+      "algorithm": "grid"
+    },
+    "font": {
+      "size": 13,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "font_domain",
+        "name": "Font Domain",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "id": "domain_default_font",
+            "name": "global fallback attribute"
+          },
+          {
+            "id": "domain_bold_attribute",
+            "name": "bold underlined attribute",
+            "font": {
+              "size": 15,
+              "bold": true,
+              "underline": true
+            }
+          }
+        ],
+        "children": [
+          "font_class_override",
+          "font_class_fallback"
+        ],
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 5.2,
+          "height": 3.6
+        },
+        "rendering": {
+          "font": {
+            "size": 20,
+            "italic": true
+          },
+          "class": {
+            "color": "#dbeafe",
+            "borderColor": "#1d4ed8",
+            "opacity": 0.22,
+            "cornerRadius": 0.22
+          },
+          "attributes": {
+            "checkboxColor": "#1d4ed8",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#1d4ed8",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "font_class_override",
+        "name": "Individual Class Font",
+        "attributes": [
+          {
+            "id": "class_custom_attribute",
+            "name": "italic attribute",
+            "font": {
+              "size": 16,
+              "italic": true
+            }
+          },
+          {
+            "id": "class_fallback_attribute",
+            "name": "fallback attribute"
+          }
+        ],
+        "parentClassId": "font_domain",
+        "position": {
+          "x": -1.2,
+          "y": 0.35,
+          "z": 0
+        },
+        "rendering": {
+          "font": {
+            "size": 18,
+            "bold": true
+          },
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#a16207",
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#a16207",
+            "checkboxMaterial": "metallic",
+            "shape": "diamond",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#a16207",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "font_class_fallback",
+        "name": "Global Font Class",
+        "attributes": [
+          "legacy string fallback",
+          {
+            "id": "class_underlined_attribute",
+            "name": "underlined attribute",
+            "font": {
+              "underline": true
+            }
+          }
+        ],
+        "parentClassId": "font_domain",
+        "position": {
+          "x": 1.2,
+          "y": -0.55,
+          "z": 0
+        },
+        "rendering": {
+          "class": {
+            "color": "#dcfce7",
+            "borderColor": "#15803d",
+            "cornerRadius": 0.1
+          },
+          "attributes": {
+            "checkboxColor": "#15803d",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#15803d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "font_link",
+        "sourceClassId": "font_class_override",
+        "targetClassId": "font_class_fallback",
+        "name": "font fallback",
+        "rendering": {
+          "labelText": "font fallback",
+          "lineColor": "#475569",
+          "lineWidth": 2
+        }
+      }
+    ]
+  }
+}

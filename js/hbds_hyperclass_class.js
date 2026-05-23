@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { attachAttributesToMesh, createIconTitleLabel } from './hbds_class.js?v=attribute-rendering-20260522a';
+import { attachAttributesToMesh, createIconTitleLabel, applyLabelFontSettings } from './hbds_class.js?v=font-zoom-20260523a';
 
 const hyperclassLabels = [];
 let lastSizingCamera = null;
@@ -62,6 +62,8 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
     className: 'label class-label hyperclass-label',
     isHyperclass: true,
     textColor,
+    font: hyperClassData.rendering?.font,
+    modelFont: hyperClassData.modelFont,
     legacyFont: 'bold 18px Arial',
     iconFont: 'bold 18px Arial',
     iconSize: classCfg.iconSize ?? 1,
@@ -125,6 +127,7 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
       lineWidth: hyperClassData.rendering?.connections?.lineWidth ?? 0.01
     },
     textColor,
+    modelFont: hyperClassData.modelFont,
     startY: sz.height / 2 - 0.45,
     gapY: 0.16,
     colX: sz.width / 2 + 0.28,
@@ -151,10 +154,14 @@ export function updateLabelFontSizes(camera, renderer, options = {}) {
     const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, dist, viewportHeight);
     const availableWidthPx = Math.max(72, (nodeWidth - 0.36) * pixelsPerWorldUnit);
     const distanceSize = THREE.MathUtils.clamp(150 / dist, 2.8, 22);
-    const verticalCap = Math.max(2.8, 0.28 * pixelsPerWorldUnit);
+    const verticalCap = Math.max(1.5, 0.24 * pixelsPerWorldUnit);
     const text = label.userData?.text || label.element.textContent || '';
     const fitSize = availableWidthPx / Math.max(1, String(text).length * 0.62 + (label.element.classList.contains('hbds-icon-title') ? 1.25 : 0));
-    const size = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), 2.8, 22);
+    const configuredSize = Number(label.userData?.fontSettings?.size);
+    const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), 1.5, 22);
+    const size = Number.isFinite(configuredSize)
+      ? Math.max(1.5, Math.min(configuredSize, dynamicSize))
+      : dynamicSize;
     applyHyperclassTitleSizing(label.element, availableWidthPx, size);
   });
 }
@@ -170,6 +177,7 @@ function getPixelsPerWorldUnit(camera, distance, viewportHeight) {
 
 function applyHyperclassTitleSizing(element, availableWidthPx, fontSize) {
   element.style.fontSize = `${fontSize.toFixed(1)}px`;
+  if (element.__hbdsFontSettings) applyLabelFontSettings(element, { ...element.__hbdsFontSettings, size: fontSize });
   element.style.maxWidth = `${Math.round(availableWidthPx)}px`;
   element.style.overflow = 'hidden';
   element.style.textOverflow = 'ellipsis';

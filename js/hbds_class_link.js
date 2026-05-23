@@ -11,6 +11,13 @@ const LANE_OVERLAP_MIN = 0.2;
 const RELATIONSHIP_PORT_RADIUS = 0.065;
 const RELATIONSHIP_PORT_STUB = 0.24;
 const PORT_SIDES = ['top', 'right', 'bottom', 'left'];
+const DEFAULT_LINK_FONT_SETTINGS = {
+  size: 12,
+  family: 'Arial, sans-serif',
+  bold: false,
+  italic: false,
+  underline: false
+};
 
 export const Loader = {
   async load(modelName) {
@@ -23,6 +30,47 @@ export const Loader = {
 export function clearLinkRegistry() {
   linkLabels.length = 0;
   activeLinks.length = 0;
+}
+
+function resolveLinkLabelFontSettings(rendering = {}, modelFont = {}) {
+  const individual = rendering.font && typeof rendering.font === 'object' ? rendering.font : {};
+  const model = modelFont && typeof modelFont === 'object' ? modelFont : {};
+  const fallback = {
+    ...DEFAULT_LINK_FONT_SETTINGS,
+    ...model,
+    size: toPositiveNumber(model.size ?? model.fontSize ?? model.labelFontSize, DEFAULT_LINK_FONT_SETTINGS.size),
+    family: normalizeFontFamily(model.family ?? model.fontFamily, DEFAULT_LINK_FONT_SETTINGS.family),
+    bold: toBooleanFontValue(model.bold ?? model.fontWeight, DEFAULT_LINK_FONT_SETTINGS.bold),
+    italic: toBooleanFontValue(model.italic ?? model.fontStyle, DEFAULT_LINK_FONT_SETTINGS.italic),
+    underline: toBooleanFontValue(model.underline ?? model.textDecoration ?? model.textDecorationLine, DEFAULT_LINK_FONT_SETTINGS.underline)
+  };
+  return {
+    size: toPositiveNumber(rendering.labelFontSize ?? individual.size ?? individual.fontSize, fallback.size),
+    family: normalizeFontFamily(individual.family ?? individual.fontFamily, fallback.family),
+    bold: toBooleanFontValue(individual.bold ?? individual.fontWeight, fallback.bold),
+    italic: toBooleanFontValue(individual.italic ?? individual.fontStyle, fallback.italic),
+    underline: toBooleanFontValue(individual.underline ?? individual.textDecoration ?? individual.textDecorationLine, fallback.underline)
+  };
+}
+
+function applyLinkLabelFontSettings(element, fontSettings = DEFAULT_LINK_FONT_SETTINGS) {
+  if (!element) return;
+  const font = {
+    ...DEFAULT_LINK_FONT_SETTINGS,
+    ...fontSettings,
+    size: toPositiveNumber(fontSettings.size, DEFAULT_LINK_FONT_SETTINGS.size),
+    family: normalizeFontFamily(fontSettings.family, DEFAULT_LINK_FONT_SETTINGS.family)
+  };
+  element.__hbdsFontSettings = font;
+  element.style.fontSize = `${font.size}px`;
+  element.style.fontFamily = font.family;
+  element.style.fontWeight = font.bold ? '700' : '400';
+  element.style.fontStyle = font.italic ? 'italic' : 'normal';
+  element.style.textDecoration = font.underline ? 'underline' : 'none';
+  const paddingY = THREE.MathUtils.clamp(font.size * 0.12, 0.2, 2);
+  const paddingX = THREE.MathUtils.clamp(font.size * 0.42, 0.8, 8);
+  element.style.padding = `${paddingY.toFixed(1)}px ${paddingX.toFixed(1)}px`;
+  element.style.borderRadius = `${Math.max(2, font.size * 1.2).toFixed(1)}px`;
 }
 
 export function createLinkBetweenClass(linkData, classById) {
@@ -64,19 +112,24 @@ export function createLinkBetweenClass(linkData, classById) {
 
   const sourcePort = createRelationshipPortMarker('source', rendering);
   const targetPort = createRelationshipPortMarker('target', rendering);
+  const labelFont = resolveLinkLabelFontSettings(rendering, linkData.modelFont);
 
   const labelDiv = document.createElement('div');
   labelDiv.className = 'label link-label';
   labelDiv.textContent = rendering.labelText ?? '';
-  labelDiv.style.font = `${rendering.labelFontSize ?? 12}px Arial`;
+  applyLinkLabelFontSettings(labelDiv, labelFont);
   labelDiv.style.color = rendering.labelColor ?? rendering.textColor ?? '#111111';
   labelDiv.style.background = rendering.labelBackgroundColor ?? 'rgba(255,255,255,0.9)';
-  labelDiv.style.padding = '2px 8px';
   labelDiv.style.borderRadius = '999px';
   labelDiv.style.border = '1px solid rgba(55,65,81,0.45)';
   labelDiv.style.whiteSpace = 'nowrap';
   labelDiv.style.textAlign = 'center';
   const labelObj = new CSS2DObject(labelDiv);
+  labelObj.userData = {
+    labelKind: 'link',
+    text: rendering.labelText ?? '',
+    fontSettings: labelFont
+  };
   linkLabels.push(labelObj);
 
   const linkGroup = new THREE.Group();
@@ -92,6 +145,7 @@ export function recalculateAllLinks() {
   const pairBuckets = new Map();
   const occupiedLanes = [];
   const occupiedLabels = [];
+  const occupiedLabelParents = new WeakSet();
   for (const link of activeLinks) {
     const key = [String(link.linkData.sourceClassId), String(link.linkData.targetClassId)].sort().join(':');
     if (!pairBuckets.has(key)) pairBuckets.set(key, []);
@@ -103,6 +157,10 @@ export function recalculateAllLinks() {
     const laneDescriptors = getBucketLaneDescriptors(bucket);
     bucket.forEach((link, index) => {
       const parent = link.linkGroup.parent;
+      if (parent && !occupiedLabelParents.has(parent)) {
+        occupiedLabels.push(...getStaticAttributeLabelBounds(parent));
+        occupiedLabelParents.add(parent);
+      }
       const obstacleBoxes = getObstacleBoxes(parent, link.sourceClass, link.targetClass);
       const lane = laneDescriptors.get(link);
       const portPair = chooseRelationshipPortPair(link, parent, lane, obstacleBoxes);
@@ -924,6 +982,30 @@ function getLabelBounds(position, size) {
   };
 }
 
+function getStaticAttributeLabelBounds(parent) {
+  const bounds = [];
+  const localPosition = new THREE.Vector3();
+  parent.updateWorldMatrix?.(true, true);
+  parent.traverse?.(object => {
+    if (!object.isCSS2DObject || object.userData?.labelKind !== 'attribute') return;
+    object.getWorldPosition(localPosition);
+    parent.worldToLocal(localPosition);
+    const text = String(object.userData?.text || object.element?.textContent || '');
+    const width = Math.min(
+      object.userData?.maxWorldWidth ?? 2.25,
+      Math.max(0.24, text.length * 0.075)
+    );
+    const height = Math.max(0.08, (object.userData?.gapY ?? 0.17) * 0.9);
+    bounds.push({
+      minX: localPosition.x,
+      maxX: localPosition.x + width,
+      minY: localPosition.y - height / 2,
+      maxY: localPosition.y + height / 2
+    });
+  });
+  return bounds;
+}
+
 function labelBoundsCollide(a, b, margin = 0) {
   return Math.min(a.maxX, b.maxX) - Math.max(a.minX, b.minX) > -margin &&
     Math.min(a.maxY, b.maxY) - Math.max(a.minY, b.minY) > -margin;
@@ -966,15 +1048,67 @@ function pointsAlmostEqual(a, b) {
   return almostEqual(a.x, b.x) && almostEqual(a.y, b.y) && almostEqual(a.z, b.z);
 }
 
-export function updateLinkFontSizes(camera) {
+function toFiniteNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function toPositiveNumber(value, fallback) {
+  const number = toFiniteNumber(value, fallback);
+  return number > 0 ? number : fallback;
+}
+
+function normalizeFontFamily(value, fallback) {
+  const clean = String(value ?? '').trim();
+  return clean || fallback || DEFAULT_LINK_FONT_SETTINGS.family;
+}
+
+function toBooleanFontValue(value, fallback = false) {
+  if (value === undefined || value === null || value === '') return Boolean(fallback);
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value >= 600 || value === 1;
+  const clean = String(value).trim().toLowerCase();
+  if (['true', '1', 'yes', 'bold', 'bolder', '600', '700', '800', '900', 'italic', 'underline'].includes(clean)) return true;
+  if (['false', '0', 'no', 'normal', 'none', 'lighter', '400'].includes(clean)) return false;
+  const numeric = Number(clean);
+  if (Number.isFinite(numeric)) return numeric >= 600 || numeric === 1;
+  return Boolean(fallback);
+}
+
+function getPixelsPerWorldUnit(camera, distance, viewportHeight) {
+  if (camera?.isPerspectiveCamera) {
+    const fov = camera.fov * Math.PI / 180;
+    return viewportHeight / Math.max(1e-6, 2 * Math.tan(fov / 2) * Math.max(distance, 1e-6));
+  }
+  if (camera?.isOrthographicCamera) return viewportHeight / Math.max(1e-6, camera.top - camera.bottom);
+  return 80;
+}
+
+function getFontSizeForTextWidth(text, availableWidthPx, extraPx = 0) {
+  const estimatedEm = Math.max(1, String(text || '').length * 0.58);
+  return Math.max(1, availableWidthPx - extraPx) / estimatedEm;
+}
+
+export function updateLinkFontSizes(camera, renderer) {
   const p = new THREE.Vector3();
   const c = new THREE.Vector3();
   camera.getWorldPosition(c);
+  const viewportHeight = Math.max(1, renderer?.domElement?.clientHeight ?? globalThis.innerHeight ?? 800);
   for (const label of linkLabels) {
     label.getWorldPosition(p);
     const d = Math.max(1, p.distanceTo(c));
-    const size = THREE.MathUtils.clamp(120 / d, 6, 18);
-    label.element.style.fontSize = `${size.toFixed(1)}px`;
+    const font = label.userData?.fontSettings || DEFAULT_LINK_FONT_SETTINGS;
+    const preferredSize = toPositiveNumber(font.size, DEFAULT_LINK_FONT_SETTINGS.size);
+    const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, d, viewportHeight);
+    const rendering = label.parent?.userData?.linkData?.rendering || {};
+    const collisionWidthWorld = rendering.labelCollisionWidth ?? Math.max(0.85, String(label.userData?.text || label.element.textContent || '').length * 0.12);
+    const availableWidthPx = Math.max(42, collisionWidthWorld * pixelsPerWorldUnit);
+    const minSize = 1;
+    const distanceSize = THREE.MathUtils.clamp(120 / d, minSize, Math.max(18, preferredSize));
+    const fitSize = getFontSizeForTextWidth(label.userData?.text || label.element.textContent || '', availableWidthPx, 2);
+    const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize), minSize, Math.max(18, preferredSize));
+    const size = Math.max(minSize, Math.min(preferredSize, dynamicSize));
+    applyLinkLabelFontSettings(label.element, { ...font, size });
   }
 }
 

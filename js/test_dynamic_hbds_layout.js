@@ -31,9 +31,12 @@ import {
   setSceneSettings,
   normalizeSceneSettings,
   getLayoutSettings,
-  setLayoutSettings
-} from './hbds_model.js?v=attribute-rendering-20260522a';
-import { recalculateAllLinks } from './hbds_class_link.js?v=link-rendering-20260522a';
+  setLayoutSettings,
+  getFontSettings,
+  setFontSettings,
+  normalizeFontSettings
+} from './hbds_model.js?v=font-zoom-20260523a';
+import { recalculateAllLinks } from './hbds_class_link.js?v=font-zoom-20260523a';
 
 let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
 const draggableObjects = [];
@@ -58,11 +61,19 @@ let nextAttributeNumber = 1;
 let nextLinkNumber = 1;
 let toastTimer = null;
 const activityLog = [];
-let lightingState = normalizeSceneSettings();
-const defaultLightingState = normalizeSceneSettings();
+const LIGHT_CIRCLE_RADIUS = 16;
+const LIGHT_CIRCLE_ELEVATION = 7;
+const DEFAULT_HORIZONTAL_LIGHT_INTENSITY = 1;
+const DEFAULT_VERTICAL_LIGHT_INTENSITY = 0.6;
+const DEFAULT_VERTICAL_LIGHT_ANGLE = 45;
+let lightingState = normalizeSimplifiedSceneSettings();
+const defaultLightingState = normalizeSimplifiedSceneSettings();
+let fontState = normalizeFontSettings();
+const defaultFontState = normalizeFontSettings();
 let sceneLights = {};
 let propertyPanelTargetKey = null;
 let propertyPanelOpenSection = null;
+let nextInspectorListId = 1;
 
 const CLASS_COLORS = [
   { fill: '#ffd166', border: '#7a4f00' },
@@ -129,7 +140,28 @@ const KNOWN_ENUMS = {
     'star',
     'capsule',
     'parallelogram',
-    'trapezoid'
+    'trapezoid',
+    'invertedTrapezoid',
+    'document',
+    'paperTape',
+    'predefinedProcess',
+    'manualInput',
+    'database',
+    'directAccessStorage',
+    'internalStorage',
+    'display',
+    'storedData',
+    'triangleDown',
+    'circlePlus',
+    'circleX',
+    'offPageConnector',
+    'braceLeft',
+    'braceRight',
+    'textLines',
+    'bracketedList',
+    'table',
+    'tableColumns',
+    'tableRows'
   ],
   shapeType: [
     'roundedRectangle',
@@ -145,11 +177,42 @@ const KNOWN_ENUMS = {
     'star',
     'capsule',
     'parallelogram',
-    'trapezoid'
+    'trapezoid',
+    'invertedTrapezoid',
+    'document',
+    'paperTape',
+    'predefinedProcess',
+    'manualInput',
+    'database',
+    'directAccessStorage',
+    'internalStorage',
+    'display',
+    'storedData',
+    'triangleDown',
+    'circlePlus',
+    'circleX',
+    'offPageConnector',
+    'braceLeft',
+    'braceRight',
+    'textLines',
+    'bracketedList',
+    'table',
+    'tableColumns',
+    'tableRows'
   ],
   checkboxMaterial: ['metallic', 'flat'],
   shape: ['square', 'circle', 'diamond', 'triangle']
 };
+const KNOWN_CLASS_IMAGE_SOURCES = [
+  './images/class_car.png',
+  './images/class_satellite.png',
+  './images/class_vehicle.png',
+  './images/class_voiture.png',
+  './images/class_human.png',
+  './images/class_user.png',
+  './images/class_man.png',
+  './images/class_supplier.png'
+];
 const DEFAULT_OPEN_CONTROL_SECTIONS = new Set(['model', 'session']);
 const INSPECTOR_HISTORY_LIMIT = 40;
 const CLASS_2D_DEFAULTS = {
@@ -249,6 +312,7 @@ const ctx = () => ({
   setupDragControls: setupDrag,
   applyModelSceneSettings,
   applyModelLayoutSettings,
+  applyModelFontSettings,
   renderOnce
 });
 
@@ -342,6 +406,115 @@ function resizeRenderers() {
   updateOverview();
 }
 
+function normalizeSimplifiedSceneSettings(settings = {}) {
+  const source = settings && typeof settings === 'object' ? settings : {};
+  const hasExplicitSettings = Object.keys(source).length > 0;
+  const normalized = normalizeSceneSettings(source);
+  const horizontalSource = normalized.sources?.[0] || {};
+  const verticalSource = normalized.sources?.[1] || {};
+  const legacyLayeredLighting = normalized.ambient > 0 || normalized.front > 0;
+  const horizontalAngle = horizontalLightAngleFromDirection(horizontalSource.direction);
+  const verticalAngle = hasExplicitSettings && !legacyLayeredLighting
+    ? verticalLightAngleFromDirection(verticalSource.direction)
+    : DEFAULT_VERTICAL_LIGHT_ANGLE;
+  const horizontalIntensity = normalizeLightIntensity(
+    horizontalSource.intensity,
+    DEFAULT_HORIZONTAL_LIGHT_INTENSITY,
+    hasExplicitSettings,
+    legacyLayeredLighting
+  );
+  const verticalIntensity = normalizeLightIntensity(
+    verticalSource.intensity,
+    DEFAULT_VERTICAL_LIGHT_INTENSITY,
+    hasExplicitSettings,
+    legacyLayeredLighting
+  );
+  return {
+    ...normalized,
+    ambient: 0,
+    front: 0,
+    sources: [
+      {
+        intensity: horizontalIntensity,
+        direction: horizontalLightDirectionFromAngle(horizontalAngle)
+      },
+      {
+        intensity: verticalIntensity,
+        direction: verticalLightDirectionFromAngle(verticalAngle)
+      }
+    ]
+  };
+}
+
+function normalizeLightIntensity(value, defaultValue, hasExplicitSettings, legacyLayeredLighting) {
+  const intensity = clampNumber(value, 0, 2, defaultValue);
+  if (!hasExplicitSettings) return defaultValue;
+  return legacyLayeredLighting && intensity <= 0.25 ? defaultValue : intensity;
+}
+
+function clampNumber(value, min, max, fallback = min) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(max, Math.max(min, number));
+}
+
+function normalizeLightAngle(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  if (number === 360) return 360;
+  return ((number % 360) + 360) % 360;
+}
+
+function horizontalLightDirectionFromAngle(angle) {
+  const radians = normalizeLightAngle(angle) * Math.PI / 180;
+  return {
+    x: Number((Math.sin(radians) * LIGHT_CIRCLE_RADIUS).toFixed(3)),
+    y: LIGHT_CIRCLE_ELEVATION,
+    z: Number((Math.cos(radians) * LIGHT_CIRCLE_RADIUS).toFixed(3))
+  };
+}
+
+function verticalLightDirectionFromAngle(angle) {
+  const radians = normalizeLightAngle(angle) * Math.PI / 180;
+  return {
+    x: 0,
+    y: Number((Math.sin(radians) * LIGHT_CIRCLE_RADIUS).toFixed(3)),
+    z: Number((Math.cos(radians) * LIGHT_CIRCLE_RADIUS).toFixed(3))
+  };
+}
+
+function horizontalLightAngleFromDirection(direction = {}) {
+  const x = Number(direction.x ?? 0);
+  const z = Number(direction.z ?? LIGHT_CIRCLE_RADIUS);
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return 0;
+  return normalizeLightAngle(Math.round(Math.atan2(x, z) * 180 / Math.PI));
+}
+
+function verticalLightAngleFromDirection(direction = {}) {
+  const y = Number(direction.y ?? 0);
+  const z = Number(direction.z ?? LIGHT_CIRCLE_RADIUS);
+  if (!Number.isFinite(y) || !Number.isFinite(z)) return DEFAULT_VERTICAL_LIGHT_ANGLE;
+  return normalizeLightAngle(Math.round(Math.atan2(y, z) * 180 / Math.PI));
+}
+
+function horizontalLightSource() {
+  return lightingState.sources?.[0] || {
+    intensity: DEFAULT_HORIZONTAL_LIGHT_INTENSITY,
+    direction: horizontalLightDirectionFromAngle(0)
+  };
+}
+
+function verticalLightSource() {
+  return lightingState.sources?.[1] || {
+    intensity: DEFAULT_VERTICAL_LIGHT_INTENSITY,
+    direction: verticalLightDirectionFromAngle(DEFAULT_VERTICAL_LIGHT_ANGLE)
+  };
+}
+
+function effectiveLightIntensity(source, fallback) {
+  return source.direction?.z < 0 ? 0 : clampNumber(source.intensity, 0, 2, fallback);
+}
+
 function ensureLighting() {
   const ambient = new THREE.AmbientLight(0xffffff, lightingState.ambient);
   ambient.name = 'hbds-ambient-light';
@@ -352,15 +525,22 @@ function ensureLighting() {
   front.position.set(-3, 2, 16);
   scene.add(front);
 
-  const sourceOne = new THREE.DirectionalLight(0xffffff, lightingState.sources[0].intensity);
+  const sourceOne = new THREE.DirectionalLight(
+    0xffffff,
+    effectiveLightIntensity(horizontalLightSource(), DEFAULT_HORIZONTAL_LIGHT_INTENSITY)
+  );
   sourceOne.name = 'hbds-source-one-light';
-  sourceOne.position.copy(directionToVector(lightingState.sources[0].direction));
+  sourceOne.position.copy(directionToVector(horizontalLightSource().direction));
   scene.add(sourceOne);
 
-  const sourceTwo = new THREE.DirectionalLight(0xffffff, lightingState.sources[1].intensity);
+  const sourceTwo = new THREE.DirectionalLight(
+    0xffffff,
+    effectiveLightIntensity(verticalLightSource(), DEFAULT_VERTICAL_LIGHT_INTENSITY)
+  );
   sourceTwo.name = 'hbds-source-two-light';
-  sourceTwo.position.copy(directionToVector(lightingState.sources[1].direction));
+  sourceTwo.position.copy(directionToVector(verticalLightSource().direction));
   scene.add(sourceTwo);
+
   sceneLights = { ambient, front, sourceOne, sourceTwo };
 }
 
@@ -369,12 +549,14 @@ function applySceneSettings(options = {}) {
   if (sceneLights.ambient) sceneLights.ambient.intensity = lightingState.ambient;
   if (sceneLights.front) sceneLights.front.intensity = lightingState.front;
   if (sceneLights.sourceOne) {
-    sceneLights.sourceOne.intensity = lightingState.sources[0].intensity;
-    sceneLights.sourceOne.position.copy(directionToVector(lightingState.sources[0].direction));
+    sceneLights.sourceOne.intensity = effectiveLightIntensity(horizontalLightSource(), DEFAULT_HORIZONTAL_LIGHT_INTENSITY);
+    sceneLights.sourceOne.visible = sceneLights.sourceOne.intensity > 0;
+    sceneLights.sourceOne.position.copy(directionToVector(horizontalLightSource().direction));
   }
   if (sceneLights.sourceTwo) {
-    sceneLights.sourceTwo.intensity = lightingState.sources[1].intensity;
-    sceneLights.sourceTwo.position.copy(directionToVector(lightingState.sources[1].direction));
+    sceneLights.sourceTwo.intensity = effectiveLightIntensity(verticalLightSource(), DEFAULT_VERTICAL_LIGHT_INTENSITY);
+    sceneLights.sourceTwo.visible = sceneLights.sourceTwo.intensity > 0;
+    sceneLights.sourceTwo.position.copy(directionToVector(verticalLightSource().direction));
   }
   if (options.syncControls) syncSceneSettingsControls();
   renderOnce();
@@ -389,17 +571,31 @@ function syncSceneSettingsControls() {
     const input = $(id);
     if (input) input.value = String(value);
   };
+  const horizontal = horizontalLightSource();
+  const vertical = verticalLightSource();
   bind('scene-background-input', lightingState.background);
-  bind('ambient-light-input', lightingState.ambient);
-  bind('front-light-input', lightingState.front);
-  bind('source-one-intensity-input', lightingState.sources[0].intensity);
-  bind('source-one-x-input', lightingState.sources[0].direction.x);
-  bind('source-one-y-input', lightingState.sources[0].direction.y);
-  bind('source-one-z-input', lightingState.sources[0].direction.z);
-  bind('source-two-intensity-input', lightingState.sources[1].intensity);
-  bind('source-two-x-input', lightingState.sources[1].direction.x);
-  bind('source-two-y-input', lightingState.sources[1].direction.y);
-  bind('source-two-z-input', lightingState.sources[1].direction.z);
+  bind('horizontal-light-intensity-input', horizontal.intensity);
+  bind('horizontal-light-angle-input', horizontalLightAngleFromDirection(horizontal.direction));
+  bind('vertical-light-intensity-input', vertical.intensity);
+  bind('vertical-light-angle-input', verticalLightAngleFromDirection(vertical.direction));
+  updateHorizontalLightAngleValue();
+  updateVerticalLightAngleValue();
+}
+
+function updateHorizontalLightAngleValue(angle = horizontalLightAngleFromDirection(horizontalLightSource().direction)) {
+  const output = $('horizontal-light-angle-value');
+  if (!output) return;
+  const label = `${Math.round(normalizeLightAngle(angle))}deg`;
+  output.value = label;
+  output.textContent = label;
+}
+
+function updateVerticalLightAngleValue(angle = verticalLightAngleFromDirection(verticalLightSource().direction)) {
+  const output = $('vertical-light-angle-value');
+  if (!output) return;
+  const label = `${Math.round(normalizeLightAngle(angle))}deg`;
+  output.value = label;
+  output.textContent = label;
 }
 
 function readSceneSettingsControls() {
@@ -407,18 +603,39 @@ function readSceneSettingsControls() {
     const value = Number($(id)?.value);
     return Number.isFinite(value) ? value : fallback;
   };
-  lightingState.background = normalizeHexColor($('scene-background-input')?.value || lightingState.background);
-  lightingState.ambient = numberValue('ambient-light-input', lightingState.ambient);
-  lightingState.front = numberValue('front-light-input', lightingState.front);
-  lightingState.sources[0].intensity = numberValue('source-one-intensity-input', lightingState.sources[0].intensity);
-  lightingState.sources[0].direction.x = numberValue('source-one-x-input', lightingState.sources[0].direction.x);
-  lightingState.sources[0].direction.y = numberValue('source-one-y-input', lightingState.sources[0].direction.y);
-  lightingState.sources[0].direction.z = numberValue('source-one-z-input', lightingState.sources[0].direction.z);
-  lightingState.sources[1].intensity = numberValue('source-two-intensity-input', lightingState.sources[1].intensity);
-  lightingState.sources[1].direction.x = numberValue('source-two-x-input', lightingState.sources[1].direction.x);
-  lightingState.sources[1].direction.y = numberValue('source-two-y-input', lightingState.sources[1].direction.y);
-  lightingState.sources[1].direction.z = numberValue('source-two-z-input', lightingState.sources[1].direction.z);
-  lightingState = normalizeSceneSettings(lightingState);
+  const currentHorizontal = horizontalLightSource();
+  const currentVertical = verticalLightSource();
+  const horizontalAngle = normalizeLightAngle(numberValue(
+    'horizontal-light-angle-input',
+    horizontalLightAngleFromDirection(currentHorizontal.direction)
+  ));
+  const verticalAngle = normalizeLightAngle(numberValue(
+    'vertical-light-angle-input',
+    verticalLightAngleFromDirection(currentVertical.direction)
+  ));
+  const horizontalIntensity = clampNumber(
+    numberValue('horizontal-light-intensity-input', currentHorizontal.intensity),
+    0,
+    2,
+    DEFAULT_HORIZONTAL_LIGHT_INTENSITY
+  );
+  const verticalIntensity = clampNumber(
+    numberValue('vertical-light-intensity-input', currentVertical.intensity),
+    0,
+    2,
+    DEFAULT_VERTICAL_LIGHT_INTENSITY
+  );
+  lightingState = normalizeSimplifiedSceneSettings({
+    background: normalizeHexColor($('scene-background-input')?.value || lightingState.background),
+    ambient: 0,
+    front: 0,
+    sources: [
+      { intensity: horizontalIntensity, direction: horizontalLightDirectionFromAngle(horizontalAngle) },
+      { intensity: verticalIntensity, direction: verticalLightDirectionFromAngle(verticalAngle) }
+    ]
+  });
+  updateHorizontalLightAngleValue(horizontalAngle);
+  updateVerticalLightAngleValue(verticalAngle);
 }
 
 function handleSceneSettingInput() {
@@ -430,7 +647,7 @@ function handleSceneSettingInput() {
 }
 
 function handleResetSceneSettings() {
-  lightingState = normalizeSceneSettings(defaultLightingState);
+  lightingState = normalizeSimplifiedSceneSettings(defaultLightingState);
   setSceneSettings(lightingState, { applyContext: false });
   applySceneSettings({ syncControls: true });
   updateJsonPreviewFromData();
@@ -439,7 +656,7 @@ function handleResetSceneSettings() {
 }
 
 function applyModelSceneSettings(settings) {
-  lightingState = normalizeSceneSettings(settings || getSceneSettings());
+  lightingState = normalizeSimplifiedSceneSettings(settings || getSceneSettings());
   applySceneSettings({ syncControls: true });
 }
 
@@ -447,6 +664,69 @@ function applyModelLayoutSettings(settings) {
   const select = $('layout-algorithm-select');
   const algorithm = settings?.algorithm || getLayoutSettings().algorithm || 'none';
   if (select) select.value = [...select.options].some(option => option.value === algorithm) ? algorithm : 'none';
+}
+
+function syncFontSettingsControls() {
+  const bind = (id, value) => {
+    const input = $(id);
+    if (!input) return;
+    if (input.type === 'checkbox') input.checked = Boolean(value);
+    else input.value = String(value);
+  };
+  bind('model-font-size-input', fontState.size);
+  bind('model-font-family-input', fontState.family);
+  bind('model-font-bold-input', fontState.bold);
+  bind('model-font-italic-input', fontState.italic);
+  bind('model-font-underline-input', fontState.underline);
+  updateFontSizeValue();
+}
+
+function readFontSettingsControls() {
+  const numberValue = (id, fallback) => {
+    const value = Number($(id)?.value);
+    return Number.isFinite(value) ? value : fallback;
+  };
+  fontState = normalizeFontSettings({
+    size: numberValue('model-font-size-input', fontState.size),
+    family: $('model-font-family-input')?.value || fontState.family,
+    bold: $('model-font-bold-input')?.checked === true,
+    italic: $('model-font-italic-input')?.checked === true,
+    underline: $('model-font-underline-input')?.checked === true
+  });
+  updateFontSizeValue();
+}
+
+function updateFontSizeValue() {
+  const output = $('model-font-size-value');
+  if (!output) return;
+  const label = `${Math.round(fontState.size)}px`;
+  output.value = label;
+  output.textContent = label;
+}
+
+function handleFontSettingInput() {
+  readFontSettingsControls();
+  setFontSettings(fontState, { context: ctx(), applyContext: false, refresh: true });
+  updateOverview();
+  renderPropertyPanel();
+  updateJsonPreviewFromData();
+  updateRenderDiagnostics();
+}
+
+function handleResetFontSettings() {
+  fontState = normalizeFontSettings(defaultFontState);
+  setFontSettings(fontState, { context: ctx(), applyContext: false, refresh: true });
+  syncFontSettingsControls();
+  updateOverview();
+  renderPropertyPanel();
+  updateJsonPreviewFromData();
+  updateRenderDiagnostics();
+  addLog('Reset model font settings');
+}
+
+function applyModelFontSettings(settings) {
+  fontState = normalizeFontSettings(settings || getFontSettings());
+  syncFontSettingsControls();
 }
 
 function handleLayoutSettingChange() {
@@ -538,12 +818,14 @@ function countAttributes() {
 }
 
 function updateStats() {
-  const nodeCount = nodes().length;
-  $('stat-node-count').textContent = String(nodeCount);
+  const allNodes = nodes();
+  const classCount = allNodes.filter(node => node.type !== 'hyperclass').length;
+  const hyperclassCount = allNodes.filter(node => node.type === 'hyperclass').length;
+  $('stat-node-count').textContent = String(classCount);
   $('stat-link-count').textContent = String(links().length);
   $('stat-attribute-count').textContent = String(countAttributes());
-  $('stat-hyperclass-count').textContent = String(nodes().filter(node => node.type === 'hyperclass').length);
-  document.body.classList.toggle('has-model', nodeCount > 0 || Boolean(canvasTitleOverride));
+  $('stat-hyperclass-count').textContent = String(hyperclassCount);
+  document.body.classList.toggle('has-model', allNodes.length > 0 || Boolean(canvasTitleOverride));
 }
 
 function updateCanvasTitle() {
@@ -863,7 +1145,8 @@ function updateModeControls() {
 
   ['mode-full', 'mode-structure', 'mode-readonly'].forEach(id => $(id)?.classList.remove('active'));
   $(`mode-${editMode}`)?.classList.add('active');
-  $('edit-mode-select').value = editMode;
+  const editModeSelect = $('edit-mode-select');
+  if (editModeSelect) editModeSelect.value = editMode;
   if (dragControls) dragControls.enabled = !isReadOnly;
 }
 
@@ -1158,6 +1441,12 @@ function renderClass2DInspector(panel, target) {
     step: 0.01,
     defaultValue: CLASS_2D_DEFAULTS.opacity
   });
+  appendFontControls(appearance.body, {
+    labelPrefix: 'Name ',
+    path: ['rendering', 'font'],
+    font: node.rendering?.font,
+    fallback: getFontSettings()
+  });
   appendCheckboxControl(appearance.body, {
     label: 'Visible',
     path: ['visible'],
@@ -1282,6 +1571,7 @@ function appendClassImagesInspectorSection(panel, renderingClass = {}, selectedN
     path: ['rendering', 'class', 'imageSrc'],
     value: getValue(['rendering', 'class', 'imageSrc'], CLASS_2D_DEFAULTS.imageSrc),
     placeholder: './images/class.png or https://...',
+    suggestions: KNOWN_CLASS_IMAGE_SOURCES,
     defaultValue: CLASS_2D_DEFAULTS.imageSrc
   });
   appendSelectControl(images.body, {
@@ -1315,6 +1605,54 @@ function appendClassShapesInspectorSection(panel, renderingClass = {}, selectedN
     defaultValue: CLASS_2D_DEFAULTS.shapeType
   });
   panel.appendChild(shapes.section);
+}
+
+function appendFontControls(container, config) {
+  const font = normalizeFontSettings(config.font, config.fallback || getFontSettings());
+  const path = config.path || ['rendering', 'font'];
+  const prefix = config.labelPrefix || '';
+  appendSliderNumberControl(container, {
+    label: `${prefix}Font Size`,
+    path: [...path, 'size'],
+    value: font.size,
+    min: 6,
+    max: 48,
+    step: 1,
+    defaultValue: null
+  });
+  appendTextControl(container, {
+    label: `${prefix}Font Family`,
+    path: [...path, 'family'],
+    value: font.family,
+    placeholder: 'Arial, sans-serif',
+    defaultValue: null
+  });
+  appendCheckboxControl(container, {
+    label: `${prefix}Bold`,
+    path: [...path, 'bold'],
+    value: font.bold,
+    defaultValue: null
+  });
+  appendCheckboxControl(container, {
+    label: `${prefix}Italic`,
+    path: [...path, 'italic'],
+    value: font.italic,
+    defaultValue: null
+  });
+  appendCheckboxControl(container, {
+    label: `${prefix}Underline`,
+    path: [...path, 'underline'],
+    value: font.underline,
+    defaultValue: null
+  });
+}
+
+function getCommonFontValue(items, path) {
+  const font = {};
+  for (const key of ['size', 'family', 'bold', 'italic', 'underline']) {
+    font[key] = getCommonPropertyValue(items, [...path, key], null);
+  }
+  return font;
 }
 
 function renderMultiClass2DInspector(panel, target) {
@@ -1385,6 +1723,12 @@ function renderMultiClass2DInspector(panel, target) {
     max: 1,
     step: 0.01,
     defaultValue: CLASS_2D_DEFAULTS.opacity
+  });
+  appendFontControls(appearance.body, {
+    labelPrefix: 'Name ',
+    path: ['rendering', 'font'],
+    font: getCommonFontValue(selectedNodes, ['rendering', 'font']),
+    fallback: getFontSettings()
   });
   appendCheckboxControl(appearance.body, {
     label: 'Visible',
@@ -1891,6 +2235,14 @@ function renderAttribute2DInspector(panel, target) {
     placeholder: 'Attribute name'
   });
   panel.appendChild(content.section);
+
+  const appearance = createInspectorSection('Appearance', true);
+  appendFontControls(appearance.body, {
+    path: ['font'],
+    font: target.value.font,
+    fallback: getFontSettings()
+  });
+  panel.appendChild(appearance.section);
 }
 
 function createInspectorSection(title, open = false) {
@@ -1911,6 +2263,17 @@ function appendTextControl(container, config) {
   input.type = 'text';
   input.value = String(config.value ?? '');
   input.placeholder = config.placeholder || '';
+  if (config.suggestions?.length) {
+    const list = document.createElement('datalist');
+    list.id = `inspector-list-${nextInspectorListId++}`;
+    [...new Set(config.suggestions.map(String).filter(Boolean))].forEach(value => {
+      const option = document.createElement('option');
+      option.value = value;
+      list.appendChild(option);
+    });
+    input.setAttribute('list', list.id);
+    row.control.appendChild(list);
+  }
   applyInspectorDataset(input, config.path, 'string', false, config.defaultValue);
   row.control.appendChild(input);
   appendResetButton(row.control, config);
@@ -2613,9 +2976,18 @@ function installIconOnLabel(label, labelObject, model) {
     label.style.background = 'transparent';
     label.style.boxShadow = 'none';
     const currentFontSize = label.style.fontSize || getComputedStyle(label).fontSize;
-    label.style.fontWeight = '700';
-    label.style.fontFamily = 'Arial, sans-serif';
-    if (currentFontSize) label.style.fontSize = currentFontSize;
+    const fontSettings = labelObject.userData?.fontSettings;
+    if (fontSettings) {
+      label.style.fontWeight = fontSettings.bold ? '700' : '400';
+      label.style.fontFamily = fontSettings.family || 'Arial, sans-serif';
+      label.style.fontStyle = fontSettings.italic ? 'italic' : 'normal';
+      label.style.textDecoration = fontSettings.underline ? 'underline' : 'none';
+      label.style.fontSize = `${fontSettings.size}px`;
+    } else {
+      label.style.fontWeight = '700';
+      label.style.fontFamily = 'Arial, sans-serif';
+      if (currentFontSize) label.style.fontSize = currentFontSize;
+    }
     label.style.lineHeight = '1';
     label.style.whiteSpace = 'nowrap';
     label.style.overflow = 'visible';
@@ -3080,14 +3452,70 @@ function collectLinkHubMetrics() {
 function collectLabelMetrics() {
   return [...document.querySelectorAll('.class-label, .attribute-label, .link-label')].map(element => {
     const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
     return {
       text: element.textContent || '',
       classes: [...element.classList],
+      left: Number(rect.left.toFixed(2)),
+      top: Number(rect.top.toFixed(2)),
+      right: Number(rect.right.toFixed(2)),
+      bottom: Number(rect.bottom.toFixed(2)),
       width: Number(rect.width.toFixed(2)),
       height: Number(rect.height.toFixed(2)),
+      fontSize: style.fontSize,
+      fontFamily: style.fontFamily,
+      fontWeight: style.fontWeight,
+      fontStyle: style.fontStyle,
+      textDecorationLine: style.textDecorationLine,
       visible: rect.width > 0 && rect.height > 0
     };
   });
+}
+
+function validateRenderedFontMetrics() {
+  const metrics = collectLabelMetrics().filter(metric => (
+    metric.classes.includes('class-label') || metric.classes.includes('attribute-label') || metric.classes.includes('link-label')
+  ));
+  const errors = [];
+  metrics.forEach((metric, index) => {
+    const size = Number.parseFloat(metric.fontSize);
+    if (!Number.isFinite(size) || size <= 0) errors.push(`label ${index + 1} has invalid font size`);
+    if (!String(metric.fontFamily || '').trim()) errors.push(`label ${index + 1} has no font family`);
+  });
+  return errors;
+}
+
+function getLabelOverlapSummary(metrics, ratioThreshold = 0.55) {
+  const labels = metrics.filter(metric => metric.visible && metric.width > 1 && metric.height > 1);
+  let severe = 0;
+  let maxRatio = 0;
+  const examples = [];
+  for (let i = 0; i < labels.length; i += 1) {
+    for (let j = i + 1; j < labels.length; j += 1) {
+      const a = labels[i];
+      const b = labels[j];
+      const overlapWidth = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+      const overlapHeight = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+      const area = overlapWidth * overlapHeight;
+      if (!area) continue;
+      const ratio = area / Math.max(1, Math.min(a.width * a.height, b.width * b.height));
+      maxRatio = Math.max(maxRatio, ratio);
+      if (ratio > ratioThreshold) {
+        severe += 1;
+        if (examples.length < 4) examples.push(`${a.text || a.classes.join('.')} / ${b.text || b.classes.join('.')}`);
+      }
+    }
+  }
+  return { severe, maxRatio: Number(maxRatio.toFixed(3)), examples };
+}
+
+function summarizeFontZoomSamples(samples) {
+  return samples.map(sample => (
+    `${sample.label}: class ${sample.classLabel.min.toFixed(1)}-${sample.classLabel.max.toFixed(1)}, `
+    + `attr ${sample.attributeLabel.min.toFixed(1)}-${sample.attributeLabel.max.toFixed(1)}, `
+    + `link ${sample.linkLabel.min.toFixed(1)}-${sample.linkLabel.max.toFixed(1)}, `
+    + `overlap ${sample.overlap.severe}/${sample.overlap.maxRatio.toFixed(2)}`
+  )).join(' | ');
 }
 
 function collectLayoutMetrics() {
@@ -3449,6 +3877,7 @@ async function handleApplyJson() {
 }
 
 function handleSaveModel() {
+  setSceneSettings(lightingState, { applyContext: false });
   saveScene(ctx(), { fileName: 'dynamic_hbds_test_model.json' });
   updateJsonPreviewFromData();
   addLog('Saved model JSON');
@@ -3456,6 +3885,7 @@ function handleSaveModel() {
 }
 
 function handleExportJson() {
+  setSceneSettings(lightingState, { applyContext: false });
   saveScene(ctx(), { fileName: 'dynamic_hbds_export.json' });
   updateJsonPreviewFromData();
   addLog('Exported JSON');
@@ -3647,6 +4077,11 @@ async function runScenarioSuite() {
           await optimizeAndRefreshLayout(ctx(), { algorithm });
         }
         if (!hasSavedFit) fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
+        const fontErrors = validateRenderedFontMetrics();
+        if (fontErrors.length) {
+          failures.push(`${label}: ${fontErrors.join('; ')}`);
+          continue;
+        }
         passed += 1;
         setStatus(`Running suite: ${passed}/${availableModels.length} - ${label}`, 'warn');
       } catch (error) {
@@ -3677,6 +4112,96 @@ async function runScenarioSuite() {
     addLog(`Scenario suite passed (${passed}/${availableModels.length} in ${elapsedMs}ms)`);
     setStatus(`Scenario suite: ${passed}/${availableModels.length} passed`, 'ok');
   }
+}
+
+function nextAnimationFrame() {
+  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+
+function getFontMetricExtremes(metrics, className) {
+  const sizes = metrics
+    .filter(metric => metric.classes.includes(className) && metric.visible)
+    .map(metric => Number.parseFloat(metric.fontSize))
+    .filter(Number.isFinite);
+  return {
+    count: sizes.length,
+    min: sizes.length ? Math.min(...sizes) : 0,
+    max: sizes.length ? Math.max(...sizes) : 0
+  };
+}
+
+async function sampleSatelliteFontZoomState(label, distanceFactor, baseDistance, target) {
+  const direction = camera.position.clone().sub(target).normalize();
+  camera.position.copy(target.clone().add(direction.multiplyScalar(baseDistance * distanceFactor)));
+  camera.lookAt(target);
+  camera.updateProjectionMatrix();
+  orbitControls?.target.copy(target);
+  orbitControls?.update?.();
+  updateSceneLabelScales(ctx());
+  renderOnce();
+  await nextAnimationFrame();
+  const metrics = collectLabelMetrics();
+  return {
+    label,
+    distanceFactor,
+    classLabel: getFontMetricExtremes(metrics, 'class-label'),
+    attributeLabel: getFontMetricExtremes(metrics, 'attribute-label'),
+    linkLabel: getFontMetricExtremes(metrics, 'link-label'),
+    overlap: getLabelOverlapSummary(metrics),
+    metrics
+  };
+}
+
+async function runSatelliteFontZoomRegression() {
+  const errors = [];
+  const loadedModel = await loadAndRenderScene('models/satellite_world_simple_structure.json', ctx(), {
+    allowedBasePath: 'models/',
+    defaultBasePath: 'models/'
+  });
+  fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
+  const target = orbitControls?.target?.clone?.() || new THREE.Vector3();
+  const baseDistance = Math.max(1, camera.position.distanceTo(target));
+  const samples = [
+    await sampleSatelliteFontZoomState('near', 0.55, baseDistance, target),
+    await sampleSatelliteFontZoomState('default', 1, baseDistance, target),
+    await sampleSatelliteFontZoomState('far', 1.75, baseDistance, target)
+  ];
+
+  const near = samples[0];
+  const far = samples[2];
+  if (near.classLabel.count <= 0) errors.push('missing class/hyperclass labels');
+  if (near.attributeLabel.count <= 0) errors.push('missing attribute labels');
+  if (near.linkLabel.count <= 0) errors.push('missing link labels');
+  if (near.classLabel.max > 14.15) errors.push(`class label font exceeded global 14px cap (${near.classLabel.max.toFixed(1)}px)`);
+  if (near.attributeLabel.max > 11.15) errors.push(`attribute font exceeded individual 11px cap (${near.attributeLabel.max.toFixed(1)}px)`);
+  if (near.linkLabel.max > 14.15) errors.push(`link label font exceeded 14px cap (${near.linkLabel.max.toFixed(1)}px)`);
+  if (far.classLabel.max >= near.classLabel.max - 0.25) errors.push('class labels did not shrink when zooming out');
+  if (far.attributeLabel.max >= near.attributeLabel.max - 0.25) errors.push('attribute labels did not shrink when zooming out');
+  if (far.linkLabel.max >= near.linkLabel.max - 0.25) errors.push('link labels did not shrink when zooming out');
+  samples.forEach(sample => {
+    if (sample.linkLabel.max > 0 && sample.attributeLabel.max < sample.linkLabel.max * 0.5) {
+      errors.push(`${sample.label} zoom attribute labels are too small relative to link labels (${sample.attributeLabel.max.toFixed(1)}px vs ${sample.linkLabel.max.toFixed(1)}px)`);
+    }
+  });
+  samples.forEach(sample => {
+    if (sample.overlap.severe > 0) {
+      errors.push(`${sample.label} zoom has severe label overlaps (${sample.overlap.severe}; ${sample.overlap.examples.join(', ')})`);
+    }
+  });
+
+  const validation = validateData(loadedModel);
+  if (!validation.valid) errors.push(`satellite model invalid: ${validation.errors.join('; ')}`);
+  if (errors.length) {
+    addLog(`Font zoom sample summary: ${summarizeFontZoomSamples(samples)}`);
+    errors.forEach(error => addLog(`Font zoom failure: ${error}`));
+    setStatus(`Satellite font zoom regression failed: ${errors.length}`, 'warn');
+  } else {
+    const summary = summarizeFontZoomSamples(samples);
+    addLog(`Satellite font zoom regression passed (${summary})`);
+    setStatus('Satellite font zoom regression passed', 'ok');
+  }
+  updateRenderDiagnostics();
+  return { valid: errors.length === 0, errors, samples };
 }
 
 function clearLinkBuilder() {
@@ -4017,20 +4542,23 @@ function bindUi() {
     }
   });
   $('reset-scene-settings-button')?.addEventListener('click', handleResetSceneSettings);
+  $('reset-model-font-settings-button')?.addEventListener('click', handleResetFontSettings);
 
   [
     'scene-background-input',
-    'ambient-light-input',
-    'front-light-input',
-    'source-one-intensity-input',
-    'source-one-x-input',
-    'source-one-y-input',
-    'source-one-z-input',
-    'source-two-intensity-input',
-    'source-two-x-input',
-    'source-two-y-input',
-    'source-two-z-input'
+    'horizontal-light-intensity-input',
+    'horizontal-light-angle-input',
+    'vertical-light-intensity-input',
+    'vertical-light-angle-input'
   ].forEach(id => $(id)?.addEventListener('input', handleSceneSettingInput));
+
+  [
+    'model-font-size-input',
+    'model-font-family-input',
+    'model-font-bold-input',
+    'model-font-italic-input',
+    'model-font-underline-input'
+  ].forEach(id => $(id)?.addEventListener('input', handleFontSettingInput));
 
   $('layout-algorithm-select')?.addEventListener('change', handleLayoutSettingChange);
 
@@ -4039,22 +4567,22 @@ function bindUi() {
     runAction(handleLoadModel);
   });
 
-  $('edit-mode-select').addEventListener('change', event => {
+  $('edit-mode-select')?.addEventListener('change', event => {
     editMode = event.target.value || 'full';
     if (editMode !== 'full') linkPickActive = false;
     updateInterface({ json: false });
   });
 
-  $('mode-full').addEventListener('click', () => {
+  $('mode-full')?.addEventListener('click', () => {
     editMode = 'full';
     updateInterface({ json: false });
   });
-  $('mode-structure').addEventListener('click', () => {
+  $('mode-structure')?.addEventListener('click', () => {
     editMode = 'structure';
     linkPickActive = false;
     updateInterface({ json: false });
   });
-  $('mode-readonly').addEventListener('click', () => {
+  $('mode-readonly')?.addEventListener('click', () => {
     editMode = 'readonly';
     linkPickActive = false;
     updateInterface({ json: false });
@@ -4095,6 +4623,7 @@ async function init() {
 
   ensureLighting();
   applySceneSettings({ syncControls: true });
+  syncFontSettingsControls();
   compactControlSections();
   bindUi();
   bindDiagramPicking();
@@ -4109,6 +4638,13 @@ async function init() {
   await populateModelSelect();
   updateInterface();
   addLog('Ready');
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('runScenarioSuite')) {
+    setTimeout(() => runAction(runScenarioSuite), 0);
+  }
+  if (params.has('runSatelliteFontRegression')) {
+    setTimeout(() => runAction(runSatelliteFontZoomRegression), 0);
+  }
 
   requestAnimationFrame(animate);
 }

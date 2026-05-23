@@ -22,6 +22,60 @@ CLASS_SHAPE_TYPES = {
     "capsule",
     "parallelogram",
     "trapezoid",
+    "invertedTrapezoid",
+    "document",
+    "paperTape",
+    "predefinedProcess",
+    "manualInput",
+    "database",
+    "directAccessStorage",
+    "internalStorage",
+    "display",
+    "storedData",
+    "triangleDown",
+    "circlePlus",
+    "circleX",
+    "offPageConnector",
+    "braceLeft",
+    "braceRight",
+    "textLines",
+    "bracketedList",
+    "table",
+    "tableColumns",
+    "tableRows",
+}
+CLASS_IMAGE_GALLERY_SOURCES = {
+    "./images/class_car.png",
+    "./images/class_satellite.png",
+    "./images/class_vehicle.png",
+    "./images/class_voiture.png",
+    "./images/class_human.png",
+    "./images/class_user.png",
+    "./images/class_man.png",
+    "./images/class_supplier.png",
+}
+FLOWCHART_SHAPE_TYPES = {
+    "invertedTrapezoid",
+    "document",
+    "paperTape",
+    "predefinedProcess",
+    "manualInput",
+    "database",
+    "directAccessStorage",
+    "internalStorage",
+    "display",
+    "storedData",
+    "triangleDown",
+    "circlePlus",
+    "circleX",
+    "offPageConnector",
+    "braceLeft",
+    "braceRight",
+    "textLines",
+    "bracketedList",
+    "table",
+    "tableColumns",
+    "tableRows",
 }
 
 
@@ -68,6 +122,7 @@ def validate_model_file(model_path: Path):
     if not isinstance(links, list):
         errors.append(f"{model_path}: hypergraph.link must be an array")
         links = []
+    errors.extend(validate_font_fields(model_path, data.get("metadata", {}) if isinstance(data, dict) else {}, "metadata"))
 
     ids = set()
     by_id = {}
@@ -86,6 +141,10 @@ def validate_model_file(model_path: Path):
         if not isinstance(node.get("attributes", []), list):
             errors.append(f"{model_path}: class {node_id} attributes must be an array")
         errors.extend(validate_class_body_fields(model_path, node))
+        errors.extend(validate_font_fields(model_path, (node.get("rendering") or {}).get("font"), f"class {node_id} rendering.font"))
+        for attr_idx, attribute in enumerate(node.get("attributes", []) if isinstance(node.get("attributes", []), list) else []):
+            if isinstance(attribute, dict):
+                errors.extend(validate_font_fields(model_path, attribute.get("font"), f"class {node_id} attributes[{attr_idx}].font"))
 
     for node in classes:
         if not isinstance(node, dict) or not node.get("id"):
@@ -113,6 +172,27 @@ def validate_model_file(model_path: Path):
             errors.append(f"{model_path}: link {link_id or idx} missing source {source}")
         if target not in by_id:
             errors.append(f"{model_path}: link {link_id or idx} missing target {target}")
+    return errors
+
+
+def validate_font_fields(model_path: Path, value, label: str):
+    if value is None:
+        return []
+    errors = []
+    font = (value.get("font") if label == "metadata" and isinstance(value, dict) and "font" in value else value)
+    if font is None:
+        return []
+    if not isinstance(font, dict):
+        return [f"{model_path}: {label} must be an object"]
+    size = font.get("size", font.get("fontSize", font.get("labelFontSize")))
+    if size is not None and (not isinstance(size, (int, float)) or size <= 0):
+        errors.append(f"{model_path}: {label}.size must be a positive number")
+    family = font.get("family", font.get("fontFamily"))
+    if family is not None and (not isinstance(family, str) or not family.strip()):
+        errors.append(f"{model_path}: {label}.family must be a non-empty string")
+    for key in ("bold", "italic", "underline"):
+        if key in font and font[key] is not None and not isinstance(font[key], bool):
+            errors.append(f"{model_path}: {label}.{key} must be a boolean or null")
     return errors
 
 
@@ -159,13 +239,19 @@ def is_allowed_image_source(value: str):
 def validate_image_shape_regression_model():
     model_path = ROOT / "test_models" / "render_029_image_shape_class_bodies.json"
     shape_catalog_path = ROOT / "test_models" / "render_030_extended_shape_class_bodies.json"
-    missing_models = [path for path in (model_path, shape_catalog_path) if not path.exists()]
+    image_gallery_path = ROOT / "test_models" / "render_031_class_image_gallery.json"
+    flowchart_shape_path = ROOT / "test_models" / "render_032_flowchart_shape_class_bodies.json"
+    missing_models = [path for path in (model_path, shape_catalog_path, image_gallery_path, flowchart_shape_path) if not path.exists()]
     if missing_models:
         return [f"missing image/shape regression model: {path}" for path in missing_models]
     data = load_json(model_path)
     shape_catalog_data = load_json(shape_catalog_path)
+    image_gallery_data = load_json(image_gallery_path)
+    flowchart_shape_data = load_json(flowchart_shape_path)
     classes = data["hypergraph"]["class"]
     shape_catalog_classes = shape_catalog_data["hypergraph"]["class"]
+    image_gallery_classes = image_gallery_data["hypergraph"]["class"]
+    flowchart_shape_classes = flowchart_shape_data["hypergraph"]["class"]
     links = data["hypergraph"].get("link", [])
     by_id = {node["id"]: node for node in classes}
     errors = []
@@ -176,7 +262,11 @@ def validate_image_shape_regression_model():
         if required not in body_types:
             errors.append(f"{model_path}: regression model missing bodyType {required}")
 
-    shape_regular = regular + [node for node in shape_catalog_classes if node.get("type") != "hyperclass"]
+    shape_regular = (
+        regular
+        + [node for node in shape_catalog_classes if node.get("type") != "hyperclass"]
+        + [node for node in flowchart_shape_classes if node.get("type") != "hyperclass"]
+    )
     shape_types = {
         ((node.get("rendering") or {}).get("class") or {}).get("shapeType")
         for node in shape_regular
@@ -184,7 +274,10 @@ def validate_image_shape_regression_model():
     }
     missing_shapes = CLASS_SHAPE_TYPES - shape_types
     if missing_shapes:
-        errors.append(f"{model_path} / {shape_catalog_path}: regression models missing shape types {sorted(missing_shapes)}")
+        errors.append(f"{model_path} / {shape_catalog_path} / {flowchart_shape_path}: regression models missing shape types {sorted(missing_shapes)}")
+    missing_flowchart_shapes = FLOWCHART_SHAPE_TYPES - shape_types
+    if missing_flowchart_shapes:
+        errors.append(f"{flowchart_shape_path}: flowchart regression model missing shape types {sorted(missing_flowchart_shapes)}")
 
     image_nodes = [
         node for node in regular
@@ -208,7 +301,23 @@ def validate_image_shape_regression_model():
     if not missing_local_images:
         errors.append(f"{model_path}: regression model needs at least one missing image fallback case")
 
-    for node in [*classes, *shape_catalog_classes]:
+    gallery_image_sources = {
+        ((node.get("rendering") or {}).get("class") or {}).get("imageSrc")
+        for node in image_gallery_classes
+        if node.get("type") != "hyperclass"
+        and ((node.get("rendering") or {}).get("class") or {}).get("bodyType") == "image"
+    }
+    missing_gallery_sources = CLASS_IMAGE_GALLERY_SOURCES - gallery_image_sources
+    if missing_gallery_sources:
+        errors.append(f"{image_gallery_path}: image gallery missing sources {sorted(missing_gallery_sources)}")
+    for src in CLASS_IMAGE_GALLERY_SOURCES:
+        local_path = src.replace("\\", "/")
+        if local_path.startswith("./"):
+            local_path = local_path[2:]
+        if not (ROOT / local_path).exists():
+            errors.append(f"{image_gallery_path}: image gallery source does not exist: {src}")
+
+    for node in [*classes, *shape_catalog_classes, *image_gallery_classes, *flowchart_shape_classes]:
         rendering_class = ((node.get("rendering") or {}).get("class") or {})
         if node.get("type") == "hyperclass" and any(key in rendering_class for key in ("bodyType", "imageSrc", "imageFit", "shapeType")):
             errors.append(f"{model_path}: hyperclass {node['id']} must not carry class body image/shape fields")
@@ -224,6 +333,33 @@ def validate_image_shape_regression_model():
     missing_pairs = required_pairs - link_type_pairs
     if missing_pairs:
         errors.append(f"{model_path}: regression model missing link body-type pairs {sorted(missing_pairs)}")
+    return errors
+
+
+def validate_font_regression_model():
+    model_path = ROOT / "test_models" / "render_033_font_properties.json"
+    if not model_path.exists():
+        return [f"missing font regression model: {model_path}"]
+    data = load_json(model_path)
+    classes = data["hypergraph"]["class"]
+    errors = []
+    metadata_font = (data.get("metadata") or {}).get("font") or {}
+    if metadata_font.get("size") != 13:
+        errors.append(f"{model_path}: font regression model must define metadata.font.size 13")
+    if not any(((node.get("rendering") or {}).get("font") or {}).get("size") for node in classes if node.get("type") != "hyperclass"):
+        errors.append(f"{model_path}: font regression model missing regular class font override")
+    if not any(((node.get("rendering") or {}).get("font") or {}).get("italic") for node in classes if node.get("type") == "hyperclass"):
+        errors.append(f"{model_path}: font regression model missing hyperclass italic override")
+    attr_fonts = [
+        attribute.get("font")
+        for node in classes
+        for attribute in node.get("attributes", [])
+        if isinstance(attribute, dict) and attribute.get("font")
+    ]
+    if not attr_fonts:
+        errors.append(f"{model_path}: font regression model missing individual attribute font override")
+    if not any(isinstance(attribute, str) for node in classes for attribute in node.get("attributes", [])):
+        errors.append(f"{model_path}: font regression model missing legacy string attribute fallback")
     return errors
 
 
@@ -245,6 +381,7 @@ def main():
             continue
         all_errors.extend(validate_manifest(manifest_path, default_base))
     all_errors.extend(validate_image_shape_regression_model())
+    all_errors.extend(validate_font_regression_model())
     if all_errors:
         print("Manifest validation failed:")
         for err in all_errors:

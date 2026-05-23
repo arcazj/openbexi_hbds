@@ -6,7 +6,57 @@
     "regressionTags": [
       "nested",
       "hyperclass"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "hierarchy",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 18.7426,
+        "fitWidthDistance": 10.8804,
+        "distance": 17.5036,
+        "diagramWidth": 7.14,
+        "diagramHeight": 13.75,
+        "diagramDepth": 0.13,
+        "radius": 7.7469,
+        "center": {
+          "x": 0.165,
+          "y": 0.03,
+          "z": 0.065
+        },
+        "cameraAspect": 1.7226,
+        "cameraFov": 52
+      }
+    },
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
   },
   "hypergraph": {
     "class": [
@@ -30,13 +80,13 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 0,
-          "y": 0,
+          "x": -2.8639,
+          "y": -0.4013,
           "z": 0
         },
         "size": {
-          "width": 11.2,
-          "height": 6.5
+          "width": 6.8100000000000005,
+          "height": 13.690000000000001
         },
         "rendering": {
           "class": {
@@ -82,13 +132,13 @@
         ],
         "parentClassId": "hyper_enterprise",
         "position": {
-          "x": -3,
-          "y": 0.65,
+          "x": -3.5189,
+          "y": -3.8413,
           "z": 0
         },
         "size": {
-          "width": 5.2,
-          "height": 3.4
+          "width": 4.05,
+          "height": 5.73
         },
         "rendering": {
           "class": {
@@ -134,13 +184,13 @@
         ],
         "parentClassId": "hyper_enterprise",
         "position": {
-          "x": 3,
-          "y": 0.65,
+          "x": -3.6189,
+          "y": 2.6887,
           "z": 0
         },
         "size": {
-          "width": 4.2,
-          "height": 3.4
+          "width": 4,
+          "height": 5.73
         },
         "rendering": {
           "class": {
@@ -186,13 +236,13 @@
         ],
         "parentClassId": "hyper_sales",
         "position": {
-          "x": -4.1,
-          "y": 0.45,
+          "x": -4.1739,
+          "y": -2.7413,
           "z": 0
         },
         "size": {
-          "width": 1.25,
-          "height": 1.65
+          "width": 1.35,
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -237,13 +287,13 @@
         ],
         "parentClassId": "hyper_sales",
         "position": {
-          "x": -1.55,
-          "y": 0.45,
+          "x": -4.1739,
+          "y": -5.2713,
           "z": 0
         },
         "size": {
-          "width": 1.25,
-          "height": 1.65
+          "width": 1.44,
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -288,13 +338,13 @@
         ],
         "parentClassId": "hyper_platform",
         "position": {
-          "x": 1.85,
-          "y": 0.45,
+          "x": -4.2939,
+          "y": 3.7687,
           "z": 0
         },
         "size": {
-          "width": 1.25,
-          "height": 1.65
+          "width": 1.35,
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -339,13 +389,13 @@
         ],
         "parentClassId": "hyper_platform",
         "position": {
-          "x": 3.55,
-          "y": 0.45,
+          "x": -4.2939,
+          "y": 1.2387,
           "z": 0
         },
         "size": {
-          "width": 1.25,
-          "height": 1.65
+          "width": 1.35,
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -383,18 +433,19 @@
         "name": "activates",
         "rendering": {
           "labelText": "activates",
+          "orthogonalStyle": "horizontal",
           "lineColor": "#7c4a03",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "horizontal",
           "orthogonalClearance": 0.75,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_sales_platform",
@@ -403,18 +454,19 @@
         "name": "depends on",
         "rendering": {
           "labelText": "depends on",
+          "orthogonalStyle": "horizontal",
           "lineColor": "#155e75",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "horizontal",
           "orthogonalClearance": 0.95,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       }
     ]
   }

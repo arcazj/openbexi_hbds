@@ -2,7 +2,6 @@
   "generatedAt": "2026-05-16T21:42:03.775Z",
   "models": [
     "bridge_road_links.json",
-    "complex_HDBS_Structure.json",
     "complex_hyperclass_mail_Carrier_with_links.json",
     "human_and_car_and_more.json",
     "human_and_car_links.json",
@@ -19,8 +18,8 @@
     "transportation_links.json",
     "transportation.json"
   ],
-  "uniqueNames": 469,
-  "generated": 463,
+  "uniqueNames": 467,
+  "generated": 461,
   "reused": 6,
   "collisions": 5,
   "icons": [
@@ -1649,17 +1648,6 @@
       ]
     },
     {
-      "name": "Enterprise_System_A",
-      "types": [
-        "hyperclass"
-      ],
-      "icon": "enterprise_system_a.svg",
-      "source": "generated",
-      "files": [
-        "complex_HDBS_Structure.json"
-      ]
-    },
-    {
       "name": "Entrees",
       "types": [
         "hyperclass"
@@ -1845,17 +1833,6 @@
       "source": "generated",
       "files": [
         "complex_hyperclass_mail_Carrier_with_links.json"
-      ]
-    },
-    {
-      "name": "External_Monitoring_Service",
-      "types": [
-        "class"
-      ],
-      "icon": "external_monitoring_service.svg",
-      "source": "generated",
-      "files": [
-        "complex_HDBS_Structure.json"
       ]
     },
     {

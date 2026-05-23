@@ -6,7 +6,57 @@
     "regressionTags": [
       "links",
       "class-hyperclass"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "grid",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 14.0057,
+        "fitWidthDistance": 8.1306,
+        "distance": 9.9494,
+        "diagramWidth": 9.56,
+        "diagramHeight": 6.53,
+        "diagramDepth": 0.13,
+        "radius": 5.789,
+        "center": {
+          "x": -0.405,
+          "y": 0.4,
+          "z": 0.065
+        },
+        "cameraAspect": 1.7226,
+        "cameraFov": 52
+      }
+    },
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
   },
   "hypergraph": {
     "class": [
@@ -26,8 +76,8 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": -3.1,
-          "y": 0.6,
+          "x": 3.300000000000001,
+          "y": 0,
           "z": 0
         },
         "size": {
@@ -77,13 +127,13 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 0.8,
+          "x": -3.1849999999999996,
           "y": 0,
           "z": 0
         },
         "size": {
-          "width": 5.2,
-          "height": 3.3
+          "width": 4,
+          "height": 5.73
         },
         "rendering": {
           "class": {
@@ -125,13 +175,13 @@
         ],
         "parentClassId": "hyper_monitoring",
         "position": {
-          "x": -0.2,
-          "y": 0.1,
+          "x": -3.859999999999999,
+          "y": 1.0900000000000003,
           "z": 0
         },
         "size": {
-          "width": 1.25,
-          "height": 1.55
+          "width": 1.35,
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -172,13 +222,13 @@
         ],
         "parentClassId": "hyper_monitoring",
         "position": {
-          "x": 1.9,
-          "y": 0.1,
+          "x": -3.859999999999999,
+          "y": -1.44,
           "z": 0
         },
         "size": {
-          "width": 1.25,
-          "height": 1.55
+          "width": 1.35,
+          "height": 1.75
         },
         "rendering": {
           "class": {
@@ -216,18 +266,19 @@
         "name": "reports into",
         "rendering": {
           "labelText": "reports into",
+          "orthogonalStyle": "auto",
           "lineColor": "#7c4a03",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.8,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       }
     ]
   }

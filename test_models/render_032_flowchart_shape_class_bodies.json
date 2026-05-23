@@ -1,0 +1,885 @@
+{
+  "metadata": {
+    "name": "Render 032 Flowchart Shape Class Bodies",
+    "purpose": "Regression model covering flowchart and diagram style class body shapes from the expanded Shapes menu.",
+    "preserveLayout": true,
+    "layout": {
+      "algorithm": "grid",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 35.3338,
+        "fitWidthDistance": 20.512,
+        "distance": 21.8916,
+        "diagramWidth": 25.995,
+        "diagramHeight": 13.32,
+        "diagramDepth": 0.13,
+        "radius": 14.6046,
+        "center": {
+          "x": -0.76,
+          "y": 0,
+          "z": 0.065
+        },
+        "cameraAspect": 1.7226,
+        "cameraFov": 52
+      }
+    },
+    "regressionTags": [
+      "rendering",
+      "shapes",
+      "classes",
+      "flowchart"
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "flowchart_shape_catalog_hyper",
+        "name": "Flowchart Shape Catalog",
+        "type": "hyperclass",
+        "children": [
+          "shape_body_inverted_trapezoid",
+          "shape_body_document",
+          "shape_body_paper_tape",
+          "shape_body_predefined_process",
+          "shape_body_manual_input",
+          "shape_body_database",
+          "shape_body_direct_access_storage",
+          "shape_body_internal_storage",
+          "shape_body_display",
+          "shape_body_stored_data",
+          "shape_body_triangle_down",
+          "shape_body_circle_plus",
+          "shape_body_circle_x",
+          "shape_body_off_page_connector",
+          "shape_body_brace_left",
+          "shape_body_brace_right",
+          "shape_body_text_lines",
+          "shape_body_bracketed_list",
+          "shape_body_table",
+          "shape_body_table_columns",
+          "shape_body_table_rows"
+        ],
+        "attributes": [
+          {
+            "id": "flowchart_shape_catalog_note",
+            "name": "regular classes only"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -2.5974,
+          "y": -0.3658,
+          "z": 0
+        },
+        "size": {
+          "width": 25.665,
+          "height": 13.320000000000002
+        },
+        "rendering": {
+          "class": {
+            "color": "#f8fafc",
+            "metallicColor": "#e2e8f0",
+            "borderColor": "#475569",
+            "borderWidth": 2,
+            "opacity": 0.24,
+            "cornerRadius": 0.28,
+            "metalness": 0.36,
+            "roughness": 0.34,
+            "material": "metallic"
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "shape_body_inverted_trapezoid",
+        "name": "Inverted Trapezoid",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_inverted_trapezoid_attr",
+            "name": "invertedTrapezoid"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -13.4849,
+          "y": -0.5408,
+          "z": 0
+        },
+        "size": {
+          "width": 2.5900000000000003,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "invertedTrapezoid",
+            "color": "#8ecae6",
+            "metallicColor": "#8ecae6",
+            "borderColor": "#155e75",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#082f49"
+        }
+      },
+      {
+        "id": "shape_body_document",
+        "name": "Document",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_document_attr",
+            "name": "document"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": 1.9126,
+          "y": 1.9892,
+          "z": 0
+        },
+        "size": {
+          "width": 1.44,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "document",
+            "color": "#b7e4c7",
+            "metallicColor": "#b7e4c7",
+            "borderColor": "#087443",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "shape_body_paper_tape",
+        "name": "Paper Tape",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_paper_tape_attr",
+            "name": "paperTape"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": 1.8951,
+          "y": -0.5408,
+          "z": 0
+        },
+        "size": {
+          "width": 1.6700000000000002,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "paperTape",
+            "color": "#f4a261",
+            "metallicColor": "#f4a261",
+            "borderColor": "#874a17",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_predefined_process",
+        "name": "Predefined Process",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_predefined_process_attr",
+            "name": "predefinedProcess"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": 6.5051,
+          "y": -0.5408,
+          "z": 0
+        },
+        "size": {
+          "width": 2.5900000000000003,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "predefinedProcess",
+            "color": "#cdb4db",
+            "metallicColor": "#cdb4db",
+            "borderColor": "#694b7d",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_manual_input",
+        "name": "Manual Input",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_manual_input_attr",
+            "name": "manualInput"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -8.1274,
+          "y": -0.5408,
+          "z": 0
+        },
+        "size": {
+          "width": 1.9000000000000001,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "manualInput",
+            "color": "#ffafcc",
+            "metallicColor": "#ffafcc",
+            "borderColor": "#8a3a57",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_database",
+        "name": "Database",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_database_attr",
+            "name": "database"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -13.2474,
+          "y": 1.9892,
+          "z": 0
+        },
+        "size": {
+          "width": 1.44,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "database",
+            "color": "#99f6e4",
+            "metallicColor": "#99f6e4",
+            "borderColor": "#0f766e",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#042f2e"
+        }
+      },
+      {
+        "id": "shape_body_direct_access_storage",
+        "name": "Direct Access",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_direct_access_storage_attr",
+            "name": "directAccessStorage"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -8.3474,
+          "y": 1.9892,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "directAccessStorage",
+            "color": "#fde68a",
+            "metallicColor": "#fde68a",
+            "borderColor": "#92400e",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_internal_storage",
+        "name": "Internal Storage",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_internal_storage_attr",
+            "name": "internalStorage"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": 6.5601,
+          "y": 1.9892,
+          "z": 0
+        },
+        "size": {
+          "width": 2.3600000000000003,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "internalStorage",
+            "color": "#a5b4fc",
+            "metallicColor": "#a5b4fc",
+            "borderColor": "#4338ca",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_display",
+        "name": "Display",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_display_attr",
+            "name": "display"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -2.8899,
+          "y": 1.9892,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "display",
+            "color": "#fecdd3",
+            "metallicColor": "#fecdd3",
+            "borderColor": "#be123c",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_stored_data",
+        "name": "Stored Data",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_stored_data_attr",
+            "name": "storedData"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -13.2924,
+          "y": -3.0708,
+          "z": 0
+        },
+        "size": {
+          "width": 1.7850000000000001,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "storedData",
+            "color": "#bae6fd",
+            "metallicColor": "#bae6fd",
+            "borderColor": "#0369a1",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#082f49"
+        }
+      },
+      {
+        "id": "shape_body_triangle_down",
+        "name": "Triangle Down",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_triangle_down_attr",
+            "name": "triangleDown"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -13.3474,
+          "y": -5.6008,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "triangleDown",
+            "color": "#bbf7d0",
+            "metallicColor": "#bbf7d0",
+            "borderColor": "#15803d",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "shape_body_circle_plus",
+        "name": "Circle Plus",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_circle_plus_attr",
+            "name": "circlePlus"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": 1.8676,
+          "y": 4.5192,
+          "z": 0
+        },
+        "size": {
+          "width": 1.7850000000000001,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "circlePlus",
+            "color": "#ddd6fe",
+            "metallicColor": "#ddd6fe",
+            "borderColor": "#6d28d9",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_circle_x",
+        "name": "Circle X",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_circle_x_attr",
+            "name": "circleX"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": 6.7426,
+          "y": 4.5192,
+          "z": 0
+        },
+        "size": {
+          "width": 1.44,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "circleX",
+            "color": "#fbcfe8",
+            "metallicColor": "#fbcfe8",
+            "borderColor": "#be185d",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_off_page_connector",
+        "name": "Off Page Connector",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_off_page_connector_attr",
+            "name": "offPageConnector"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -3.0999,
+          "y": -0.5408,
+          "z": 0
+        },
+        "size": {
+          "width": 2.5900000000000003,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "offPageConnector",
+            "color": "#fed7aa",
+            "metallicColor": "#fed7aa",
+            "borderColor": "#c2410c",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_brace_left",
+        "name": "Brace Left",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_brace_left_attr",
+            "name": "braceLeft"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -13.2649,
+          "y": 4.5192,
+          "z": 0
+        },
+        "size": {
+          "width": 1.6700000000000002,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "braceLeft",
+            "color": "#e0f2fe",
+            "metallicColor": "#e0f2fe",
+            "borderColor": "#075985",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#082f49"
+        }
+      },
+      {
+        "id": "shape_body_brace_right",
+        "name": "Brace Right",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_brace_right_attr",
+            "name": "braceRight"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -8.0999,
+          "y": 4.5192,
+          "z": 0
+        },
+        "size": {
+          "width": 1.7850000000000001,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "braceRight",
+            "color": "#dcfce7",
+            "metallicColor": "#dcfce7",
+            "borderColor": "#166534",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "shape_body_text_lines",
+        "name": "Text Lines",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_text_lines_attr",
+            "name": "textLines"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": 6.7251,
+          "y": -3.0708,
+          "z": 0
+        },
+        "size": {
+          "width": 1.6700000000000002,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "textLines",
+            "color": "#fef3c7",
+            "metallicColor": "#fef3c7",
+            "borderColor": "#a16207",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_bracketed_list",
+        "name": "Bracketed List",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_bracketed_list_attr",
+            "name": "bracketedList"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -3.0174,
+          "y": 4.5192,
+          "z": 0
+        },
+        "size": {
+          "width": 2.13,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "bracketedList",
+            "color": "#ede9fe",
+            "metallicColor": "#ede9fe",
+            "borderColor": "#5b21b6",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_table",
+        "name": "Table",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_table_attr",
+            "name": "table"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -8.0549,
+          "y": -3.0708,
+          "z": 0
+        },
+        "size": {
+          "width": 1.35,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "table",
+            "color": "#cffafe",
+            "metallicColor": "#cffafe",
+            "borderColor": "#0e7490",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#083344"
+        }
+      },
+      {
+        "id": "shape_body_table_columns",
+        "name": "Table Columns",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_table_columns_attr",
+            "name": "tableColumns"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": -2.9899,
+          "y": -3.0708,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "tableColumns",
+            "color": "#fee2e2",
+            "metallicColor": "#fee2e2",
+            "borderColor": "#b91c1c",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "shape_body_table_rows",
+        "name": "Table Rows",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "shape_body_table_rows_attr",
+            "name": "tableRows"
+          }
+        ],
+        "parentClassId": "flowchart_shape_catalog_hyper",
+        "position": {
+          "x": 1.8951,
+          "y": -3.0708,
+          "z": 0
+        },
+        "size": {
+          "width": 1.6700000000000002,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "shape",
+            "shapeType": "tableRows",
+            "color": "#e5e7eb",
+            "metallicColor": "#e5e7eb",
+            "borderColor": "#374151",
+            "borderWidth": 2,
+            "metalness": 0.38,
+            "roughness": 0.34
+          },
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "flowchart_shape_link_storage",
+        "sourceClassId": "shape_body_database",
+        "targetClassId": "shape_body_direct_access_storage",
+        "name": "storage",
+        "rendering": {
+          "labelText": "storage",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#0f766e",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "relationshipCornerRadius": 0.12
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "flowchart_shape_link_symbols",
+        "sourceClassId": "shape_body_circle_plus",
+        "targetClassId": "shape_body_circle_x",
+        "name": "junctions",
+        "rendering": {
+          "labelText": "junctions",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#6d28d9",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "relationshipCornerRadius": 0.12
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "flowchart_shape_link_tables",
+        "sourceClassId": "shape_body_table",
+        "targetClassId": "shape_body_table_columns",
+        "name": "tables",
+        "rendering": {
+          "labelText": "tables",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#0e7490",
+          "lineWidth": 2,
+          "lineStyle": "dotted",
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "relationshipCornerRadius": 0.12
+        },
+        "allowSelfLink": true
+      }
+    ]
+  }
+}

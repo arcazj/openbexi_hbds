@@ -20,9 +20,82 @@ const CLASS_SHAPE_TYPES = new Set([
     'star',
     'capsule',
     'parallelogram',
-    'trapezoid'
+    'trapezoid',
+    'invertedTrapezoid',
+    'document',
+    'paperTape',
+    'predefinedProcess',
+    'manualInput',
+    'database',
+    'directAccessStorage',
+    'internalStorage',
+    'display',
+    'storedData',
+    'triangleDown',
+    'circlePlus',
+    'circleX',
+    'offPageConnector',
+    'braceLeft',
+    'braceRight',
+    'textLines',
+    'bracketedList',
+    'table',
+    'tableColumns',
+    'tableRows'
 ]);
 let iconManifestLookupPromise = null;
+
+export const DEFAULT_LABEL_FONT_SETTINGS = Object.freeze({
+    size: 12,
+    family: 'Arial, sans-serif',
+    bold: false,
+    italic: false,
+    underline: false
+});
+
+export function normalizeLabelFontSettings(font = {}, fallback = DEFAULT_LABEL_FONT_SETTINGS) {
+    const source = font && typeof font === 'object' ? font : {};
+    const base = fallback && typeof fallback === 'object' ? fallback : DEFAULT_LABEL_FONT_SETTINGS;
+    return {
+        size: toPositiveNumber(source.size ?? source.fontSize ?? source.labelFontSize, base.size ?? DEFAULT_LABEL_FONT_SETTINGS.size),
+        family: normalizeFontFamily(source.family ?? source.fontFamily, base.family ?? DEFAULT_LABEL_FONT_SETTINGS.family),
+        bold: toBooleanFontValue(source.bold ?? source.fontWeight, base.bold ?? DEFAULT_LABEL_FONT_SETTINGS.bold),
+        italic: toBooleanFontValue(source.italic ?? source.fontStyle, base.italic ?? DEFAULT_LABEL_FONT_SETTINGS.italic),
+        underline: toBooleanFontValue(source.underline ?? source.textDecoration ?? source.textDecorationLine, base.underline ?? DEFAULT_LABEL_FONT_SETTINGS.underline)
+    };
+}
+
+export function resolveLabelFontSettings(individualFont = {}, modelFont = {}, fallback = DEFAULT_LABEL_FONT_SETTINGS) {
+    return normalizeLabelFontSettings(individualFont, normalizeLabelFontSettings(modelFont, fallback));
+}
+
+export function applyLabelFontSettings(element, fontSettings = DEFAULT_LABEL_FONT_SETTINGS) {
+    if (!element) return;
+    const font = normalizeLabelFontSettings(fontSettings);
+    element.__hbdsFontSettings = font;
+    element.style.fontSize = `${font.size}px`;
+    element.style.fontFamily = font.family;
+    element.style.fontWeight = font.bold ? '700' : '400';
+    element.style.fontStyle = font.italic ? 'italic' : 'normal';
+    element.style.textDecoration = font.underline ? 'underline' : 'none';
+}
+
+function normalizeFontFamily(value, fallback) {
+    const clean = String(value ?? '').trim();
+    return clean || fallback || DEFAULT_LABEL_FONT_SETTINGS.family;
+}
+
+function toBooleanFontValue(value, fallback = false) {
+    if (value === undefined || value === null || value === '') return Boolean(fallback);
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value >= 600 || value === 1;
+    const clean = String(value).trim().toLowerCase();
+    if (['true', '1', 'yes', 'bold', 'bolder', '600', '700', '800', '900', 'italic', 'underline'].includes(clean)) return true;
+    if (['false', '0', 'no', 'normal', 'none', 'lighter', '400'].includes(clean)) return false;
+    const numeric = Number(clean);
+    if (Number.isFinite(numeric)) return numeric >= 600 || numeric === 1;
+    return Boolean(fallback);
+}
 
 /* ─────────────────────────────── Loader ──────────────────────────────── */
 export const Loader = {
@@ -146,6 +219,8 @@ export function createClass(classData) {
         className: 'label class-label',
         isHyperclass: false,
         textColor: cfg.textColor,
+        font: classData.rendering?.font,
+        modelFont: classData.modelFont,
         legacyFont: 'bold 16px Arial',
         iconFont: 'bold 18px Arial',
         iconSize: cfg.class.iconSize ?? 0.95,
@@ -194,6 +269,7 @@ export function createClass(classData) {
         attributes: cfg.attributes,
         connections: cfg.connections,
         textColor: cfg.textColor,
+        modelFont: classData.modelFont,
         hubPosition: hubPos,
         z: Z_OVERLAY
     });
@@ -289,6 +365,7 @@ function installShapeClassBody(classMesh, border, bodyRendering, classCfg, size,
     visualBorder.name = 'class-shape-border';
     visualBorder.raycast = () => {};
     visual.add(visualBorder);
+    addClassBodyShapeDecorations(visual, bodyRendering.shapeType, size, classCfg);
     classMesh.add(visual);
 }
 
@@ -447,7 +524,282 @@ function createClassBodyShape(shapeType, size, cornerRadius = 0.1) {
             [-size.width / 2, -size.height / 2]
         ]);
     }
+    if (type === 'invertedTrapezoid') {
+        const inset = size.width * 0.18;
+        return createClassPolygonShape([
+            [-size.width / 2, size.height / 2],
+            [size.width / 2, size.height / 2],
+            [size.width / 2 - inset, -size.height / 2],
+            [-size.width / 2 + inset, -size.height / 2]
+        ]);
+    }
+    if (type === 'document') {
+        return createDocumentShape(size);
+    }
+    if (type === 'paperTape') {
+        return createPaperTapeShape(size);
+    }
+    if (type === 'predefinedProcess' || type === 'internalStorage' || type === 'table' || type === 'tableColumns' || type === 'tableRows' || type === 'textLines' || type === 'bracketedList') {
+        return roundedRect(size.width, size.height, 0);
+    }
+    if (type === 'manualInput') {
+        return createClassPolygonShape([
+            [-size.width / 2, size.height * 0.3],
+            [size.width / 2, size.height / 2],
+            [size.width / 2, -size.height / 2],
+            [-size.width / 2, -size.height / 2]
+        ]);
+    }
+    if (type === 'database') {
+        return createDatabaseShape(size);
+    }
+    if (type === 'directAccessStorage') {
+        return createDirectAccessStorageShape(size);
+    }
+    if (type === 'display') {
+        return createDisplayShape(size);
+    }
+    if (type === 'storedData') {
+        return createStoredDataShape(size);
+    }
+    if (type === 'triangleDown') {
+        return createClassPolygonShape([
+            [-size.width / 2, size.height / 2],
+            [size.width / 2, size.height / 2],
+            [0, -size.height / 2]
+        ]);
+    }
+    if (type === 'circlePlus' || type === 'circleX') {
+        const shape = new THREE.Shape();
+        const radius = Math.min(size.width, size.height) / 2;
+        shape.absellipse(0, 0, radius, radius, 0, Math.PI * 2, false, 0);
+        return shape;
+    }
+    if (type === 'offPageConnector') {
+        return createClassPolygonShape([
+            [-size.width / 2, size.height / 2],
+            [size.width / 2, size.height / 2],
+            [size.width / 2, -size.height * 0.14],
+            [0, -size.height / 2],
+            [-size.width / 2, -size.height * 0.14]
+        ]);
+    }
+    if (type === 'braceLeft') {
+        return createBraceShape(size, -1);
+    }
+    if (type === 'braceRight') {
+        return createBraceShape(size, 1);
+    }
     return roundedRect(size.width, size.height, cornerRadius);
+}
+
+function createDocumentShape(size) {
+    const w = size.width;
+    const h = size.height;
+    const amp = Math.min(h * 0.12, w * 0.08);
+    const shape = new THREE.Shape();
+    shape.moveTo(-w / 2, h / 2);
+    shape.lineTo(w / 2, h / 2);
+    shape.lineTo(w / 2, -h / 2 + amp * 0.35);
+    shape.bezierCurveTo(w * 0.25, -h / 2 - amp, w * 0.08, -h / 2 + amp, -w * 0.12, -h / 2);
+    shape.bezierCurveTo(-w * 0.28, -h / 2 - amp, -w * 0.38, -h / 2 + amp, -w / 2, -h / 2);
+    shape.lineTo(-w / 2, h / 2);
+    return shape;
+}
+
+function createPaperTapeShape(size) {
+    const w = size.width;
+    const h = size.height;
+    const amp = Math.min(h * 0.13, w * 0.08);
+    const shape = new THREE.Shape();
+    shape.moveTo(-w / 2, h / 2 - amp * 0.45);
+    shape.bezierCurveTo(-w * 0.28, h / 2 + amp, w * 0.08, h / 2 - amp, w / 2, h / 2);
+    shape.lineTo(w / 2, -h / 2 + amp * 0.45);
+    shape.bezierCurveTo(w * 0.24, -h / 2 - amp, -w * 0.08, -h / 2 + amp, -w / 2, -h / 2);
+    shape.lineTo(-w / 2, h / 2 - amp * 0.45);
+    return shape;
+}
+
+function createDatabaseShape(size) {
+    const w = size.width;
+    const h = size.height;
+    const ellipseH = Math.min(h * 0.2, w * 0.16);
+    const shape = new THREE.Shape();
+    shape.moveTo(-w / 2, h / 2 - ellipseH);
+    shape.bezierCurveTo(-w / 2, h / 2, w / 2, h / 2, w / 2, h / 2 - ellipseH);
+    shape.lineTo(w / 2, -h / 2 + ellipseH);
+    shape.bezierCurveTo(w / 2, -h / 2, -w / 2, -h / 2, -w / 2, -h / 2 + ellipseH);
+    shape.lineTo(-w / 2, h / 2 - ellipseH);
+    return shape;
+}
+
+function createDirectAccessStorageShape(size) {
+    const w = size.width;
+    const h = size.height;
+    const ellipseW = Math.min(w * 0.2, h * 0.2);
+    const shape = new THREE.Shape();
+    shape.moveTo(-w / 2 + ellipseW, h / 2);
+    shape.lineTo(w / 2 - ellipseW, h / 2);
+    shape.bezierCurveTo(w / 2, h / 2, w / 2, -h / 2, w / 2 - ellipseW, -h / 2);
+    shape.lineTo(-w / 2 + ellipseW, -h / 2);
+    shape.bezierCurveTo(-w / 2, -h / 2, -w / 2, h / 2, -w / 2 + ellipseW, h / 2);
+    return shape;
+}
+
+function createDisplayShape(size) {
+    const w = size.width;
+    const h = size.height;
+    const shape = new THREE.Shape();
+    shape.moveTo(-w / 2, -h / 2);
+    shape.lineTo(-w / 2, h / 2);
+    shape.lineTo(w * 0.1, h / 2);
+    shape.bezierCurveTo(w * 0.52, h / 2, w * 0.52, -h / 2, w * 0.1, -h / 2);
+    shape.lineTo(-w / 2, -h / 2);
+    return shape;
+}
+
+function createStoredDataShape(size) {
+    const w = size.width;
+    const h = size.height;
+    const shape = new THREE.Shape();
+    shape.moveTo(-w * 0.36, h / 2);
+    shape.lineTo(w * 0.34, h / 2);
+    shape.bezierCurveTo(w * 0.54, h * 0.32, w * 0.54, -h * 0.32, w * 0.34, -h / 2);
+    shape.lineTo(-w * 0.36, -h / 2);
+    shape.bezierCurveTo(-w * 0.14, -h * 0.3, -w * 0.14, h * 0.3, -w * 0.36, h / 2);
+    return shape;
+}
+
+function createBraceShape(size, side = -1) {
+    const w = size.width;
+    const h = size.height;
+    const leftPoints = [
+        [-w * 0.06, h / 2],
+        [-w * 0.34, h / 2],
+        [-w * 0.48, h * 0.3],
+        [-w * 0.24, h * 0.1],
+        [-w * 0.48, 0],
+        [-w * 0.24, -h * 0.1],
+        [-w * 0.48, -h * 0.3],
+        [-w * 0.34, -h / 2],
+        [-w * 0.06, -h / 2],
+        [-w * 0.22, -h * 0.28],
+        [w * 0.04, -h * 0.08],
+        [-w * 0.18, 0],
+        [w * 0.04, h * 0.08],
+        [-w * 0.22, h * 0.28]
+    ];
+    return createClassPolygonShape(side < 0 ? leftPoints : leftPoints.map(([x, y]) => [-x, y]));
+}
+
+function addClassBodyShapeDecorations(visual, shapeType, size, classCfg) {
+    const polylines = getClassBodyShapeDecorationPolylines(shapeType, size);
+    if (!polylines.length) return;
+    const material = new THREE.LineBasicMaterial({
+        color: classCfg.borderColor ?? '#000080',
+        linewidth: classCfg.borderWidth ?? 1,
+        depthTest: false
+    });
+    const group = new THREE.Group();
+    group.name = 'class-shape-decoration';
+    group.position.z = 0.058;
+    group.renderOrder = 10;
+    group.raycast = () => {};
+    polylines.forEach((points, index) => {
+        const line = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(points.map(([x, y]) => new THREE.Vector3(x, y, 0))),
+            material
+        );
+        line.name = `class-shape-decoration-line-${index}`;
+        line.raycast = () => {};
+        group.add(line);
+    });
+    visual.add(group);
+}
+
+function getClassBodyShapeDecorationPolylines(shapeType, size) {
+    const w = size.width;
+    const h = size.height;
+    const left = -w / 2;
+    const right = w / 2;
+    const top = h / 2;
+    const bottom = -h / 2;
+    if (shapeType === 'predefinedProcess') {
+        const inset = w * 0.18;
+        return [
+            [[left + inset, bottom], [left + inset, top]],
+            [[right - inset, bottom], [right - inset, top]]
+        ];
+    }
+    if (shapeType === 'internalStorage') {
+        return [
+            [[left + w * 0.25, bottom], [left + w * 0.25, top]],
+            [[left, top - h * 0.25], [right, top - h * 0.25]]
+        ];
+    }
+    if (shapeType === 'database') {
+        const ellipseH = Math.min(h * 0.2, w * 0.16);
+        return [createEllipsePolyline(0, top - ellipseH, w / 2, ellipseH, 0, Math.PI * 2, 40)];
+    }
+    if (shapeType === 'directAccessStorage') {
+        const ellipseW = Math.min(w * 0.2, h * 0.2);
+        return [createEllipsePolyline(left + ellipseW, 0, ellipseW, h / 2, 0, Math.PI * 2, 40)];
+    }
+    if (shapeType === 'circlePlus') {
+        const radius = Math.min(w, h) * 0.28;
+        return [
+            [[-radius, 0], [radius, 0]],
+            [[0, -radius], [0, radius]]
+        ];
+    }
+    if (shapeType === 'circleX') {
+        const radius = Math.min(w, h) * 0.24;
+        return [
+            [[-radius, -radius], [radius, radius]],
+            [[-radius, radius], [radius, -radius]]
+        ];
+    }
+    if (shapeType === 'table' || shapeType === 'tableColumns' || shapeType === 'tableRows') {
+        const lines = [];
+        if (shapeType !== 'tableRows') {
+            lines.push([[left + w / 3, bottom], [left + w / 3, top]]);
+            lines.push([[right - w / 3, bottom], [right - w / 3, top]]);
+        }
+        if (shapeType !== 'tableColumns') {
+            lines.push([[left, bottom + h / 3], [right, bottom + h / 3]]);
+            lines.push([[left, top - h / 3], [right, top - h / 3]]);
+        }
+        return lines;
+    }
+    if (shapeType === 'textLines') {
+        const x0 = left + w * 0.22;
+        const x1 = right - w * 0.16;
+        return [-0.22, 0, 0.22].map(offset => [[x0, h * offset], [x1, h * offset]]);
+    }
+    if (shapeType === 'bracketedList') {
+        const bracketX = left + w * 0.16;
+        const bracketEnd = left + w * 0.28;
+        const lineX = left + w * 0.38;
+        const lineEnd = right - w * 0.12;
+        const yTop = top - h * 0.18;
+        const yBottom = bottom + h * 0.18;
+        return [
+            [[bracketEnd, yTop], [bracketX, yTop], [bracketX, yBottom], [bracketEnd, yBottom]],
+            [[lineX, h * 0.22], [lineEnd, h * 0.22]],
+            [[lineX, 0], [lineEnd, 0]],
+            [[lineX, -h * 0.22], [lineEnd, -h * 0.22]]
+        ];
+    }
+    return [];
+}
+
+function createEllipsePolyline(cx, cy, rx, ry, startAngle, endAngle, segments = 32) {
+    const points = [];
+    for (let index = 0; index <= segments; index += 1) {
+        const angle = startAngle + (endAngle - startAngle) * index / segments;
+        points.push([cx + Math.cos(angle) * rx, cy + Math.sin(angle) * ry]);
+    }
+    return points;
 }
 
 function createRegularPolygonShape(sides, size, rotation = 0) {
@@ -491,6 +843,7 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
     const attrCfg = normalizeAttributeRenderingConfig(options.attributes);
     const connCfg = options.connections ?? {lineColor: "#000000", lineWidth: 0.01};
     const textColor = options.textColor ?? "#000000";
+    const modelFont = normalizeLabelFontSettings(options.modelFont);
 
     const cbW = attrCfg.size.width;
     const cbH = attrCfg.size.height ?? cbW;
@@ -531,9 +884,10 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
 
         // attribute label
         const aDiv = document.createElement('div');
+        const fontSettings = resolveLabelFontSettings(getAttributeFontSettings(attribute) ?? attrCfg.font, modelFont);
         aDiv.className = 'label attribute-label';
         aDiv.style.color = textColor;
-        aDiv.style.font = '12px Arial';
+        applyLabelFontSettings(aDiv, fontSettings);
         aDiv.style.lineHeight = '1.05';
         aDiv.style.whiteSpace = 'nowrap';
         aDiv.textContent = attrName;
@@ -544,7 +898,8 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
             labelKind: 'attribute',
             text: attrName,
             gapY,
-            maxWorldWidth: options.attributeLabelMaxWidth ?? 2.25
+            maxWorldWidth: options.attributeLabelMaxWidth ?? 2.25,
+            fontSettings
         };
         classMesh.add(aLbl);
         labels.push(aLbl);
@@ -557,11 +912,12 @@ export function createIconTitleLabel(classData, options = {}) {
     const width = classData?.size?.width ?? (options.isHyperclass ? 4 : 1.2);
     const estimatedTitleWidth = Math.max(130, name.length * 14 + (options.iconSize ? options.iconSize * 20 : 38));
     const maxTextWidth = options.titleMaxWidth ?? Math.max(estimatedTitleWidth, Math.min(420, width * 120));
+    const fontSettings = resolveLabelFontSettings(options.font ?? classData?.rendering?.font, options.modelFont ?? classData?.modelFont);
     label.className = options.className ?? 'label class-label';
     label.setAttribute('data-class', name);
     label.setAttribute('data-hyperclass', options.isHyperclass ? 'true' : 'false');
     label.style.color = options.textColor ?? '#000000';
-    label.style.font = options.legacyFont ?? 'bold 16px Arial';
+    applyLabelFontSettings(label, fontSettings);
     label.style.maxWidth = `${maxTextWidth}px`;
     label.style.overflow = 'visible';
     label.style.textAlign = 'center';
@@ -578,7 +934,8 @@ export function createIconTitleLabel(classData, options = {}) {
         labelKind: 'title',
         nodeSize: {width, height: classData?.size?.height ?? (options.isHyperclass ? 3.2 : 1.6)},
         nodeType: options.isHyperclass ? 'hyperclass' : 'class',
-        text: name
+        text: name,
+        fontSettings
     };
     installOptionalIcon(label, labelObj, classData, options);
     return labelObj;
@@ -604,9 +961,13 @@ function installOptionalIcon(label, labelObj, classData, options) {
         label.style.background = 'transparent';
         label.style.boxShadow = 'none';
         const currentFontSize = label.style.fontSize || globalThis.getComputedStyle?.(label)?.fontSize;
-        label.style.fontWeight = '700';
-        label.style.fontFamily = 'Arial, sans-serif';
-        if (currentFontSize) label.style.fontSize = currentFontSize;
+        if (labelObj.userData?.fontSettings) {
+            applyLabelFontSettings(label, labelObj.userData.fontSettings);
+        } else {
+            label.style.fontWeight = '700';
+            label.style.fontFamily = 'Arial, sans-serif';
+            if (currentFontSize) label.style.fontSize = currentFontSize;
+        }
         label.style.lineHeight = '1';
         label.style.whiteSpace = 'nowrap';
         label.style.overflow = 'visible';
@@ -962,6 +1323,11 @@ function getAttributeDisplayName(attribute, index) {
     if (!attribute || typeof attribute !== 'object') return `attribute${index + 1}`;
     return String(attribute.name ?? attribute.label ?? attribute.title ?? attribute.id ?? `attribute${index + 1}`);
 }
+
+function getAttributeFontSettings(attribute) {
+    if (!attribute || typeof attribute !== 'object') return null;
+    return attribute.font ?? attribute.rendering?.font ?? null;
+}
 /**
  * NEW: Dynamically scales CSS2D labels based on camera distance.
  * @param {THREE.Camera} camera - The scene camera.
@@ -988,18 +1354,26 @@ export function updateLabelFontSizes(camera, renderer) {
             const nodeWidth = label.userData?.nodeSize?.width ?? label.parent?.userData?.modelData?.size?.width ?? 1.2;
             const availableWidthPx = Math.max(42, (nodeWidth - 0.22) * pixelsPerWorldUnit);
             const distanceSize = THREE.MathUtils.clamp(132 / Math.max(distance, 1e-6), 3.2, 19);
-            const verticalCap = Math.max(2.4, 0.24 * pixelsPerWorldUnit);
+            const verticalCap = Math.max(1.4, 0.22 * pixelsPerWorldUnit);
             const text = label.userData?.text || label.element.textContent || '';
             const fitSize = getFontSizeForTextWidth(text, availableWidthPx, label.element.classList.contains('hbds-icon-title') ? 1.25 : 0);
-            const fontSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), 2.4, 19);
+            const configuredSize = Number(label.userData?.fontSettings?.size);
+            const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), 1.4, 19);
+            const fontSize = Number.isFinite(configuredSize)
+                ? Math.max(1.4, Math.min(configuredSize, dynamicSize))
+                : dynamicSize;
             applyTitleLabelSizing(label.element, availableWidthPx, fontSize);
         } else {
             const maxWorldWidth = label.userData?.maxWorldWidth ?? 1.75;
             const availableWidthPx = Math.max(34, maxWorldWidth * pixelsPerWorldUnit);
             const gapY = label.userData?.gapY ?? 0.17;
-            const verticalCap = Math.max(1.6, gapY * pixelsPerWorldUnit * 0.5);
-            const distanceSize = THREE.MathUtils.clamp(110 / Math.max(distance, 1e-6), 1.6, 11.2);
-            const fontSize = THREE.MathUtils.clamp(Math.min(distanceSize, verticalCap), 1.6, 11.2);
+            const verticalCap = Math.max(1.1, gapY * pixelsPerWorldUnit * 0.78);
+            const distanceSize = THREE.MathUtils.clamp(110 / Math.max(distance, 1e-6), 1.1, 11.2);
+            const configuredSize = Number(label.userData?.fontSettings?.size);
+            const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, verticalCap), 1.1, 11.2);
+            const fontSize = Number.isFinite(configuredSize)
+                ? Math.max(1.1, Math.min(configuredSize, dynamicSize))
+                : dynamicSize;
             applyAttributeLabelSizing(label.element, availableWidthPx, fontSize);
         }
         label.element.style.transform = 'translateZ(0)';
@@ -1024,6 +1398,7 @@ function getFontSizeForTextWidth(text, availableWidthPx, extraEm = 0) {
 
 function applyTitleLabelSizing(element, availableWidthPx, fontSize) {
     element.style.fontSize = `${fontSize.toFixed(1)}px`;
+    if (element.__hbdsFontSettings) applyLabelFontSettings(element, {...element.__hbdsFontSettings, size: fontSize});
     element.style.maxWidth = `${Math.round(availableWidthPx)}px`;
     element.style.overflow = 'hidden';
     element.style.textOverflow = 'ellipsis';
@@ -1046,6 +1421,7 @@ function applyTitleLabelSizing(element, availableWidthPx, fontSize) {
 
 function applyAttributeLabelSizing(element, availableWidthPx, fontSize) {
     element.style.fontSize = `${fontSize.toFixed(1)}px`;
+    if (element.__hbdsFontSettings) applyLabelFontSettings(element, {...element.__hbdsFontSettings, size: fontSize});
     element.style.lineHeight = '1';
     element.style.maxWidth = `${Math.round(availableWidthPx)}px`;
     element.style.overflow = 'hidden';

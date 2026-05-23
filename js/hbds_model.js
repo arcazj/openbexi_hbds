@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=attribute-rendering-20260522a';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=attribute-rendering-20260522a';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=link-rendering-20260522a';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=link-rendering-20260522a';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=font-zoom-20260523a';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=font-zoom-20260523a';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=font-zoom-20260523a';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=font-zoom-20260523a';
 
 export const DEFAULT_SCENE_SETTINGS = {
   background: '#eef2f6',
@@ -16,6 +16,13 @@ export const DEFAULT_SCENE_SETTINGS = {
 
 export const DEFAULT_LAYOUT_SETTINGS = {
   algorithm: 'grid'
+};
+export const DEFAULT_FONT_SETTINGS = {
+  size: 12,
+  family: 'Arial, sans-serif',
+  bold: false,
+  italic: false,
+  underline: false
 };
 const DEFAULT_FIT_PADDING = 1.15;
 
@@ -52,7 +59,28 @@ const CLASS_SHAPE_TYPES = new Set([
   'star',
   'capsule',
   'parallelogram',
-  'trapezoid'
+  'trapezoid',
+  'invertedTrapezoid',
+  'document',
+  'paperTape',
+  'predefinedProcess',
+  'manualInput',
+  'database',
+  'directAccessStorage',
+  'internalStorage',
+  'display',
+  'storedData',
+  'triangleDown',
+  'circlePlus',
+  'circleX',
+  'offPageConnector',
+  'braceLeft',
+  'braceRight',
+  'textLines',
+  'bracketedList',
+  'table',
+  'tableColumns',
+  'tableRows'
 ]);
 const clone=(v)=>typeof structuredClone==='function'?structuredClone(v):JSON.parse(JSON.stringify(v));
 const nextId=(p)=>`${p}_${Math.random().toString(36).slice(2,8)}`;
@@ -110,7 +138,8 @@ export function normalizeModelMetadata(metadata={}){
   return {
     ...source,
     sceneSettings:normalizeSceneSettings(source.sceneSettings || source.scene || source.settings),
-    layout:normalizeLayoutSettings(source.layout)
+    layout:normalizeLayoutSettings(source.layout),
+    font:normalizeFontSettings(source.font || source.fontSettings || source.labelFont)
   };
 }
 export function normalizeSceneSettings(settings={}){
@@ -150,11 +179,25 @@ export function normalizeLayoutSettings(layout={}){
   else if('fit' in source) normalized.fit=null;
   return normalized;
 }
+export function normalizeFontSettings(font={},fallback=DEFAULT_FONT_SETTINGS){
+  const source=font&&typeof font==='object'?font:{};
+  const base=fallback&&typeof fallback==='object'?fallback:DEFAULT_FONT_SETTINGS;
+  return {
+    size:toPositiveNumber(source.size ?? source.fontSize ?? source.labelFontSize, base.size ?? DEFAULT_FONT_SETTINGS.size),
+    family:normalizeFontFamily(source.family ?? source.fontFamily, base.family ?? DEFAULT_FONT_SETTINGS.family),
+    bold:toBooleanFontValue(source.bold ?? source.fontWeight, base.bold ?? DEFAULT_FONT_SETTINGS.bold),
+    italic:toBooleanFontValue(source.italic ?? source.fontStyle, base.italic ?? DEFAULT_FONT_SETTINGS.italic),
+    underline:toBooleanFontValue(source.underline ?? source.textDecoration ?? source.textDecorationLine, base.underline ?? DEFAULT_FONT_SETTINGS.underline)
+  };
+}
 export function getSceneSettings(currentData=data){
   return clone(normalizeSceneSettings(currentData?.metadata?.sceneSettings));
 }
 export function getLayoutSettings(currentData=data){
   return clone(normalizeLayoutSettings(currentData?.metadata?.layout));
+}
+export function getFontSettings(currentData=data){
+  return clone(normalizeFontSettings(currentData?.metadata?.font));
 }
 export function setSceneSettings(sceneSettings, options={}){
   data=normalizeData({ ...data, metadata:{ ...(data.metadata||{}), sceneSettings } });
@@ -167,6 +210,12 @@ export function setLayoutSettings(layoutSettings, options={}){
   if(options.applyContext!==false) applyDataMetadataToContext(options.context);
   if(options.refresh===true) refreshSceneFromData(options.context);
   return getLayoutSettings();
+}
+export function setFontSettings(fontSettings, options={}){
+  data=normalizeData({ ...data, metadata:{ ...(data.metadata||{}), font:fontSettings } });
+  if(options.applyContext!==false) applyDataMetadataToContext(options.context);
+  if(options.refresh===true) refreshSceneFromData(options.context);
+  return getFontSettings();
 }
 function normalizeLightSource(source={},fallback){
   const direction=source?.direction || {};
@@ -188,6 +237,25 @@ function normalizeHexColor(value,fallback){
 function toFiniteNumber(value,fallback){
   const number=Number(value);
   return Number.isFinite(number)?number:fallback;
+}
+function toPositiveNumber(value,fallback){
+  const number=toFiniteNumber(value,fallback);
+  return number>0?number:fallback;
+}
+function normalizeFontFamily(value,fallback){
+  const clean=String(value??'').trim();
+  return clean||fallback||DEFAULT_FONT_SETTINGS.family;
+}
+function toBooleanFontValue(value,fallback=false){
+  if(value===undefined||value===null||value==='') return Boolean(fallback);
+  if(typeof value==='boolean') return value;
+  if(typeof value==='number') return value>=600||value===1;
+  const clean=String(value).trim().toLowerCase();
+  if(['true','1','yes','bold','bolder','600','700','800','900','italic','underline'].includes(clean)) return true;
+  if(['false','0','no','normal','none','lighter','400'].includes(clean)) return false;
+  const numeric=Number(clean);
+  if(Number.isFinite(numeric)) return numeric>=600||numeric===1;
+  return Boolean(fallback);
 }
 function roundFitNumber(value){
   const number=Number(value);
@@ -238,6 +306,7 @@ function applyDataMetadataToContext(context){
   if(!context) return;
   context.applyModelSceneSettings?.(getSceneSettings());
   context.applyModelLayoutSettings?.(getLayoutSettings());
+  context.applyModelFontSettings?.(getFontSettings());
   applyFitMetadataToContext(context,{ updateOverview:true, preserveMetadata:true });
 }
 export function validateData(currentData=data){
@@ -290,9 +359,9 @@ function isAllowedClassImageSource(value){
   const normalized=clean.replace(/\\/g,'/').replace(/^\.\//,'');
   return normalized.toLowerCase().startsWith('images/')&&/\.png(?:[?#].*)?$/i.test(normalized);
 }
-export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; clearLinkRegistry(); if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
+export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; const modelFont=getFontSettings(); clearLinkRegistry(); if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
   if(dragControls){dragControls.dispose(); setDragControls?.(null);} const dg=new THREE.Group(); scene?.add(dg); setDiagramGroup?.(dg); modelRuntime.diagramGroup=dg; modelRuntime.classById.clear(); modelRuntime.linkGroups=[];
-  for(const cd of data.hypergraph.class){ const r=cd.type==='hyperclass'?createHyperClass(null,cd):createClassMesh(cd); const m=r.classMesh; m.visible=cd.visible!==false&&cd.rendering?.visible!==false; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true,isLocked:cd.locked===true}; dg.add(m); modelRuntime.classById.set(cd.id,m);}
+  for(const cd of data.hypergraph.class){ const renderData={...cd,modelFont}; const r=cd.type==='hyperclass'?createHyperClass(null,renderData):createClassMesh(renderData); const m=r.classMesh; m.visible=cd.visible!==false&&cd.rendering?.visible!==false; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true,isLocked:cd.locked===true}; dg.add(m); modelRuntime.classById.set(cd.id,m);}
   for(const cd of data.hypergraph.class){
     const node=modelRuntime.classById.get(cd.id);
     if(!node) continue;
@@ -309,12 +378,12 @@ export function refreshSceneFromData(context){ if(!context) return; const {scene
     }
     node.position.set(p.x||0,p.y||0,p.z||0);
   }
-  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,ld):createLinkBetweenClass(ld,modelRuntime.classById); if(!r) continue; r.linkGroup.visible=ld.visible!==false&&ld.rendering?.visible!==false; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(ld),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);}
+  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const renderLinkData={...ld,modelFont}; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,renderLinkData):createLinkBetweenClass(renderLinkData,modelRuntime.classById); if(!r) continue; r.linkGroup.visible=ld.visible!==false&&ld.rendering?.visible!==false; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(renderLinkData),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);}
   draggableObjects.length=0; for(const cd of data.hypergraph.class){ const o=modelRuntime.classById.get(cd.id); if(o&&o.visible!==false&&!o.userData?.isLocked) draggableObjects.push(o); }
   modelRuntime.draggableObjects=draggableObjects;
-  context.setupDragControls?.(); recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
-export function updateLayoutFromData(context){ recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
-export function updateSceneLabelScales(context){ if(!context?.camera) return; updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
+  context.setupDragControls?.(); recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera, context.renderer); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
+export function updateLayoutFromData(context){ recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera, context.renderer); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
+export function updateSceneLabelScales(context){ if(!context?.camera) return; updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera, context.renderer); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
 export function refreshDiagramBoundsAndCamera(context, options={}){
   if(!context?.diagramGroup) return null;
   const box=new THREE.Box3().setFromObject(context.diagramGroup);
@@ -650,7 +719,7 @@ function setupOverviewViewportDrag(context, transform) {
 }
 export function commitDataChange(operationName, updater, options={}){ const before=clone(data); const result=updater(data); data=normalizeData(data); const v=validateData(data); if(!v.valid && options.rollbackOnError!==false){ data=before; throw new Error(`Invalid data after ${operationName}: ${v.errors.join('; ')}`);} if(options.refresh!==false) refreshSceneFromData(options.context); if(options.optimizeLayout===true) updateLayoutFromData(options.context); if(options.saveHistory!==false) history.push({operationName,before,after:clone(data)}); return result; }
 export function setData(nextData, options={}){ data=normalizeData(nextData); const v=validateData(data); if(!v.valid) throw new Error(v.errors.join('; ')); if(options.refresh!==false) refreshSceneFromData(options.context); applyDataMetadataToContext(options.context); return getData(); }
-export function resetData(options={}){ return setData({metadata:{layout:DEFAULT_LAYOUT_SETTINGS,sceneSettings:DEFAULT_SCENE_SETTINGS},hypergraph:{class:[],link:[]}},options); }
+export function resetData(options={}){ return setData({metadata:{layout:DEFAULT_LAYOUT_SETTINGS,sceneSettings:DEFAULT_SCENE_SETTINGS,font:DEFAULT_FONT_SETTINGS},hypergraph:{class:[],link:[]}},options); }
 export function readClass(id){return data.hypergraph.class.find(c=>c.id===id)||null;} export const readHyperclass=readClass;
 export function createClass(input,options={}){ return commitDataChange('createClass',d=>{ const c=createClassData(input); d.hypergraph.class.push(c); if(c.parentClassId) addChildToHyperclass(c.parentClassId,c.id,{...options,refresh:false,saveHistory:false}); return c;},options); }
 export function updateClass(id,patch,options={}){ return commitDataChange('updateClass',d=>{ const i=d.hypergraph.class.findIndex(c=>c.id===id&&c.type!=='hyperclass'); if(i<0) throw new Error('class not found'); d.hypergraph.class[i]=updateClassData(d.hypergraph.class[i],patch); return d.hypergraph.class[i];},options); }
@@ -664,7 +733,7 @@ export function removeChildFromHyperclass(parentId,childId,options={}){ return c
 export const moveChildToHyperclass=(cid,pid,options={})=>commitDataChange('moveChild',d=>{const c=d.hypergraph.class.find(n=>n.id===cid); if(!c) throw new Error('child not found'); d.hypergraph.class.filter(n=>n.type==='hyperclass').forEach(h=>h.children=(h.children||[]).filter(x=>x!==cid)); if(pid){const p=d.hypergraph.class.find(n=>n.id===pid&&n.type==='hyperclass'); if(!p) throw new Error('parent not hyperclass'); p.children.push(cid); c.parentClassId=pid;} else c.parentClassId=null;},options);
 export function readAttributes(ownerId){return readClass(ownerId)?.attributes||[];}
 export function createAttribute(ownerId,attributeInput,options={}){ return commitDataChange('createAttribute',d=>{ const o=d.hypergraph.class.find(c=>c.id===ownerId); if(!o) throw new Error('owner not found'); o.attributes=o.attributes||[]; if(o.attributes.length&&typeof o.attributes[0]==='string') o.attributes.push(attributeInput?.name||String(attributeInput)); else o.attributes.push(typeof attributeInput==='string'?attributeInput:{id:attributeInput?.id||nextId('att'),name:attributeInput?.name||'attribute'}); },options);}
-export const updateAttribute=(ownerId,key,patch,options={})=>commitDataChange('updateAttribute',d=>{const o=d.hypergraph.class.find(c=>c.id===ownerId); if(!o) throw new Error('owner not found'); const i=typeof key==='number'?key:o.attributes.findIndex(a=>typeof a==='string'?a===key:a.name===key||a.id===key); if(i<0) throw new Error('attribute not found'); o.attributes[i]=typeof o.attributes[i]==='string'?(patch?.name||patch):{...o.attributes[i],...(typeof patch==='string'?{name:patch}:patch)};},options);
+export const updateAttribute=(ownerId,key,patch,options={})=>commitDataChange('updateAttribute',d=>{const o=d.hypergraph.class.find(c=>c.id===ownerId); if(!o) throw new Error('owner not found'); const i=typeof key==='number'?key:o.attributes.findIndex(a=>typeof a==='string'?a===key:a.name===key||a.id===key); if(i<0) throw new Error('attribute not found'); const current=o.attributes[i]; if(typeof current==='string'){ if(patch&&typeof patch==='object'){ const keys=Object.keys(patch).filter(k=>k!=='name'); o.attributes[i]=keys.length?{...patch,name:patch.name??current}:{name:patch.name??current}; } else o.attributes[i]=patch?.name||patch; } else o.attributes[i]={...current,...(typeof patch==='string'?{name:patch}:patch)};},options);
 export const deleteAttribute=(ownerId,key,options={})=>commitDataChange('deleteAttribute',d=>{const o=d.hypergraph.class.find(c=>c.id===ownerId); if(!o) throw new Error('owner not found'); const i=typeof key==='number'?key:o.attributes.findIndex(a=>typeof a==='string'?a===key:a.name===key||a.id===key); if(i>=0) o.attributes.splice(i,1);},options);
 export const readLink=(idOrPred)=>typeof idOrPred==='function'?data.hypergraph.link.find(idOrPred)||null:data.hypergraph.link.find(l=>l.id===idOrPred)||null;
 export const createLink=(input,options={})=>commitDataChange('createLink',d=>{const l=createLinkData(input); const byId=new Map(d.hypergraph.class.map(c=>[c.id,c])); const v=validateLinkData(l,byId); if(!v.valid) throw new Error(v.errors.join('; ')); d.hypergraph.link.push(l); return l;},options);

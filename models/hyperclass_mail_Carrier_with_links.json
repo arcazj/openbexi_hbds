@@ -316,21 +316,28 @@
       "algorithm": "hierarchy",
       "fit": {
         "padding": 1.15,
-        "fitHeightDistance": 20.1237,
-        "fitWidthDistance": 9.3995,
-        "distance": 20.1237,
+        "fitHeightDistance": 20.1231,
+        "fitWidthDistance": 12.1535,
+        "distance": 13.3505,
         "diagramWidth": 14.7725,
         "diagramHeight": 6.934,
-        "diagramDepth": 0.16,
-        "radius": 8.1599,
+        "diagramDepth": 0.097,
+        "radius": 8.1596,
         "center": {
-          "x": -0.2862,
-          "y": 0,
+          "x": 1.4453,
+          "y": 0.0885,
           "z": 0.07
         },
-        "cameraAspect": 2.1409,
+        "cameraAspect": 1.6557,
         "cameraFov": 50
       }
+    },
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
     }
   }
 }

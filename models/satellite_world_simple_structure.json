@@ -31,6 +31,13 @@
       "classPalette": "domain-colored",
       "hyperclassMaterial": "metallic"
     },
+    "font": {
+      "size": 14,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
     "sceneSettings": {
       "background": "#eef2f6",
       "ambient": 0.82,
@@ -62,9 +69,24 @@
         "name": "Satellite Catalog",
         "type": "hyperclass",
         "attributes": [
-          "Catalog authority",
-          "Object identity",
-          "Launch lineage"
+          {
+            "name": "Catalog authority",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "Object identity",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "Launch lineage",
+            "font": {
+              "size": 11
+            }
+          }
         ],
         "children": [
           "satellite",
@@ -97,9 +119,24 @@
         "name": "Orbit / Payload",
         "type": "hyperclass",
         "attributes": [
-          "Orbital state",
-          "Payload mission",
-          "TLE traceability"
+          {
+            "name": "Orbital state",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "Payload mission",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "TLE traceability",
+            "font": {
+              "size": 11
+            }
+          }
         ],
         "children": [
           "tle_set",
@@ -132,18 +169,78 @@
         "type": "roundedRectangle",
         "parentClassId": "hc_satellite_catalog",
         "attributes": [
-          "noradCatalogId",
-          "satelliteName",
-          "internationalDesignator",
-          "cosparId",
-          "satelliteStatus",
-          "busType",
-          "dryMassKg",
-          "powerWatts",
-          "manufacturerOrgId",
-          "operatorOrgId",
-          "launchDateUtc",
-          "decayedDateUtc"
+          {
+            "name": "noradCatalogId",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "satelliteName",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "internationalDesignator",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "cosparId",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "satelliteStatus",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "busType",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "dryMassKg",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "powerWatts",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "manufacturerOrgId",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "operatorOrgId",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "launchDateUtc",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "decayedDateUtc",
+            "font": {
+              "size": 11
+            }
+          }
         ],
         "position": {
           "x": 3.2124999999999986,
@@ -170,14 +267,54 @@
         "type": "roundedRectangle",
         "parentClassId": "hc_satellite_catalog",
         "attributes": [
-          "rocketName",
-          "rocketFamily",
-          "launchSite",
-          "launchProvider",
-          "launchSuccess",
-          "launchMassToLeoKg",
-          "launchMassToGtoKg",
-          "firstFlightDate"
+          {
+            "name": "rocketName",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "rocketFamily",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "launchSite",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "launchProvider",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "launchSuccess",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "launchMassToLeoKg",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "launchMassToGtoKg",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "firstFlightDate",
+            "font": {
+              "size": 11
+            }
+          }
         ],
         "position": {
           "x": 3.3774999999999986,
@@ -204,12 +341,42 @@
         "type": "roundedRectangle",
         "parentClassId": "hc_satellite_catalog",
         "attributes": [
-          "organizationId",
-          "name",
-          "country",
-          "role",
-          "organizationType",
-          "foundedDate"
+          {
+            "name": "organizationId",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "name",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "country",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "role",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "organizationType",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "foundedDate",
+            "font": {
+              "size": 11
+            }
+          }
         ],
         "position": {
           "x": 3.404999999999999,
@@ -236,14 +403,54 @@
         "type": "roundedRectangle",
         "parentClassId": "hc_orbit_payload",
         "attributes": [
-          "tleEpochUtc",
-          "tleLine1",
-          "tleLine2",
-          "inclinationDeg",
-          "eccentricity",
-          "meanMotionRevPerDay",
-          "raanDeg",
-          "argPerigeeDeg"
+          {
+            "name": "tleEpochUtc",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "tleLine1",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "tleLine2",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "inclinationDeg",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "eccentricity",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "meanMotionRevPerDay",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "raanDeg",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "argPerigeeDeg",
+            "font": {
+              "size": 11
+            }
+          }
         ],
         "position": {
           "x": -7.0125,
@@ -270,13 +477,48 @@
         "type": "roundedRectangle",
         "parentClassId": "hc_orbit_payload",
         "attributes": [
-          "payloadType",
-          "missionClass",
-          "capacityDescriptor",
-          "frequencyBand",
-          "coverageRegion",
-          "designLifeYears",
-          "operatorOrgId"
+          {
+            "name": "payloadType",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "missionClass",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "capacityDescriptor",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "frequencyBand",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "coverageRegion",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "designLifeYears",
+            "font": {
+              "size": 11
+            }
+          },
+          {
+            "name": "operatorOrgId",
+            "font": {
+              "size": 11
+            }
+          }
         ],
         "position": {
           "x": -6.985,
@@ -319,7 +561,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -346,7 +588,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -373,7 +615,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -400,7 +642,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -427,7 +669,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -454,7 +696,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -481,7 +723,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -508,7 +750,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -535,7 +777,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -562,7 +804,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -589,7 +831,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -616,7 +858,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
@@ -643,7 +885,7 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,

@@ -6,7 +6,50 @@
     "regressionTags": [
       "rendering",
       "metallic"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "grid",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 12.5422,
+        "fitWidthDistance": 7.281,
+        "distance": 8.9097,
+        "diagramWidth": 8.64,
+        "diagramHeight": 5.73,
+        "diagramDepth": 0.13,
+        "radius": 5.1841,
+        "center": {
+          "x": -0.44,
+          "y": 0,
+          "z": 0.065
+        },
+        "cameraAspect": 1.7226,
+        "cameraFov": 52
+      }
+    }
   },
   "hypergraph": {
     "class": [
@@ -32,13 +75,13 @@
         ],
         "parentClassId": null,
         "position": {
-          "x": 0,
+          "x": -0.605,
           "y": 0,
           "z": 0
         },
         "size": {
-          "width": 6.7,
-          "height": 4.6
+          "width": 8.31,
+          "height": 5.73
         },
         "rendering": {
           "class": {
@@ -84,8 +127,8 @@
         ],
         "parentClassId": "metal_hyper",
         "position": {
-          "x": -2,
-          "y": 0.6,
+          "x": 0.7549999999999999,
+          "y": 1.0900000000000003,
           "z": 0
         },
         "size": {
@@ -135,12 +178,12 @@
         ],
         "parentClassId": "metal_hyper",
         "position": {
-          "x": 0.2,
-          "y": 0.6,
+          "x": 0.7549999999999999,
+          "y": -1.44,
           "z": 0
         },
         "size": {
-          "width": 1.35,
+          "width": 1.6700000000000002,
           "height": 1.75
         },
         "rendering": {
@@ -186,12 +229,12 @@
         ],
         "parentClassId": "metal_hyper",
         "position": {
-          "x": -2,
-          "y": -1.25,
+          "x": -3.2749999999999995,
+          "y": -1.44,
           "z": 0
         },
         "size": {
-          "width": 1.35,
+          "width": 1.6700000000000002,
           "height": 1.75
         },
         "rendering": {
@@ -237,8 +280,8 @@
         ],
         "parentClassId": "metal_hyper",
         "position": {
-          "x": 0.2,
-          "y": -1.25,
+          "x": -3.2749999999999995,
+          "y": 1.0900000000000003,
           "z": 0
         },
         "size": {
@@ -281,18 +324,19 @@
         "name": "contrasts",
         "rendering": {
           "labelText": "contrasts",
+          "orthogonalStyle": "auto",
           "lineColor": "#7c4a03",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       },
       {
         "id": "link_metal_2",
@@ -301,18 +345,19 @@
         "name": "balances",
         "rendering": {
           "labelText": "balances",
+          "orthogonalStyle": "auto",
           "lineColor": "#155e75",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
           "labelFontSize": 12
-        }
+        },
+        "allowSelfLink": true
       }
     ]
   }

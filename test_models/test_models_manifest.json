@@ -250,6 +250,41 @@
       ]
     },
     {
+      "value": "test_models/render_031_class_image_gallery.json",
+      "label": "Render 031 Class Image Gallery",
+      "description": "Gallery of regular classes rendered with local transparent PNG class-body images.",
+      "tags": [
+        "rendering",
+        "images",
+        "classes",
+        "gallery"
+      ]
+    },
+    {
+      "value": "test_models/render_032_flowchart_shape_class_bodies.json",
+      "label": "Render 032 Flowchart Shape Class Bodies",
+      "description": "Flowchart and diagram style class body shapes from the expanded Shapes menu.",
+      "tags": [
+        "rendering",
+        "shapes",
+        "classes",
+        "flowchart"
+      ]
+    },
+    {
+      "value": "test_models/render_033_font_properties.json",
+      "label": "Render 033 Font Properties",
+      "description": "Global model font settings with class, hyperclass, and individual attribute overrides.",
+      "tags": [
+        "rendering",
+        "font",
+        "class",
+        "hyperclass",
+        "attributes",
+        "inspector"
+      ]
+    },
+    {
       "value": "test_models/edge_020_defaults_empty_attributes.json",
       "label": "Edge 020 Defaults Empty Attributes",
       "description": "Missing optional rendering fields and empty attributes.",

@@ -49,6 +49,31 @@ body {
   height: 100%;
 }
 
+#canvas-model-title {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  z-index: 18;
+  max-width: calc(100% - 340px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 20px;
+  font-weight: 780;
+  color: #333;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  padding: 6px 12px;
+  backdrop-filter: blur(3px);
+  display: none;
+  transform: translateX(-50%);
+}
+
+body.has-model #canvas-model-title {
+  display: inline-block;
+}
+
 canvas {
   display: block;
 }
@@ -205,6 +230,11 @@ canvas {
   gap: 8px;
 }
 
+.inline-field input[type="text"] {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .range-field {
   display: grid;
   grid-template-columns: minmax(74px, 0.9fr) minmax(120px, 1.1fr);
@@ -214,6 +244,22 @@ canvas {
 
 .range-field input[type="range"] {
   width: 100%;
+}
+
+.range-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.range-value {
+  min-width: 44px;
+  color: #15803d;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 select {

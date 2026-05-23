@@ -1,0 +1,580 @@
+{
+  "metadata": {
+    "name": "Render 031 Class Image Gallery",
+    "purpose": "Gallery of regular classes rendered with local transparent PNG class-body images.",
+    "preserveLayout": true,
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 19.3938,
+        "fitWidthDistance": 11.2585,
+        "distance": 12.0157,
+        "diagramWidth": 13.74,
+        "diagramHeight": 8.26,
+        "diagramDepth": 0.13,
+        "radius": 8.0161,
+        "center": {
+          "x": -1.9915,
+          "y": 0.0502,
+          "z": 0.065
+        },
+        "cameraAspect": 1.7226,
+        "cameraFov": 52
+      }
+    },
+    "regressionTags": [
+      "rendering",
+      "images",
+      "classes",
+      "gallery"
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0.82,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.14,
+          "direction": {
+            "x": -5,
+            "y": 7,
+            "z": 13
+          }
+        },
+        {
+          "intensity": 0.1,
+          "direction": {
+            "x": 8,
+            "y": -6,
+            "z": 10
+          }
+        }
+      ]
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "class_image_gallery_hyper",
+        "name": "Class Image Gallery",
+        "type": "hyperclass",
+        "children": [
+          "class_image_car",
+          "class_image_satellite",
+          "class_image_vehicle",
+          "class_image_voiture",
+          "class_image_human",
+          "class_image_user",
+          "class_image_man",
+          "class_image_supplier"
+        ],
+        "attributes": [
+          {
+            "id": "class_image_gallery_scope",
+            "name": "regular image classes"
+          }
+        ],
+        "parentClassId": null,
+        "position": {
+          "x": -3.5419,
+          "y": -0.2929,
+          "z": 0
+        },
+        "size": {
+          "width": 13.410000000000002,
+          "height": 8.260000000000002
+        },
+        "rendering": {
+          "class": {
+            "color": "#eef2ff",
+            "metallicColor": "#e0e7ff",
+            "borderColor": "#4338ca",
+            "borderWidth": 2,
+            "opacity": 0.24,
+            "cornerRadius": 0.28,
+            "metalness": 0.4,
+            "roughness": 0.3,
+            "material": "metallic"
+          },
+          "attributes": {
+            "checkboxColor": "#4338ca",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#4338ca",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_image_car",
+        "name": "Car Image",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_image_car_attr",
+            "name": "car"
+          }
+        ],
+        "parentClassId": "class_image_gallery_hyper",
+        "position": {
+          "x": -8.9084,
+          "y": 1.6984,
+          "z": 0
+        },
+        "size": {
+          "width": 1.5550000000000002,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_car.png",
+            "imageFit": "contain",
+            "color": "#8ecae6",
+            "metallicColor": "#8ecae6",
+            "borderColor": "#155e75",
+            "cornerRadius": 0.16,
+            "metalness": 0.36,
+            "roughness": 0.36
+          },
+          "attributes": {
+            "checkboxColor": "#155e75",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#155e75",
+            "lineWidth": 0.01
+          },
+          "textColor": "#082f49"
+        }
+      },
+      {
+        "id": "class_image_satellite",
+        "name": "Satellite Image",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_image_satellite_attr",
+            "name": "satellite"
+          }
+        ],
+        "parentClassId": "class_image_gallery_hyper",
+        "position": {
+          "x": 0.4178,
+          "y": -0.4428,
+          "z": 0
+        },
+        "size": {
+          "width": 2.245,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_satellite.png",
+            "imageFit": "contain",
+            "color": "#a5b4fc",
+            "metallicColor": "#a5b4fc",
+            "borderColor": "#4338ca",
+            "cornerRadius": 0.16,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#4338ca",
+            "checkboxMaterial": "metallic",
+            "shape": "diamond",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#4338ca",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_image_vehicle",
+        "name": "Vehicle Image",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_image_vehicle_attr",
+            "name": "vehicle"
+          }
+        ],
+        "parentClassId": "class_image_gallery_hyper",
+        "position": {
+          "x": -8.6576,
+          "y": -3.0606,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_vehicle.png",
+            "imageFit": "contain",
+            "color": "#b7e4c7",
+            "metallicColor": "#b7e4c7",
+            "borderColor": "#087443",
+            "cornerRadius": 0.16,
+            "metalness": 0.4,
+            "roughness": 0.32
+          },
+          "attributes": {
+            "checkboxColor": "#087443",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#087443",
+            "lineWidth": 0.01
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "class_image_voiture",
+        "name": "Voiture Image",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_image_voiture_attr",
+            "name": "voiture"
+          }
+        ],
+        "parentClassId": "class_image_gallery_hyper",
+        "position": {
+          "x": -1.9354,
+          "y": -2.7722,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_voiture.png",
+            "imageFit": "contain",
+            "color": "#f4a261",
+            "metallicColor": "#f4a261",
+            "borderColor": "#874a17",
+            "cornerRadius": 0.16,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#874a17",
+            "checkboxMaterial": "metallic",
+            "shape": "triangle",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#874a17",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_image_human",
+        "name": "Human Image",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_image_human_attr",
+            "name": "human"
+          }
+        ],
+        "parentClassId": "class_image_gallery_hyper",
+        "position": {
+          "x": -3.7038,
+          "y": -0.0826,
+          "z": 0
+        },
+        "size": {
+          "width": 1.7850000000000001,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_human.png",
+            "imageFit": "contain",
+            "color": "#cdb4db",
+            "metallicColor": "#cdb4db",
+            "borderColor": "#694b7d",
+            "cornerRadius": 0.16,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#694b7d",
+            "checkboxMaterial": "metallic",
+            "shape": "diamond",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#694b7d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_image_user",
+        "name": "User Image",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_image_user_attr",
+            "name": "user"
+          }
+        ],
+        "parentClassId": "class_image_gallery_hyper",
+        "position": {
+          "x": 1.6599,
+          "y": -2.6753,
+          "z": 0
+        },
+        "size": {
+          "width": 1.6700000000000002,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_user.png",
+            "imageFit": "contain",
+            "color": "#ffafcc",
+            "metallicColor": "#ffafcc",
+            "borderColor": "#8a3a57",
+            "cornerRadius": 0.16,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#8a3a57",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#8a3a57",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_image_man",
+        "name": "Man Image",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_image_man_attr",
+            "name": "man"
+          },
+          {
+            "id": "att_qpmblo",
+            "name": "owner10"
+          },
+          {
+            "id": "att_w22yt0",
+            "name": "priority11"
+          },
+          {
+            "id": "att_7mwuqf",
+            "name": "version12"
+          },
+          {
+            "id": "att_i3oyoz",
+            "name": "region13"
+          },
+          {
+            "id": "att_9cqs65",
+            "name": "createdAt14"
+          }
+        ],
+        "parentClassId": "class_image_gallery_hyper",
+        "position": {
+          "x": 0.5311,
+          "y": 2.338,
+          "z": 0
+        },
+        "size": {
+          "width": 1.5550000000000002,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_man.png",
+            "imageFit": "contain",
+            "color": "#fde68a",
+            "metallicColor": "#fde68a",
+            "borderColor": "#92400e",
+            "cornerRadius": 0.16,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#92400e",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#92400e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "class_image_supplier",
+        "name": "Supplier Image",
+        "type": "roundedRectangle",
+        "attributes": [
+          {
+            "id": "class_image_supplier_attr",
+            "name": "supplier"
+          }
+        ],
+        "parentClassId": "class_image_gallery_hyper",
+        "position": {
+          "x": -6.902,
+          "y": -0.2046,
+          "z": 0
+        },
+        "size": {
+          "width": 2.13,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "bodyType": "image",
+            "imageSrc": "./images/class_supplier.png",
+            "imageFit": "contain",
+            "color": "#99f6e4",
+            "metallicColor": "#99f6e4",
+            "borderColor": "#0f766e",
+            "cornerRadius": 0.16,
+            "metalness": 0.42,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#0f766e",
+            "checkboxMaterial": "flat",
+            "shape": "diamond",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#0f766e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#042f2e"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "class_image_link_top",
+        "sourceClassId": "class_image_car",
+        "targetClassId": "class_image_voiture",
+        "name": "top gallery",
+        "rendering": {
+          "labelText": "top gallery",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#155e75",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "sourcePortSide": "top",
+          "targetPortSide": "top",
+          "routeSide": "top",
+          "orthogonalClearance": 0.56,
+          "relationshipCornerRadius": 0.18
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "class_image_link_bottom",
+        "sourceClassId": "class_image_human",
+        "targetClassId": "class_image_supplier",
+        "name": "bottom gallery",
+        "rendering": {
+          "labelText": "bottom gallery",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#694b7d",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "sourcePortSide": "bottom",
+          "targetPortSide": "bottom",
+          "routeSide": "bottom",
+          "orthogonalClearance": 0.6,
+          "relationshipCornerRadius": 0.18
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "class_image_link_cross",
+        "sourceClassId": "class_image_satellite",
+        "targetClassId": "class_image_man",
+        "name": "cross gallery",
+        "rendering": {
+          "labelText": "cross gallery",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#4338ca",
+          "lineWidth": 2,
+          "lineStyle": "dotted",
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "orthogonalClearance": 0.62,
+          "relationshipCornerRadius": 0.18
+        },
+        "allowSelfLink": true
+      }
+    ]
+  }
+}
