@@ -154,6 +154,14 @@
       line-height: 1;
     }
 
+    .connection-status.connecting .connection-value {
+      color: #8a5a00;
+    }
+
+    .connection-status.connected .connection-value {
+      color: #087443;
+    }
+
     .frame-wrap {
       inset: 0;
       min-height: 0;
@@ -332,11 +340,11 @@
           <img class="mode-icon" src="icons/help.png" alt="">
           <span class="mode-label">Help</span>
         </button>
-        <div class="connection-status" role="status" aria-live="polite" aria-label="Connection status: idle">
-          <img class="power-icon" src="icons/power_red.png" alt="">
+        <div id="connection-status" class="connection-status" role="status" aria-live="polite" aria-label="Connection status: idle">
+          <img id="connection-icon" class="power-icon" src="icons/power_red.png" alt="">
           <span class="connection-copy">
             <span class="connection-label">Connection</span>
-            <span class="connection-value">Idle</span>
+            <span id="connection-value" class="connection-value">Idle</span>
           </span>
         </div>
       </nav>
@@ -370,6 +378,16 @@
             <p>Project repository: <a href="https://github.com/arcazj/openbexi_hbds" target="_blank" rel="noopener noreferrer">https://github.com/arcazj/openbexi_hbds</a></p>
           </div>
         </details>
+        <details class="help-section">
+          <summary>Swagger API</summary>
+          <div class="help-section-body">
+            <p>The local Python server exposes model load/save endpoints and an OpenAPI specification.</p>
+            <ul>
+              <li><a href="api/docs" target="_blank" rel="noopener noreferrer">OpenAPI specification</a></li>
+              <li><a href="api/docs" target="_blank" rel="noopener noreferrer">API documentation</a></li>
+            </ul>
+          </div>
+        </details>
       </div>
     </div>
   </aside>
@@ -377,9 +395,13 @@
   <script>
     const frame = document.getElementById('view-frame');
     const helpOverlay = document.getElementById('shell-help');
+    const connectionStatus = document.getElementById('connection-status');
+    const connectionIcon = document.getElementById('connection-icon');
+    const connectionValue = document.getElementById('connection-value');
     const viewButtons = Array.from(document.querySelectorAll('.mode-button[data-view]'));
     const helpSections = Array.from(document.querySelectorAll('.help-section'));
     let activeView = 'models';
+    let serverConnectionState = 'idle';
     const views = {
       models: {
         src: 'index_models.html?embeddedShell=1',
@@ -394,6 +416,42 @@
         title: 'HBDS Tests view'
       }
     };
+
+    function setServerConnectionState(state) {
+      serverConnectionState = state === 'connected' || state === 'connecting' ? state : 'idle';
+      const labels = {
+        idle: 'Idle',
+        connecting: 'Connecting',
+        connected: 'Connected'
+      };
+      connectionStatus.classList.toggle('connected', serverConnectionState === 'connected');
+      connectionStatus.classList.toggle('connecting', serverConnectionState === 'connecting');
+      connectionStatus.setAttribute('aria-label', `Connection status: ${labels[serverConnectionState].toLowerCase()}`);
+      connectionValue.textContent = labels[serverConnectionState];
+      connectionIcon.src = serverConnectionState === 'connected' ? 'icons/power_green.png' : 'icons/power_red.png';
+      window.HBDS_SERVER_STATE = serverConnectionState;
+      broadcastServerConnectionState();
+    }
+
+    function broadcastServerConnectionState() {
+      if (!frame.contentWindow) return;
+      const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
+      frame.contentWindow.postMessage({
+        type: 'hbds-server-state',
+        state: serverConnectionState
+      }, targetOrigin);
+    }
+
+    async function refreshServerConnectionState() {
+      setServerConnectionState('connecting');
+      try {
+        const api = await import('./js/hbds_server_api.js?v=server-api-20260524a');
+        const result = await api.checkServerConnection({ timeoutMs: 1600 });
+        setServerConnectionState(result.ok ? 'connected' : 'idle');
+      } catch {
+        setServerConnectionState('idle');
+      }
+    }
 
     function selectView(name, options = {}) {
       if (name === 'help') {
@@ -437,6 +495,8 @@
       button.addEventListener('click', () => selectView(button.dataset.view));
     });
 
+    frame.addEventListener('load', broadcastServerConnectionState);
+
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') {
         setHelpOpen(false);
@@ -448,6 +508,7 @@
 
     const initialView = window.location.hash.slice(1);
     selectView(initialView === 'help' || views[initialView] ? initialView : 'models', { skipHash: !initialView });
+    refreshServerConnectionState();
   </script>
 </body>
 </html>

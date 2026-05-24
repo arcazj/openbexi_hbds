@@ -20,6 +20,7 @@ import {
   moveChildToHyperclass,
   refreshSceneFromData,
   saveScene,
+  prepareSceneSnapshot,
   optimizeAndRefreshLayout,
   fitModelToCanvas,
   updateSceneLabelScales,
@@ -37,6 +38,7 @@ import {
   normalizeFontSettings
 } from './hbds_model.js?v=font-zoom-20260523a';
 import { recalculateAllLinks } from './hbds_class_link.js?v=font-zoom-20260523a';
+import { checkServerConnection, listServerModels, loadServerModel, saveServerModel, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './hbds_server_api.js?v=server-api-20260524a';
 
 let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
 const draggableObjects = [];
@@ -55,6 +57,7 @@ let editMode = 'full';
 let linkPickActive = false;
 let pointerStart = null;
 let availableModels = [];
+let serverConnected = false;
 let nextClassNumber = 1;
 let nextHyperclassNumber = 1;
 let nextAttributeNumber = 1;
@@ -106,6 +109,7 @@ const TEST_MODEL_ROOT = MODEL_SOURCE_CONFIG.root;
 const TEST_MODEL_MANIFEST = MODEL_SOURCE_CONFIG.manifest;
 const TEST_MODEL_HIDDEN_VALUES = MODEL_SOURCE_CONFIG.hiddenValues;
 const HIDE_SCENARIO_SUITE = TEST_MODEL_ROOT === 'models/';
+const SERVER_MODELS_ENABLED = TEST_MODEL_ROOT === 'models/';
 const EMBEDDED_SHELL_MENU = new URLSearchParams(window.location.search).get('embeddedShell') === '1';
 if (EMBEDDED_SHELL_MENU) document.body.classList.add('embedded-shell-menu');
 const STRUCTURAL_PROPERTY_KEYS = new Set([
@@ -3464,6 +3468,7 @@ function installDebugHooks() {
       selectedLinkSourceId,
       selectedLinkTargetId,
       editMode,
+      serverConnected,
       validation: validateData(getData()),
       canvas: renderer ? {
         width: renderer.domElement.width,
@@ -3969,12 +3974,38 @@ async function handleApplyJson() {
   await refreshWorkspace('Applied JSON', { refresh: true, optimize: false, fit: !hasFitMetadata(parsed) });
 }
 
-function handleSaveModel() {
+async function handleSaveModel() {
   setSceneSettings(lightingState, { applyContext: false });
-  saveScene(ctx(), { fileName: 'dynamic_hbds_test_model.json' });
+  const selectedValue = $('test-model-select')?.value || '';
+  const fileName = modelFileNameFromValue(selectedValue, 'dynamic_hbds_test_model.json');
+  if (SERVER_MODELS_ENABLED && !serverConnected) await refreshServerConnection();
+  if (SERVER_MODELS_ENABLED && serverConnected) {
+    const snapshot = prepareSceneSnapshot(ctx());
+    const result = await saveServerModel(fileName, snapshot, { timeoutMs: 8000 });
+    if (!result.ok) {
+      serverConnected = false;
+      const message = result.error?.message || 'Server save failed';
+      addLog(`Server save failed: ${message}`);
+      showToast(message);
+      return;
+    }
+    await populateModelSelect();
+    const savedValue = serverModelValue(result.data.saved);
+    if ([...$('test-model-select').options].some(option => option.value === savedValue)) {
+      $('test-model-select').value = savedValue;
+    }
+    updateModelSummary();
+    updateCanvasTitle();
+    updateJsonPreviewFromData();
+    addLog(`Saved ${result.data.saved} to server`);
+    showToast(`Saved ${result.data.saved} to server`);
+    return;
+  }
+
+  saveScene(ctx(), { fileName });
   updateJsonPreviewFromData();
-  addLog('Saved model JSON');
-  showToast('Saved model JSON');
+  addLog(`Saved model JSON (${fileName})`);
+  showToast(`Saved model JSON (${fileName})`);
 }
 
 function handleExportJson() {
@@ -4073,6 +4104,41 @@ async function handleSeedDemo() {
 
 async function populateModelSelect() {
   const select = $('test-model-select');
+  const selectedValue = select.value;
+  if (SERVER_MODELS_ENABLED && serverConnected) {
+    const serverResult = await listServerModels({ timeoutMs: 2500 });
+    if (serverResult.ok && serverResult.models.length) {
+      availableModels = serverResult.models;
+      select.innerHTML = '';
+
+      const blank = document.createElement('option');
+      blank.value = '';
+      blank.textContent = 'Blank workspace';
+      blank.dataset.summary = 'Blank workspace';
+      select.appendChild(blank);
+
+      availableModels.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.value;
+        option.textContent = item.label || item.value;
+        const tags = item.tags?.length ? ` - ${item.tags.join(', ')}` : '';
+        option.dataset.summary = `${item.description || item.label || item.value}${tags}`;
+        select.appendChild(option);
+      });
+
+      if ([...select.options].some(option => option.value === selectedValue)) {
+        select.value = selectedValue;
+      }
+      updateModelSummary();
+      setStatus('Server model library connected', 'ok');
+      return;
+    }
+    if (!serverResult.ok) {
+      serverConnected = false;
+      addLog(`Server model list failed: ${serverResult.error?.message || 'request failed'}`);
+    }
+  }
+
   availableModels = await listAvailableModels({
     manifestPath: TEST_MODEL_MANIFEST,
     modelsPath: TEST_MODEL_ROOT,
@@ -4098,6 +4164,16 @@ async function populateModelSelect() {
   updateModelSummary();
 }
 
+async function refreshServerConnection() {
+  if (!SERVER_MODELS_ENABLED) {
+    serverConnected = false;
+    return false;
+  }
+  const result = await checkServerConnection({ timeoutMs: 1200 });
+  serverConnected = Boolean(result.ok);
+  return serverConnected;
+}
+
 async function handleLoadModel() {
   const value = $('test-model-select').value;
   if (!value) {
@@ -4106,10 +4182,17 @@ async function handleLoadModel() {
   }
 
   const selectedLabel = $('test-model-select').selectedOptions[0]?.textContent || value;
-  const loadedModel = await loadAndRenderScene(value, ctx(), {
-    allowedBasePath: TEST_MODEL_ROOT,
-    defaultBasePath: TEST_MODEL_ROOT
-  });
+  let loadedModel;
+  if (isServerModelValue(value)) {
+    const result = await loadServerModel(modelNameFromValue(value), { timeoutMs: 6000 });
+    if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
+    loadedModel = setData(result.data.model, { context: ctx(), refresh: true });
+  } else {
+    loadedModel = await loadAndRenderScene(value, ctx(), {
+      allowedBasePath: TEST_MODEL_ROOT,
+      defaultBasePath: TEST_MODEL_ROOT
+    });
+  }
   const preserveLayout = Boolean(loadedModel?.metadata?.preserveLayout || loadedModel?.hypergraph?.metadata?.preserveLayout);
   const hasSavedFit = hasFitMetadata(loadedModel);
   const optimize = !preserveLayout && !hasSavedFit && shouldOptimizeAfterCrud();
@@ -4120,7 +4203,7 @@ async function handleLoadModel() {
   selectedLinkTargetId = null;
   linkPickActive = false;
   syncCountersFromData();
-  await refreshWorkspace(`Loaded ${selectedLabel}`, {
+  await refreshWorkspace(`Loaded ${selectedLabel}${isServerModelValue(value) ? ' from server' : ''}`, {
     refresh: false,
     optimize,
     fit: optimize || !hasSavedFit
@@ -4585,7 +4668,7 @@ function bindUi() {
   $('delete-selected-button').addEventListener('click', () => runAction(handleDeleteSelected));
   $('optimize-layout-button').addEventListener('click', () => runAction(handleOptimizeLayout));
   $('fit-model-button').addEventListener('click', handleFitModel);
-  $('save-model-button').addEventListener('click', handleSaveModel);
+  $('save-model-button').addEventListener('click', () => runAction(handleSaveModel));
   $('export-json-button').addEventListener('click', handleExportJson);
   $('apply-json-button').addEventListener('click', () => runAction(handleApplyJson));
   $('reset-model-button').addEventListener('click', () => runAction(handleResetModel));
@@ -4731,6 +4814,7 @@ async function init() {
   await resetData({ context: ctx(), refresh: true });
   initModelOverview(ctx());
   clearOverview();
+  await refreshServerConnection();
   await populateModelSelect();
   updateInterface();
   addLog('Ready');

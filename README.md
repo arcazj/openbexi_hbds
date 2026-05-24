@@ -18,6 +18,7 @@ An interactive browser-based simulator for **Hypergraph-Based Data Structures (H
 * **Layout tools**: Fit models to the canvas and optimize placement with `grid`, `hierarchy`, or `radial` layout algorithms.
 * **Overview minimap**: Navigate larger models with the built-in model overview.
 * **Model export**: Save the current scene as a JSON file.
+* **Optional local API server**: Load and save `models/` JSON files through the Python backend when it is running.
 * **Dynamic layout test page**: Use `test_dynamic_hbds_layout.html` to add, delete, link, and export model elements during development.
 
 ## Built With
@@ -54,6 +55,37 @@ On systems where `python` points to Python 2, use:
 ```sh
 python3 -m http.server 8000
 ```
+
+### Run With Model Save/Load API
+
+The connected mode uses the included Python server. It serves the UI and exposes the model API used by the connection indicator, server model selector, and server save action.
+
+```sh
+python server.py --port 8010
+```
+
+On Windows with the Python launcher, use `py -3 server.py --port 8010`.
+
+Then open `http://127.0.0.1:8010/index.html`.
+
+API endpoints:
+
+* `GET /api/health` - connection status for the menu bar.
+* `GET /api/models` - list JSON models in `models/`.
+* `GET /api/models/{modelName}` - load one model from `models/`.
+* `POST /api/models/{modelName}` - validate and save one model into `models/`.
+* `GET /api/openapi.json` - OpenAPI specification.
+* `GET /api/docs` - browser-readable API documentation.
+
+When overwriting an existing model, the server writes a timestamped backup under `models/.backups/` before replacing the file.
+
+Run the server regression smoke test with:
+
+```sh
+python scripts/smoke_server.py
+```
+
+On Windows with the Python launcher, use `py -3 scripts/smoke_server.py`.
 
 ## Usage
 

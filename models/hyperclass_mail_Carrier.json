@@ -14,23 +14,38 @@
           "Priority",
           "Tracking code"
         ],
-        "children": [4, 5],
-        "position": { "x": 9.5, "y": 4.8, "z": 0 },
-        "size": { "width": 4.1, "height": 5.3 },
+        "children": [
+          4,
+          5
+        ],
+        "position": {
+          "x": 9.5,
+          "y": 4.8,
+          "z": 0
+        },
+        "size": {
+          "width": 4.1,
+          "height": 5.3
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
-            "material": "flat",
+            "material": "metallic",
             "borderColor": "#000000",
             "borderWidth": 0.02,
             "cornerRadius": 0.3,
-            "opacity": 0.12
+            "opacity": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -51,8 +66,15 @@
           "Recipient address"
         ],
         "parentClassId": 3,
-        "position": { "x": 8.9, "y": 5.4, "z": 0 },
-        "size": { "width": 2.1, "height": 1.25 },
+        "position": {
+          "x": 8.9,
+          "y": 5.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -66,7 +88,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -88,8 +113,15 @@
           "Tracking code"
         ],
         "parentClassId": 3,
-        "position": { "x": 8.9, "y": 3.1, "z": 0 },
-        "size": { "width": 2.1, "height": 1.25 },
+        "position": {
+          "x": 8.9,
+          "y": 3.1,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.25
+        },
         "rendering": {
           "class": {
             "color": "#FFFFFF",
@@ -103,7 +135,10 @@
             "checkboxColor": "#FFFFFF",
             "checkboxMaterial": "flat",
             "shape": "circle",
-            "size": { "width": 0.14, "height": 0.14 }
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -112,6 +147,59 @@
           "textColor": "#000000"
         }
       }
-    ]
+    ],
+    "link": []
+  },
+  "metadata": {
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 0.48,
+          "direction": {
+            "x": 1.394,
+            "y": 7,
+            "z": -15.939
+          }
+        },
+        {
+          "intensity": 0.68,
+          "direction": {
+            "x": 0,
+            "y": 5.734,
+            "z": 14.937
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.15,
+        "fitHeightDistance": 8.5341,
+        "fitWidthDistance": 4.3966,
+        "distance": 8.5341,
+        "diagramWidth": 4.45,
+        "diagramHeight": 5.3,
+        "diagramDepth": 0.08,
+        "radius": 3.4605,
+        "center": {
+          "x": 10.6213,
+          "y": 4.9699,
+          "z": 0.04
+        },
+        "cameraAspect": 1.9411,
+        "cameraFov": 50
+      }
+    },
+    "font": {
+      "size": 48,
+      "family": "Arial, sans-serif",
+      "bold": true,
+      "italic": false,
+      "underline": false
+    }
   }
 }

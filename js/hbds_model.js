@@ -904,7 +904,8 @@ function modelNeedsLayoutPlacement(model){
     return !p || !Number.isFinite(Number(p.x)) || !Number.isFinite(Number(p.y));
   });
 }
-export function saveScene(context, options={}){ if(options.updateFitMetadata!==false) updateFitMetadataFromContext(context,options); const snapshot=getData(); const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=options.fileName||'hbds_saved_model.json'; a.click(); URL.revokeObjectURL(url); return snapshot; }
+export function prepareSceneSnapshot(context, options={}){ if(options.updateFitMetadata!==false) updateFitMetadataFromContext(context,options); return getData(); }
+export function saveScene(context, options={}){ const snapshot=prepareSceneSnapshot(context,options); const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=options.fileName||'hbds_saved_model.json'; a.click(); URL.revokeObjectURL(url); return snapshot; }
 function getNodeSize(node){
   return getNodeBodySize(node);
 }

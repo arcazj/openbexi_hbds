@@ -377,7 +377,8 @@ select {
   position: absolute;
   border: 2px solid #ff3300;
   background: rgba(255, 51, 0, 0.08);
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: grab;
 }
 
 .editor-tools button,

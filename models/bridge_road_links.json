@@ -16,7 +16,7 @@
           "Condition"
         ],
         "position": {
-          "x": -3.6500000000000004,
+          "x": -3.71,
           "y": 2.175,
           "z": 0
         },
@@ -63,7 +63,7 @@
           "Waterway type"
         ],
         "position": {
-          "x": -3.5675,
+          "x": -3.6274999999999995,
           "y": -2.175,
           "z": 0
         },
@@ -115,7 +115,7 @@
           "z": 0
         },
         "size": {
-          "width": 1.55,
+          "width": 1.6700000000000002,
           "height": 2.15
         },
         "rendering": {
@@ -380,29 +380,53 @@
   "metadata": {
     "sceneSettings": {
       "background": "#eef2f6",
-      "ambient": 0.82,
-      "front": 0.16,
+      "ambient": 0,
+      "front": 0,
       "sources": [
         {
-          "intensity": 0.14,
+          "intensity": 1,
           "direction": {
-            "x": -5,
+            "x": -5.734,
             "y": 7,
-            "z": 13
+            "z": 14.937
           }
         },
         {
-          "intensity": 0.1,
+          "intensity": 0.6,
           "direction": {
-            "x": 8,
-            "y": -6,
-            "z": 10
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
           }
         }
       ]
     },
     "layout": {
-      "algorithm": "grid"
+      "algorithm": "grid",
+      "fit": {
+        "padding": 1.15,
+        "fitHeightDistance": 14.9569,
+        "fitWidthDistance": 7.7055,
+        "distance": 14.9569,
+        "diagramWidth": 8.893,
+        "diagramHeight": 8.248,
+        "diagramDepth": 0.11,
+        "radius": 6.0648,
+        "center": {
+          "x": -0.5325,
+          "y": 0.28,
+          "z": 0.055
+        },
+        "cameraAspect": 1.9411,
+        "cameraFov": 50
+      }
+    },
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
     }
   }
 }
