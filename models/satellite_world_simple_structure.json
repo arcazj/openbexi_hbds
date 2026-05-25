@@ -11,8 +11,8 @@
       "fit": {
         "padding": 1.15,
         "fitHeightDistance": 23.8342,
-        "fitWidthDistance": 21.0717,
-        "distance": 17.0766,
+        "fitWidthDistance": 16.2993,
+        "distance": 13.909,
         "diagramWidth": 16.77,
         "diagramHeight": 9.61,
         "diagramDepth": 0.13,
@@ -22,7 +22,7 @@
           "y": 0.275,
           "z": 0.068
         },
-        "cameraAspect": 1.1311,
+        "cameraAspect": 1.4623,
         "cameraFov": 50
       }
     },

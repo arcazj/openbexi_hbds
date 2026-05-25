@@ -2,23 +2,23 @@
   "metadata": {
     "sceneSettings": {
       "background": "#eef2f6",
-      "ambient": 0.82,
-      "front": 0.16,
+      "ambient": 0,
+      "front": 0,
       "sources": [
         {
-          "intensity": 0.14,
+          "intensity": 1,
           "direction": {
-            "x": -5,
+            "x": -5.734,
             "y": 7,
-            "z": 13
+            "z": 14.937
           }
         },
         {
-          "intensity": 0.1,
+          "intensity": 0.6,
           "direction": {
-            "x": 8,
-            "y": -6,
-            "z": 10
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
           }
         }
       ]
@@ -27,19 +27,19 @@
       "algorithm": "grid",
       "fit": {
         "padding": 1.15,
-        "fitHeightDistance": 38.6811,
-        "fitWidthDistance": 23.3619,
-        "distance": 38.6811,
+        "fitHeightDistance": 38.6809,
+        "fitWidthDistance": 26.4524,
+        "distance": 27.0125,
         "diagramWidth": 22.8175,
         "diagramHeight": 21.526,
-        "diagramDepth": 0.15,
-        "radius": 15.6846,
+        "diagramDepth": 0.11,
+        "radius": 15.6845,
         "center": {
           "x": -0.7962,
           "y": 0,
           "z": 0.075
         },
-        "cameraAspect": 1.6557,
+        "cameraAspect": 1.4623,
         "cameraFov": 50
       }
     },
@@ -49,7 +49,14 @@
       "model",
       "transportation",
       "links"
-    ]
+    ],
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
   },
   "hypergraph": {
     "class": [

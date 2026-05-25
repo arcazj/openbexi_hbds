@@ -10,6 +10,15 @@ An interactive browser-based simulator for **Hypergraph-Based Data Structures (H
 
 ![HBDS builder Lab](pictures/HBDS_LAB.PNG)
 
+## Documentation
+
+This README is the main entry point for setup, features, server mode, API endpoints, usage, and project structure. Other project Markdown files:
+
+* [Test_and_Integration.md](Test_and_Integration.md) - authoritative validation and integration checklist, including smoke tests, model validators, JavaScript syntax checks, optional Maven tests, manual workflows, and expected pass/fail reporting.
+* [Prompt4HDBS_graphi_ simulator.md](Prompt4HDBS_graphi_%20simulator.md) - reverse-engineering and phased implementation prompt for covering the full HBDS Graphic Simulator capability set.
+
+Generated preview caches may contain third-party Markdown under hidden directories such as `.codex_previews/`; those files are not project documentation.
+
 ## Recent Updates
 
 This week the project added a larger local-server workflow and collaboration surface:
