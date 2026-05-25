@@ -417,6 +417,14 @@ def main() -> int:
                 }
             ],
             "selection": {"classId": draft_class_id},
+            "preview": {
+                "kind": "live-canvas-snapshot",
+                "label": "Live Preview Snapshot",
+                "mediaType": "image/png",
+                "dataUrl": "data:image/png;base64,iVBORw0KGgo=",
+                "width": 32,
+                "height": 18,
+            },
         }
         draft_result = request_json(
             base_url,
@@ -432,11 +440,13 @@ def main() -> int:
         assert_ok(draft_event.get("mode") == "editing", "Draft event did not preserve collaboration mode")
         assert_ok(draft_event.get("dirty") is True, "Draft event did not preserve dirty flag")
         assert_ok(draft_event.get("operations", [{}])[0].get("opId") == "smoke-draft-update", "Draft event did not include operation")
+        assert_ok(draft_event.get("preview", {}).get("kind") == "live-canvas-snapshot", "Draft event did not preserve preview snapshot")
         draft_thread.join(timeout=3)
         draft_list = request_json(base_url, f"/api/models/{SMOKE_MODEL_NAME}/drafts")
         assert_ok(len(draft_list.get("drafts", [])) == 1, "Draft list did not contain saved draft")
         assert_ok(draft_list["drafts"][0].get("clientId") == draft_client_id, "Draft list had wrong client id")
         assert_ok(draft_list["drafts"][0].get("mode") == "editing", "Draft list did not preserve collaboration mode")
+        assert_ok(draft_list["drafts"][0].get("preview", {}).get("dataUrl", "").startswith("data:image/png;base64,"), "Draft list did not preserve preview data")
 
         clear_events: queue.Queue = queue.Queue()
         clear_thread = threading.Thread(

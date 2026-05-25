@@ -87,10 +87,18 @@ let draftPublishTimer = null;
 let localDraftModelName = '';
 let localDraftDirty = false;
 let savedSnapshotKey = '';
+let lastCollaborationPreviewSnapshot = null;
+let lastCollaborationPreviewSnapshotAt = 0;
 let collaborationBaseModel = null;
 let collaborationWarningVisible = false;
 let collaborationPreviewZoom = 1;
+const collaborationLivePreviewZoomByDraft = new Map();
 const COLLABORATION_DIFF_DEFAULT_LIMIT = Number.POSITIVE_INFINITY;
+const COLLABORATION_PREVIEW_MAX_WIDTH = 1024;
+const COLLABORATION_PREVIEW_MAX_HEIGHT = 1024;
+const COLLABORATION_PREVIEW_MAX_DATA_URL_CHARS = 480000;
+const COLLABORATION_PREVIEW_MIN_INTERVAL_MS = 2500;
+const COLLABORATION_PREVIEW_JPEG_QUALITY = 0.74;
 let nextClassNumber = 1;
 let nextHyperclassNumber = 1;
 let nextAttributeNumber = 1;
@@ -1885,6 +1893,110 @@ function buildManualLiveSnapshotPngDataUrl(metrics) {
   return canvas.toDataURL('image/png');
 }
 
+function renderLiveSnapshotToCanvas(targetWidth, targetHeight) {
+  const metrics = getLiveSnapshotMetrics();
+  renderOnce();
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(targetWidth));
+  canvas.height = Math.max(1, Math.round(targetHeight));
+  const canvasContext = canvas.getContext('2d');
+  canvasContext.drawImage(renderer.domElement, 0, 0, canvas.width, canvas.height);
+
+  const container = $('container');
+  const containerRect = container.getBoundingClientRect();
+  canvasContext.save();
+  canvasContext.scale(canvas.width / metrics.cssWidth, canvas.height / metrics.cssHeight);
+  const labels = [...(labelRenderer?.domElement?.children || [])]
+    .filter(element => isSnapshotElementVisible(element, containerRect));
+  labels.forEach(element => drawSnapshotElement(canvasContext, element, containerRect));
+  const canvasTitle = $('canvas-model-title');
+  if (canvasTitle && isSnapshotElementVisible(canvasTitle, containerRect)) {
+    drawSnapshotElement(canvasContext, canvasTitle, containerRect);
+  }
+  canvasContext.restore();
+
+  return { canvas, metrics };
+}
+
+function collaborationPreviewSize(metrics, scale = 1) {
+  const baseRatio = Math.min(
+    1,
+    COLLABORATION_PREVIEW_MAX_WIDTH / metrics.pixelWidth,
+    COLLABORATION_PREVIEW_MAX_HEIGHT / metrics.pixelHeight
+  );
+  const ratio = Math.max(0.12, baseRatio * scale);
+  return {
+    width: Math.max(1, Math.round(metrics.pixelWidth * ratio)),
+    height: Math.max(1, Math.round(metrics.pixelHeight * ratio))
+  };
+}
+
+function canvasToPreviewDataUrl(canvas, quality = COLLABORATION_PREVIEW_JPEG_QUALITY) {
+  try {
+    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+    if (dataUrl && dataUrl !== 'data:,') return { dataUrl, mediaType: 'image/jpeg' };
+  } catch (error) {
+    addLog(`JPEG preview encode failed: ${error?.message || error}`);
+  }
+  return { dataUrl: canvas.toDataURL('image/png'), mediaType: 'image/png' };
+}
+
+function clearCollaborationPreviewSnapshotCache() {
+  lastCollaborationPreviewSnapshot = null;
+  lastCollaborationPreviewSnapshotAt = 0;
+}
+
+async function buildCollaborationPreviewSnapshot(options = {}) {
+  if (!renderer || !labelRenderer || !nodes().length) return null;
+  const now = Date.now();
+  if (
+    !options.force &&
+    lastCollaborationPreviewSnapshot &&
+    now - lastCollaborationPreviewSnapshotAt < COLLABORATION_PREVIEW_MIN_INTERVAL_MS
+  ) {
+    return lastCollaborationPreviewSnapshot;
+  }
+
+  try {
+    const metrics = getLiveSnapshotMetrics();
+    let scale = 1;
+    let size = collaborationPreviewSize(metrics, scale);
+    let rendered = renderLiveSnapshotToCanvas(size.width, size.height);
+    let encoded = canvasToPreviewDataUrl(rendered.canvas);
+
+    while (encoded.dataUrl.length > COLLABORATION_PREVIEW_MAX_DATA_URL_CHARS && scale > 0.42) {
+      scale *= 0.78;
+      size = collaborationPreviewSize(metrics, scale);
+      rendered = renderLiveSnapshotToCanvas(size.width, size.height);
+      encoded = canvasToPreviewDataUrl(rendered.canvas, Math.max(0.56, COLLABORATION_PREVIEW_JPEG_QUALITY * scale));
+    }
+
+    if (encoded.dataUrl.length > COLLABORATION_PREVIEW_MAX_DATA_URL_CHARS) {
+      addLog(`Skipped collaboration preview snapshot (${encoded.dataUrl.length} chars)`);
+      return lastCollaborationPreviewSnapshot;
+    }
+
+    lastCollaborationPreviewSnapshot = {
+      kind: 'live-canvas-snapshot',
+      label: 'Live Preview Snapshot',
+      mediaType: encoded.mediaType,
+      dataUrl: encoded.dataUrl,
+      width: size.width,
+      height: size.height,
+      sourceWidth: metrics.pixelWidth,
+      sourceHeight: metrics.pixelHeight,
+      capturedAt: new Date().toISOString(),
+      viewport: getSerializableViewState(),
+      selection: getDraftSelection()
+    };
+    lastCollaborationPreviewSnapshotAt = now;
+    return lastCollaborationPreviewSnapshot;
+  } catch (error) {
+    addLog(`Collaboration preview snapshot failed: ${error?.message || error}`);
+    return lastCollaborationPreviewSnapshot;
+  }
+}
+
 async function handleExportPng() {
   const { text, metrics } = buildLiveSnapshotSvgText();
   let pngDataUrl;
@@ -2179,6 +2291,17 @@ function bindCollaborationControls() {
   $('collaboration-apply-right-button')?.addEventListener('click', () => runAction(applySelectedRemoteDraft));
   $('collaboration-merge-button')?.addEventListener('click', () => runAction(mergeSelectedRemoteDraft));
   $('collaboration-preview')?.addEventListener('click', event => {
+    const liveButton = event.target.closest?.('[data-collaboration-live-preview-action]');
+    if (liveButton) {
+      const draft = selectedRemoteDraft();
+      const action = liveButton.dataset.collaborationLivePreviewAction;
+      const currentZoom = getCollaborationLivePreviewZoom(draft);
+      if (action === 'zoom-in') setCollaborationLivePreviewZoom(draft, currentZoom + 0.25);
+      if (action === 'zoom-out') setCollaborationLivePreviewZoom(draft, currentZoom - 0.25);
+      if (action === 'fit') setCollaborationLivePreviewZoom(draft, 1);
+      renderCollaborationPreview(draft);
+      return;
+    }
     const button = event.target.closest?.('[data-collaboration-preview-action]');
     if (!button) return;
     const action = button.dataset.collaborationPreviewAction;
@@ -2276,6 +2399,102 @@ function setCollaborationWarning(visible, message = '') {
   if (message) warning.textContent = message;
 }
 
+function safePreviewImageSrc(value) {
+  const text = String(value || '').trim();
+  return /^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(text) ? text : '';
+}
+
+function draftPreviewPayload(draft) {
+  const preview = draft?.preview;
+  if (preview?.kind === 'live-canvas-snapshot' && preview?.dataUrl) return preview;
+  return null;
+}
+
+function collaborationLivePreviewZoomKey(draft) {
+  const clientId = draft?.clientId || '';
+  if (!clientId) return '';
+  return `${draft?.modelName || getSelectedCollaborationModelName() || ''}:${clientId}`;
+}
+
+function getCollaborationLivePreviewZoom(draft) {
+  const key = collaborationLivePreviewZoomKey(draft);
+  return key && collaborationLivePreviewZoomByDraft.has(key)
+    ? collaborationLivePreviewZoomByDraft.get(key)
+    : 1;
+}
+
+function setCollaborationLivePreviewZoom(draft, zoom) {
+  const key = collaborationLivePreviewZoomKey(draft);
+  if (!key) return;
+  collaborationLivePreviewZoomByDraft.set(key, clampNumber(zoom, 0.35, 4, 1));
+}
+
+function clearCollaborationLivePreviewZoomForClient(clientId) {
+  if (!clientId) return;
+  const suffix = `:${clientId}`;
+  [...collaborationLivePreviewZoomByDraft.keys()].forEach(key => {
+    if (key.endsWith(suffix)) collaborationLivePreviewZoomByDraft.delete(key);
+  });
+}
+
+function renderCollaborationVisualPreview(draft) {
+  return renderCollaborationLiveSnapshotPreview(draft) || renderCollaborationModelPreview(draft);
+}
+
+function renderCollaborationLiveSnapshotPreview(draft) {
+  const preview = draftPreviewPayload(draft);
+  const src = safePreviewImageSrc(preview?.dataUrl);
+  if (!src) return '';
+  const capturedAt = preview.capturedAt || draft?.updatedAt || draft?.timestamp || '';
+  const dimensions = preview.width && preview.height ? `${preview.width} x ${preview.height}` : '';
+  const zoom = getCollaborationLivePreviewZoom(draft);
+  const isFit = Math.abs(zoom - 1) < 0.01;
+  const zoomPercent = Math.round(zoom * 100);
+  const imageWidth = Math.max(1, Math.round((preview.width || COLLABORATION_PREVIEW_MAX_WIDTH) * zoom));
+  const imageStyle = isFit
+    ? 'width: 100%; max-width: 100%; height: auto;'
+    : `width: ${imageWidth}px; max-width: none; height: auto;`;
+  const note = [
+    capturedAt ? `Captured ${capturedAt}` : '',
+    dimensions
+  ].filter(Boolean).join(' - ');
+  return `
+    <div class="collaboration-live-preview">
+      <div class="collaboration-preview-mode">
+        <span>Live Preview Snapshot</span>
+        <div class="collaboration-preview-zoom" aria-label="Live preview zoom controls">
+          <button type="button" data-collaboration-live-preview-action="zoom-out" title="Zoom out">-</button>
+          <span>${zoomPercent}%</span>
+          <button type="button" data-collaboration-live-preview-action="zoom-in" title="Zoom in">+</button>
+          <button type="button" data-collaboration-live-preview-action="fit" title="Fit preview">Fit</button>
+        </div>
+      </div>
+      <div class="collaboration-live-preview-scroll">
+        <img class="${isFit ? 'is-fit' : 'is-zoomed'}" src="${escapeHtml(src)}" alt="Remote live canvas preview" style="${escapeHtml(imageStyle)}">
+      </div>
+      ${note ? `<div class="collaboration-preview-note">${escapeHtml(note)}</div>` : ''}
+    </div>
+  `;
+}
+
+function renderCollaborationModelPreview(draft) {
+  if (!draft?.model) {
+    return '<div class="collaboration-diagram-empty">No model preview available</div>';
+  }
+  return `
+    <div class="collaboration-model-preview">
+      <div class="collaboration-preview-mode">
+        <span>Model Preview</span>
+        <span>fallback</span>
+      </div>
+      ${renderDraftDiagramSvg(draft.model, {
+        selection: draft.selection,
+        zoom: collaborationPreviewZoom
+      })}
+    </div>
+  `;
+}
+
 function renderCollaborationPreview(draft) {
   const preview = $('collaboration-preview');
   const mergeButton = $('collaboration-merge-button');
@@ -2303,10 +2522,7 @@ function renderCollaborationPreview(draft) {
       ${renderCollaborationStat('Attrs', summary.attributes ?? 0)}
     </div>
     ${renderCollaborationSelectionDetails(draft)}
-    ${renderDraftDiagramSvg(draft.model, {
-      selection: draft.selection,
-      zoom: collaborationPreviewZoom
-    })}
+    ${renderCollaborationVisualPreview(draft)}
     ${renderCollaborationChangeSummary(draft, operations)}
   `;
   if (mergeButton) mergeButton.disabled = !draft.model && operations.length === 0;
@@ -2888,6 +3104,7 @@ async function publishLocalDraft(reason = 'Updated draft', options = {}) {
   try {
     const snapshot = cloneValue(prepareSceneSnapshot(ctx(), { updateFitMetadata: false }));
     const isDirty = options.dirty !== false;
+    const preview = await buildCollaborationPreviewSnapshot({ force: options.forcePreview === true });
     await publishServerDraft(modelName, {
       clientName: getCollaborationClientName(),
       baseModelRevision: snapshot?.metadata?.revision || snapshot?.metadata?.contentHash || '',
@@ -2898,6 +3115,7 @@ async function publishLocalDraft(reason = 'Updated draft', options = {}) {
       operations: [],
       selection: getDraftSelection(),
       viewport: getSerializableViewState(),
+      preview: preview || { kind: 'model-preview', label: 'Model Preview' },
       summary: summarizeModel(snapshot),
       status: reason || 'Editing'
     }, {
@@ -2963,6 +3181,7 @@ async function clearLocalServerDraft(modelName = localDraftModelName || getSelec
 async function loadRemoteDraftsForCurrentModel() {
   const modelName = getSelectedCollaborationModelName();
   remoteDrafts.clear();
+  collaborationLivePreviewZoomByDraft.clear();
   clearCollaborationChangeHistory();
   selectedRemoteClientId = '';
   if (!COLLABORATION_ENABLED || !serverConnected || !modelName) {
@@ -2992,6 +3211,7 @@ function handleServerDraftUpdated(event) {
 function handleServerDraftCleared(event) {
   if (!event?.clientId || event.clientId === serverEvents?.clientId) return;
   clearCollaborationChangeHistory(event.clientId, event.modelName);
+  clearCollaborationLivePreviewZoomForClient(event.clientId);
   remoteDrafts.delete(event.clientId);
   updateCollaborationPanel();
 }
@@ -2999,6 +3219,7 @@ function handleServerDraftCleared(event) {
 function handleServerClientLeft(event) {
   if (!event?.clientId || event.clientId === serverEvents?.clientId) return;
   clearCollaborationChangeHistory(event.clientId);
+  clearCollaborationLivePreviewZoomForClient(event.clientId);
   remoteDrafts.delete(event.clientId);
   updateCollaborationPanel();
 }
@@ -6007,6 +6228,7 @@ function handleFitModel() {
 
 async function handleResetModel() {
   const previousCollaborationModel = getSelectedCollaborationModelName();
+  clearCollaborationPreviewSnapshotCache();
   await resetData({ context: ctx(), refresh: false });
   const select = $('test-model-select');
   if (select) select.value = '';
@@ -6022,6 +6244,7 @@ async function handleResetModel() {
   linkPickActive = false;
   if (previousCollaborationModel) await clearLocalServerDraft(previousCollaborationModel);
   remoteDrafts.clear();
+  collaborationLivePreviewZoomByDraft.clear();
   clearCollaborationChangeHistory();
   selectedRemoteClientId = '';
   updateCollaborationPanel();
@@ -6382,8 +6605,10 @@ function restoreViewState(state) {
 }
 
 async function handleLoadModel() {
+  clearCollaborationPreviewSnapshotCache();
   await clearLocalServerDraft();
   remoteDrafts.clear();
+  collaborationLivePreviewZoomByDraft.clear();
   clearCollaborationChangeHistory();
   selectedRemoteClientId = '';
   updateCollaborationPanel();

@@ -1067,7 +1067,9 @@ def openapi_spec(host: str) -> dict:
                         "selection": {"description": "Optional selected element ids or selection state."},
                         "cursor": {"description": "Optional pointer/cursor state."},
                         "viewport": {"description": "Optional canvas camera or viewport state."},
-                        "preview": {"description": "Optional compact preview state for split-view rendering."},
+                        "preview": {
+                            "description": "Optional preview-only state for split-view rendering, such as a throttled live canvas snapshot. This field is not saved into model JSON."
+                        },
                         "model": {"type": "object", "description": "Optional draft model snapshot."},
                         "updatedAt": {"type": "string", "format": "date-time"},
                     },
