@@ -2,7 +2,10 @@ const DEFAULT_API_BASE = '';
 const DEFAULT_SERVER_PORT = '8010';
 const DEFAULT_TIMEOUT_MS = 3500;
 const SERVER_MODEL_PREFIX = 'server:';
+const CLIENT_ID_STORAGE_KEY = 'hbds.server.clientId';
+const PAGE_CLIENT_SUFFIX = createClientId('tab');
 let discoveredApiBase = null;
+let fallbackClientId = null;
 
 export function getOpenApiUrl(apiBase = DEFAULT_API_BASE) {
   return `${normalizeApiBase(apiBase)}/api/openapi.json`;
@@ -61,11 +64,186 @@ export async function loadServerModel(modelName, options = {}) {
 
 export async function saveServerModel(modelName, modelData, options = {}) {
   const name = encodeURIComponent(modelFileNameFromValue(modelName));
-  return apiRequest(`/api/models/${name}`, {
+  const revision = options.revision ?? modelData?.metadata?.revision ?? modelData?.metadata?.contentHash;
+  const headers = { ...(options.headers || {}) };
+  if (revision && !hasHeader(headers, 'If-Match')) {
+    headers['If-Match'] = String(revision);
+  }
+  if (!hasHeader(headers, 'X-Client-Id')) {
+    headers['X-Client-Id'] = getServerClientId();
+  }
+  const result = await apiRequest(`/api/models/${name}`, {
     ...options,
+    headers,
     method: 'POST',
     body: modelData
   });
+  if (result.ok && modelData && typeof modelData === 'object' && result.data?.metadata?.revision) {
+    modelData.metadata = {
+      ...(modelData.metadata || {}),
+      revision: result.data.metadata.revision,
+      contentHash: result.data.metadata.contentHash,
+      modified: result.data.metadata.modified,
+      modifiedIso: result.data.metadata.modifiedIso
+    };
+  }
+  return result;
+}
+
+export async function saveScopedModel(modelName, modelData, options = {}) {
+  const scope = normalizeDraftScope(options.modelScope || options.scope);
+  if (!scope) return saveServerModel(modelName, modelData, options);
+  const name = encodeURIComponent(modelFileNameFromValue(modelName));
+  const headers = clientHeaders(options);
+  return apiRequest(`/api/model-files/${encodeURIComponent(scope)}/${name}`, {
+    ...options,
+    headers,
+    method: 'POST',
+    body: modelData
+  });
+}
+
+export async function applyServerModelOperations(modelName, operations = [], options = {}) {
+  const name = encodeURIComponent(modelFileNameFromValue(modelName));
+  const clientId = String(options.clientId || getServerClientId());
+  const revision = options.revision ?? options.baseModelRevision;
+  const headers = clientHeaders(options, { clientId });
+  if (revision && !hasHeader(headers, 'If-Match')) {
+    headers['If-Match'] = String(revision);
+  }
+  return apiRequest(`/api/models/${name}/ops`, {
+    ...options,
+    headers,
+    method: 'POST',
+    body: {
+      clientId,
+      baseModelRevision: revision,
+      operations
+    }
+  });
+}
+
+export async function listServerDrafts(modelName, options = {}) {
+  return apiRequest(draftEndpoint(modelName, options), options);
+}
+
+export async function publishServerDraft(modelName, draft = {}, options = {}) {
+  const clientId = String(options.clientId || draft?.clientId || getServerClientId());
+  const headers = clientHeaders(options, draft);
+  return apiRequest(draftEndpoint(modelName, options, clientId), {
+    ...options,
+    headers,
+    method: 'POST',
+    body: {
+      ...draft,
+      clientId
+    }
+  });
+}
+
+export async function clearServerDraft(modelName, options = {}) {
+  const clientId = String(options.clientId || getServerClientId());
+  const headers = clientHeaders(options);
+  return apiRequest(draftEndpoint(modelName, options, clientId), {
+    ...options,
+    headers,
+    method: 'DELETE'
+  });
+}
+
+export function getServerClientId() {
+  if (fallbackClientId) return fallbackClientId;
+  let baseClientId = '';
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      baseClientId = window.sessionStorage.getItem(CLIENT_ID_STORAGE_KEY) || '';
+      if (!baseClientId) {
+        baseClientId = createClientId('ui');
+        window.sessionStorage.setItem(CLIENT_ID_STORAGE_KEY, baseClientId);
+      }
+    }
+  } catch {
+    baseClientId = '';
+  }
+  fallbackClientId = `${baseClientId || createClientId('ui')}-${PAGE_CLIENT_SUFFIX}`;
+  return fallbackClientId;
+}
+
+export function subscribeServerEvents(handlers = {}, options = {}) {
+  const clientId = options.clientId || getServerClientId();
+  const apiBase = getEventApiBase(options);
+  if (typeof EventSource !== 'function') {
+    handlers.onError?.({ code: 'eventsource_unavailable', message: 'EventSource is unavailable' });
+    return { clientId, close() {} };
+  }
+
+  const params = new URLSearchParams({ clientId });
+  if (options.clientName) params.set('clientName', String(options.clientName));
+  const source = new EventSource(`${apiBase}/api/events?${params.toString()}`);
+  const dispatch = event => {
+    let data = {};
+    try {
+      data = event?.data ? JSON.parse(event.data) : {};
+    } catch {
+      handlers.onError?.({ code: 'invalid_event', message: 'Server event was not JSON' });
+      return;
+    }
+    handlers.onEvent?.(data, event);
+    if (data?.type) {
+      handlers[data.type]?.(data, event);
+    }
+  };
+
+  [
+    'model.updated',
+    'client.joined',
+    'client.left',
+    'draft.updated',
+    'draft.cleared'
+  ].forEach(eventType => source.addEventListener(eventType, dispatch));
+  source.onmessage = dispatch;
+  source.onopen = event => handlers.onOpen?.(event);
+  source.onerror = event => handlers.onError?.(event);
+
+  return {
+    clientId,
+    source,
+    close() {
+      source.close();
+    }
+  };
+}
+
+function clientHeaders(options = {}, payload = {}) {
+  const headers = { ...(options.headers || {}) };
+  if (!hasHeader(headers, 'X-Client-Id')) {
+    headers['X-Client-Id'] = String(options.clientId || payload?.clientId || getServerClientId());
+  }
+  const clientName = options.clientName || payload?.clientName;
+  if (clientName && !hasHeader(headers, 'X-Client-Name')) {
+    headers['X-Client-Name'] = String(clientName);
+  }
+  return headers;
+}
+
+function draftEndpoint(modelName, options = {}, clientId = '') {
+  const scope = normalizeDraftScope(options.draftScope || options.scope);
+  const name = encodeURIComponent(modelFileNameFromValue(modelName));
+  if (scope) {
+    const base = `/api/drafts/${encodeURIComponent(scope)}/${name}`;
+    return clientId ? `${base}/clients/${encodeURIComponent(clientId)}` : base;
+  }
+  const base = `/api/models/${name}/drafts`;
+  return clientId ? `${base}/${encodeURIComponent(clientId)}` : base;
+}
+
+function normalizeDraftScope(value) {
+  const clean = String(value || '').trim().replace(/^\/+|\/+$/g, '');
+  return clean === 'test_models' ? clean : '';
+}
+
+function createClientId(prefix) {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 async function apiRequest(path, options = {}) {
@@ -205,14 +383,27 @@ function getLocalServerFallbackBases() {
   return bases;
 }
 
+function getEventApiBase(options = {}) {
+  if (Object.prototype.hasOwnProperty.call(options, 'apiBase')) {
+    return normalizeApiBase(options.apiBase);
+  }
+  return getApiBaseCandidates(DEFAULT_API_BASE)[0] || '';
+}
+
 function normalizeApiBase(value) {
   const clean = String(value || '').trim().replace(/\/+$/, '');
   return clean;
 }
 
+function hasHeader(headers, name) {
+  const target = String(name || '').toLowerCase();
+  return Object.keys(headers || {}).some(key => key.toLowerCase() === target);
+}
+
 function normalizeError(error, status) {
   if (error && typeof error === 'object') {
     return {
+      ...error,
       code: String(error.code || `http_${status || 0}`),
       message: String(error.message || 'Server request failed')
     };

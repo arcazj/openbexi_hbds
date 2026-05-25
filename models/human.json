@@ -24,8 +24,8 @@
           "Email"
         ],
         "position": {
-          "x": 19.5541,
-          "y": 4.9239,
+          "x": 20.0602,
+          "y": 4.7825,
           "z": 0
         },
         "size": {
@@ -93,8 +93,8 @@
       "fit": {
         "padding": 1.18,
         "fitHeightDistance": 3.7989,
-        "fitWidthDistance": 2.2944,
-        "distance": 3.609,
+        "fitWidthDistance": 2.5979,
+        "distance": 4.2094,
         "diagramWidth": 1.6,
         "diagramHeight": 2.7,
         "diagramDepth": 0.11,
@@ -104,7 +104,7 @@
           "y": 4.65,
           "z": 0.055
         },
-        "cameraAspect": 1.6557,
+        "cameraAspect": 1.4623,
         "cameraFov": 52
       }
     },

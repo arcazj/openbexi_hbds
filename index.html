@@ -91,6 +91,11 @@
       cursor: pointer;
     }
 
+    .connection-status {
+      gap: 2px;
+      padding: 4px 3px;
+    }
+
     .mode-button:hover,
     .mode-button:focus-visible {
       background: #f7fbff;
@@ -119,8 +124,8 @@
     }
 
     .power-icon {
-      height: 34px;
-      width: 34px;
+      height: 28px;
+      width: 28px;
     }
 
     .mode-label {
@@ -134,13 +139,14 @@
       align-items: center;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
       min-width: 0;
+      width: 100%;
     }
 
     .connection-label {
       color: #6b7280;
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 800;
       letter-spacing: 0.04em;
       line-height: 1;
@@ -149,9 +155,14 @@
 
     .connection-value {
       color: #b42318;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 800;
       line-height: 1;
+      max-width: 100%;
+      overflow: hidden;
+      text-align: center;
+      text-overflow: clip;
+      white-space: nowrap;
     }
 
     .connection-status.connecting .connection-value {
@@ -296,14 +307,19 @@
         padding: 7px 4px;
       }
 
+      .connection-status {
+        gap: 2px;
+        padding: 4px 3px;
+      }
+
       .mode-icon {
         height: 28px;
         width: 28px;
       }
 
       .power-icon {
-        height: 32px;
-        width: 32px;
+        height: 28px;
+        width: 28px;
       }
 
       .mode-label {
@@ -315,7 +331,7 @@
       }
 
       .connection-value {
-        font-size: 12px;
+        font-size: 10px;
       }
     }
   </style>
@@ -340,11 +356,11 @@
           <img class="mode-icon" src="icons/help.png" alt="">
           <span class="mode-label">Help</span>
         </button>
-        <div id="connection-status" class="connection-status" role="status" aria-live="polite" aria-label="Connection status: idle">
+        <div id="connection-status" class="connection-status" role="status" aria-live="polite" aria-label="Connection status: not connected">
           <img id="connection-icon" class="power-icon" src="icons/power_red.png" alt="">
           <span class="connection-copy">
             <span class="connection-label">Connection</span>
-            <span id="connection-value" class="connection-value">Idle</span>
+            <span id="connection-value" class="connection-value">Not connected</span>
           </span>
         </div>
       </nav>
@@ -401,7 +417,8 @@
     const viewButtons = Array.from(document.querySelectorAll('.mode-button[data-view]'));
     const helpSections = Array.from(document.querySelectorAll('.help-section'));
     let activeView = 'models';
-    let serverConnectionState = 'idle';
+    let serverConnectionState = 'not_connected';
+    let serverConnectionPollTimer = null;
     const views = {
       models: {
         src: 'index_models.html?embeddedShell=1',
@@ -418,9 +435,9 @@
     };
 
     function setServerConnectionState(state) {
-      serverConnectionState = state === 'connected' || state === 'connecting' ? state : 'idle';
+      serverConnectionState = state === 'connected' || state === 'connecting' ? state : 'not_connected';
       const labels = {
-        idle: 'Idle',
+        not_connected: 'Not connected',
         connecting: 'Connecting',
         connected: 'Connected'
       };
@@ -442,15 +459,22 @@
       }, targetOrigin);
     }
 
-    async function refreshServerConnectionState() {
-      setServerConnectionState('connecting');
+    async function refreshServerConnectionState(options = {}) {
+      if (options.showConnecting === true) setServerConnectionState('connecting');
       try {
-        const api = await import('./js/hbds_server_api.js?v=server-api-20260524a');
+        const api = await import('./js/hbds_server_api.js?v=server-api-20260524f');
         const result = await api.checkServerConnection({ timeoutMs: 1600 });
-        setServerConnectionState(result.ok ? 'connected' : 'idle');
+        setServerConnectionState(result.ok ? 'connected' : 'not_connected');
       } catch {
-        setServerConnectionState('idle');
+        setServerConnectionState('not_connected');
       }
+    }
+
+    function startServerConnectionPolling() {
+      window.clearInterval(serverConnectionPollTimer);
+      serverConnectionPollTimer = window.setInterval(() => {
+        refreshServerConnectionState({ showConnecting: false });
+      }, 2500);
     }
 
     function selectView(name, options = {}) {
@@ -508,7 +532,12 @@
 
     const initialView = window.location.hash.slice(1);
     selectView(initialView === 'help' || views[initialView] ? initialView : 'models', { skipHash: !initialView });
-    refreshServerConnectionState();
+    refreshServerConnectionState({ showConnecting: true });
+    startServerConnectionPolling();
+    window.addEventListener('online', () => refreshServerConnectionState({ showConnecting: true }));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') refreshServerConnectionState({ showConnecting: false });
+    });
   </script>
 </body>
 </html>

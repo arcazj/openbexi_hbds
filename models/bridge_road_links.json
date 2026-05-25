@@ -120,11 +120,14 @@
         },
         "rendering": {
           "class": {
-            "color": "#FFE082",
+            "color": "#ff809f",
             "material": "metallic",
             "borderColor": "#000080",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.1
+            "borderWidth": 7,
+            "cornerRadius": 0.61,
+            "metallicColor": "#ff809f",
+            "bodyType": "shape",
+            "shapeType": "square"
           },
           "attributes": {
             "checkboxColor": "#A9A9A9",
@@ -167,11 +170,12 @@
         },
         "rendering": {
           "class": {
-            "color": "#B0BEC5",
+            "color": "#0df867",
             "material": "metallic",
             "borderColor": "#000080",
             "borderWidth": 0.02,
-            "cornerRadius": 0.1
+            "cornerRadius": 0.1,
+            "metallicColor": "#0df867"
           },
           "attributes": {
             "checkboxColor": "#A9A9A9",
@@ -404,20 +408,20 @@
     "layout": {
       "algorithm": "grid",
       "fit": {
-        "padding": 1.15,
-        "fitHeightDistance": 14.9569,
-        "fitWidthDistance": 7.7055,
-        "distance": 14.9569,
+        "padding": 1.18,
+        "fitHeightDistance": 15.3471,
+        "fitWidthDistance": 13.5683,
+        "distance": 11.4213,
         "diagramWidth": 8.893,
         "diagramHeight": 8.248,
         "diagramDepth": 0.11,
         "radius": 6.0648,
         "center": {
-          "x": -0.5325,
-          "y": 0.28,
+          "x": 0.45,
+          "y": 0.834,
           "z": 0.055
         },
-        "cameraAspect": 1.9411,
+        "cameraAspect": 1.1311,
         "cameraFov": 50
       }
     },

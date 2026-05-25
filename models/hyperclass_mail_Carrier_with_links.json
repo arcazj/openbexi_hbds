@@ -291,23 +291,23 @@
   "metadata": {
     "sceneSettings": {
       "background": "#eef2f6",
-      "ambient": 0.82,
-      "front": 0.16,
+      "ambient": 0,
+      "front": 0,
       "sources": [
         {
-          "intensity": 0.14,
+          "intensity": 1,
           "direction": {
-            "x": -5,
+            "x": -5.734,
             "y": 7,
-            "z": 13
+            "z": 14.937
           }
         },
         {
-          "intensity": 0.1,
+          "intensity": 0.6,
           "direction": {
-            "x": 8,
-            "y": -6,
-            "z": 10
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
           }
         }
       ]
@@ -317,7 +317,7 @@
       "fit": {
         "padding": 1.15,
         "fitHeightDistance": 20.1231,
-        "fitWidthDistance": 12.1535,
+        "fitWidthDistance": 10.8825,
         "distance": 13.3505,
         "diagramWidth": 14.7725,
         "diagramHeight": 6.934,
@@ -328,7 +328,7 @@
           "y": 0.0885,
           "z": 0.07
         },
-        "cameraAspect": 1.6557,
+        "cameraAspect": 1.8491,
         "cameraFov": 50
       }
     },

@@ -7,7 +7,57 @@
       "layout",
       "class",
       "attributes"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 3.3386,
+        "fitWidthDistance": 2.2831,
+        "distance": 3.1717,
+        "diagramWidth": 1.95,
+        "diagramHeight": 1.95,
+        "diagramDepth": 0.11,
+        "radius": 1.38,
+        "center": {
+          "x": 0.3252,
+          "y": -0.1483,
+          "z": 0.055
+        },
+        "cameraAspect": 1.4623,
+        "cameraFov": 52
+      }
+    },
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
   },
   "hypergraph": {
     "class": [
@@ -27,12 +77,19 @@
           {
             "id": "class_single_few_attr_3",
             "name": "owner"
+          },
+          {
+            "id": "att_ls38o7",
+            "name": "age",
+            "font": {
+              "size": 24
+            }
           }
         ],
         "parentClassId": null,
         "position": {
-          "x": 0,
-          "y": 0,
+          "x": 0.1252,
+          "y": -0.1483,
           "z": 0
         },
         "size": {
@@ -44,11 +101,16 @@
             "color": "#f6c64a",
             "metallicColor": "#ffd166",
             "material": "metallic",
-            "borderColor": "#7c4a03",
-            "cornerRadius": 0.13,
+            "borderColor": "#7c035c",
+            "cornerRadius": 0,
             "metalness": 0.52,
             "roughness": 0.22,
-            "emissiveIntensity": 0.035
+            "emissiveIntensity": 0.035,
+            "borderWidth": 6.5,
+            "bodyType": "shape",
+            "imageSrc": "./images/class_vehicle.png",
+            "imageFit": "cover",
+            "shapeType": "roundedRectangle"
           },
           "attributes": {
             "checkboxColor": "#7c4a03",
@@ -63,7 +125,11 @@
             "lineColor": "#7c4a03",
             "lineWidth": 0.01
           },
-          "textColor": "#111827"
+          "textColor": "#111827",
+          "font": {
+            "bold": true,
+            "size": 48
+          }
         }
       }
     ],

@@ -18,6 +18,40 @@
     <div id="model-overview-viewport"></div>
   </div>
 
+  <section id="collaboration-split" aria-label="Collaborator live view" hidden>
+    <div class="collaboration-header">
+      <div class="collaboration-heading">
+        <div class="eyebrow">Live Collaboration</div>
+        <h2 id="collaboration-title">Others' View</h2>
+      </div>
+      <div class="collaboration-header-controls">
+        <span id="collaboration-count" class="collaboration-count">0 users</span>
+        <label class="collaboration-client-picker" for="collaboration-client-select">
+          <select id="collaboration-client-select" aria-label="Select collaborator"></select>
+        </label>
+      </div>
+    </div>
+    <div id="collaboration-warning" class="collaboration-warning" hidden>
+      Another client is editing this model. Saving now can overwrite or conflict with a later save.
+    </div>
+    <div id="collaboration-preview" class="collaboration-preview">
+      <div class="collaboration-empty">No collaborator selected</div>
+    </div>
+    <div class="collaboration-actions" aria-label="Collaboration resolution">
+      <button id="collaboration-merge-button" type="button" title="Combine your diagram with the selected user's non-conflicting changes">Merge Both</button>
+      <button id="collaboration-apply-right-button" type="button" title="Replace your canvas with the selected user's diagram">Use Theirs</button>
+      <button id="collaboration-apply-left-button" type="button" title="Keep and save your current diagram">Keep Mine</button>
+    </div>
+    <span class="collaboration-resize-handle is-north" data-floating-resize="n" aria-hidden="true"></span>
+    <span class="collaboration-resize-handle is-east" data-floating-resize="e" aria-hidden="true"></span>
+    <span class="collaboration-resize-handle is-south" data-floating-resize="s" aria-hidden="true"></span>
+    <span class="collaboration-resize-handle is-west" data-floating-resize="w" aria-hidden="true"></span>
+    <span class="collaboration-resize-handle is-north-east" data-floating-resize="ne" aria-hidden="true"></span>
+    <span class="collaboration-resize-handle is-north-west" data-floating-resize="nw" aria-hidden="true"></span>
+    <span class="collaboration-resize-handle is-south-east" data-floating-resize="se" aria-hidden="true"></span>
+    <span class="collaboration-resize-handle is-south-west" data-floating-resize="sw" aria-hidden="true"></span>
+  </section>
+
   <aside id="dynamic-test-panel" aria-label="HBDS dynamic controls">
     <header class="panel-header">
       <div class="eyebrow">HBDS Lab</div>
@@ -25,10 +59,10 @@
     </header>
 
     <div class="stats-grid" aria-label="Model statistics">
-      <div class="stat"><span class="stat-value" id="stat-node-count">0</span><span class="stat-label">Class(es)</span></div>
-      <div class="stat"><span class="stat-value" id="stat-link-count">0</span><span class="stat-label">Link(s)</span></div>
-      <div class="stat"><span class="stat-value" id="stat-attribute-count">0</span><span class="stat-label">attribute(s)</span></div>
-      <div class="stat"><span class="stat-value" id="stat-hyperclass-count">0</span><span class="stat-label">Hyperclasse(s)</span></div>
+      <div class="stat"><span class="stat-value" id="stat-hyperclass-count">0</span><span class="stat-label" id="stat-hyperclass-label">hyperclasses</span></div>
+      <div class="stat"><span class="stat-value" id="stat-node-count">0</span><span class="stat-label" id="stat-node-label">classes</span></div>
+      <div class="stat"><span class="stat-value" id="stat-attribute-count">0</span><span class="stat-label" id="stat-attribute-label">attributes</span></div>
+      <div class="stat"><span class="stat-value" id="stat-link-count">0</span><span class="stat-label" id="stat-link-label">links</span></div>
     </div>
     <div id="validation-status" class="status-chip">No model loaded</div>
 
@@ -96,6 +130,7 @@
       <div id="property-panel" class="property-panel" aria-live="polite"></div>
       <div class="danger-zone">
         <button id="delete-selected-button" type="button" class="danger">Delete Selected</button>
+        <button id="delete-attribute-button" type="button" class="danger">Delete Attribute</button>
       </div>
     </section>
 
@@ -140,6 +175,6 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=font-zoom-20260523a"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=collab-ui-20260524l"></script>
 </body>
 </html>

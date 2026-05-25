@@ -82,7 +82,9 @@
             "borderColor": "#000000",
             "borderWidth": 0.02,
             "cornerRadius": 0.1,
-            "opacity": 0.2
+            "opacity": 0.2,
+            "bodyType": "shape",
+            "shapeType": "document"
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -110,12 +112,17 @@
           "Contents",
           "Fragile",
           "Insurance",
-          "Tracking code"
+          {
+            "name": "Tracking code",
+            "font": {
+              "italic": true
+            }
+          }
         ],
         "parentClassId": 3,
         "position": {
-          "x": 8.9,
-          "y": 3.1,
+          "x": 8.9244,
+          "y": 3.3653,
           "z": 0
         },
         "size": {
@@ -179,7 +186,7 @@
       "fit": {
         "padding": 1.15,
         "fitHeightDistance": 8.5341,
-        "fitWidthDistance": 4.3966,
+        "fitWidthDistance": 5.4181,
         "distance": 8.5341,
         "diagramWidth": 4.45,
         "diagramHeight": 5.3,
@@ -190,7 +197,7 @@
           "y": 4.9699,
           "z": 0.04
         },
-        "cameraAspect": 1.9411,
+        "cameraAspect": 1.5751,
         "cameraFov": 50
       }
     },

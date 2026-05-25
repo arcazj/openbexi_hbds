@@ -1,134 +1,89 @@
 {
   "models": [
     {
-      "value": "human",
-      "label": "Human",
-      "description": "Base human class model",
-      "tags": [
-        "starter"
-      ]
-    },
-    {
-      "value": "human_and_car",
-      "label": "Human + Car",
-      "description": "Simple two-entity model",
-      "tags": [
-        "starter"
-      ]
-    },
-    {
-      "value": "human_and_car_and_more",
-      "label": "Human + Car + More",
-      "description": "Extended sample model",
-      "tags": [
-        "sample"
-      ]
-    },
-    {
-      "value": "transportation",
-      "label": "Transportation",
-      "description": "Transportation entities",
-      "tags": [
-        "domain"
-      ]
-    },
-    {
-      "value": "transportation_links",
-      "label": "Transportation + Links",
-      "description": "Transportation with explicit links",
-      "tags": [
-        "domain"
-      ]
-    },
-    {
-      "value": "models/multimodal_transportation_diagram.json",
-      "label": "Multimodal Transportation Diagram",
-      "description": "HBDS model reconstructed from the multimodal transport diagram",
-      "tags": [
-        "domain",
-        "transportation",
-        "diagram"
-      ]
-    },
-    {
-      "value": "human_and_car_links",
-      "label": "Human + Car + Links",
-      "description": "Linked human-car sample",
-      "tags": [
-        "sample"
-      ]
-    },
-    {
-      "value": "bridge_road_links",
-      "label": "Bridge + Road Links",
-      "description": "Infrastructure links demo",
-      "tags": [
-        "domain"
-      ]
-    },
-    {
-      "value": "models/hyperclass_mail_Carrier.json",
-      "label": "Hyperclass Mail Carrier",
-      "description": "Hyperclass sample",
-      "tags": [
-        "hyperclass"
-      ]
-    },
-    {
-      "value": "models/hyperclass_mail_Carrier_with_links.json",
-      "label": "Hyperclass Mail Carrier + Links",
-      "description": "Hyperclass with links",
-      "tags": [
-        "hyperclass"
-      ]
+      "value": "models/bridge_road_links.json",
+      "label": "bridge road links",
+      "description": "bridge road links"
     },
     {
       "value": "models/complex_hyperclass_mail_Carrier_with_links.json",
-      "label": "Complex Hyperclass Mail Carrier + Links",
-      "description": "Large hyperclass sample",
-      "tags": [
-        "hyperclass",
-        "complex"
-      ]
+      "label": "complex hyperclass mail Carrier with links",
+      "description": "complex hyperclass mail Carrier with links"
+    },
+    {
+      "value": "models/human.json",
+      "label": "human",
+      "description": "human"
+    },
+    {
+      "value": "models/human_and_car.json",
+      "label": "human and car",
+      "description": "human and car"
+    },
+    {
+      "value": "models/human_and_car_and_more.json",
+      "label": "human and car and more",
+      "description": "human and car and more"
+    },
+    {
+      "value": "models/human_and_car_links.json",
+      "label": "human and car links",
+      "description": "human and car links"
+    },
+    {
+      "value": "models/hyperclass_mail_Carrier.json",
+      "label": "hyperclass mail Carrier",
+      "description": "hyperclass mail Carrier"
+    },
+    {
+      "value": "models/hyperclass_mail_Carrier_with_links.json",
+      "label": "hyperclass mail Carrier with links",
+      "description": "hyperclass mail Carrier with links"
+    },
+    {
+      "value": "models/hyperclasse_human_and_car.json",
+      "label": "hyperclasse human and car",
+      "description": "hyperclasse human and car"
+    },
+    {
+      "value": "models/hyperclasse_link_human_and_car.json",
+      "label": "hyperclasse link human and car",
+      "description": "hyperclasse link human and car"
+    },
+    {
+      "value": "models/multimodal_transportation_diagram.json",
+      "label": "multimodal transportation diagram",
+      "description": "multimodal transportation diagram"
     },
     {
       "value": "models/opera_de Paris.json",
-      "label": "Opera de Paris",
-      "description": "Cultural domain sample",
-      "tags": [
-        "domain"
-      ]
+      "label": "opera de Paris",
+      "description": "opera de Paris"
     },
     {
       "value": "models/satellite_world_complete_structure.json",
-      "label": "Satellite World Complete Structure",
-      "description": "Complete satellite world HBDS model; grid layout with metallic colored classes",
-      "tags": [
-        "domain",
-        "space",
-        "grid",
-        "metallic"
-      ]
+      "label": "satellite world complete structure",
+      "description": "satellite world complete structure"
+    },
+    {
+      "value": "models/satellite_world_simple_structure.json",
+      "label": "satellite world simple structure",
+      "description": "satellite world simple structure"
     },
     {
       "value": "models/TGV.json",
       "label": "TGV",
-      "description": "Railway sample model",
-      "tags": [
-        "domain"
-      ]
+      "description": "TGV"
     },
     {
-      "value": "models/satellite_world_simple_structure.json",
-      "label": "Satellite World Simple Structure",
-      "description": "Simple CelesTrak-inspired HBDS satellite model (satellites, payload type, capacity, TLE, rocket, manufacturer, launch).",
-      "tags": [
-        "domain",
-        "space",
-        "simple",
-        "grid",
-        "metallic"
-      ]
+      "value": "models/transportation.json",
+      "label": "transportation",
+      "description": "transportation"
+    },
+    {
+      "value": "models/transportation_links.json",
+      "label": "transportation links",
+      "description": "transportation links"
     }
   ]
 }

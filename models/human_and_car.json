@@ -24,8 +24,8 @@
           "Email"
         ],
         "position": {
-          "x": 19.0791,
-          "y": 5.0153,
+          "x": 20.366,
+          "y": 4.9676,
           "z": 0
         },
         "size": {
@@ -74,8 +74,8 @@
           "Owner"
         ],
         "position": {
-          "x": 23.2786,
-          "y": 5.0537,
+          "x": 23.8565,
+          "y": 4.9822,
           "z": 0
         },
         "size": {
@@ -137,19 +137,19 @@
       "algorithm": "none",
       "fit": {
         "padding": 1.18,
-        "fitHeightDistance": 7.8997,
-        "fitWidthDistance": 4.0698,
-        "distance": 5.9474,
-        "diagramWidth": 5.7995,
+        "fitHeightDistance": 7.1489,
+        "fitWidthDistance": 4.8889,
+        "distance": 6.2604,
+        "diagramWidth": 5.0905,
         "diagramHeight": 3,
         "diagramDepth": 0.11,
-        "radius": 3.2652,
+        "radius": 2.9549,
         "center": {
           "x": 22.2,
           "y": 5,
           "z": 0.055
         },
-        "cameraAspect": 1.9411,
+        "cameraAspect": 1.4623,
         "cameraFov": 52
       }
     },

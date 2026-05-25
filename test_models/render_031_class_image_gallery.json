@@ -8,7 +8,7 @@
       "fit": {
         "padding": 1.18,
         "fitHeightDistance": 19.3938,
-        "fitWidthDistance": 11.2585,
+        "fitWidthDistance": 17.146,
         "distance": 12.0157,
         "diagramWidth": 13.74,
         "diagramHeight": 8.26,
@@ -19,7 +19,7 @@
           "y": 0.0502,
           "z": 0.065
         },
-        "cameraAspect": 1.7226,
+        "cameraAspect": 1.1311,
         "cameraFov": 52
       }
     },
@@ -31,26 +31,33 @@
     ],
     "sceneSettings": {
       "background": "#eef2f6",
-      "ambient": 0.82,
-      "front": 0.16,
+      "ambient": 0,
+      "front": 0,
       "sources": [
         {
-          "intensity": 0.14,
+          "intensity": 1,
           "direction": {
-            "x": -5,
+            "x": -5.734,
             "y": 7,
-            "z": 13
+            "z": 14.937
           }
         },
         {
-          "intensity": 0.1,
+          "intensity": 0.6,
           "direction": {
-            "x": 8,
-            "y": -6,
-            "z": 10
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
           }
         }
       ]
+    },
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
     }
   },
   "hypergraph": {
