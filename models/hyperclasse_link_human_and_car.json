@@ -1,101 +1,95 @@
 {
-  "hypergraph": {
-    "hyperclass": [
-      {
-        "id": 100,
-        "name": "Human",
-        "type": "roundedRectangle",
-        "attributes": [
-          "Last name", "First name", "Middle name", "Age", "Weight",
-          "Height", "Sex", "Date of birth", "Place of birth",
-          "Nationality", "Marital status", "Occupation", "Education level",
-          "Address", "Phone number", "Email"
-        ],
-        "position": { "x": 20, "y": 5, "z": 0 },
-        "size": { "width": 4, "height": 4.5 },
-        "rendering": {
-          "class": {
-            "color": "#ECECEC",
-            "material": "phong",
-            "borderColor": "#333333",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.1
-          },
-          "attributes": {
-            "checkboxColor": "#A9A9A9",
-            "checkboxMaterial": "metallic",
-            "shape": "square",
-            "size": { "width": 0.1, "height": 0.1 }
-          },
-          "connections": {
-            "lineColor": "#555555",
-            "lineWidth": 0.01
-          },
-          "textColor": "#000000"
-        },
-        "classes": [
-          {
-            "id": 1,
-            "name": "Man",
-            "type": "roundedRectangle",
-            "specific_attributes": [
-              "Beard Style",
-              "Voice Pitch",
-              "Shoulder-to-Hip Ratio",
-              "Favorite Sport",
-              "Typical Tie Knot"
-            ],
-            "position": { "x": -1, "y": 0, "z": 0.1 },
-            "size": { "width": 1.8, "height": 3 },
-            "rendering": {
-              "class": {
-                "color": "#ADD8E6",
-                "material": "metallic",
-                "borderColor": "#000080",
-                "borderWidth": 0.02,
-                "cornerRadius": 0.1
-              },
-              "textColor": "#000000"
-            }
-          },
-          {
-            "id": 2,
-            "name": "Woman",
-            "type": "roundedRectangle",
-            "specific_attributes": [
-              "Maiden Name",
-              "Hip-to-Waist Ratio",
-              "Hairstyle",
-              "Zodiac Sign",
-              "Preferred Handbag Style"
-            ],
-            "position": { "x": 1, "y": 0, "z": 0.1 },
-            "size": { "width": 1.8, "height": 3 },
-            "rendering": {
-              "class": {
-                "color": "#FFB6C1",
-                "material": "metallic",
-                "borderColor": "#800000",
-                "borderWidth": 0.02,
-                "cornerRadius": 0.1
-              },
-              "textColor": "#000000"
-            }
-          }
-        ]
-      }
+  "metadata": {
+    "name": "Hyperclasse Link Human And Car",
+    "purpose": "Reference HBDS model for Hyperclasse Link Human And Car.",
+    "regressionTags": [
+      "model",
+      "hyperclasse",
+      "link",
+      "human",
+      "car",
+      "links",
+      "hyperclass"
     ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "radial",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 21.4007,
+        "fitWidthDistance": 14.6352,
+        "distance": 15.7315,
+        "diagramWidth": 14.1075,
+        "diagramHeight": 9.33,
+        "diagramDepth": 0.13,
+        "radius": 8.4571,
+        "center": {
+          "x": -1.2541,
+          "y": 0.0805,
+          "z": 0.065
+        },
+        "cameraAspect": 1.4623,
+        "cameraFov": 50
+      }
+    },
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
+  },
+  "hypergraph": {
     "class": [
       {
-        "id": 3,
+        "id": "hyperclasse_link_human_and_car_3",
         "name": "Car",
         "type": "roundedRectangle",
         "attributes": [
-          "Make", "Model", "Year", "VIN", "Color", "Mileage",
-          "Engine type", "Fuel type", "Transmission", "License plate", "Owner"
+          "Make",
+          "Model",
+          "Year",
+          "VIN",
+          "Color",
+          "Mileage",
+          "Engine type",
+          "Fuel type",
+          "Transmission",
+          "License plate",
+          "Owner"
         ],
-        "position": { "x": 26, "y": 5, "z": 0 },
-        "size": { "width": 2.2, "height": 2.5 },
+        "position": {
+          "x": 5,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2.5
+        },
         "rendering": {
           "class": {
             "color": "#00BFFF",
@@ -108,7 +102,10 @@
             "checkboxColor": "#A9A9A9",
             "checkboxMaterial": "metallic",
             "shape": "square",
-            "size": { "width": 0.1, "height": 0.1 }
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
           },
           "connections": {
             "lineColor": "#000000",
@@ -116,60 +113,197 @@
           },
           "textColor": "#000000"
         }
+      },
+      {
+        "id": "hyperclasse_link_human_and_car_100",
+        "name": "Human",
+        "type": "hyperclass",
+        "attributes": [
+          "Last name",
+          "First name",
+          "Middle name",
+          "Age",
+          "Weight",
+          "Height",
+          "Sex",
+          "Date of birth",
+          "Place of birth",
+          "Nationality",
+          "Marital status",
+          "Occupation",
+          "Education level",
+          "Address",
+          "Phone number",
+          "Email"
+        ],
+        "position": {
+          "x": -5,
+          "y": 6.123233995736766e-16,
+          "z": 0
+        },
+        "size": {
+          "width": 5.215000000000001,
+          "height": 8.23
+        },
+        "rendering": {
+          "class": {
+            "color": "#ECECEC",
+            "material": "metallic",
+            "borderColor": "#333333",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "metalness": 0.42,
+            "roughness": 0.28
+          },
+          "attributes": {
+            "checkboxColor": "#A9A9A9",
+            "checkboxMaterial": "metallic",
+            "shape": "square",
+            "size": {
+              "width": 0.1,
+              "height": 0.1
+            }
+          },
+          "connections": {
+            "lineColor": "#555555",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        },
+        "children": [
+          "hyperclasse_link_human_and_car_1",
+          "hyperclasse_link_human_and_car_2"
+        ]
+      },
+      {
+        "id": "hyperclasse_link_human_and_car_1",
+        "name": "Man",
+        "type": "roundedRectangle",
+        "position": {
+          "x": -6.002499999999999,
+          "y": 1.7150000000000012,
+          "z": 0
+        },
+        "size": {
+          "width": 1.8,
+          "height": 3
+        },
+        "rendering": {
+          "class": {
+            "color": "#ADD8E6",
+            "material": "metallic",
+            "borderColor": "#000080",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "textColor": "#000000"
+        },
+        "attributes": [
+          "Beard Style",
+          "Voice Pitch",
+          "Shoulder-to-Hip Ratio",
+          "Favorite Sport",
+          "Typical Tie Knot"
+        ],
+        "parentClassId": "hyperclasse_link_human_and_car_100"
+      },
+      {
+        "id": "hyperclasse_link_human_and_car_2",
+        "name": "Woman",
+        "type": "roundedRectangle",
+        "position": {
+          "x": -6.057499999999999,
+          "y": -2.064999999999999,
+          "z": 0
+        },
+        "size": {
+          "width": 1.8,
+          "height": 3
+        },
+        "rendering": {
+          "class": {
+            "color": "#FFB6C1",
+            "material": "metallic",
+            "borderColor": "#800000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1
+          },
+          "textColor": "#000000"
+        },
+        "attributes": [
+          "Maiden Name",
+          "Hip-to-Waist Ratio",
+          "Hairstyle",
+          "Zodiac Sign",
+          "Preferred Handbag Style"
+        ],
+        "parentClassId": "hyperclasse_link_human_and_car_100"
       }
     ],
-    "relationships": [
+    "link": [
       {
-        "id": 1001,
+        "id": "hyperclasse_link_human_and_car_link_1001",
         "name": "Owns",
-        "source": 100,
-        "target": 3,
         "type": "tube",
         "rendering": {
+          "labelText": "Owns",
+          "orthogonalStyle": "auto",
           "lineColor": "#3498db",
           "lineWidth": 0.02,
           "lineStyle": "dashed",
           "textColor": "#2980b9"
-        }
+        },
+        "sourceClassId": "hyperclasse_link_human_and_car_100",
+        "targetClassId": "hyperclasse_link_human_and_car_3",
+        "allowSelfLink": true
       },
       {
-        "id": 1002,
+        "id": "hyperclasse_link_human_and_car_link_1002",
         "name": "Drives",
-        "source": 100,
-        "target": 3,
         "type": "arrow",
         "rendering": {
+          "labelText": "Drives",
+          "orthogonalStyle": "auto",
           "lineColor": "#2ecc71",
           "lineWidth": 0.02,
           "arrowheadSize": 0.1,
           "textColor": "#27ae60"
-        }
+        },
+        "sourceClassId": "hyperclasse_link_human_and_car_100",
+        "targetClassId": "hyperclasse_link_human_and_car_3",
+        "allowSelfLink": true
       },
       {
-        "id": 1003,
+        "id": "hyperclasse_link_human_and_car_link_1003",
         "name": "Married To",
-        "source": 1,
-        "target": 2,
         "type": "bidirectional-arrow",
         "rendering": {
+          "labelText": "Married To",
+          "orthogonalStyle": "auto",
           "lineColor": "#e74c3c",
           "lineWidth": 0.02,
           "arrowheadSize": 0.1,
           "textColor": "#c0392b"
-        }
+        },
+        "sourceClassId": "hyperclasse_link_human_and_car_1",
+        "targetClassId": "hyperclasse_link_human_and_car_2",
+        "allowSelfLink": true
       },
       {
-        "id": 1004,
+        "id": "hyperclasse_link_human_and_car_link_1004",
         "name": "Sibling Of",
-        "source": 1,
-        "target": 2,
         "type": "tube",
         "rendering": {
+          "labelText": "Sibling Of",
+          "orthogonalStyle": "auto",
           "lineColor": "#9b59b6",
           "lineWidth": 0.015,
           "lineStyle": "dotted",
           "textColor": "#8e44ad"
-        }
+        },
+        "sourceClassId": "hyperclasse_link_human_and_car_1",
+        "targetClassId": "hyperclasse_link_human_and_car_2",
+        "allowSelfLink": true
       }
     ]
   }

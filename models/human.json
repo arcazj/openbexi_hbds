@@ -1,8 +1,66 @@
 {
+  "metadata": {
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 3.7989,
+        "fitWidthDistance": 2.5979,
+        "distance": 4.2094,
+        "diagramWidth": 1.6,
+        "diagramHeight": 2.7,
+        "diagramDepth": 0.11,
+        "radius": 1.5702,
+        "center": {
+          "x": 20.2,
+          "y": 4.65,
+          "z": 0.055
+        },
+        "cameraAspect": 1.4623,
+        "cameraFov": 52
+      }
+    },
+    "font": {
+      "size": 48,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "name": "Human",
+    "purpose": "Reference HBDS model for Human.",
+    "regressionTags": [
+      "model",
+      "human"
+    ]
+  },
   "hypergraph": {
     "class": [
       {
-        "id": 1,
+        "id": "human_1",
         "name": "Human",
         "type": "roundedRectangle",
         "attributes": [
@@ -63,57 +121,5 @@
       }
     ],
     "link": []
-  },
-  "metadata": {
-    "sceneSettings": {
-      "background": "#eef2f6",
-      "ambient": 0,
-      "front": 0,
-      "sources": [
-        {
-          "intensity": 1,
-          "direction": {
-            "x": -5.734,
-            "y": 7,
-            "z": 14.937
-          }
-        },
-        {
-          "intensity": 0.6,
-          "direction": {
-            "x": 0,
-            "y": 11.314,
-            "z": 11.314
-          }
-        }
-      ]
-    },
-    "layout": {
-      "algorithm": "none",
-      "fit": {
-        "padding": 1.18,
-        "fitHeightDistance": 3.7989,
-        "fitWidthDistance": 2.5979,
-        "distance": 4.2094,
-        "diagramWidth": 1.6,
-        "diagramHeight": 2.7,
-        "diagramDepth": 0.11,
-        "radius": 1.5702,
-        "center": {
-          "x": 20.2,
-          "y": 4.65,
-          "z": 0.055
-        },
-        "cameraAspect": 1.4623,
-        "cameraFov": 52
-      }
-    },
-    "font": {
-      "size": 48,
-      "family": "Arial, sans-serif",
-      "bold": false,
-      "italic": false,
-      "underline": false
-    }
   }
 }

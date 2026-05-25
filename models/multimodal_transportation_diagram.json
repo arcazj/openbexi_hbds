@@ -5,23 +5,23 @@
     "preserveLayout": true,
     "sceneSettings": {
       "background": "#eef2f6",
-      "ambient": 0.82,
-      "front": 0.16,
+      "ambient": 0,
+      "front": 0,
       "sources": [
         {
-          "intensity": 0.14,
+          "intensity": 1,
           "direction": {
-            "x": -5,
+            "x": -5.734,
             "y": 7,
-            "z": 13
+            "z": 14.937
           }
         },
         {
-          "intensity": 0.1,
+          "intensity": 0.6,
           "direction": {
-            "x": 8,
-            "y": -6,
-            "z": 10
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
           }
         }
       ]
@@ -30,63 +30,77 @@
       "algorithm": "grid",
       "fit": {
         "padding": 1.15,
-        "fitHeightDistance": 36.9017,
-        "fitWidthDistance": 17.2364,
+        "fitHeightDistance": 36.9016,
+        "fitWidthDistance": 25.2356,
         "distance": 22.0944,
         "diagramWidth": 23.0875,
         "diagramHeight": 19.04,
-        "diagramDepth": 0.149,
-        "radius": 14.9631,
+        "diagramDepth": 0.13,
+        "radius": 14.963,
         "center": {
-          "x": -0.6913,
-          "y": 0,
+          "x": -2.8505,
+          "y": 0.7456,
           "z": 0.0745
         },
-        "cameraAspect": 2.1409,
+        "cameraAspect": 1.4623,
         "cameraFov": 50
       }
+    },
+    "purpose": "HBDS model reconstructed from the multimodal transportation diagram.",
+    "regressionTags": [
+      "model",
+      "multimodal",
+      "transportation",
+      "diagram"
+    ],
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
     }
   },
   "hypergraph": {
     "class": [
       {
-        "id": "road_transport",
+        "id": "multimodal_transportation_diagram_road_transport",
         "name": "Road Transport",
         "type": "hyperclass",
         "attributes": [
           {
-            "id": "road_network_id",
+            "id": "multimodal_transportation_diagram_road_transport_attr_road_network_id",
             "name": "Network ID"
           },
           {
-            "id": "road_type",
+            "id": "multimodal_transportation_diagram_road_transport_attr_road_type",
             "name": "Road type"
           },
           {
-            "id": "road_traffic_capacity",
+            "id": "multimodal_transportation_diagram_road_transport_attr_road_traffic_capacity",
             "name": "Traffic capacity"
           },
           {
-            "id": "road_average_speed",
+            "id": "multimodal_transportation_diagram_road_transport_attr_road_average_speed",
             "name": "Average speed"
           },
           {
-            "id": "road_regulation_zone",
+            "id": "multimodal_transportation_diagram_road_transport_attr_road_regulation_zone",
             "name": "Regulation zone"
           },
           {
-            "id": "road_signal_priority",
+            "id": "multimodal_transportation_diagram_road_transport_attr_road_signal_priority",
             "name": "Signal priority"
           },
           {
-            "id": "road_lane_policy",
+            "id": "multimodal_transportation_diagram_road_transport_attr_road_lane_policy",
             "name": "Lane policy"
           }
         ],
         "children": [
-          "car",
-          "motorcycle",
-          "bus"
+          "multimodal_transportation_diagram_car",
+          "multimodal_transportation_diagram_motorcycle",
+          "multimodal_transportation_diagram_bus"
         ],
         "position": {
           "x": -9.667499999999999,
@@ -123,48 +137,48 @@
         }
       },
       {
-        "id": "car",
+        "id": "multimodal_transportation_diagram_car",
         "name": "Car",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "car_model",
+            "id": "multimodal_transportation_diagram_car_attr_car_model",
             "name": "Model"
           },
           {
-            "id": "car_year",
+            "id": "multimodal_transportation_diagram_car_attr_car_year",
             "name": "Year"
           },
           {
-            "id": "car_vin",
+            "id": "multimodal_transportation_diagram_car_attr_car_vin",
             "name": "VIN"
           },
           {
-            "id": "car_engine",
+            "id": "multimodal_transportation_diagram_car_attr_car_engine",
             "name": "Engine"
           },
           {
-            "id": "car_color",
+            "id": "multimodal_transportation_diagram_car_attr_car_color",
             "name": "Color"
           },
           {
-            "id": "car_fuel_type",
+            "id": "multimodal_transportation_diagram_car_attr_car_fuel_type",
             "name": "Fuel type"
           },
           {
-            "id": "car_transmission",
+            "id": "multimodal_transportation_diagram_car_attr_car_transmission",
             "name": "Transmission"
           },
           {
-            "id": "car_mileage",
+            "id": "multimodal_transportation_diagram_car_attr_car_mileage",
             "name": "Mileage"
           },
           {
-            "id": "car_license_plate",
+            "id": "multimodal_transportation_diagram_car_attr_car_license_plate",
             "name": "License plate"
           }
         ],
-        "parentClassId": "road_transport",
+        "parentClassId": "multimodal_transportation_diagram_road_transport",
         "position": {
           "x": -10.449999999999998,
           "y": -5.364999999999999,
@@ -195,44 +209,44 @@
         }
       },
       {
-        "id": "motorcycle",
+        "id": "multimodal_transportation_diagram_motorcycle",
         "name": "Motorcycle",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "motorcycle_model",
+            "id": "multimodal_transportation_diagram_motorcycle_attr_motorcycle_model",
             "name": "Model"
           },
           {
-            "id": "motorcycle_brand",
+            "id": "multimodal_transportation_diagram_motorcycle_attr_motorcycle_brand",
             "name": "Brand"
           },
           {
-            "id": "motorcycle_vin",
+            "id": "multimodal_transportation_diagram_motorcycle_attr_motorcycle_vin",
             "name": "VIN"
           },
           {
-            "id": "motorcycle_type",
+            "id": "multimodal_transportation_diagram_motorcycle_attr_motorcycle_type",
             "name": "Type"
           },
           {
-            "id": "motorcycle_engine_size",
+            "id": "multimodal_transportation_diagram_motorcycle_attr_motorcycle_engine_size",
             "name": "Engine size"
           },
           {
-            "id": "motorcycle_fuel",
+            "id": "multimodal_transportation_diagram_motorcycle_attr_motorcycle_fuel",
             "name": "Fuel"
           },
           {
-            "id": "motorcycle_color",
+            "id": "multimodal_transportation_diagram_motorcycle_attr_motorcycle_color",
             "name": "Color"
           },
           {
-            "id": "motorcycle_license_plate",
+            "id": "multimodal_transportation_diagram_motorcycle_attr_motorcycle_license_plate",
             "name": "License plate"
           }
         ],
-        "parentClassId": "road_transport",
+        "parentClassId": "multimodal_transportation_diagram_road_transport",
         "position": {
           "x": -10.449999999999998,
           "y": -8.055,
@@ -263,36 +277,36 @@
         }
       },
       {
-        "id": "bus",
+        "id": "multimodal_transportation_diagram_bus",
         "name": "Bus",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "bus_operator",
+            "id": "multimodal_transportation_diagram_bus_attr_bus_operator",
             "name": "Operator"
           },
           {
-            "id": "bus_route_number",
+            "id": "multimodal_transportation_diagram_bus_attr_bus_route_number",
             "name": "Route number"
           },
           {
-            "id": "bus_capacity",
+            "id": "multimodal_transportation_diagram_bus_attr_bus_capacity",
             "name": "Capacity"
           },
           {
-            "id": "bus_fuel_type",
+            "id": "multimodal_transportation_diagram_bus_attr_bus_fuel_type",
             "name": "Fuel type"
           },
           {
-            "id": "bus_length",
+            "id": "multimodal_transportation_diagram_bus_attr_bus_length",
             "name": "Length"
           },
           {
-            "id": "bus_license_plate",
+            "id": "multimodal_transportation_diagram_bus_attr_bus_license_plate",
             "name": "License plate"
           }
         ],
-        "parentClassId": "road_transport",
+        "parentClassId": "multimodal_transportation_diagram_road_transport",
         "position": {
           "x": -10.449999999999998,
           "y": -2.7149999999999994,
@@ -323,43 +337,43 @@
         }
       },
       {
-        "id": "rail_transport",
+        "id": "multimodal_transportation_diagram_rail_transport",
         "name": "Rail Transport",
         "type": "hyperclass",
         "attributes": [
           {
-            "id": "rail_network_id",
+            "id": "multimodal_transportation_diagram_rail_transport_attr_rail_network_id",
             "name": "Network ID"
           },
           {
-            "id": "rail_track_type",
+            "id": "multimodal_transportation_diagram_rail_transport_attr_rail_track_type",
             "name": "Track type"
           },
           {
-            "id": "rail_operator",
+            "id": "multimodal_transportation_diagram_rail_transport_attr_rail_operator",
             "name": "Operator"
           },
           {
-            "id": "rail_service_frequency",
+            "id": "multimodal_transportation_diagram_rail_transport_attr_rail_service_frequency",
             "name": "Service frequency"
           },
           {
-            "id": "rail_station_count",
+            "id": "multimodal_transportation_diagram_rail_transport_attr_rail_station_count",
             "name": "Station count"
           },
           {
-            "id": "rail_signal_system",
+            "id": "multimodal_transportation_diagram_rail_transport_attr_rail_signal_system",
             "name": "Signal system"
           },
           {
-            "id": "rail_power_system",
+            "id": "multimodal_transportation_diagram_rail_transport_attr_rail_power_system",
             "name": "Power system"
           }
         ],
         "children": [
-          "train",
-          "subway",
-          "tram"
+          "multimodal_transportation_diagram_train",
+          "multimodal_transportation_diagram_subway",
+          "multimodal_transportation_diagram_tram"
         ],
         "position": {
           "x": 8.250000000000004,
@@ -396,32 +410,32 @@
         }
       },
       {
-        "id": "train",
+        "id": "multimodal_transportation_diagram_train",
         "name": "Train",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "train_type",
+            "id": "multimodal_transportation_diagram_train_attr_train_type",
             "name": "Train-type"
           },
           {
-            "id": "train_operator",
+            "id": "multimodal_transportation_diagram_train_attr_train_operator",
             "name": "Operator"
           },
           {
-            "id": "train_power",
+            "id": "multimodal_transportation_diagram_train_attr_train_power",
             "name": "Power"
           },
           {
-            "id": "train_carriages",
+            "id": "multimodal_transportation_diagram_train_attr_train_carriages",
             "name": "Number of carriages"
           },
           {
-            "id": "train_route",
+            "id": "multimodal_transportation_diagram_train_attr_train_route",
             "name": "Route"
           }
         ],
-        "parentClassId": "rail_transport",
+        "parentClassId": "multimodal_transportation_diagram_rail_transport",
         "position": {
           "x": 7.302500000000005,
           "y": 5.215000000000001,
@@ -452,28 +466,28 @@
         }
       },
       {
-        "id": "subway",
+        "id": "multimodal_transportation_diagram_subway",
         "name": "Subway",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "subway_operator",
+            "id": "multimodal_transportation_diagram_subway_attr_subway_operator",
             "name": "Operator"
           },
           {
-            "id": "subway_line_name",
+            "id": "multimodal_transportation_diagram_subway_attr_subway_line_name",
             "name": "Line name"
           },
           {
-            "id": "subway_capacity",
+            "id": "multimodal_transportation_diagram_subway_attr_subway_capacity",
             "name": "Capacity"
           },
           {
-            "id": "subway_stops",
+            "id": "multimodal_transportation_diagram_subway_attr_subway_stops",
             "name": "Stops"
           }
         ],
-        "parentClassId": "rail_transport",
+        "parentClassId": "multimodal_transportation_diagram_rail_transport",
         "position": {
           "x": 7.577500000000005,
           "y": 7.745000000000001,
@@ -504,24 +518,24 @@
         }
       },
       {
-        "id": "tram",
+        "id": "multimodal_transportation_diagram_tram",
         "name": "Tram",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "tram_operator",
+            "id": "multimodal_transportation_diagram_tram_attr_tram_operator",
             "name": "Operator"
           },
           {
-            "id": "tram_line",
+            "id": "multimodal_transportation_diagram_tram_attr_tram_line",
             "name": "Line"
           },
           {
-            "id": "tram_capacity",
+            "id": "multimodal_transportation_diagram_tram_attr_tram_capacity",
             "name": "Capacity"
           }
         ],
-        "parentClassId": "rail_transport",
+        "parentClassId": "multimodal_transportation_diagram_rail_transport",
         "position": {
           "x": 7.595000000000004,
           "y": 2.6850000000000005,
@@ -552,38 +566,38 @@
         }
       },
       {
-        "id": "water_transport",
+        "id": "multimodal_transportation_diagram_water_transport",
         "name": "Water Transport",
         "type": "hyperclass",
         "attributes": [
           {
-            "id": "water_region",
+            "id": "multimodal_transportation_diagram_water_transport_attr_water_region",
             "name": "Waterway region"
           },
           {
-            "id": "water_port_authority",
+            "id": "multimodal_transportation_diagram_water_transport_attr_water_port_authority",
             "name": "Port authority"
           },
           {
-            "id": "water_route_type",
+            "id": "multimodal_transportation_diagram_water_transport_attr_water_route_type",
             "name": "Route type"
           },
           {
-            "id": "water_passenger_capacity",
+            "id": "multimodal_transportation_diagram_water_transport_attr_water_passenger_capacity",
             "name": "Passenger capacity"
           },
           {
-            "id": "water_cargo_support",
+            "id": "multimodal_transportation_diagram_water_transport_attr_water_cargo_support",
             "name": "Cargo support"
           },
           {
-            "id": "water_weather_restriction",
+            "id": "multimodal_transportation_diagram_water_transport_attr_water_weather_restriction",
             "name": "Weather restriction"
           }
         ],
         "children": [
-          "boat",
-          "ferry"
+          "multimodal_transportation_diagram_boat",
+          "multimodal_transportation_diagram_ferry"
         ],
         "position": {
           "x": 8.195000000000004,
@@ -620,32 +634,32 @@
         }
       },
       {
-        "id": "boat",
+        "id": "multimodal_transportation_diagram_boat",
         "name": "Boat",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "boat_type",
+            "id": "multimodal_transportation_diagram_boat_attr_boat_type",
             "name": "Boat type"
           },
           {
-            "id": "boat_operator",
+            "id": "multimodal_transportation_diagram_boat_attr_boat_operator",
             "name": "Operator"
           },
           {
-            "id": "boat_capacity",
+            "id": "multimodal_transportation_diagram_boat_attr_boat_capacity",
             "name": "Capacity"
           },
           {
-            "id": "boat_hull",
+            "id": "multimodal_transportation_diagram_boat_attr_boat_hull",
             "name": "Hull"
           },
           {
-            "id": "boat_engine_type",
+            "id": "multimodal_transportation_diagram_boat_attr_boat_engine_type",
             "name": "Engine type"
           }
         ],
-        "parentClassId": "water_transport",
+        "parentClassId": "multimodal_transportation_diagram_water_transport",
         "position": {
           "x": 7.467500000000003,
           "y": -4.140000000000001,
@@ -676,28 +690,28 @@
         }
       },
       {
-        "id": "ferry",
+        "id": "multimodal_transportation_diagram_ferry",
         "name": "Ferry",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "ferry_operator",
+            "id": "multimodal_transportation_diagram_ferry_attr_ferry_operator",
             "name": "Operator"
           },
           {
-            "id": "ferry_route",
+            "id": "multimodal_transportation_diagram_ferry_attr_ferry_route",
             "name": "Route"
           },
           {
-            "id": "ferry_passenger_capacity",
+            "id": "multimodal_transportation_diagram_ferry_attr_ferry_passenger_capacity",
             "name": "Passenger capacity"
           },
           {
-            "id": "ferry_vehicle_capacity",
+            "id": "multimodal_transportation_diagram_ferry_attr_ferry_vehicle_capacity",
             "name": "Vehicle capacity"
           }
         ],
-        "parentClassId": "water_transport",
+        "parentClassId": "multimodal_transportation_diagram_water_transport",
         "position": {
           "x": 7.275000000000003,
           "y": -6.67,
@@ -728,38 +742,38 @@
         }
       },
       {
-        "id": "active_personal_mobility",
+        "id": "multimodal_transportation_diagram_active_personal_mobility",
         "name": "Active / Personal Mobility",
         "type": "hyperclass",
         "attributes": [
           {
-            "id": "mobility_zone",
+            "id": "multimodal_transportation_diagram_active_personal_mobility_attr_mobility_zone",
             "name": "Mobility zone"
           },
           {
-            "id": "mobility_lane_type",
+            "id": "multimodal_transportation_diagram_active_personal_mobility_attr_mobility_lane_type",
             "name": "Lane type"
           },
           {
-            "id": "mobility_safety_equipment",
+            "id": "multimodal_transportation_diagram_active_personal_mobility_attr_mobility_safety_equipment",
             "name": "Safety equipment"
           },
           {
-            "id": "mobility_distance_range",
+            "id": "multimodal_transportation_diagram_active_personal_mobility_attr_mobility_distance_range",
             "name": "Distance range"
           },
           {
-            "id": "mobility_user_type",
+            "id": "multimodal_transportation_diagram_active_personal_mobility_attr_mobility_user_type",
             "name": "User type"
           },
           {
-            "id": "mobility_parking_policy",
+            "id": "multimodal_transportation_diagram_active_personal_mobility_attr_mobility_parking_policy",
             "name": "Parking policy"
           }
         ],
         "children": [
-          "bicycle",
-          "skateboard"
+          "multimodal_transportation_diagram_bicycle",
+          "multimodal_transportation_diagram_skateboard"
         ],
         "position": {
           "x": -9.667499999999999,
@@ -796,36 +810,36 @@
         }
       },
       {
-        "id": "bicycle",
+        "id": "multimodal_transportation_diagram_bicycle",
         "name": "Bicycle",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "bicycle_type",
+            "id": "multimodal_transportation_diagram_bicycle_attr_bicycle_type",
             "name": "Type"
           },
           {
-            "id": "bicycle_brand",
+            "id": "multimodal_transportation_diagram_bicycle_attr_bicycle_brand",
             "name": "Brand"
           },
           {
-            "id": "bicycle_frame_size",
+            "id": "multimodal_transportation_diagram_bicycle_attr_bicycle_frame_size",
             "name": "Frame size"
           },
           {
-            "id": "bicycle_gears",
+            "id": "multimodal_transportation_diagram_bicycle_attr_bicycle_gears",
             "name": "Gears"
           },
           {
-            "id": "bicycle_last_mile",
+            "id": "multimodal_transportation_diagram_bicycle_attr_bicycle_last_mile",
             "name": "Supports last-mile mobility"
           },
           {
-            "id": "bicycle_color",
+            "id": "multimodal_transportation_diagram_bicycle_attr_bicycle_color",
             "name": "Color"
           }
         ],
-        "parentClassId": "active_personal_mobility",
+        "parentClassId": "multimodal_transportation_diagram_active_personal_mobility",
         "position": {
           "x": -10.834999999999999,
           "y": 6.48,
@@ -856,24 +870,24 @@
         }
       },
       {
-        "id": "skateboard",
+        "id": "multimodal_transportation_diagram_skateboard",
         "name": "Skateboard",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "skateboard_type",
+            "id": "multimodal_transportation_diagram_skateboard_attr_skateboard_type",
             "name": "Type"
           },
           {
-            "id": "skateboard_deck_length",
+            "id": "multimodal_transportation_diagram_skateboard_attr_skateboard_deck_length",
             "name": "Deck length"
           },
           {
-            "id": "skateboard_brand",
+            "id": "multimodal_transportation_diagram_skateboard_attr_skateboard_brand",
             "name": "Brand"
           }
         ],
-        "parentClassId": "active_personal_mobility",
+        "parentClassId": "multimodal_transportation_diagram_active_personal_mobility",
         "position": {
           "x": -10.395,
           "y": 3.95,
@@ -904,38 +918,38 @@
         }
       },
       {
-        "id": "air_transport",
+        "id": "multimodal_transportation_diagram_air_transport",
         "name": "Air Transport",
         "type": "hyperclass",
         "attributes": [
           {
-            "id": "air_airspace_region",
+            "id": "multimodal_transportation_diagram_air_transport_attr_air_airspace_region",
             "name": "Airspace region"
           },
           {
-            "id": "air_airport_hub",
+            "id": "multimodal_transportation_diagram_air_transport_attr_air_airport_hub",
             "name": "Airport hub"
           },
           {
-            "id": "air_operator",
+            "id": "multimodal_transportation_diagram_air_transport_attr_air_operator",
             "name": "Operator"
           },
           {
-            "id": "air_flight_range",
+            "id": "multimodal_transportation_diagram_air_transport_attr_air_flight_range",
             "name": "Flight range"
           },
           {
-            "id": "air_safety_class",
+            "id": "multimodal_transportation_diagram_air_transport_attr_air_safety_class",
             "name": "Safety class"
           },
           {
-            "id": "air_runway_access",
+            "id": "multimodal_transportation_diagram_air_transport_attr_air_runway_access",
             "name": "Runway access"
           }
         ],
         "children": [
-          "airplane",
-          "helicopter"
+          "multimodal_transportation_diagram_airplane",
+          "multimodal_transportation_diagram_helicopter"
         ],
         "position": {
           "x": -0.5474999999999993,
@@ -972,32 +986,32 @@
         }
       },
       {
-        "id": "airplane",
+        "id": "multimodal_transportation_diagram_airplane",
         "name": "Airplane",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "airplane_operator",
+            "id": "multimodal_transportation_diagram_airplane_attr_airplane_operator",
             "name": "Operator"
           },
           {
-            "id": "airplane_flight_number",
+            "id": "multimodal_transportation_diagram_airplane_attr_airplane_flight_number",
             "name": "Flight number"
           },
           {
-            "id": "airplane_aircraft_type",
+            "id": "multimodal_transportation_diagram_airplane_attr_airplane_aircraft_type",
             "name": "Aircraft type"
           },
           {
-            "id": "airplane_seat_capacity",
+            "id": "multimodal_transportation_diagram_airplane_attr_airplane_seat_capacity",
             "name": "Seat capacity"
           },
           {
-            "id": "airplane_engine_type",
+            "id": "multimodal_transportation_diagram_airplane_attr_airplane_engine_type",
             "name": "Engine type"
           }
         ],
-        "parentClassId": "air_transport",
+        "parentClassId": "multimodal_transportation_diagram_air_transport",
         "position": {
           "x": -1.3299999999999992,
           "y": 6.48,
@@ -1028,28 +1042,28 @@
         }
       },
       {
-        "id": "helicopter",
+        "id": "multimodal_transportation_diagram_helicopter",
         "name": "Helicopter",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "helicopter_operator",
+            "id": "multimodal_transportation_diagram_helicopter_attr_helicopter_operator",
             "name": "Operator"
           },
           {
-            "id": "helicopter_type",
+            "id": "multimodal_transportation_diagram_helicopter_attr_helicopter_type",
             "name": "Helicopter type"
           },
           {
-            "id": "helicopter_capacity",
+            "id": "multimodal_transportation_diagram_helicopter_attr_helicopter_capacity",
             "name": "Capacity"
           },
           {
-            "id": "helicopter_tail_number",
+            "id": "multimodal_transportation_diagram_helicopter_attr_helicopter_tail_number",
             "name": "Tail number"
           }
         ],
-        "parentClassId": "air_transport",
+        "parentClassId": "multimodal_transportation_diagram_air_transport",
         "position": {
           "x": -1.3849999999999993,
           "y": 3.95,
@@ -1080,37 +1094,37 @@
         }
       },
       {
-        "id": "space_transport",
+        "id": "multimodal_transportation_diagram_space_transport",
         "name": "Space Transport",
         "type": "hyperclass",
         "attributes": [
           {
-            "id": "space_mission_id",
+            "id": "multimodal_transportation_diagram_space_transport_attr_space_mission_id",
             "name": "Mission ID"
           },
           {
-            "id": "space_launch_site",
+            "id": "multimodal_transportation_diagram_space_transport_attr_space_launch_site",
             "name": "Launch site"
           },
           {
-            "id": "space_orbit_type",
+            "id": "multimodal_transportation_diagram_space_transport_attr_space_orbit_type",
             "name": "Orbit type"
           },
           {
-            "id": "space_payload_capacity",
+            "id": "multimodal_transportation_diagram_space_transport_attr_space_payload_capacity",
             "name": "Payload capacity"
           },
           {
-            "id": "space_mission_operator",
+            "id": "multimodal_transportation_diagram_space_transport_attr_space_mission_operator",
             "name": "Mission operator"
           },
           {
-            "id": "space_recovery_plan",
+            "id": "multimodal_transportation_diagram_space_transport_attr_space_recovery_plan",
             "name": "Recovery plan"
           }
         ],
         "children": [
-          "spaceship"
+          "multimodal_transportation_diagram_spaceship"
         ],
         "position": {
           "x": -0.5749999999999994,
@@ -1147,28 +1161,28 @@
         }
       },
       {
-        "id": "spaceship",
+        "id": "multimodal_transportation_diagram_spaceship",
         "name": "Spaceship",
         "type": "roundedRectangle",
         "attributes": [
           {
-            "id": "spaceship_operator",
+            "id": "multimodal_transportation_diagram_spaceship_attr_spaceship_operator",
             "name": "Operator"
           },
           {
-            "id": "spaceship_mission_type",
+            "id": "multimodal_transportation_diagram_spaceship_attr_spaceship_mission_type",
             "name": "Mission type"
           },
           {
-            "id": "spaceship_launch_site",
+            "id": "multimodal_transportation_diagram_spaceship_attr_spaceship_launch_site",
             "name": "Launch site"
           },
           {
-            "id": "spaceship_payload_capacity",
+            "id": "multimodal_transportation_diagram_spaceship_attr_spaceship_payload_capacity",
             "name": "Payload capacity"
           }
         ],
-        "parentClassId": "space_transport",
+        "parentClassId": "multimodal_transportation_diagram_space_transport",
         "position": {
           "x": -1.4399999999999995,
           "y": -5.405,
@@ -1201,9 +1215,9 @@
     ],
     "link": [
       {
-        "id": "road_active_shares_road",
-        "sourceClassId": "road_transport",
-        "targetClassId": "active_personal_mobility",
+        "id": "multimodal_transportation_diagram_link_road_active_shares_road",
+        "sourceClassId": "multimodal_transportation_diagram_road_transport",
+        "targetClassId": "multimodal_transportation_diagram_active_personal_mobility",
         "rendering": {
           "labelText": "shares road with",
           "orthogonalStyle": "auto",
@@ -1238,9 +1252,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "road_rail_corridors",
-        "sourceClassId": "road_transport",
-        "targetClassId": "rail_transport",
+        "id": "multimodal_transportation_diagram_link_road_rail_corridors",
+        "sourceClassId": "multimodal_transportation_diagram_road_transport",
+        "targetClassId": "multimodal_transportation_diagram_rail_transport",
         "rendering": {
           "labelText": "shares urban corridors",
           "orthogonalStyle": "auto",
@@ -1270,9 +1284,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "rail_active_last_mile",
-        "sourceClassId": "rail_transport",
-        "targetClassId": "active_personal_mobility",
+        "id": "multimodal_transportation_diagram_link_rail_active_last_mile",
+        "sourceClassId": "multimodal_transportation_diagram_rail_transport",
+        "targetClassId": "multimodal_transportation_diagram_active_personal_mobility",
         "rendering": {
           "labelText": "feeds last-mile mobility",
           "orthogonalStyle": "auto",
@@ -1307,9 +1321,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "road_rail_interchange",
-        "sourceClassId": "bus",
-        "targetClassId": "train",
+        "id": "multimodal_transportation_diagram_link_road_rail_interchange",
+        "sourceClassId": "multimodal_transportation_diagram_bus",
+        "targetClassId": "multimodal_transportation_diagram_train",
         "rendering": {
           "labelText": "interchanges with",
           "orthogonalStyle": "auto",
@@ -1339,9 +1353,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "road_rail_passenger_transfer",
-        "sourceClassId": "bus",
-        "targetClassId": "subway",
+        "id": "multimodal_transportation_diagram_link_road_rail_passenger_transfer",
+        "sourceClassId": "multimodal_transportation_diagram_bus",
+        "targetClassId": "multimodal_transportation_diagram_subway",
         "rendering": {
           "labelText": "transfers passengers to",
           "orthogonalStyle": "auto",
@@ -1371,9 +1385,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "bus_bicycle_public_transit",
-        "sourceClassId": "bus",
-        "targetClassId": "bicycle",
+        "id": "multimodal_transportation_diagram_link_bus_bicycle_public_transit",
+        "sourceClassId": "multimodal_transportation_diagram_bus",
+        "targetClassId": "multimodal_transportation_diagram_bicycle",
         "rendering": {
           "labelText": "feeds public transit",
           "orthogonalStyle": "auto",
@@ -1403,9 +1417,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "water_road_ports",
-        "sourceClassId": "water_transport",
-        "targetClassId": "road_transport",
+        "id": "multimodal_transportation_diagram_link_water_road_ports",
+        "sourceClassId": "multimodal_transportation_diagram_water_transport",
+        "targetClassId": "multimodal_transportation_diagram_road_transport",
         "rendering": {
           "labelText": "connects ports to roads",
           "orthogonalStyle": "auto",
@@ -1435,9 +1449,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "ferry_carries_vehicles",
-        "sourceClassId": "ferry",
-        "targetClassId": "car",
+        "id": "multimodal_transportation_diagram_link_ferry_carries_vehicles",
+        "sourceClassId": "multimodal_transportation_diagram_ferry",
+        "targetClassId": "multimodal_transportation_diagram_car",
         "rendering": {
           "labelText": "carries vehicles",
           "orthogonalStyle": "auto",
@@ -1467,9 +1481,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "ferry_train_passengers",
-        "sourceClassId": "ferry",
-        "targetClassId": "train",
+        "id": "multimodal_transportation_diagram_link_ferry_train_passengers",
+        "sourceClassId": "multimodal_transportation_diagram_ferry",
+        "targetClassId": "multimodal_transportation_diagram_train",
         "rendering": {
           "labelText": "carries passengers",
           "orthogonalStyle": "auto",
@@ -1499,9 +1513,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "air_road_airports",
-        "sourceClassId": "air_transport",
-        "targetClassId": "road_transport",
+        "id": "multimodal_transportation_diagram_link_air_road_airports",
+        "sourceClassId": "multimodal_transportation_diagram_air_transport",
+        "targetClassId": "multimodal_transportation_diagram_road_transport",
         "rendering": {
           "labelText": "connects airports to roads",
           "orthogonalStyle": "auto",
@@ -1531,9 +1545,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "water_rail_ports",
-        "sourceClassId": "water_transport",
-        "targetClassId": "rail_transport",
+        "id": "multimodal_transportation_diagram_link_water_rail_ports",
+        "sourceClassId": "multimodal_transportation_diagram_water_transport",
+        "targetClassId": "multimodal_transportation_diagram_rail_transport",
         "rendering": {
           "labelText": "connects ports to roads",
           "orthogonalStyle": "auto",
@@ -1563,9 +1577,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "air_rail_airports",
-        "sourceClassId": "air_transport",
-        "targetClassId": "rail_transport",
+        "id": "multimodal_transportation_diagram_link_air_rail_airports",
+        "sourceClassId": "multimodal_transportation_diagram_air_transport",
+        "targetClassId": "multimodal_transportation_diagram_rail_transport",
         "rendering": {
           "labelText": "connects airports to rail",
           "orthogonalStyle": "auto",
@@ -1595,9 +1609,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "air_water_airports",
-        "sourceClassId": "air_transport",
-        "targetClassId": "water_transport",
+        "id": "multimodal_transportation_diagram_link_air_water_airports",
+        "sourceClassId": "multimodal_transportation_diagram_air_transport",
+        "targetClassId": "multimodal_transportation_diagram_water_transport",
         "rendering": {
           "labelText": "connects airports",
           "orthogonalStyle": "auto",
@@ -1627,9 +1641,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "air_support_service",
-        "sourceClassId": "helicopter",
-        "targetClassId": "airplane",
+        "id": "multimodal_transportation_diagram_link_air_support_service",
+        "sourceClassId": "multimodal_transportation_diagram_helicopter",
+        "targetClassId": "multimodal_transportation_diagram_airplane",
         "rendering": {
           "labelText": "supports air service",
           "orthogonalStyle": "auto",
@@ -1659,9 +1673,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "air_regional_transfer",
-        "sourceClassId": "airplane",
-        "targetClassId": "helicopter",
+        "id": "multimodal_transportation_diagram_link_air_regional_transfer",
+        "sourceClassId": "multimodal_transportation_diagram_airplane",
+        "targetClassId": "multimodal_transportation_diagram_helicopter",
         "rendering": {
           "labelText": "supports regional transfer",
           "orthogonalStyle": "auto",
@@ -1691,9 +1705,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "air_space_launch_airspace",
-        "sourceClassId": "air_transport",
-        "targetClassId": "space_transport",
+        "id": "multimodal_transportation_diagram_link_air_space_launch_airspace",
+        "sourceClassId": "multimodal_transportation_diagram_air_transport",
+        "targetClassId": "multimodal_transportation_diagram_space_transport",
         "rendering": {
           "labelText": "uses launch airspace",
           "orthogonalStyle": "auto",
@@ -1723,9 +1737,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "space_launches_from",
-        "sourceClassId": "spaceship",
-        "targetClassId": "air_transport",
+        "id": "multimodal_transportation_diagram_link_space_launches_from",
+        "sourceClassId": "multimodal_transportation_diagram_spaceship",
+        "targetClassId": "multimodal_transportation_diagram_air_transport",
         "rendering": {
           "labelText": "launches from",
           "orthogonalStyle": "auto",
@@ -1755,9 +1769,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "water_space_waterways",
-        "sourceClassId": "water_transport",
-        "targetClassId": "space_transport",
+        "id": "multimodal_transportation_diagram_link_water_space_waterways",
+        "sourceClassId": "multimodal_transportation_diagram_water_transport",
+        "targetClassId": "multimodal_transportation_diagram_space_transport",
         "rendering": {
           "labelText": "shares waterways with",
           "orthogonalStyle": "auto",
@@ -1787,9 +1801,9 @@
         "allowSelfLink": true
       },
       {
-        "id": "space_ground_logistics",
-        "sourceClassId": "space_transport",
-        "targetClassId": "water_transport",
+        "id": "multimodal_transportation_diagram_link_space_ground_logistics",
+        "sourceClassId": "multimodal_transportation_diagram_space_transport",
+        "targetClassId": "multimodal_transportation_diagram_water_transport",
         "rendering": {
           "labelText": "requires ground logistics",
           "orthogonalStyle": "auto",

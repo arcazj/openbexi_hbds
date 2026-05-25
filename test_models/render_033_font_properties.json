@@ -1,5 +1,15 @@
 {
   "metadata": {
+    "name": "Render 033 Font Properties",
+    "purpose": "Regression model covering global, class, hyperclass, attribute, link, and legacy string font behavior.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "rendering",
+      "font",
+      "labels",
+      "attributes",
+      "links"
+    ],
     "layout": {
       "algorithm": "grid"
     },

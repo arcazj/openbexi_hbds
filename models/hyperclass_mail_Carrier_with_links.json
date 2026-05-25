@@ -1,293 +1,4 @@
 {
-  "hypergraph": {
-    "class": [
-      {
-        "id": 1,
-        "name": "Mail Carrier",
-        "type": "ellipse",
-        "attributes": [
-          "Last name",
-          "First name",
-          "Employee ID",
-          "Delivery route",
-          "Post office",
-          "Phone number"
-        ],
-        "position": {
-          "x": 0,
-          "y": 0,
-          "z": 0
-        },
-        "size": {
-          "width": 3.2,
-          "height": 1.75
-        },
-        "rendering": {
-          "class": {
-            "color": "#FFFFFF",
-            "material": "flat",
-            "borderColor": "#000000",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.1,
-            "opacity": 0.2
-          },
-          "attributes": {
-            "checkboxColor": "#FFFFFF",
-            "checkboxMaterial": "flat",
-            "shape": "circle",
-            "size": {
-              "width": 0.14,
-              "height": 0.14
-            }
-          },
-          "connections": {
-            "lineColor": "#000000",
-            "lineWidth": 0.01
-          },
-          "textColor": "#000000"
-        }
-      },
-      {
-        "id": 2,
-        "name": "Person",
-        "type": "ellipse",
-        "attributes": [
-          "Last name",
-          "First name",
-          "Address",
-          "Phone number",
-          "Email"
-        ],
-        "position": {
-          "x": 5.04,
-          "y": 0,
-          "z": 0
-        },
-        "size": {
-          "width": 3.2,
-          "height": 1.75
-        },
-        "rendering": {
-          "class": {
-            "color": "#FFFFFF",
-            "material": "flat",
-            "borderColor": "#000000",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.1,
-            "opacity": 0.2
-          },
-          "attributes": {
-            "checkboxColor": "#FFFFFF",
-            "checkboxMaterial": "flat",
-            "shape": "circle",
-            "size": {
-              "width": 0.14,
-              "height": 0.14
-            }
-          },
-          "connections": {
-            "lineColor": "#000000",
-            "lineWidth": 0.01
-          },
-          "textColor": "#000000"
-        }
-      },
-      {
-        "id": 3,
-        "name": "Mail",
-        "type": "hyperclass",
-        "attributes": [
-          "Mail ID",
-          "Sent date",
-          "Received date",
-          "Status",
-          "Weight",
-          "Priority",
-          "Tracking code"
-        ],
-        "children": [
-          4,
-          5
-        ],
-        "position": {
-          "x": -5.04,
-          "y": 0,
-          "z": 0
-        },
-        "size": {
-          "width": 5.265000000000001,
-          "height": 5.73
-        },
-        "rendering": {
-          "class": {
-            "color": "#FFFFFF",
-            "material": "metallic",
-            "borderColor": "#000000",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.3,
-            "opacity": 0.12,
-            "metalness": 0.42,
-            "roughness": 0.28
-          },
-          "attributes": {
-            "checkboxColor": "#FFFFFF",
-            "checkboxMaterial": "flat",
-            "shape": "circle",
-            "size": {
-              "width": 0.14,
-              "height": 0.14
-            }
-          },
-          "connections": {
-            "lineColor": "#000000",
-            "lineWidth": 0.01
-          },
-          "textColor": "#000000"
-        }
-      },
-      {
-        "id": 4,
-        "name": "Letter",
-        "type": "ellipse",
-        "attributes": [
-          "Format",
-          "Weight",
-          "Stamp",
-          "Sender address",
-          "Recipient address"
-        ],
-        "parentClassId": 3,
-        "position": {
-          "x": -5.9725,
-          "y": 1.0900000000000003,
-          "z": 0
-        },
-        "size": {
-          "width": 2.1,
-          "height": 1.75
-        },
-        "rendering": {
-          "class": {
-            "color": "#FFFFFF",
-            "material": "flat",
-            "borderColor": "#000000",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.1,
-            "opacity": 0.2
-          },
-          "attributes": {
-            "checkboxColor": "#FFFFFF",
-            "checkboxMaterial": "flat",
-            "shape": "circle",
-            "size": {
-              "width": 0.14,
-              "height": 0.14
-            }
-          },
-          "connections": {
-            "lineColor": "#000000",
-            "lineWidth": 0.01
-          },
-          "textColor": "#000000"
-        }
-      },
-      {
-        "id": 5,
-        "name": "Package",
-        "type": "ellipse",
-        "attributes": [
-          "Dimensions",
-          "Weight",
-          "Contents",
-          "Fragile",
-          "Insurance",
-          "Tracking code"
-        ],
-        "parentClassId": 3,
-        "position": {
-          "x": -5.8625,
-          "y": -1.44,
-          "z": 0
-        },
-        "size": {
-          "width": 2.1,
-          "height": 1.75
-        },
-        "rendering": {
-          "class": {
-            "color": "#FFFFFF",
-            "material": "flat",
-            "borderColor": "#000000",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.1,
-            "opacity": 0.2
-          },
-          "attributes": {
-            "checkboxColor": "#FFFFFF",
-            "checkboxMaterial": "flat",
-            "shape": "circle",
-            "size": {
-              "width": 0.14,
-              "height": 0.14
-            }
-          },
-          "connections": {
-            "lineColor": "#000000",
-            "lineWidth": 0.01
-          },
-          "textColor": "#000000"
-        }
-      }
-    ],
-    "link": [
-      {
-        "sourceClassId": 1,
-        "targetClassId": 3,
-        "rendering": {
-          "labelText": "sends",
-          "orthogonalStyle": "auto",
-          "lineColor": "#000000",
-          "lineWidth": 2,
-          "lineStyle": "solid",
-          "curveOffset": -0.65,
-          "arrowheadVisibility": true,
-          "arrowheadType": "triangle",
-          "arrowheadSize": 0.22,
-          "labelFontSize": 13,
-          "labelColor": "#000000",
-          "labelBackgroundColor": "rgba(255,255,255,0.95)",
-          "labelPositionAlongPath": 0.42,
-          "labelOffsetFromPath": 0.2,
-          "labelRotationBehavior": "follow",
-          "zIndex": 8
-        },
-        "allowSelfLink": true
-      },
-      {
-        "sourceClassId": 3,
-        "targetClassId": 2,
-        "rendering": {
-          "labelText": "receives",
-          "orthogonalStyle": "auto",
-          "lineColor": "#000000",
-          "lineWidth": 2,
-          "lineStyle": "solid",
-          "curveOffset": 0.65,
-          "arrowheadVisibility": true,
-          "arrowheadType": "triangle",
-          "arrowheadSize": 0.22,
-          "labelFontSize": 13,
-          "labelColor": "#000000",
-          "labelBackgroundColor": "rgba(255,255,255,0.95)",
-          "labelPositionAlongPath": 0.42,
-          "labelOffsetFromPath": -0.2,
-          "labelRotationBehavior": "follow",
-          "zIndex": 8
-        },
-        "allowSelfLink": true
-      }
-    ]
-  },
   "metadata": {
     "sceneSettings": {
       "background": "#eef2f6",
@@ -315,20 +26,20 @@
     "layout": {
       "algorithm": "hierarchy",
       "fit": {
-        "padding": 1.15,
-        "fitHeightDistance": 20.1231,
-        "fitWidthDistance": 10.8825,
-        "distance": 13.3505,
+        "padding": 1.18,
+        "fitHeightDistance": 20.648,
+        "fitWidthDistance": 14.1204,
+        "distance": 13.0134,
         "diagramWidth": 14.7725,
         "diagramHeight": 6.934,
         "diagramDepth": 0.097,
         "radius": 8.1596,
         "center": {
-          "x": 1.4453,
-          "y": 0.0885,
-          "z": 0.07
+          "x": -0.2862,
+          "y": 0,
+          "z": 0.0485
         },
-        "cameraAspect": 1.8491,
+        "cameraAspect": 1.4623,
         "cameraFov": 50
       }
     },
@@ -338,6 +49,325 @@
       "bold": false,
       "italic": false,
       "underline": false
-    }
+    },
+    "name": "Hyperclass Mail Carrier With Links",
+    "purpose": "Reference HBDS model for Hyperclass Mail Carrier With Links.",
+    "regressionTags": [
+      "model",
+      "hyperclass",
+      "mail",
+      "carrier",
+      "links",
+      "rendering",
+      "color"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "hyperclass_mail_carrier_with_links_1",
+        "name": "Mail Carrier",
+        "type": "ellipse",
+        "attributes": [
+          "Last name",
+          "First name",
+          "Employee ID",
+          "Delivery route",
+          "Post office",
+          "Phone number"
+        ],
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 3.2,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#bfdbfe",
+            "metallicColor": "#60a5fa",
+            "material": "metallic",
+            "borderColor": "#1d4ed8",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.9,
+            "metalness": 0.38,
+            "roughness": 0.3
+          },
+          "attributes": {
+            "checkboxColor": "#1d4ed8",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
+          },
+          "connections": {
+            "lineColor": "#1d4ed8",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "hyperclass_mail_carrier_with_links_2",
+        "name": "Person",
+        "type": "ellipse",
+        "attributes": [
+          "Last name",
+          "First name",
+          "Address",
+          "Phone number",
+          "Email"
+        ],
+        "position": {
+          "x": 5.04,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 3.2,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#dcfce7",
+            "metallicColor": "#86efac",
+            "material": "metallic",
+            "borderColor": "#15803d",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.9,
+            "metalness": 0.34,
+            "roughness": 0.32
+          },
+          "attributes": {
+            "checkboxColor": "#15803d",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
+          },
+          "connections": {
+            "lineColor": "#15803d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "hyperclass_mail_carrier_with_links_3",
+        "name": "Mail",
+        "type": "hyperclass",
+        "attributes": [
+          "Mail ID",
+          "Sent date",
+          "Received date",
+          "Status",
+          "Weight",
+          "Priority",
+          "Tracking code"
+        ],
+        "children": [
+          "hyperclass_mail_carrier_with_links_4",
+          "hyperclass_mail_carrier_with_links_5"
+        ],
+        "position": {
+          "x": -5.04,
+          "y": 0,
+          "z": 0
+        },
+        "size": {
+          "width": 5.265000000000001,
+          "height": 5.73
+        },
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "metallicColor": "#fde68a",
+            "material": "metallic",
+            "borderColor": "#d97706",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.3,
+            "opacity": 0.24,
+            "metalness": 0.42,
+            "roughness": 0.28
+          },
+          "attributes": {
+            "checkboxColor": "#d97706",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
+          },
+          "connections": {
+            "lineColor": "#d97706",
+            "lineWidth": 0.01
+          },
+          "textColor": "#451a03"
+        }
+      },
+      {
+        "id": "hyperclass_mail_carrier_with_links_4",
+        "name": "Letter",
+        "type": "ellipse",
+        "attributes": [
+          "Format",
+          "Weight",
+          "Stamp",
+          "Sender address",
+          "Recipient address"
+        ],
+        "parentClassId": "hyperclass_mail_carrier_with_links_3",
+        "position": {
+          "x": -5.9725,
+          "y": 1.0900000000000003,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#fff7ed",
+            "metallicColor": "#fed7aa",
+            "material": "metallic",
+            "borderColor": "#ea580c",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.92,
+            "metalness": 0.28,
+            "roughness": 0.38,
+            "bodyType": "shape",
+            "shapeType": "document"
+          },
+          "attributes": {
+            "checkboxColor": "#ea580c",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
+          },
+          "connections": {
+            "lineColor": "#ea580c",
+            "lineWidth": 0.01
+          },
+          "textColor": "#431407"
+        }
+      },
+      {
+        "id": "hyperclass_mail_carrier_with_links_5",
+        "name": "Package",
+        "type": "ellipse",
+        "attributes": [
+          "Dimensions",
+          "Weight",
+          "Contents",
+          "Fragile",
+          "Insurance",
+          "Tracking code"
+        ],
+        "parentClassId": "hyperclass_mail_carrier_with_links_3",
+        "position": {
+          "x": -5.8625,
+          "y": -1.44,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "metallicColor": "#7dd3fc",
+            "material": "metallic",
+            "borderColor": "#0369a1",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.92,
+            "metalness": 0.32,
+            "roughness": 0.34,
+            "bodyType": "shape",
+            "shapeType": "trapezoid"
+          },
+          "attributes": {
+            "checkboxColor": "#0369a1",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
+          },
+          "connections": {
+            "lineColor": "#0369a1",
+            "lineWidth": 0.01
+          },
+          "textColor": "#082f49"
+        }
+      }
+    ],
+    "link": [
+      {
+        "sourceClassId": "hyperclass_mail_carrier_with_links_1",
+        "targetClassId": "hyperclass_mail_carrier_with_links_3",
+        "rendering": {
+          "labelText": "sends",
+          "orthogonalStyle": "auto",
+          "lineColor": "#1d4ed8",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.65,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#1e3a8a",
+          "labelBackgroundColor": "rgba(219,234,254,0.95)",
+          "labelPositionAlongPath": 0.42,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true,
+        "id": "hyperclass_mail_carrier_with_links_link_1_to_3_001"
+      },
+      {
+        "sourceClassId": "hyperclass_mail_carrier_with_links_3",
+        "targetClassId": "hyperclass_mail_carrier_with_links_2",
+        "rendering": {
+          "labelText": "receives",
+          "orthogonalStyle": "auto",
+          "lineColor": "#15803d",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.65,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#14532d",
+          "labelBackgroundColor": "rgba(220,252,231,0.95)",
+          "labelPositionAlongPath": 0.42,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true,
+        "id": "hyperclass_mail_carrier_with_links_link_3_to_2_002"
+      }
+    ]
   }
 }

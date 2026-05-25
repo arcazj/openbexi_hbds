@@ -1,162 +1,4 @@
 {
-  "hypergraph": {
-    "class": [
-      {
-        "id": 3,
-        "name": "Mail",
-        "type": "hyperclass",
-        "attributes": [
-          "Mail ID",
-          "Sent date",
-          "Received date",
-          "Status",
-          "Weight",
-          "Priority",
-          "Tracking code"
-        ],
-        "children": [
-          4,
-          5
-        ],
-        "position": {
-          "x": 9.5,
-          "y": 4.8,
-          "z": 0
-        },
-        "size": {
-          "width": 4.1,
-          "height": 5.3
-        },
-        "rendering": {
-          "class": {
-            "color": "#FFFFFF",
-            "material": "metallic",
-            "borderColor": "#000000",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.3,
-            "opacity": 0.12,
-            "metalness": 0.42,
-            "roughness": 0.28
-          },
-          "attributes": {
-            "checkboxColor": "#FFFFFF",
-            "checkboxMaterial": "flat",
-            "shape": "circle",
-            "size": {
-              "width": 0.14,
-              "height": 0.14
-            }
-          },
-          "connections": {
-            "lineColor": "#000000",
-            "lineWidth": 0.01
-          },
-          "textColor": "#000000"
-        }
-      },
-      {
-        "id": 4,
-        "name": "Letter",
-        "type": "ellipse",
-        "attributes": [
-          "Format",
-          "Weight",
-          "Stamp",
-          "Sender address",
-          "Recipient address"
-        ],
-        "parentClassId": 3,
-        "position": {
-          "x": 8.9,
-          "y": 5.4,
-          "z": 0
-        },
-        "size": {
-          "width": 2.1,
-          "height": 1.25
-        },
-        "rendering": {
-          "class": {
-            "color": "#FFFFFF",
-            "material": "flat",
-            "borderColor": "#000000",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.1,
-            "opacity": 0.2,
-            "bodyType": "shape",
-            "shapeType": "document"
-          },
-          "attributes": {
-            "checkboxColor": "#FFFFFF",
-            "checkboxMaterial": "flat",
-            "shape": "circle",
-            "size": {
-              "width": 0.14,
-              "height": 0.14
-            }
-          },
-          "connections": {
-            "lineColor": "#000000",
-            "lineWidth": 0.01
-          },
-          "textColor": "#000000"
-        }
-      },
-      {
-        "id": 5,
-        "name": "Package",
-        "type": "ellipse",
-        "attributes": [
-          "Dimensions",
-          "Weight",
-          "Contents",
-          "Fragile",
-          "Insurance",
-          {
-            "name": "Tracking code",
-            "font": {
-              "italic": true
-            }
-          }
-        ],
-        "parentClassId": 3,
-        "position": {
-          "x": 8.9244,
-          "y": 3.3653,
-          "z": 0
-        },
-        "size": {
-          "width": 2.1,
-          "height": 1.25
-        },
-        "rendering": {
-          "class": {
-            "color": "#FFFFFF",
-            "material": "flat",
-            "borderColor": "#000000",
-            "borderWidth": 0.02,
-            "cornerRadius": 0.1,
-            "opacity": 0.2
-          },
-          "attributes": {
-            "checkboxColor": "#FFFFFF",
-            "checkboxMaterial": "flat",
-            "shape": "circle",
-            "size": {
-              "width": 0.14,
-              "height": 0.14
-            }
-          },
-          "connections": {
-            "lineColor": "#000000",
-            "lineWidth": 0.01
-          },
-          "textColor": "#000000"
-        }
-      }
-    ],
-    "link": []
-  },
   "metadata": {
     "sceneSettings": {
       "background": "#eef2f6",
@@ -207,6 +49,173 @@
       "bold": true,
       "italic": false,
       "underline": false
-    }
+    },
+    "name": "Hyperclass Mail Carrier",
+    "purpose": "Reference HBDS model for Hyperclass Mail Carrier.",
+    "regressionTags": [
+      "model",
+      "hyperclass",
+      "mail",
+      "carrier"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "hyperclass_mail_carrier_3",
+        "name": "Mail",
+        "type": "hyperclass",
+        "attributes": [
+          "Mail ID",
+          "Sent date",
+          "Received date",
+          "Status",
+          "Weight",
+          "Priority",
+          "Tracking code"
+        ],
+        "children": [
+          "hyperclass_mail_carrier_4",
+          "hyperclass_mail_carrier_5"
+        ],
+        "position": {
+          "x": 9.5,
+          "y": 4.8,
+          "z": 0
+        },
+        "size": {
+          "width": 4.1,
+          "height": 5.3
+        },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "metallic",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.3,
+            "opacity": 0.12,
+            "metalness": 0.42,
+            "roughness": 0.28
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": "hyperclass_mail_carrier_4",
+        "name": "Letter",
+        "type": "ellipse",
+        "attributes": [
+          "Format",
+          "Weight",
+          "Stamp",
+          "Sender address",
+          "Recipient address"
+        ],
+        "parentClassId": "hyperclass_mail_carrier_3",
+        "position": {
+          "x": 8.9,
+          "y": 5.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.25
+        },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2,
+            "bodyType": "shape",
+            "shapeType": "document"
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      },
+      {
+        "id": "hyperclass_mail_carrier_5",
+        "name": "Package",
+        "type": "ellipse",
+        "attributes": [
+          "Dimensions",
+          "Weight",
+          "Contents",
+          "Fragile",
+          "Insurance",
+          {
+            "name": "Tracking code",
+            "font": {
+              "italic": true
+            },
+            "id": "hyperclass_mail_carrier_5_attr_tracking_code"
+          }
+        ],
+        "parentClassId": "hyperclass_mail_carrier_3",
+        "position": {
+          "x": 8.9244,
+          "y": 3.3653,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 1.25
+        },
+        "rendering": {
+          "class": {
+            "color": "#FFFFFF",
+            "material": "flat",
+            "borderColor": "#000000",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "opacity": 0.2
+          },
+          "attributes": {
+            "checkboxColor": "#FFFFFF",
+            "checkboxMaterial": "flat",
+            "shape": "circle",
+            "size": {
+              "width": 0.14,
+              "height": 0.14
+            }
+          },
+          "connections": {
+            "lineColor": "#000000",
+            "lineWidth": 0.01
+          },
+          "textColor": "#000000"
+        }
+      }
+    ],
+    "link": []
   }
 }

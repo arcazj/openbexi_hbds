@@ -1,8 +1,67 @@
 {
+  "metadata": {
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 7.1489,
+        "fitWidthDistance": 4.8889,
+        "distance": 6.2604,
+        "diagramWidth": 5.0905,
+        "diagramHeight": 3,
+        "diagramDepth": 0.11,
+        "radius": 2.9549,
+        "center": {
+          "x": 22.2,
+          "y": 5,
+          "z": 0.055
+        },
+        "cameraAspect": 1.4623,
+        "cameraFov": 52
+      }
+    },
+    "font": {
+      "size": 48,
+      "family": "Arial, sans-serif",
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "name": "Human And Car",
+    "purpose": "Reference HBDS model for Human And Car.",
+    "regressionTags": [
+      "model",
+      "human",
+      "car"
+    ]
+  },
   "hypergraph": {
     "class": [
       {
-        "id": 1,
+        "id": "human_and_car_1",
         "name": "Human",
         "type": "roundedRectangle",
         "attributes": [
@@ -57,7 +116,7 @@
         }
       },
       {
-        "id": 2,
+        "id": "human_and_car_2",
         "name": "Car",
         "type": "roundedRectangle",
         "attributes": [
@@ -108,57 +167,5 @@
       }
     ],
     "link": []
-  },
-  "metadata": {
-    "sceneSettings": {
-      "background": "#eef2f6",
-      "ambient": 0,
-      "front": 0,
-      "sources": [
-        {
-          "intensity": 1,
-          "direction": {
-            "x": -5.734,
-            "y": 7,
-            "z": 14.937
-          }
-        },
-        {
-          "intensity": 0.6,
-          "direction": {
-            "x": 0,
-            "y": 11.314,
-            "z": 11.314
-          }
-        }
-      ]
-    },
-    "layout": {
-      "algorithm": "none",
-      "fit": {
-        "padding": 1.18,
-        "fitHeightDistance": 7.1489,
-        "fitWidthDistance": 4.8889,
-        "distance": 6.2604,
-        "diagramWidth": 5.0905,
-        "diagramHeight": 3,
-        "diagramDepth": 0.11,
-        "radius": 2.9549,
-        "center": {
-          "x": 22.2,
-          "y": 5,
-          "z": 0.055
-        },
-        "cameraAspect": 1.4623,
-        "cameraFov": 52
-      }
-    },
-    "font": {
-      "size": 48,
-      "family": "Arial, sans-serif",
-      "bold": true,
-      "italic": false,
-      "underline": false
-    }
   }
 }

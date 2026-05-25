@@ -1,8 +1,17 @@
 {
+  "metadata": {
+    "name": "Opera De Paris",
+    "purpose": "Reference HBDS model for Opera De Paris.",
+    "regressionTags": [
+      "model",
+      "opera",
+      "paris"
+    ]
+  },
   "hypergraph": {
     "class": [
       {
-        "id": 100,
+        "id": "opera_de_paris_100",
         "name": "Matiere",
         "type": "hyperclass",
         "attributes": [
@@ -13,9 +22,9 @@
           "Cycle de vie"
         ],
         "children": [
-          101,
-          102,
-          103
+          "opera_de_paris_101",
+          "opera_de_paris_102",
+          "opera_de_paris_103"
         ],
         "position": {
           "x": -16,
@@ -52,7 +61,7 @@
         }
       },
       {
-        "id": 101,
+        "id": "opera_de_paris_101",
         "name": "Mineral",
         "type": "ellipse",
         "attributes": [
@@ -94,10 +103,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 100
+        "parentClassId": "opera_de_paris_100"
       },
       {
-        "id": 102,
+        "id": "opera_de_paris_102",
         "name": "Synthetique",
         "type": "ellipse",
         "attributes": [
@@ -138,10 +147,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 100
+        "parentClassId": "opera_de_paris_100"
       },
       {
-        "id": 103,
+        "id": "opera_de_paris_103",
         "name": "Metal",
         "type": "ellipse",
         "attributes": [
@@ -182,10 +191,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 100
+        "parentClassId": "opera_de_paris_100"
       },
       {
-        "id": 110,
+        "id": "opera_de_paris_110",
         "name": "Element de Decoration",
         "type": "hyperclass",
         "attributes": [
@@ -196,11 +205,11 @@
           "Etat"
         ],
         "children": [
-          111,
-          112,
-          113,
-          114,
-          115
+          "opera_de_paris_111",
+          "opera_de_paris_112",
+          "opera_de_paris_113",
+          "opera_de_paris_114",
+          "opera_de_paris_115"
         ],
         "position": {
           "x": -8.5,
@@ -237,7 +246,7 @@
         }
       },
       {
-        "id": 111,
+        "id": "opera_de_paris_111",
         "name": "Arbre",
         "type": "ellipse",
         "attributes": [
@@ -278,10 +287,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 110
+        "parentClassId": "opera_de_paris_110"
       },
       {
-        "id": 112,
+        "id": "opera_de_paris_112",
         "name": "Animal",
         "type": "ellipse",
         "attributes": [
@@ -322,10 +331,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 110
+        "parentClassId": "opera_de_paris_110"
       },
       {
-        "id": 113,
+        "id": "opera_de_paris_113",
         "name": "Eau",
         "type": "ellipse",
         "attributes": [
@@ -366,10 +375,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 110
+        "parentClassId": "opera_de_paris_110"
       },
       {
-        "id": 114,
+        "id": "opera_de_paris_114",
         "name": "Lettre",
         "type": "ellipse",
         "attributes": [
@@ -410,10 +419,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 110
+        "parentClassId": "opera_de_paris_110"
       },
       {
-        "id": 115,
+        "id": "opera_de_paris_115",
         "name": "Volume",
         "type": "ellipse",
         "attributes": [
@@ -454,10 +463,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 110
+        "parentClassId": "opera_de_paris_110"
       },
       {
-        "id": 120,
+        "id": "opera_de_paris_120",
         "name": "Spectacle",
         "type": "hyperclass",
         "attributes": [
@@ -467,9 +476,9 @@
           "Equipe artistique"
         ],
         "children": [
-          121,
-          122,
-          123
+          "opera_de_paris_121",
+          "opera_de_paris_122",
+          "opera_de_paris_123"
         ],
         "position": {
           "x": -4.0,
@@ -506,7 +515,7 @@
         }
       },
       {
-        "id": 121,
+        "id": "opera_de_paris_121",
         "name": "Ballet",
         "type": "ellipse",
         "attributes": [
@@ -546,10 +555,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 120
+        "parentClassId": "opera_de_paris_120"
       },
       {
-        "id": 122,
+        "id": "opera_de_paris_122",
         "name": "Opera",
         "type": "ellipse",
         "attributes": [
@@ -589,10 +598,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 120
+        "parentClassId": "opera_de_paris_120"
       },
       {
-        "id": 123,
+        "id": "opera_de_paris_123",
         "name": "Concert",
         "type": "ellipse",
         "attributes": [
@@ -632,10 +641,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 120
+        "parentClassId": "opera_de_paris_120"
       },
       {
-        "id": 130,
+        "id": "opera_de_paris_130",
         "name": "Costume",
         "type": "hyperclass",
         "attributes": [
@@ -645,10 +654,10 @@
           "Inventaire"
         ],
         "children": [
-          131,
-          132,
-          133,
-          134
+          "opera_de_paris_131",
+          "opera_de_paris_132",
+          "opera_de_paris_133",
+          "opera_de_paris_134"
         ],
         "position": {
           "x": 0.3,
@@ -685,7 +694,7 @@
         }
       },
       {
-        "id": 131,
+        "id": "opera_de_paris_131",
         "name": "Habit",
         "type": "ellipse",
         "attributes": [
@@ -725,10 +734,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 130
+        "parentClassId": "opera_de_paris_130"
       },
       {
-        "id": 132,
+        "id": "opera_de_paris_132",
         "name": "Chaussure",
         "type": "ellipse",
         "attributes": [
@@ -768,10 +777,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 130
+        "parentClassId": "opera_de_paris_130"
       },
       {
-        "id": 133,
+        "id": "opera_de_paris_133",
         "name": "Accessoire",
         "type": "ellipse",
         "attributes": [
@@ -811,10 +820,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 130
+        "parentClassId": "opera_de_paris_130"
       },
       {
-        "id": 134,
+        "id": "opera_de_paris_134",
         "name": "Perruque",
         "type": "ellipse",
         "attributes": [
@@ -854,10 +863,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 130
+        "parentClassId": "opera_de_paris_130"
       },
       {
-        "id": 140,
+        "id": "opera_de_paris_140",
         "name": "Decor",
         "type": "hyperclass",
         "attributes": [
@@ -867,8 +876,8 @@
           "Stockage"
         ],
         "children": [
-          141,
-          142
+          "opera_de_paris_141",
+          "opera_de_paris_142"
         ],
         "position": {
           "x": -4.0,
@@ -905,7 +914,7 @@
         }
       },
       {
-        "id": 141,
+        "id": "opera_de_paris_141",
         "name": "Element plat",
         "type": "ellipse",
         "attributes": [
@@ -946,10 +955,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 140
+        "parentClassId": "opera_de_paris_140"
       },
       {
-        "id": 142,
+        "id": "opera_de_paris_142",
         "name": "Element 3D",
         "type": "ellipse",
         "attributes": [
@@ -990,10 +999,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 140
+        "parentClassId": "opera_de_paris_140"
       },
       {
-        "id": 150,
+        "id": "opera_de_paris_150",
         "name": "Mobilier Manipulation Decors",
         "type": "hyperclass",
         "attributes": [
@@ -1002,9 +1011,9 @@
           "Etat"
         ],
         "children": [
-          151,
-          152,
-          153
+          "opera_de_paris_151",
+          "opera_de_paris_152",
+          "opera_de_paris_153"
         ],
         "position": {
           "x": 0.7,
@@ -1041,7 +1050,7 @@
         }
       },
       {
-        "id": 151,
+        "id": "opera_de_paris_151",
         "name": "Poteau",
         "type": "ellipse",
         "attributes": [
@@ -1081,10 +1090,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 150
+        "parentClassId": "opera_de_paris_150"
       },
       {
-        "id": 152,
+        "id": "opera_de_paris_152",
         "name": "Chariot",
         "type": "ellipse",
         "attributes": [
@@ -1124,10 +1133,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 150
+        "parentClassId": "opera_de_paris_150"
       },
       {
-        "id": 153,
+        "id": "opera_de_paris_153",
         "name": "Rail de guidage",
         "type": "ellipse",
         "attributes": [
@@ -1167,10 +1176,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 150
+        "parentClassId": "opera_de_paris_150"
       },
       {
-        "id": 160,
+        "id": "opera_de_paris_160",
         "name": "Machinerie de Scene",
         "type": "hyperclass",
         "attributes": [
@@ -1180,11 +1189,11 @@
           "Maintenance"
         ],
         "children": [
-          161,
-          162,
-          163,
-          164,
-          165
+          "opera_de_paris_161",
+          "opera_de_paris_162",
+          "opera_de_paris_163",
+          "opera_de_paris_164",
+          "opera_de_paris_165"
         ],
         "position": {
           "x": -9.0,
@@ -1221,7 +1230,7 @@
         }
       },
       {
-        "id": 161,
+        "id": "opera_de_paris_161",
         "name": "Treuil",
         "type": "ellipse",
         "attributes": [
@@ -1262,10 +1271,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 160
+        "parentClassId": "opera_de_paris_160"
       },
       {
-        "id": 162,
+        "id": "opera_de_paris_162",
         "name": "Moteur",
         "type": "ellipse",
         "attributes": [
@@ -1306,10 +1315,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 160
+        "parentClassId": "opera_de_paris_160"
       },
       {
-        "id": 163,
+        "id": "opera_de_paris_163",
         "name": "Gril technique",
         "type": "ellipse",
         "attributes": [
@@ -1350,10 +1359,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 160
+        "parentClassId": "opera_de_paris_160"
       },
       {
-        "id": 164,
+        "id": "opera_de_paris_164",
         "name": "Cintre",
         "type": "ellipse",
         "attributes": [
@@ -1394,10 +1403,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 160
+        "parentClassId": "opera_de_paris_160"
       },
       {
-        "id": 165,
+        "id": "opera_de_paris_165",
         "name": "Commande",
         "type": "ellipse",
         "attributes": [
@@ -1438,10 +1447,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 160
+        "parentClassId": "opera_de_paris_160"
       },
       {
-        "id": 170,
+        "id": "opera_de_paris_170",
         "name": "Vehicule",
         "type": "hyperclass",
         "attributes": [
@@ -1450,9 +1459,9 @@
           "Etat"
         ],
         "children": [
-          171,
-          172,
-          173
+          "opera_de_paris_171",
+          "opera_de_paris_172",
+          "opera_de_paris_173"
         ],
         "position": {
           "x": -17.0,
@@ -1489,7 +1498,7 @@
         }
       },
       {
-        "id": 171,
+        "id": "opera_de_paris_171",
         "name": "Voiture",
         "type": "ellipse",
         "attributes": [
@@ -1529,10 +1538,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 170
+        "parentClassId": "opera_de_paris_170"
       },
       {
-        "id": 172,
+        "id": "opera_de_paris_172",
         "name": "Camion",
         "type": "ellipse",
         "attributes": [
@@ -1572,10 +1581,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 170
+        "parentClassId": "opera_de_paris_170"
       },
       {
-        "id": 173,
+        "id": "opera_de_paris_173",
         "name": "Chariot de transport",
         "type": "ellipse",
         "attributes": [
@@ -1615,10 +1624,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 170
+        "parentClassId": "opera_de_paris_170"
       },
       {
-        "id": 180,
+        "id": "opera_de_paris_180",
         "name": "Zone de Stockage",
         "type": "hyperclass",
         "attributes": [
@@ -1627,10 +1636,10 @@
           "Controle acces"
         ],
         "children": [
-          181,
-          182,
-          183,
-          184
+          "opera_de_paris_181",
+          "opera_de_paris_182",
+          "opera_de_paris_183",
+          "opera_de_paris_184"
         ],
         "position": {
           "x": -17.0,
@@ -1667,7 +1676,7 @@
         }
       },
       {
-        "id": 181,
+        "id": "opera_de_paris_181",
         "name": "Rayonnage",
         "type": "ellipse",
         "attributes": [
@@ -1707,10 +1716,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 180
+        "parentClassId": "opera_de_paris_180"
       },
       {
-        "id": 182,
+        "id": "opera_de_paris_182",
         "name": "Palette",
         "type": "ellipse",
         "attributes": [
@@ -1750,10 +1759,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 180
+        "parentClassId": "opera_de_paris_180"
       },
       {
-        "id": 183,
+        "id": "opera_de_paris_183",
         "name": "Caisse",
         "type": "ellipse",
         "attributes": [
@@ -1793,10 +1802,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 180
+        "parentClassId": "opera_de_paris_180"
       },
       {
-        "id": 184,
+        "id": "opera_de_paris_184",
         "name": "Reserve",
         "type": "ellipse",
         "attributes": [
@@ -1836,10 +1845,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 180
+        "parentClassId": "opera_de_paris_180"
       },
       {
-        "id": 190,
+        "id": "opera_de_paris_190",
         "name": "Superstructure",
         "type": "hyperclass",
         "attributes": [
@@ -1848,11 +1857,11 @@
           "Etat"
         ],
         "children": [
-          191,
-          192,
-          193,
-          194,
-          195
+          "opera_de_paris_191",
+          "opera_de_paris_192",
+          "opera_de_paris_193",
+          "opera_de_paris_194",
+          "opera_de_paris_195"
         ],
         "position": {
           "x": -17.2,
@@ -1889,7 +1898,7 @@
         }
       },
       {
-        "id": 191,
+        "id": "opera_de_paris_191",
         "name": "Armature",
         "type": "ellipse",
         "attributes": [
@@ -1929,10 +1938,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 190
+        "parentClassId": "opera_de_paris_190"
       },
       {
-        "id": 192,
+        "id": "opera_de_paris_192",
         "name": "Fondation",
         "type": "ellipse",
         "attributes": [
@@ -1972,10 +1981,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 190
+        "parentClassId": "opera_de_paris_190"
       },
       {
-        "id": 193,
+        "id": "opera_de_paris_193",
         "name": "Plancher",
         "type": "ellipse",
         "attributes": [
@@ -2015,10 +2024,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 190
+        "parentClassId": "opera_de_paris_190"
       },
       {
-        "id": 194,
+        "id": "opera_de_paris_194",
         "name": "Cloison",
         "type": "ellipse",
         "attributes": [
@@ -2058,10 +2067,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 190
+        "parentClassId": "opera_de_paris_190"
       },
       {
-        "id": 195,
+        "id": "opera_de_paris_195",
         "name": "Escalier",
         "type": "ellipse",
         "attributes": [
@@ -2101,10 +2110,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 190
+        "parentClassId": "opera_de_paris_190"
       },
       {
-        "id": 200,
+        "id": "opera_de_paris_200",
         "name": "Zone Cage de Scene",
         "type": "hyperclass",
         "attributes": [
@@ -2114,9 +2123,9 @@
           "Securite"
         ],
         "children": [
-          201,
-          202,
-          203
+          "opera_de_paris_201",
+          "opera_de_paris_202",
+          "opera_de_paris_203"
         ],
         "position": {
           "x": -5.0,
@@ -2153,7 +2162,7 @@
         }
       },
       {
-        "id": 201,
+        "id": "opera_de_paris_201",
         "name": "Entrees",
         "type": "hyperclass",
         "attributes": [
@@ -2162,9 +2171,9 @@
           "Flux"
         ],
         "children": [
-          206,
-          207,
-          208
+          "opera_de_paris_206",
+          "opera_de_paris_207",
+          "opera_de_paris_208"
         ],
         "position": {
           "x": -7.4,
@@ -2199,10 +2208,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 200
+        "parentClassId": "opera_de_paris_200"
       },
       {
-        "id": 206,
+        "id": "opera_de_paris_206",
         "name": "Porte",
         "type": "ellipse",
         "attributes": [
@@ -2242,10 +2251,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 201
+        "parentClassId": "opera_de_paris_201"
       },
       {
-        "id": 207,
+        "id": "opera_de_paris_207",
         "name": "Sas",
         "type": "ellipse",
         "attributes": [
@@ -2285,10 +2294,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 201
+        "parentClassId": "opera_de_paris_201"
       },
       {
-        "id": 208,
+        "id": "opera_de_paris_208",
         "name": "Passage technique",
         "type": "ellipse",
         "attributes": [
@@ -2328,10 +2337,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 201
+        "parentClassId": "opera_de_paris_201"
       },
       {
-        "id": 202,
+        "id": "opera_de_paris_202",
         "name": "Points de Controle",
         "type": "hyperclass",
         "attributes": [
@@ -2340,8 +2349,8 @@
           "Surveillance"
         ],
         "children": [
-          209,
-          210
+          "opera_de_paris_209",
+          "opera_de_paris_210"
         ],
         "position": {
           "x": -4.8,
@@ -2376,10 +2385,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 200
+        "parentClassId": "opera_de_paris_200"
       },
       {
-        "id": 209,
+        "id": "opera_de_paris_209",
         "name": "Controleur",
         "type": "ellipse",
         "attributes": [
@@ -2419,10 +2428,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 202
+        "parentClassId": "opera_de_paris_202"
       },
       {
-        "id": 210,
+        "id": "opera_de_paris_210",
         "name": "Camera",
         "type": "ellipse",
         "attributes": [
@@ -2462,10 +2471,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 202
+        "parentClassId": "opera_de_paris_202"
       },
       {
-        "id": 203,
+        "id": "opera_de_paris_203",
         "name": "Plateau",
         "type": "hyperclass",
         "attributes": [
@@ -2474,8 +2483,8 @@
           "Occupation"
         ],
         "children": [
-          211,
-          212
+          "opera_de_paris_211",
+          "opera_de_paris_212"
         ],
         "position": {
           "x": -2.2,
@@ -2510,10 +2519,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 200
+        "parentClassId": "opera_de_paris_200"
       },
       {
-        "id": 211,
+        "id": "opera_de_paris_211",
         "name": "Coulisses",
         "type": "ellipse",
         "attributes": [
@@ -2554,10 +2563,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 203
+        "parentClassId": "opera_de_paris_203"
       },
       {
-        "id": 212,
+        "id": "opera_de_paris_212",
         "name": "Scene",
         "type": "ellipse",
         "attributes": [
@@ -2598,10 +2607,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 203
+        "parentClassId": "opera_de_paris_203"
       },
       {
-        "id": 220,
+        "id": "opera_de_paris_220",
         "name": "Zone Publique",
         "type": "hyperclass",
         "attributes": [
@@ -2610,12 +2619,12 @@
           "Controle"
         ],
         "children": [
-          221,
-          222,
-          223,
-          224,
-          225,
-          226
+          "opera_de_paris_221",
+          "opera_de_paris_222",
+          "opera_de_paris_223",
+          "opera_de_paris_224",
+          "opera_de_paris_225",
+          "opera_de_paris_226"
         ],
         "position": {
           "x": -1.0,
@@ -2652,7 +2661,7 @@
         }
       },
       {
-        "id": 221,
+        "id": "opera_de_paris_221",
         "name": "Espace Accueil",
         "type": "ellipse",
         "attributes": [
@@ -2693,10 +2702,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 220
+        "parentClassId": "opera_de_paris_220"
       },
       {
-        "id": 222,
+        "id": "opera_de_paris_222",
         "name": "Espace Commercial",
         "type": "ellipse",
         "attributes": [
@@ -2737,10 +2746,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 220
+        "parentClassId": "opera_de_paris_220"
       },
       {
-        "id": 223,
+        "id": "opera_de_paris_223",
         "name": "Espace Reception",
         "type": "ellipse",
         "attributes": [
@@ -2781,10 +2790,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 220
+        "parentClassId": "opera_de_paris_220"
       },
       {
-        "id": 224,
+        "id": "opera_de_paris_224",
         "name": "Salle",
         "type": "ellipse",
         "attributes": [
@@ -2825,10 +2834,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 220
+        "parentClassId": "opera_de_paris_220"
       },
       {
-        "id": 225,
+        "id": "opera_de_paris_225",
         "name": "Fosse Orchestre",
         "type": "ellipse",
         "attributes": [
@@ -2869,10 +2878,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 220
+        "parentClassId": "opera_de_paris_220"
       },
       {
-        "id": 226,
+        "id": "opera_de_paris_226",
         "name": "Lustre",
         "type": "ellipse",
         "attributes": [
@@ -2913,10 +2922,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 220
+        "parentClassId": "opera_de_paris_220"
       },
       {
-        "id": 230,
+        "id": "opera_de_paris_230",
         "name": "Zone Administrative",
         "type": "hyperclass",
         "attributes": [
@@ -2925,11 +2934,11 @@
           "Contact"
         ],
         "children": [
-          231,
-          232,
-          233,
-          234,
-          235
+          "opera_de_paris_231",
+          "opera_de_paris_232",
+          "opera_de_paris_233",
+          "opera_de_paris_234",
+          "opera_de_paris_235"
         ],
         "position": {
           "x": -7.0,
@@ -2966,7 +2975,7 @@
         }
       },
       {
-        "id": 231,
+        "id": "opera_de_paris_231",
         "name": "Bureau Direction",
         "type": "ellipse",
         "attributes": [
@@ -3006,10 +3015,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 230
+        "parentClassId": "opera_de_paris_230"
       },
       {
-        "id": 232,
+        "id": "opera_de_paris_232",
         "name": "Bureau Personnel",
         "type": "ellipse",
         "attributes": [
@@ -3049,10 +3058,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 230
+        "parentClassId": "opera_de_paris_230"
       },
       {
-        "id": 233,
+        "id": "opera_de_paris_233",
         "name": "Secretariat",
         "type": "ellipse",
         "attributes": [
@@ -3092,10 +3101,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 230
+        "parentClassId": "opera_de_paris_230"
       },
       {
-        "id": 234,
+        "id": "opera_de_paris_234",
         "name": "Comptabilite",
         "type": "ellipse",
         "attributes": [
@@ -3135,10 +3144,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 230
+        "parentClassId": "opera_de_paris_230"
       },
       {
-        "id": 235,
+        "id": "opera_de_paris_235",
         "name": "Billetterie",
         "type": "ellipse",
         "attributes": [
@@ -3178,10 +3187,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 230
+        "parentClassId": "opera_de_paris_230"
       },
       {
-        "id": 240,
+        "id": "opera_de_paris_240",
         "name": "Instance Publique",
         "type": "hyperclass",
         "attributes": [
@@ -3190,9 +3199,9 @@
           "Convention"
         ],
         "children": [
-          241,
-          242,
-          243
+          "opera_de_paris_241",
+          "opera_de_paris_242",
+          "opera_de_paris_243"
         ],
         "position": {
           "x": 4.5,
@@ -3229,7 +3238,7 @@
         }
       },
       {
-        "id": 241,
+        "id": "opera_de_paris_241",
         "name": "Ministere",
         "type": "ellipse",
         "attributes": [
@@ -3269,10 +3278,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 240
+        "parentClassId": "opera_de_paris_240"
       },
       {
-        "id": 242,
+        "id": "opera_de_paris_242",
         "name": "Exploitant",
         "type": "ellipse",
         "attributes": [
@@ -3312,10 +3321,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 240
+        "parentClassId": "opera_de_paris_240"
       },
       {
-        "id": 243,
+        "id": "opera_de_paris_243",
         "name": "Public",
         "type": "ellipse",
         "attributes": [
@@ -3355,10 +3364,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 240
+        "parentClassId": "opera_de_paris_240"
       },
       {
-        "id": 250,
+        "id": "opera_de_paris_250",
         "name": "Administration",
         "type": "hyperclass",
         "attributes": [
@@ -3368,12 +3377,12 @@
           "Commande"
         ],
         "children": [
-          251,
-          252,
-          253,
-          254,
-          255,
-          256
+          "opera_de_paris_251",
+          "opera_de_paris_252",
+          "opera_de_paris_253",
+          "opera_de_paris_254",
+          "opera_de_paris_255",
+          "opera_de_paris_256"
         ],
         "position": {
           "x": 8.5,
@@ -3410,7 +3419,7 @@
         }
       },
       {
-        "id": 251,
+        "id": "opera_de_paris_251",
         "name": "Direction",
         "type": "ellipse",
         "attributes": [
@@ -3450,10 +3459,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 250
+        "parentClassId": "opera_de_paris_250"
       },
       {
-        "id": 252,
+        "id": "opera_de_paris_252",
         "name": "Contact",
         "type": "ellipse",
         "attributes": [
@@ -3493,10 +3502,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 250
+        "parentClassId": "opera_de_paris_250"
       },
       {
-        "id": 253,
+        "id": "opera_de_paris_253",
         "name": "Technique",
         "type": "ellipse",
         "attributes": [
@@ -3536,10 +3545,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 250
+        "parentClassId": "opera_de_paris_250"
       },
       {
-        "id": 254,
+        "id": "opera_de_paris_254",
         "name": "DRH",
         "type": "ellipse",
         "attributes": [
@@ -3579,10 +3588,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 250
+        "parentClassId": "opera_de_paris_250"
       },
       {
-        "id": 255,
+        "id": "opera_de_paris_255",
         "name": "Administration Financiere",
         "type": "ellipse",
         "attributes": [
@@ -3622,10 +3631,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 250
+        "parentClassId": "opera_de_paris_250"
       },
       {
-        "id": 256,
+        "id": "opera_de_paris_256",
         "name": "Organigramme",
         "type": "ellipse",
         "attributes": [
@@ -3665,10 +3674,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 250
+        "parentClassId": "opera_de_paris_250"
       },
       {
-        "id": 260,
+        "id": "opera_de_paris_260",
         "name": "Fournisseur",
         "type": "hyperclass",
         "attributes": [
@@ -3678,10 +3687,10 @@
           "Qualite"
         ],
         "children": [
-          261,
-          262,
-          263,
-          264
+          "opera_de_paris_261",
+          "opera_de_paris_262",
+          "opera_de_paris_263",
+          "opera_de_paris_264"
         ],
         "position": {
           "x": 8.0,
@@ -3718,7 +3727,7 @@
         }
       },
       {
-        "id": 261,
+        "id": "opera_de_paris_261",
         "name": "Stock",
         "type": "ellipse",
         "attributes": [
@@ -3758,10 +3767,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 260
+        "parentClassId": "opera_de_paris_260"
       },
       {
-        "id": 262,
+        "id": "opera_de_paris_262",
         "name": "Achat",
         "type": "ellipse",
         "attributes": [
@@ -3801,10 +3810,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 260
+        "parentClassId": "opera_de_paris_260"
       },
       {
-        "id": 263,
+        "id": "opera_de_paris_263",
         "name": "Pret",
         "type": "ellipse",
         "attributes": [
@@ -3844,10 +3853,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 260
+        "parentClassId": "opera_de_paris_260"
       },
       {
-        "id": 264,
+        "id": "opera_de_paris_264",
         "name": "Service",
         "type": "ellipse",
         "attributes": [
@@ -3887,10 +3896,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 260
+        "parentClassId": "opera_de_paris_260"
       },
       {
-        "id": 270,
+        "id": "opera_de_paris_270",
         "name": "Energie Electrique",
         "type": "hyperclass",
         "attributes": [
@@ -3900,11 +3909,11 @@
           "Circuit"
         ],
         "children": [
-          271,
-          272,
-          273,
-          274,
-          275
+          "opera_de_paris_271",
+          "opera_de_paris_272",
+          "opera_de_paris_273",
+          "opera_de_paris_274",
+          "opera_de_paris_275"
         ],
         "position": {
           "x": 15.0,
@@ -3941,7 +3950,7 @@
         }
       },
       {
-        "id": 271,
+        "id": "opera_de_paris_271",
         "name": "Alimentation Generale",
         "type": "ellipse",
         "attributes": [
@@ -3981,10 +3990,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 270
+        "parentClassId": "opera_de_paris_270"
       },
       {
-        "id": 272,
+        "id": "opera_de_paris_272",
         "name": "Tableau Electrique",
         "type": "ellipse",
         "attributes": [
@@ -4024,10 +4033,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 270
+        "parentClassId": "opera_de_paris_270"
       },
       {
-        "id": 273,
+        "id": "opera_de_paris_273",
         "name": "Cable",
         "type": "ellipse",
         "attributes": [
@@ -4067,10 +4076,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 270
+        "parentClassId": "opera_de_paris_270"
       },
       {
-        "id": 274,
+        "id": "opera_de_paris_274",
         "name": "Projecteur",
         "type": "ellipse",
         "attributes": [
@@ -4110,10 +4119,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 270
+        "parentClassId": "opera_de_paris_270"
       },
       {
-        "id": 275,
+        "id": "opera_de_paris_275",
         "name": "Luminaire",
         "type": "ellipse",
         "attributes": [
@@ -4153,10 +4162,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 270
+        "parentClassId": "opera_de_paris_270"
       },
       {
-        "id": 280,
+        "id": "opera_de_paris_280",
         "name": "Instrument de Mesure",
         "type": "hyperclass",
         "attributes": [
@@ -4165,10 +4174,10 @@
           "Precision"
         ],
         "children": [
-          281,
-          282,
-          283,
-          284
+          "opera_de_paris_281",
+          "opera_de_paris_282",
+          "opera_de_paris_283",
+          "opera_de_paris_284"
         ],
         "position": {
           "x": 14.4,
@@ -4205,7 +4214,7 @@
         }
       },
       {
-        "id": 281,
+        "id": "opera_de_paris_281",
         "name": "Controle Lineaire",
         "type": "ellipse",
         "attributes": [
@@ -4245,10 +4254,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 280
+        "parentClassId": "opera_de_paris_280"
       },
       {
-        "id": 282,
+        "id": "opera_de_paris_282",
         "name": "Dynamometre",
         "type": "ellipse",
         "attributes": [
@@ -4288,10 +4297,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 280
+        "parentClassId": "opera_de_paris_280"
       },
       {
-        "id": 283,
+        "id": "opera_de_paris_283",
         "name": "Capteur Effort",
         "type": "ellipse",
         "attributes": [
@@ -4331,10 +4340,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 280
+        "parentClassId": "opera_de_paris_280"
       },
       {
-        "id": 284,
+        "id": "opera_de_paris_284",
         "name": "Balance",
         "type": "ellipse",
         "attributes": [
@@ -4374,10 +4383,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 280
+        "parentClassId": "opera_de_paris_280"
       },
       {
-        "id": 290,
+        "id": "opera_de_paris_290",
         "name": "Mobilier Gestion Son Lumiere",
         "type": "hyperclass",
         "attributes": [
@@ -4386,9 +4395,9 @@
           "Patch"
         ],
         "children": [
-          291,
-          292,
-          293
+          "opera_de_paris_291",
+          "opera_de_paris_292",
+          "opera_de_paris_293"
         ],
         "position": {
           "x": 8.5,
@@ -4425,7 +4434,7 @@
         }
       },
       {
-        "id": 291,
+        "id": "opera_de_paris_291",
         "name": "Console",
         "type": "ellipse",
         "attributes": [
@@ -4465,10 +4474,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 290
+        "parentClassId": "opera_de_paris_290"
       },
       {
-        "id": 292,
+        "id": "opera_de_paris_292",
         "name": "Gradateur",
         "type": "ellipse",
         "attributes": [
@@ -4508,10 +4517,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 290
+        "parentClassId": "opera_de_paris_290"
       },
       {
-        "id": 293,
+        "id": "opera_de_paris_293",
         "name": "Reseau DMX",
         "type": "ellipse",
         "attributes": [
@@ -4551,10 +4560,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 290
+        "parentClassId": "opera_de_paris_290"
       },
       {
-        "id": 300,
+        "id": "opera_de_paris_300",
         "name": "Mobilier Support Lumiere",
         "type": "hyperclass",
         "attributes": [
@@ -4563,9 +4572,9 @@
           "Fixation"
         ],
         "children": [
-          301,
-          302,
-          303
+          "opera_de_paris_301",
+          "opera_de_paris_302",
+          "opera_de_paris_303"
         ],
         "position": {
           "x": 8.5,
@@ -4602,7 +4611,7 @@
         }
       },
       {
-        "id": 301,
+        "id": "opera_de_paris_301",
         "name": "Perche",
         "type": "ellipse",
         "attributes": [
@@ -4642,10 +4651,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 300
+        "parentClassId": "opera_de_paris_300"
       },
       {
-        "id": 302,
+        "id": "opera_de_paris_302",
         "name": "Pont",
         "type": "ellipse",
         "attributes": [
@@ -4685,10 +4694,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 300
+        "parentClassId": "opera_de_paris_300"
       },
       {
-        "id": 303,
+        "id": "opera_de_paris_303",
         "name": "Support",
         "type": "ellipse",
         "attributes": [
@@ -4728,10 +4737,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 300
+        "parentClassId": "opera_de_paris_300"
       },
       {
-        "id": 310,
+        "id": "opera_de_paris_310",
         "name": "Mobilier Controle Studio",
         "type": "hyperclass",
         "attributes": [
@@ -4740,9 +4749,9 @@
           "Video"
         ],
         "children": [
-          311,
-          312,
-          313
+          "opera_de_paris_311",
+          "opera_de_paris_312",
+          "opera_de_paris_313"
         ],
         "position": {
           "x": 8.5,
@@ -4779,7 +4788,7 @@
         }
       },
       {
-        "id": 311,
+        "id": "opera_de_paris_311",
         "name": "Ordinateur",
         "type": "ellipse",
         "attributes": [
@@ -4819,10 +4828,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 310
+        "parentClassId": "opera_de_paris_310"
       },
       {
-        "id": 312,
+        "id": "opera_de_paris_312",
         "name": "Regie Audio",
         "type": "ellipse",
         "attributes": [
@@ -4862,10 +4871,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 310
+        "parentClassId": "opera_de_paris_310"
       },
       {
-        "id": 313,
+        "id": "opera_de_paris_313",
         "name": "Monitoring",
         "type": "ellipse",
         "attributes": [
@@ -4905,10 +4914,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 310
+        "parentClassId": "opera_de_paris_310"
       },
       {
-        "id": 320,
+        "id": "opera_de_paris_320",
         "name": "Mobilier Controle Climatisation",
         "type": "hyperclass",
         "attributes": [
@@ -4917,9 +4926,9 @@
           "Flux"
         ],
         "children": [
-          321,
-          322,
-          323
+          "opera_de_paris_321",
+          "opera_de_paris_322",
+          "opera_de_paris_323"
         ],
         "position": {
           "x": 8.5,
@@ -4956,7 +4965,7 @@
         }
       },
       {
-        "id": 321,
+        "id": "opera_de_paris_321",
         "name": "CTA",
         "type": "ellipse",
         "attributes": [
@@ -4996,10 +5005,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 320
+        "parentClassId": "opera_de_paris_320"
       },
       {
-        "id": 322,
+        "id": "opera_de_paris_322",
         "name": "Ventilation",
         "type": "ellipse",
         "attributes": [
@@ -5039,10 +5048,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 320
+        "parentClassId": "opera_de_paris_320"
       },
       {
-        "id": 323,
+        "id": "opera_de_paris_323",
         "name": "Extracteur",
         "type": "ellipse",
         "attributes": [
@@ -5082,10 +5091,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 320
+        "parentClassId": "opera_de_paris_320"
       },
       {
-        "id": 330,
+        "id": "opera_de_paris_330",
         "name": "Materiel de Securite",
         "type": "hyperclass",
         "attributes": [
@@ -5094,10 +5103,10 @@
           "Alerte"
         ],
         "children": [
-          331,
-          332,
-          333,
-          334
+          "opera_de_paris_331",
+          "opera_de_paris_332",
+          "opera_de_paris_333",
+          "opera_de_paris_334"
         ],
         "position": {
           "x": 2.5,
@@ -5134,7 +5143,7 @@
         }
       },
       {
-        "id": 331,
+        "id": "opera_de_paris_331",
         "name": "Equipement",
         "type": "ellipse",
         "attributes": [
@@ -5175,10 +5184,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 330
+        "parentClassId": "opera_de_paris_330"
       },
       {
-        "id": 332,
+        "id": "opera_de_paris_332",
         "name": "Isolation Incendie",
         "type": "ellipse",
         "attributes": [
@@ -5219,10 +5228,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 330
+        "parentClassId": "opera_de_paris_330"
       },
       {
-        "id": 333,
+        "id": "opera_de_paris_333",
         "name": "Surveillance",
         "type": "ellipse",
         "attributes": [
@@ -5262,10 +5271,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 330
+        "parentClassId": "opera_de_paris_330"
       },
       {
-        "id": 334,
+        "id": "opera_de_paris_334",
         "name": "Evacuation",
         "type": "ellipse",
         "attributes": [
@@ -5305,10 +5314,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 330
+        "parentClassId": "opera_de_paris_330"
       },
       {
-        "id": 340,
+        "id": "opera_de_paris_340",
         "name": "Machinerie Thermique",
         "type": "hyperclass",
         "attributes": [
@@ -5317,9 +5326,9 @@
           "Maintenance"
         ],
         "children": [
-          341,
-          342,
-          343
+          "opera_de_paris_341",
+          "opera_de_paris_342",
+          "opera_de_paris_343"
         ],
         "position": {
           "x": 15.0,
@@ -5356,7 +5365,7 @@
         }
       },
       {
-        "id": 341,
+        "id": "opera_de_paris_341",
         "name": "Chaufferie",
         "type": "ellipse",
         "attributes": [
@@ -5396,10 +5405,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 340
+        "parentClassId": "opera_de_paris_340"
       },
       {
-        "id": 342,
+        "id": "opera_de_paris_342",
         "name": "Pompe",
         "type": "ellipse",
         "attributes": [
@@ -5439,10 +5448,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 340
+        "parentClassId": "opera_de_paris_340"
       },
       {
-        "id": 343,
+        "id": "opera_de_paris_343",
         "name": "Reseau Fluide",
         "type": "ellipse",
         "attributes": [
@@ -5482,10 +5491,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 340
+        "parentClassId": "opera_de_paris_340"
       },
       {
-        "id": 350,
+        "id": "opera_de_paris_350",
         "name": "Matrice Veille Realisations",
         "type": "hyperclass",
         "attributes": [
@@ -5495,25 +5504,25 @@
           "Validation"
         ],
         "children": [
-          351,
-          352,
-          353,
-          354,
-          355,
-          356,
-          357,
-          360,
-          361,
-          362,
-          363,
-          364,
-          365,
-          366,
-          367,
-          368,
-          369,
-          370,
-          371
+          "opera_de_paris_351",
+          "opera_de_paris_352",
+          "opera_de_paris_353",
+          "opera_de_paris_354",
+          "opera_de_paris_355",
+          "opera_de_paris_356",
+          "opera_de_paris_357",
+          "opera_de_paris_360",
+          "opera_de_paris_361",
+          "opera_de_paris_362",
+          "opera_de_paris_363",
+          "opera_de_paris_364",
+          "opera_de_paris_365",
+          "opera_de_paris_366",
+          "opera_de_paris_367",
+          "opera_de_paris_368",
+          "opera_de_paris_369",
+          "opera_de_paris_370",
+          "opera_de_paris_371"
         ],
         "position": {
           "x": 25.0,
@@ -5550,7 +5559,7 @@
         }
       },
       {
-        "id": 351,
+        "id": "opera_de_paris_351",
         "name": "Veille Segment",
         "type": "ellipse",
         "attributes": [
@@ -5591,10 +5600,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 352,
+        "id": "opera_de_paris_352",
         "name": "Sommet",
         "type": "ellipse",
         "attributes": [
@@ -5635,10 +5644,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 353,
+        "id": "opera_de_paris_353",
         "name": "Domaine",
         "type": "ellipse",
         "attributes": [
@@ -5679,10 +5688,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 354,
+        "id": "opera_de_paris_354",
         "name": "Arc",
         "type": "ellipse",
         "attributes": [
@@ -5723,10 +5732,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 355,
+        "id": "opera_de_paris_355",
         "name": "Segment",
         "type": "ellipse",
         "attributes": [
@@ -5767,10 +5776,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 356,
+        "id": "opera_de_paris_356",
         "name": "Veille Point Annexes",
         "type": "ellipse",
         "attributes": [
@@ -5810,10 +5819,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 357,
+        "id": "opera_de_paris_357",
         "name": "Point Annexes",
         "type": "ellipse",
         "attributes": [
@@ -5853,10 +5862,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 360,
+        "id": "opera_de_paris_360",
         "name": "Maintenance Zone Scene",
         "type": "ellipse",
         "attributes": [
@@ -5897,10 +5906,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 361,
+        "id": "opera_de_paris_361",
         "name": "Maintenance Zone Administrative",
         "type": "ellipse",
         "attributes": [
@@ -5941,10 +5950,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 362,
+        "id": "opera_de_paris_362",
         "name": "Maintenance Zone Publique",
         "type": "ellipse",
         "attributes": [
@@ -5985,10 +5994,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 363,
+        "id": "opera_de_paris_363",
         "name": "Reseau Securite Scene",
         "type": "ellipse",
         "attributes": [
@@ -6029,10 +6038,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 364,
+        "id": "opera_de_paris_364",
         "name": "Reseau Climatisation Scene",
         "type": "ellipse",
         "attributes": [
@@ -6073,10 +6082,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 365,
+        "id": "opera_de_paris_365",
         "name": "Reseau Electrique Scene",
         "type": "ellipse",
         "attributes": [
@@ -6117,10 +6126,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 366,
+        "id": "opera_de_paris_366",
         "name": "Realisation Scene",
         "type": "ellipse",
         "attributes": [
@@ -6161,10 +6170,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 367,
+        "id": "opera_de_paris_367",
         "name": "Realisation Salle",
         "type": "ellipse",
         "attributes": [
@@ -6205,10 +6214,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 368,
+        "id": "opera_de_paris_368",
         "name": "Realisation Administration",
         "type": "ellipse",
         "attributes": [
@@ -6249,10 +6258,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 369,
+        "id": "opera_de_paris_369",
         "name": "Essai Securite",
         "type": "ellipse",
         "attributes": [
@@ -6293,10 +6302,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 370,
+        "id": "opera_de_paris_370",
         "name": "Essai Climatisation",
         "type": "ellipse",
         "attributes": [
@@ -6337,10 +6346,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 371,
+        "id": "opera_de_paris_371",
         "name": "Essai Electrique",
         "type": "ellipse",
         "attributes": [
@@ -6381,10 +6390,10 @@
           },
           "textColor": "#000000"
         },
-        "parentClassId": 350
+        "parentClassId": "opera_de_paris_350"
       },
       {
-        "id": 400,
+        "id": "opera_de_paris_400",
         "name": "Structure HBDS Palais Garnier",
         "type": "roundedRectangle",
         "attributes": [
@@ -6429,8 +6438,8 @@
     ],
     "link": [
       {
-        "sourceClassId": 100,
-        "targetClassId": 110,
+        "sourceClassId": "opera_de_paris_100",
+        "targetClassId": "opera_de_paris_110",
         "rendering": {
           "lineColor": "#6d4c41",
           "lineWidth": 2,
@@ -6447,11 +6456,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_100_to_110_001"
       },
       {
-        "sourceClassId": 100,
-        "targetClassId": 130,
+        "sourceClassId": "opera_de_paris_100",
+        "targetClassId": "opera_de_paris_130",
         "rendering": {
           "lineColor": "#6d4c41",
           "lineWidth": 2,
@@ -6468,11 +6478,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_100_to_130_002"
       },
       {
-        "sourceClassId": 100,
-        "targetClassId": 140,
+        "sourceClassId": "opera_de_paris_100",
+        "targetClassId": "opera_de_paris_140",
         "rendering": {
           "lineColor": "#6d4c41",
           "lineWidth": 2,
@@ -6489,11 +6500,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_100_to_140_003"
       },
       {
-        "sourceClassId": 100,
-        "targetClassId": 190,
+        "sourceClassId": "opera_de_paris_100",
+        "targetClassId": "opera_de_paris_190",
         "rendering": {
           "lineColor": "#6d4c41",
           "lineWidth": 2,
@@ -6510,11 +6522,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_100_to_190_004"
       },
       {
-        "sourceClassId": 101,
-        "targetClassId": 190,
+        "sourceClassId": "opera_de_paris_101",
+        "targetClassId": "opera_de_paris_190",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -6531,11 +6544,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_101_to_190_005"
       },
       {
-        "sourceClassId": 102,
-        "targetClassId": 130,
+        "sourceClassId": "opera_de_paris_102",
+        "targetClassId": "opera_de_paris_130",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -6552,11 +6566,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_102_to_130_006"
       },
       {
-        "sourceClassId": 103,
-        "targetClassId": 160,
+        "sourceClassId": "opera_de_paris_103",
+        "targetClassId": "opera_de_paris_160",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -6573,11 +6588,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_103_to_160_007"
       },
       {
-        "sourceClassId": 110,
-        "targetClassId": 140,
+        "sourceClassId": "opera_de_paris_110",
+        "targetClassId": "opera_de_paris_140",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -6594,11 +6610,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_110_to_140_008"
       },
       {
-        "sourceClassId": 110,
-        "targetClassId": 120,
+        "sourceClassId": "opera_de_paris_110",
+        "targetClassId": "opera_de_paris_120",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -6615,11 +6632,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_110_to_120_009"
       },
       {
-        "sourceClassId": 120,
-        "targetClassId": 130,
+        "sourceClassId": "opera_de_paris_120",
+        "targetClassId": "opera_de_paris_130",
         "rendering": {
           "lineColor": "#1a237e",
           "lineWidth": 2,
@@ -6636,11 +6654,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_120_to_130_010"
       },
       {
-        "sourceClassId": 120,
-        "targetClassId": 140,
+        "sourceClassId": "opera_de_paris_120",
+        "targetClassId": "opera_de_paris_140",
         "rendering": {
           "lineColor": "#1a237e",
           "lineWidth": 2,
@@ -6657,11 +6676,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_120_to_140_011"
       },
       {
-        "sourceClassId": 120,
-        "targetClassId": 200,
+        "sourceClassId": "opera_de_paris_120",
+        "targetClassId": "opera_de_paris_200",
         "rendering": {
           "lineColor": "#1a237e",
           "lineWidth": 2,
@@ -6678,11 +6698,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_120_to_200_012"
       },
       {
-        "sourceClassId": 140,
-        "targetClassId": 150,
+        "sourceClassId": "opera_de_paris_140",
+        "targetClassId": "opera_de_paris_150",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -6699,11 +6720,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_140_to_150_013"
       },
       {
-        "sourceClassId": 150,
-        "targetClassId": 160,
+        "sourceClassId": "opera_de_paris_150",
+        "targetClassId": "opera_de_paris_160",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -6720,11 +6742,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_150_to_160_014"
       },
       {
-        "sourceClassId": 160,
-        "targetClassId": 200,
+        "sourceClassId": "opera_de_paris_160",
+        "targetClassId": "opera_de_paris_200",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -6741,11 +6764,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_160_to_200_015"
       },
       {
-        "sourceClassId": 160,
-        "targetClassId": 300,
+        "sourceClassId": "opera_de_paris_160",
+        "targetClassId": "opera_de_paris_300",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -6762,11 +6786,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_160_to_300_016"
       },
       {
-        "sourceClassId": 160,
-        "targetClassId": 280,
+        "sourceClassId": "opera_de_paris_160",
+        "targetClassId": "opera_de_paris_280",
         "rendering": {
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
@@ -6783,11 +6808,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_160_to_280_017"
       },
       {
-        "sourceClassId": 170,
-        "targetClassId": 180,
+        "sourceClassId": "opera_de_paris_170",
+        "targetClassId": "opera_de_paris_180",
         "rendering": {
           "lineColor": "#ef6c00",
           "lineWidth": 2,
@@ -6804,11 +6830,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_170_to_180_018"
       },
       {
-        "sourceClassId": 180,
-        "targetClassId": 140,
+        "sourceClassId": "opera_de_paris_180",
+        "targetClassId": "opera_de_paris_140",
         "rendering": {
           "lineColor": "#ef6c00",
           "lineWidth": 2,
@@ -6825,11 +6852,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_180_to_140_019"
       },
       {
-        "sourceClassId": 180,
-        "targetClassId": 130,
+        "sourceClassId": "opera_de_paris_180",
+        "targetClassId": "opera_de_paris_130",
         "rendering": {
           "lineColor": "#ef6c00",
           "lineWidth": 2,
@@ -6846,11 +6874,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_180_to_130_020"
       },
       {
-        "sourceClassId": 180,
-        "targetClassId": 200,
+        "sourceClassId": "opera_de_paris_180",
+        "targetClassId": "opera_de_paris_200",
         "rendering": {
           "lineColor": "#ef6c00",
           "lineWidth": 2,
@@ -6867,11 +6896,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_180_to_200_021"
       },
       {
-        "sourceClassId": 190,
-        "targetClassId": 200,
+        "sourceClassId": "opera_de_paris_190",
+        "targetClassId": "opera_de_paris_200",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -6888,11 +6918,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_190_to_200_022"
       },
       {
-        "sourceClassId": 190,
-        "targetClassId": 220,
+        "sourceClassId": "opera_de_paris_190",
+        "targetClassId": "opera_de_paris_220",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -6909,11 +6940,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_190_to_220_023"
       },
       {
-        "sourceClassId": 190,
-        "targetClassId": 230,
+        "sourceClassId": "opera_de_paris_190",
+        "targetClassId": "opera_de_paris_230",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -6930,11 +6962,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_190_to_230_024"
       },
       {
-        "sourceClassId": 200,
-        "targetClassId": 220,
+        "sourceClassId": "opera_de_paris_200",
+        "targetClassId": "opera_de_paris_220",
         "rendering": {
           "lineColor": "#1a237e",
           "lineWidth": 2,
@@ -6951,11 +6984,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_200_to_220_025"
       },
       {
-        "sourceClassId": 220,
-        "targetClassId": 230,
+        "sourceClassId": "opera_de_paris_220",
+        "targetClassId": "opera_de_paris_230",
         "rendering": {
           "lineColor": "#1a237e",
           "lineWidth": 2,
@@ -6972,11 +7006,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_220_to_230_026"
       },
       {
-        "sourceClassId": 220,
-        "targetClassId": 240,
+        "sourceClassId": "opera_de_paris_220",
+        "targetClassId": "opera_de_paris_240",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -6993,11 +7028,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_220_to_240_027"
       },
       {
-        "sourceClassId": 226,
-        "targetClassId": 330,
+        "sourceClassId": "opera_de_paris_226",
+        "targetClassId": "opera_de_paris_330",
         "rendering": {
           "lineColor": "#ad1457",
           "lineWidth": 2,
@@ -7014,11 +7050,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_226_to_330_028"
       },
       {
-        "sourceClassId": 203,
-        "targetClassId": 160,
+        "sourceClassId": "opera_de_paris_203",
+        "targetClassId": "opera_de_paris_160",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7035,11 +7072,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_203_to_160_029"
       },
       {
-        "sourceClassId": 240,
-        "targetClassId": 250,
+        "sourceClassId": "opera_de_paris_240",
+        "targetClassId": "opera_de_paris_250",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7056,11 +7094,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_240_to_250_030"
       },
       {
-        "sourceClassId": 250,
-        "targetClassId": 260,
+        "sourceClassId": "opera_de_paris_250",
+        "targetClassId": "opera_de_paris_260",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7077,11 +7116,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_250_to_260_031"
       },
       {
-        "sourceClassId": 260,
-        "targetClassId": 100,
+        "sourceClassId": "opera_de_paris_260",
+        "targetClassId": "opera_de_paris_100",
         "rendering": {
           "lineColor": "#6d4c41",
           "lineWidth": 2,
@@ -7098,11 +7138,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_260_to_100_032"
       },
       {
-        "sourceClassId": 260,
-        "targetClassId": 130,
+        "sourceClassId": "opera_de_paris_260",
+        "targetClassId": "opera_de_paris_130",
         "rendering": {
           "lineColor": "#6d4c41",
           "lineWidth": 2,
@@ -7119,11 +7160,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_260_to_130_033"
       },
       {
-        "sourceClassId": 260,
-        "targetClassId": 270,
+        "sourceClassId": "opera_de_paris_260",
+        "targetClassId": "opera_de_paris_270",
         "rendering": {
           "lineColor": "#6d4c41",
           "lineWidth": 2,
@@ -7140,11 +7182,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_260_to_270_034"
       },
       {
-        "sourceClassId": 260,
-        "targetClassId": 280,
+        "sourceClassId": "opera_de_paris_260",
+        "targetClassId": "opera_de_paris_280",
         "rendering": {
           "lineColor": "#6d4c41",
           "lineWidth": 2,
@@ -7161,11 +7204,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_260_to_280_035"
       },
       {
-        "sourceClassId": 250,
-        "targetClassId": 230,
+        "sourceClassId": "opera_de_paris_250",
+        "targetClassId": "opera_de_paris_230",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7182,11 +7226,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_250_to_230_036"
       },
       {
-        "sourceClassId": 250,
-        "targetClassId": 200,
+        "sourceClassId": "opera_de_paris_250",
+        "targetClassId": "opera_de_paris_200",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7203,11 +7248,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_250_to_200_037"
       },
       {
-        "sourceClassId": 250,
-        "targetClassId": 220,
+        "sourceClassId": "opera_de_paris_250",
+        "targetClassId": "opera_de_paris_220",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7224,11 +7270,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_250_to_220_038"
       },
       {
-        "sourceClassId": 270,
-        "targetClassId": 160,
+        "sourceClassId": "opera_de_paris_270",
+        "targetClassId": "opera_de_paris_160",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7245,11 +7292,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_270_to_160_039"
       },
       {
-        "sourceClassId": 270,
-        "targetClassId": 290,
+        "sourceClassId": "opera_de_paris_270",
+        "targetClassId": "opera_de_paris_290",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7266,11 +7314,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_270_to_290_040"
       },
       {
-        "sourceClassId": 270,
-        "targetClassId": 300,
+        "sourceClassId": "opera_de_paris_270",
+        "targetClassId": "opera_de_paris_300",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7287,11 +7336,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_270_to_300_041"
       },
       {
-        "sourceClassId": 270,
-        "targetClassId": 310,
+        "sourceClassId": "opera_de_paris_270",
+        "targetClassId": "opera_de_paris_310",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7308,11 +7358,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_270_to_310_042"
       },
       {
-        "sourceClassId": 270,
-        "targetClassId": 350,
+        "sourceClassId": "opera_de_paris_270",
+        "targetClassId": "opera_de_paris_350",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7329,11 +7380,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_270_to_350_043"
       },
       {
-        "sourceClassId": 280,
-        "targetClassId": 160,
+        "sourceClassId": "opera_de_paris_280",
+        "targetClassId": "opera_de_paris_160",
         "rendering": {
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
@@ -7350,11 +7402,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_280_to_160_044"
       },
       {
-        "sourceClassId": 280,
-        "targetClassId": 270,
+        "sourceClassId": "opera_de_paris_280",
+        "targetClassId": "opera_de_paris_270",
         "rendering": {
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
@@ -7371,11 +7424,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_280_to_270_045"
       },
       {
-        "sourceClassId": 280,
-        "targetClassId": 350,
+        "sourceClassId": "opera_de_paris_280",
+        "targetClassId": "opera_de_paris_350",
         "rendering": {
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
@@ -7392,11 +7446,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_280_to_350_046"
       },
       {
-        "sourceClassId": 290,
-        "targetClassId": 300,
+        "sourceClassId": "opera_de_paris_290",
+        "targetClassId": "opera_de_paris_300",
         "rendering": {
           "lineColor": "#1a237e",
           "lineWidth": 2,
@@ -7413,11 +7468,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_290_to_300_047"
       },
       {
-        "sourceClassId": 290,
-        "targetClassId": 310,
+        "sourceClassId": "opera_de_paris_290",
+        "targetClassId": "opera_de_paris_310",
         "rendering": {
           "lineColor": "#1a237e",
           "lineWidth": 2,
@@ -7434,11 +7490,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_290_to_310_048"
       },
       {
-        "sourceClassId": 300,
-        "targetClassId": 270,
+        "sourceClassId": "opera_de_paris_300",
+        "targetClassId": "opera_de_paris_270",
         "rendering": {
           "lineColor": "#1a237e",
           "lineWidth": 2,
@@ -7455,11 +7512,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_300_to_270_049"
       },
       {
-        "sourceClassId": 310,
-        "targetClassId": 290,
+        "sourceClassId": "opera_de_paris_310",
+        "targetClassId": "opera_de_paris_290",
         "rendering": {
           "lineColor": "#1a237e",
           "lineWidth": 2,
@@ -7476,11 +7534,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_310_to_290_050"
       },
       {
-        "sourceClassId": 320,
-        "targetClassId": 340,
+        "sourceClassId": "opera_de_paris_320",
+        "targetClassId": "opera_de_paris_340",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7497,11 +7556,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_320_to_340_051"
       },
       {
-        "sourceClassId": 340,
-        "targetClassId": 220,
+        "sourceClassId": "opera_de_paris_340",
+        "targetClassId": "opera_de_paris_220",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7518,11 +7578,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_340_to_220_052"
       },
       {
-        "sourceClassId": 340,
-        "targetClassId": 350,
+        "sourceClassId": "opera_de_paris_340",
+        "targetClassId": "opera_de_paris_350",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7539,11 +7600,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_340_to_350_053"
       },
       {
-        "sourceClassId": 330,
-        "targetClassId": 200,
+        "sourceClassId": "opera_de_paris_330",
+        "targetClassId": "opera_de_paris_200",
         "rendering": {
           "lineColor": "#ad1457",
           "lineWidth": 2,
@@ -7560,11 +7622,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_330_to_200_054"
       },
       {
-        "sourceClassId": 330,
-        "targetClassId": 220,
+        "sourceClassId": "opera_de_paris_330",
+        "targetClassId": "opera_de_paris_220",
         "rendering": {
           "lineColor": "#ad1457",
           "lineWidth": 2,
@@ -7581,11 +7644,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_330_to_220_055"
       },
       {
-        "sourceClassId": 330,
-        "targetClassId": 230,
+        "sourceClassId": "opera_de_paris_330",
+        "targetClassId": "opera_de_paris_230",
         "rendering": {
           "lineColor": "#ad1457",
           "lineWidth": 2,
@@ -7602,11 +7666,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_330_to_230_056"
       },
       {
-        "sourceClassId": 330,
-        "targetClassId": 350,
+        "sourceClassId": "opera_de_paris_330",
+        "targetClassId": "opera_de_paris_350",
         "rendering": {
           "lineColor": "#ad1457",
           "lineWidth": 2,
@@ -7623,11 +7688,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_330_to_350_057"
       },
       {
-        "sourceClassId": 200,
-        "targetClassId": 360,
+        "sourceClassId": "opera_de_paris_200",
+        "targetClassId": "opera_de_paris_360",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7644,11 +7710,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_200_to_360_058"
       },
       {
-        "sourceClassId": 230,
-        "targetClassId": 361,
+        "sourceClassId": "opera_de_paris_230",
+        "targetClassId": "opera_de_paris_361",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7665,11 +7732,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_230_to_361_059"
       },
       {
-        "sourceClassId": 220,
-        "targetClassId": 362,
+        "sourceClassId": "opera_de_paris_220",
+        "targetClassId": "opera_de_paris_362",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7686,11 +7754,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_220_to_362_060"
       },
       {
-        "sourceClassId": 330,
-        "targetClassId": 363,
+        "sourceClassId": "opera_de_paris_330",
+        "targetClassId": "opera_de_paris_363",
         "rendering": {
           "lineColor": "#ad1457",
           "lineWidth": 2,
@@ -7707,11 +7776,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_330_to_363_061"
       },
       {
-        "sourceClassId": 320,
-        "targetClassId": 364,
+        "sourceClassId": "opera_de_paris_320",
+        "targetClassId": "opera_de_paris_364",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7728,11 +7798,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_320_to_364_062"
       },
       {
-        "sourceClassId": 270,
-        "targetClassId": 365,
+        "sourceClassId": "opera_de_paris_270",
+        "targetClassId": "opera_de_paris_365",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7749,11 +7820,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_270_to_365_063"
       },
       {
-        "sourceClassId": 160,
-        "targetClassId": 366,
+        "sourceClassId": "opera_de_paris_160",
+        "targetClassId": "opera_de_paris_366",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -7770,11 +7842,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_160_to_366_064"
       },
       {
-        "sourceClassId": 220,
-        "targetClassId": 367,
+        "sourceClassId": "opera_de_paris_220",
+        "targetClassId": "opera_de_paris_367",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -7791,11 +7864,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_220_to_367_065"
       },
       {
-        "sourceClassId": 230,
-        "targetClassId": 368,
+        "sourceClassId": "opera_de_paris_230",
+        "targetClassId": "opera_de_paris_368",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -7812,11 +7886,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_230_to_368_066"
       },
       {
-        "sourceClassId": 330,
-        "targetClassId": 369,
+        "sourceClassId": "opera_de_paris_330",
+        "targetClassId": "opera_de_paris_369",
         "rendering": {
           "lineColor": "#ad1457",
           "lineWidth": 2,
@@ -7833,11 +7908,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_330_to_369_067"
       },
       {
-        "sourceClassId": 320,
-        "targetClassId": 370,
+        "sourceClassId": "opera_de_paris_320",
+        "targetClassId": "opera_de_paris_370",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7854,11 +7930,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_320_to_370_068"
       },
       {
-        "sourceClassId": 270,
-        "targetClassId": 371,
+        "sourceClassId": "opera_de_paris_270",
+        "targetClassId": "opera_de_paris_371",
         "rendering": {
           "lineColor": "#00838f",
           "lineWidth": 2,
@@ -7875,11 +7952,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_270_to_371_069"
       },
       {
-        "sourceClassId": 351,
-        "targetClassId": 352,
+        "sourceClassId": "opera_de_paris_351",
+        "targetClassId": "opera_de_paris_352",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7896,11 +7974,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_351_to_352_070"
       },
       {
-        "sourceClassId": 352,
-        "targetClassId": 353,
+        "sourceClassId": "opera_de_paris_352",
+        "targetClassId": "opera_de_paris_353",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7917,11 +7996,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_352_to_353_071"
       },
       {
-        "sourceClassId": 353,
-        "targetClassId": 354,
+        "sourceClassId": "opera_de_paris_353",
+        "targetClassId": "opera_de_paris_354",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7938,11 +8018,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_353_to_354_072"
       },
       {
-        "sourceClassId": 354,
-        "targetClassId": 355,
+        "sourceClassId": "opera_de_paris_354",
+        "targetClassId": "opera_de_paris_355",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7959,11 +8040,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_354_to_355_073"
       },
       {
-        "sourceClassId": 355,
-        "targetClassId": 356,
+        "sourceClassId": "opera_de_paris_355",
+        "targetClassId": "opera_de_paris_356",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -7980,11 +8062,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_355_to_356_074"
       },
       {
-        "sourceClassId": 356,
-        "targetClassId": 357,
+        "sourceClassId": "opera_de_paris_356",
+        "targetClassId": "opera_de_paris_357",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8001,11 +8084,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_356_to_357_075"
       },
       {
-        "sourceClassId": 111,
-        "targetClassId": 121,
+        "sourceClassId": "opera_de_paris_111",
+        "targetClassId": "opera_de_paris_121",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8022,11 +8106,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_111_to_121_076"
       },
       {
-        "sourceClassId": 112,
-        "targetClassId": 122,
+        "sourceClassId": "opera_de_paris_112",
+        "targetClassId": "opera_de_paris_122",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8043,11 +8128,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_112_to_122_077"
       },
       {
-        "sourceClassId": 113,
-        "targetClassId": 140,
+        "sourceClassId": "opera_de_paris_113",
+        "targetClassId": "opera_de_paris_140",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8064,11 +8150,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_113_to_140_078"
       },
       {
-        "sourceClassId": 114,
-        "targetClassId": 250,
+        "sourceClassId": "opera_de_paris_114",
+        "targetClassId": "opera_de_paris_250",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8085,11 +8172,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_114_to_250_079"
       },
       {
-        "sourceClassId": 115,
-        "targetClassId": 160,
+        "sourceClassId": "opera_de_paris_115",
+        "targetClassId": "opera_de_paris_160",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8106,11 +8194,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_115_to_160_080"
       },
       {
-        "sourceClassId": 131,
-        "targetClassId": 120,
+        "sourceClassId": "opera_de_paris_131",
+        "targetClassId": "opera_de_paris_120",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8127,11 +8216,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_131_to_120_081"
       },
       {
-        "sourceClassId": 141,
-        "targetClassId": 200,
+        "sourceClassId": "opera_de_paris_141",
+        "targetClassId": "opera_de_paris_200",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8148,11 +8238,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_141_to_200_082"
       },
       {
-        "sourceClassId": 142,
-        "targetClassId": 180,
+        "sourceClassId": "opera_de_paris_142",
+        "targetClassId": "opera_de_paris_180",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8169,11 +8260,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_142_to_180_083"
       },
       {
-        "sourceClassId": 151,
-        "targetClassId": 160,
+        "sourceClassId": "opera_de_paris_151",
+        "targetClassId": "opera_de_paris_160",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8190,11 +8282,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_151_to_160_084"
       },
       {
-        "sourceClassId": 152,
-        "targetClassId": 170,
+        "sourceClassId": "opera_de_paris_152",
+        "targetClassId": "opera_de_paris_170",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8211,11 +8304,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_152_to_170_085"
       },
       {
-        "sourceClassId": 173,
-        "targetClassId": 150,
+        "sourceClassId": "opera_de_paris_173",
+        "targetClassId": "opera_de_paris_150",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8232,11 +8326,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_173_to_150_086"
       },
       {
-        "sourceClassId": 184,
-        "targetClassId": 260,
+        "sourceClassId": "opera_de_paris_184",
+        "targetClassId": "opera_de_paris_260",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8253,11 +8348,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_184_to_260_087"
       },
       {
-        "sourceClassId": 221,
-        "targetClassId": 235,
+        "sourceClassId": "opera_de_paris_221",
+        "targetClassId": "opera_de_paris_235",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -8274,11 +8370,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_221_to_235_088"
       },
       {
-        "sourceClassId": 224,
-        "targetClassId": 226,
+        "sourceClassId": "opera_de_paris_224",
+        "targetClassId": "opera_de_paris_226",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -8295,11 +8392,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_224_to_226_089"
       },
       {
-        "sourceClassId": 243,
-        "targetClassId": 221,
+        "sourceClassId": "opera_de_paris_243",
+        "targetClassId": "opera_de_paris_221",
         "rendering": {
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -8316,11 +8414,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_243_to_221_090"
       },
       {
-        "sourceClassId": 251,
-        "targetClassId": 240,
+        "sourceClassId": "opera_de_paris_251",
+        "targetClassId": "opera_de_paris_240",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8337,11 +8436,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_251_to_240_091"
       },
       {
-        "sourceClassId": 255,
-        "targetClassId": 260,
+        "sourceClassId": "opera_de_paris_255",
+        "targetClassId": "opera_de_paris_260",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8358,11 +8458,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_255_to_260_092"
       },
       {
-        "sourceClassId": 334,
-        "targetClassId": 221,
+        "sourceClassId": "opera_de_paris_334",
+        "targetClassId": "opera_de_paris_221",
         "rendering": {
           "lineColor": "#ad1457",
           "lineWidth": 2,
@@ -8379,11 +8480,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_334_to_221_093"
       },
       {
-        "sourceClassId": 400,
-        "targetClassId": 350,
+        "sourceClassId": "opera_de_paris_400",
+        "targetClassId": "opera_de_paris_350",
         "rendering": {
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -8400,7 +8502,8 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "opera_de_paris_link_400_to_350_094"
       }
     ]
   }

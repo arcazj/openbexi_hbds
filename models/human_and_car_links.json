@@ -1,8 +1,18 @@
 {
+  "metadata": {
+    "name": "Human And Car Links",
+    "purpose": "Reference HBDS model for Human And Car Links.",
+    "regressionTags": [
+      "model",
+      "human",
+      "car",
+      "links"
+    ]
+  },
   "hypergraph": {
     "class": [
       {
-        "id": 1,
+        "id": "human_and_car_links_1",
         "name": "Human",
         "type": "roundedRectangle",
         "attributes": [
@@ -41,7 +51,7 @@
         }
       },
       {
-        "id": 2,
+        "id": "human_and_car_links_2",
         "name": "Car",
         "type": "roundedRectangle",
         "attributes": [
@@ -82,8 +92,8 @@
     ],
     "link": [
       {
-        "sourceClassId": 1,
-        "targetClassId": 2,
+        "sourceClassId": "human_and_car_links_1",
+        "targetClassId": "human_and_car_links_2",
         "rendering": {
           "labelText": "drive",
           "lineColor": "#1a237e",
@@ -100,11 +110,12 @@
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "human_and_car_links_link_1_to_2_001"
       },
       {
-        "sourceClassId": 1,
-        "targetClassId": 2,
+        "sourceClassId": "human_and_car_links_1",
+        "targetClassId": "human_and_car_links_2",
         "rendering": {
           "labelText": "own",
           "lineColor": "#2e7d32",
@@ -121,7 +132,8 @@
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
           "zIndex": 8
-        }
+        },
+        "id": "human_and_car_links_link_1_to_2_002"
       }
     ]
   }

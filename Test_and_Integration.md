@@ -12,6 +12,7 @@ Use this guide to validate:
 * connected Python server mode
 * Models, Edit, Tests, and Help views
 * `models/` and `test_models/` manifests
+* model and test model metadata consistency and unique IDs
 * model load, edit, save, backup, and reload
 * 2-D and 3-D rendering
 * zoom, pan, fit, and overview behavior
@@ -476,7 +477,7 @@ The smoke suite covers these server cases.
 Run Python compile checks:
 
 ```powershell
-py -m py_compile server.py scripts\smoke_server.py
+py -m py_compile server.py scripts\smoke_server.py tools\validate_manifests.py tools\validate_models.py tools\validate_test_models.py tools\lint_model_naming.py
 ```
 
 Run the full server smoke suite:
@@ -489,6 +490,18 @@ Validate manifests:
 
 ```powershell
 py tools\validate_manifests.py
+```
+
+Validate model metadata and unique IDs:
+
+```powershell
+py tools\validate_models.py
+```
+
+Validate test model metadata and unique IDs:
+
+```powershell
+py tools\validate_test_models.py
 ```
 
 Lint naming:
@@ -630,9 +643,11 @@ OpenAPI or docs returns JSON when HTML was expected:
 
 Before release:
 
-* run `py -m py_compile server.py scripts\smoke_server.py`
+* run `py -m py_compile server.py scripts\smoke_server.py tools\validate_manifests.py tools\validate_models.py tools\validate_test_models.py tools\lint_model_naming.py`
 * run `py scripts\smoke_server.py`
 * run `py tools\validate_manifests.py`
+* run `py tools\validate_models.py`
+* run `py tools\validate_test_models.py`
 * run `py tools\lint_model_naming.py`
 * run `mvn test` if Maven is installed
 * run `git diff --check`

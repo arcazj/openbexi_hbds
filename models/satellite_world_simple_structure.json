@@ -11,18 +11,18 @@
       "fit": {
         "padding": 1.15,
         "fitHeightDistance": 23.8342,
-        "fitWidthDistance": 11.1327,
-        "distance": 12.5529,
+        "fitWidthDistance": 21.0717,
+        "distance": 17.0766,
         "diagramWidth": 16.77,
         "diagramHeight": 9.61,
-        "diagramDepth": 0.136,
+        "diagramDepth": 0.13,
         "radius": 9.6644,
         "center": {
           "x": -0.6775,
           "y": 0.275,
           "z": 0.068
         },
-        "cameraAspect": 2.1409,
+        "cameraAspect": 1.1311,
         "cameraFov": 50
       }
     },
@@ -40,32 +40,40 @@
     },
     "sceneSettings": {
       "background": "#eef2f6",
-      "ambient": 0.82,
-      "front": 0.16,
+      "ambient": 0,
+      "front": 0,
       "sources": [
         {
-          "intensity": 0.14,
+          "intensity": 1,
           "direction": {
-            "x": -5,
+            "x": -5.734,
             "y": 7,
-            "z": 13
+            "z": 14.937
           }
         },
         {
-          "intensity": 0.1,
+          "intensity": 0.6,
           "direction": {
-            "x": 8,
-            "y": -6,
-            "z": 10
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
           }
         }
       ]
-    }
+    },
+    "purpose": "Simple HBDS satellite model with richer lifecycle/spacecraft metadata and radial layout.",
+    "regressionTags": [
+      "model",
+      "satellite",
+      "world",
+      "simple",
+      "structure"
+    ]
   },
   "hypergraph": {
     "class": [
       {
-        "id": "hc_satellite_catalog",
+        "id": "satellite_world_simple_structure_hc_satellite_catalog",
         "name": "Satellite Catalog",
         "type": "hyperclass",
         "attributes": [
@@ -73,25 +81,28 @@
             "name": "Catalog authority",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_hc_satellite_catalog_attr_catalog_authority"
           },
           {
             "name": "Object identity",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_hc_satellite_catalog_attr_object_identity"
           },
           {
             "name": "Launch lineage",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_hc_satellite_catalog_attr_launch_lineage"
           }
         ],
         "children": [
-          "satellite",
-          "launch_vehicle",
-          "organization"
+          "satellite_world_simple_structure_satellite",
+          "satellite_world_simple_structure_launch_vehicle",
+          "satellite_world_simple_structure_organization"
         ],
         "position": {
           "x": 4.27,
@@ -115,7 +126,7 @@
         }
       },
       {
-        "id": "hc_orbit_payload",
+        "id": "satellite_world_simple_structure_hc_orbit_payload",
         "name": "Orbit / Payload",
         "type": "hyperclass",
         "attributes": [
@@ -123,24 +134,27 @@
             "name": "Orbital state",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_hc_orbit_payload_attr_orbital_state"
           },
           {
             "name": "Payload mission",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_hc_orbit_payload_attr_payload_mission"
           },
           {
             "name": "TLE traceability",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_hc_orbit_payload_attr_tle_traceability"
           }
         ],
         "children": [
-          "tle_set",
-          "payload_profile"
+          "satellite_world_simple_structure_tle_set",
+          "satellite_world_simple_structure_payload_profile"
         ],
         "position": {
           "x": -6.065,
@@ -164,82 +178,94 @@
         }
       },
       {
-        "id": "satellite",
+        "id": "satellite_world_simple_structure_satellite",
         "name": "Satellite",
         "type": "roundedRectangle",
-        "parentClassId": "hc_satellite_catalog",
+        "parentClassId": "satellite_world_simple_structure_hc_satellite_catalog",
         "attributes": [
           {
             "name": "noradCatalogId",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_noradcatalogid"
           },
           {
             "name": "satelliteName",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_satellitename"
           },
           {
             "name": "internationalDesignator",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_internationaldesignator"
           },
           {
             "name": "cosparId",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_cosparid"
           },
           {
             "name": "satelliteStatus",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_satellitestatus"
           },
           {
             "name": "busType",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_bustype"
           },
           {
             "name": "dryMassKg",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_drymasskg"
           },
           {
             "name": "powerWatts",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_powerwatts"
           },
           {
             "name": "manufacturerOrgId",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_manufacturerorgid"
           },
           {
             "name": "operatorOrgId",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_operatororgid"
           },
           {
             "name": "launchDateUtc",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_launchdateutc"
           },
           {
             "name": "decayedDateUtc",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_satellite_attr_decayeddateutc"
           }
         ],
         "position": {
@@ -262,58 +288,66 @@
         }
       },
       {
-        "id": "launch_vehicle",
+        "id": "satellite_world_simple_structure_launch_vehicle",
         "name": "Launch Vehicle",
         "type": "roundedRectangle",
-        "parentClassId": "hc_satellite_catalog",
+        "parentClassId": "satellite_world_simple_structure_hc_satellite_catalog",
         "attributes": [
           {
             "name": "rocketName",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_launch_vehicle_attr_rocketname"
           },
           {
             "name": "rocketFamily",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_launch_vehicle_attr_rocketfamily"
           },
           {
             "name": "launchSite",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchsite"
           },
           {
             "name": "launchProvider",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchprovider"
           },
           {
             "name": "launchSuccess",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchsuccess"
           },
           {
             "name": "launchMassToLeoKg",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchmasstoleokg"
           },
           {
             "name": "launchMassToGtoKg",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchmasstogtokg"
           },
           {
             "name": "firstFlightDate",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_launch_vehicle_attr_firstflightdate"
           }
         ],
         "position": {
@@ -336,46 +370,52 @@
         }
       },
       {
-        "id": "organization",
+        "id": "satellite_world_simple_structure_organization",
         "name": "Organization",
         "type": "roundedRectangle",
-        "parentClassId": "hc_satellite_catalog",
+        "parentClassId": "satellite_world_simple_structure_hc_satellite_catalog",
         "attributes": [
           {
             "name": "organizationId",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_organization_attr_organizationid"
           },
           {
             "name": "name",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_organization_attr_name"
           },
           {
             "name": "country",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_organization_attr_country"
           },
           {
             "name": "role",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_organization_attr_role"
           },
           {
             "name": "organizationType",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_organization_attr_organizationtype"
           },
           {
             "name": "foundedDate",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_organization_attr_foundeddate"
           }
         ],
         "position": {
@@ -398,58 +438,66 @@
         }
       },
       {
-        "id": "tle_set",
+        "id": "satellite_world_simple_structure_tle_set",
         "name": "TLE Set",
         "type": "roundedRectangle",
-        "parentClassId": "hc_orbit_payload",
+        "parentClassId": "satellite_world_simple_structure_hc_orbit_payload",
         "attributes": [
           {
             "name": "tleEpochUtc",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_tle_set_attr_tleepochutc"
           },
           {
             "name": "tleLine1",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_tle_set_attr_tleline1"
           },
           {
             "name": "tleLine2",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_tle_set_attr_tleline2"
           },
           {
             "name": "inclinationDeg",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_tle_set_attr_inclinationdeg"
           },
           {
             "name": "eccentricity",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_tle_set_attr_eccentricity"
           },
           {
             "name": "meanMotionRevPerDay",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_tle_set_attr_meanmotionrevperday"
           },
           {
             "name": "raanDeg",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_tle_set_attr_raandeg"
           },
           {
             "name": "argPerigeeDeg",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_tle_set_attr_argperigeedeg"
           }
         ],
         "position": {
@@ -472,52 +520,59 @@
         }
       },
       {
-        "id": "payload_profile",
+        "id": "satellite_world_simple_structure_payload_profile",
         "name": "Payload Profile",
         "type": "roundedRectangle",
-        "parentClassId": "hc_orbit_payload",
+        "parentClassId": "satellite_world_simple_structure_hc_orbit_payload",
         "attributes": [
           {
             "name": "payloadType",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_payload_profile_attr_payloadtype"
           },
           {
             "name": "missionClass",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_payload_profile_attr_missionclass"
           },
           {
             "name": "capacityDescriptor",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_payload_profile_attr_capacitydescriptor"
           },
           {
             "name": "frequencyBand",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_payload_profile_attr_frequencyband"
           },
           {
             "name": "coverageRegion",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_payload_profile_attr_coverageregion"
           },
           {
             "name": "designLifeYears",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_payload_profile_attr_designlifeyears"
           },
           {
             "name": "operatorOrgId",
             "font": {
               "size": 11
-            }
+            },
+            "id": "satellite_world_simple_structure_payload_profile_attr_operatororgid"
           }
         ],
         "position": {
@@ -542,9 +597,9 @@
     ],
     "link": [
       {
-        "id": "rel_simple_001",
-        "sourceClassId": "satellite",
-        "targetClassId": "launch_vehicle",
+        "id": "satellite_world_simple_structure_link_rel_simple_001",
+        "sourceClassId": "satellite_world_simple_structure_satellite",
+        "targetClassId": "satellite_world_simple_structure_launch_vehicle",
         "name": "is launched by",
         "allowSelfLink": false,
         "rendering": {
@@ -569,9 +624,9 @@
         }
       },
       {
-        "id": "rel_simple_002",
-        "sourceClassId": "satellite",
-        "targetClassId": "organization",
+        "id": "satellite_world_simple_structure_link_rel_simple_002",
+        "sourceClassId": "satellite_world_simple_structure_satellite",
+        "targetClassId": "satellite_world_simple_structure_organization",
         "name": "is manufactured by",
         "allowSelfLink": false,
         "rendering": {
@@ -596,9 +651,9 @@
         }
       },
       {
-        "id": "rel_simple_003",
-        "sourceClassId": "satellite",
-        "targetClassId": "tle_set",
+        "id": "satellite_world_simple_structure_link_rel_simple_003",
+        "sourceClassId": "satellite_world_simple_structure_satellite",
+        "targetClassId": "satellite_world_simple_structure_tle_set",
         "name": "is tracked by",
         "allowSelfLink": false,
         "rendering": {
@@ -623,9 +678,9 @@
         }
       },
       {
-        "id": "rel_simple_004",
-        "sourceClassId": "satellite",
-        "targetClassId": "payload_profile",
+        "id": "satellite_world_simple_structure_link_rel_simple_004",
+        "sourceClassId": "satellite_world_simple_structure_satellite",
+        "targetClassId": "satellite_world_simple_structure_payload_profile",
         "name": "carries",
         "allowSelfLink": false,
         "rendering": {
@@ -650,9 +705,9 @@
         }
       },
       {
-        "id": "rel_simple_005",
-        "sourceClassId": "organization",
-        "targetClassId": "payload_profile",
+        "id": "satellite_world_simple_structure_link_rel_simple_005",
+        "sourceClassId": "satellite_world_simple_structure_organization",
+        "targetClassId": "satellite_world_simple_structure_payload_profile",
         "name": "operates",
         "allowSelfLink": false,
         "rendering": {
@@ -677,9 +732,9 @@
         }
       },
       {
-        "id": "rel_simple_006",
-        "sourceClassId": "hc_satellite_catalog",
-        "targetClassId": "hc_orbit_payload",
+        "id": "satellite_world_simple_structure_link_rel_simple_006",
+        "sourceClassId": "satellite_world_simple_structure_hc_satellite_catalog",
+        "targetClassId": "satellite_world_simple_structure_hc_orbit_payload",
         "name": "supplies context for",
         "allowSelfLink": false,
         "rendering": {
@@ -704,9 +759,9 @@
         }
       },
       {
-        "id": "rel_simple_007",
-        "sourceClassId": "satellite",
-        "targetClassId": "organization",
+        "id": "satellite_world_simple_structure_link_rel_simple_007",
+        "sourceClassId": "satellite_world_simple_structure_satellite",
+        "targetClassId": "satellite_world_simple_structure_organization",
         "name": "is operated by",
         "allowSelfLink": false,
         "rendering": {
@@ -731,9 +786,9 @@
         }
       },
       {
-        "id": "rel_simple_008",
-        "sourceClassId": "satellite",
-        "targetClassId": "organization",
+        "id": "satellite_world_simple_structure_link_rel_simple_008",
+        "sourceClassId": "satellite_world_simple_structure_satellite",
+        "targetClassId": "satellite_world_simple_structure_organization",
         "name": "is owned by",
         "allowSelfLink": false,
         "rendering": {
@@ -758,9 +813,9 @@
         }
       },
       {
-        "id": "rel_simple_009",
-        "sourceClassId": "launch_vehicle",
-        "targetClassId": "organization",
+        "id": "satellite_world_simple_structure_link_rel_simple_009",
+        "sourceClassId": "satellite_world_simple_structure_launch_vehicle",
+        "targetClassId": "satellite_world_simple_structure_organization",
         "name": "is provided by",
         "allowSelfLink": false,
         "rendering": {
@@ -785,9 +840,9 @@
         }
       },
       {
-        "id": "rel_simple_010",
-        "sourceClassId": "organization",
-        "targetClassId": "launch_vehicle",
+        "id": "satellite_world_simple_structure_link_rel_simple_010",
+        "sourceClassId": "satellite_world_simple_structure_organization",
+        "targetClassId": "satellite_world_simple_structure_launch_vehicle",
         "name": "procures launch with",
         "allowSelfLink": false,
         "rendering": {
@@ -812,9 +867,9 @@
         }
       },
       {
-        "id": "rel_simple_011",
-        "sourceClassId": "payload_profile",
-        "targetClassId": "tle_set",
+        "id": "satellite_world_simple_structure_link_rel_simple_011",
+        "sourceClassId": "satellite_world_simple_structure_payload_profile",
+        "targetClassId": "satellite_world_simple_structure_tle_set",
         "name": "is characterized by",
         "allowSelfLink": false,
         "rendering": {
@@ -839,9 +894,9 @@
         }
       },
       {
-        "id": "rel_simple_012",
-        "sourceClassId": "launch_vehicle",
-        "targetClassId": "payload_profile",
+        "id": "satellite_world_simple_structure_link_rel_simple_012",
+        "sourceClassId": "satellite_world_simple_structure_launch_vehicle",
+        "targetClassId": "satellite_world_simple_structure_payload_profile",
         "name": "deploys",
         "allowSelfLink": false,
         "rendering": {
@@ -866,9 +921,9 @@
         }
       },
       {
-        "id": "rel_simple_013",
-        "sourceClassId": "hc_orbit_payload",
-        "targetClassId": "satellite",
+        "id": "satellite_world_simple_structure_link_rel_simple_013",
+        "sourceClassId": "satellite_world_simple_structure_hc_orbit_payload",
+        "targetClassId": "satellite_world_simple_structure_satellite",
         "name": "describes orbital state of",
         "allowSelfLink": false,
         "rendering": {
