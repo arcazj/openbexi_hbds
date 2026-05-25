@@ -1,34 +1,57 @@
 # HBDS Graphic Simulator
 
-An interactive browser-based simulator for **Hypergraph-Based Data Structures (HBDS)**. The app renders HBDS models as editable 2D diagrams and optional 3D scenes using Three.js.
+An interactive browser-based simulator for **Hypergraph-Based Data Structures (HBDS)**. The app renders HBDS models as editable 2D diagrams and optional 3-D scenes using Three.js.
 
-[Live Demo to go throught diferrent model](https://arcazj.github.io/openbexi_hbds/index.html)
+[Live demo for viewing models](https://arcazj.github.io/openbexi_hbds/index.html)
 
 ![HBDS Bridge and road model](pictures/HBDS_Model.JPG)
 
-[Live Demo to build a new HDBS model](https://arcazj.github.io/openbexi_hbds/test_dynamic_hbds_layout.html)
-![HDBS builder Lab](pictures/HBDS_LAB.PNG)
+[Live demo for building a new HBDS model](https://arcazj.github.io/openbexi_hbds/test_dynamic_hbds_layout.html)
+
+![HBDS builder Lab](pictures/HBDS_LAB.PNG)
+
+## Recent Updates
+
+This week the project added a larger local-server workflow and collaboration surface:
+
+* **Application shell**: `index.html` now provides Models, Edit, Tests, and Help views from one menu.
+* **Server connection indicator**: the menu bar shows connected, connecting, and not connected states while polling the local Python server.
+* **Readable API documentation**: `GET /api/docs` renders browser-readable API documentation from the OpenAPI spec.
+* **OpenAPI specification**: `GET /api/openapi.json` remains available for tools and clients that need machine-readable API metadata.
+* **Automatic manifests**: `models/models_manifest.json` and `test_models/test_models_manifest.json` are regenerated every time `server.py` starts.
+* **Scoped test-model saving**: saves from the Tests workspace use `./test_models/`.
+* **Model operations API**: element-level operations can be applied through the server with revision checks and automatic merge for simple non-conflicting stale edits.
+* **Live collaboration**: Edit and Tests views publish live draft state over Server-Sent Events and show other users in a floating collaboration panel.
+* **Collaboration conflict choices**: users can choose `Merge Both`, `Use Theirs`, or `Keep Mine` before saving over another active edit.
+* **Collaboration preview**: the floating panel is draggable, resizable, zoomable, and shows the selected user's diagram without taking over the canvas.
+* **Detailed remote changes**: `Remote changes vs mine` reports class/hyperclass movement, attributes, links, rendering properties, route changes, and per-change timestamps.
+* **Per-change timestamp history**: older remote changes keep their first-seen time when later remote updates arrive.
+* **Models view cleanup**: Models mode is read-focused and keeps model selection, 3-D view, fit, zoom, and overview behavior without edit/save controls.
+* **Editing cleanup**: attribute deletion has a dedicated button, and selected link deletion now uses explicit link text.
+* **Regression coverage**: the smoke suite now checks health, OpenAPI, manifests, drafts, events, presence, scoped saves, operation merge, stale conflicts, and server shutdown.
 
 ## Features
 
-* **2D and 3D views**: Switch between an editable 2D canvas and an orbitable 3D view.
-* **Sample model library**: Load predefined JSON models from the `models/` directory.
-* **Class, hyperclass, and link rendering**: Visualize nested hyperclasses, attributes, and relationships between classes.
-* **Direct manipulation**: Drag classes and hyperclasses in editable mode.
-* **Layout tools**: Fit models to the canvas and optimize placement with `grid`, `hierarchy`, or `radial` layout algorithms.
-* **Overview minimap**: Navigate larger models with the built-in model overview.
-* **Model export**: Save the current scene as a JSON file.
-* **Optional local API server**: Load and save `models/` JSON files through the Python backend when it is running.
-* **Dynamic layout test page**: Use `test_dynamic_hbds_layout.html` to add, delete, link, and export model elements during development.
+* **2-D and 3-D views**: switch between an editable 2-D canvas and an orbitable 3-D view.
+* **Models, Edit, and Tests workspaces**: use Models for read-focused viewing, Edit for model editing, and Tests for regression/test models.
+* **Class, hyperclass, attribute, and link rendering**: visualize nested hyperclasses, attributes, and relationships between classes.
+* **Direct manipulation**: drag classes and hyperclasses in editable mode.
+* **Layout tools**: fit models to the canvas and optimize placement with `grid`, `hierarchy`, or `radial` layout algorithms where editing is enabled.
+* **Overview minimap**: navigate larger models with the built-in model overview.
+* **Model export and server save**: download JSON locally or save through the Python server when connected.
+* **Live collaboration UI**: see other connected users, inspect their live draft, review remote differences, and choose how to resolve save conflicts.
+* **Local model API**: load, save, draft, stream, and merge model changes through the Python backend.
+* **Dynamic layout test page**: use `test_dynamic_hbds_layout.html` to add, delete, link, test, and export model elements during development.
 
 ## Built With
 
 * [Three.js](https://threejs.org/)
 * Plain HTML, CSS, and JavaScript ES modules
+* Python standard library server for local API mode
 
 ## Getting Started
 
-The simulator runs entirely in the browser, but it must be served from a local web server. Opening `index.html` directly with the `file://` protocol will not work reliably because the app uses ES modules and loads JSON model files.
+The simulator must be served from a local web server. Opening `index.html` directly with the `file://` protocol will not work reliably because the app uses ES modules and loads JSON model files.
 
 ### Prerequisites
 
@@ -37,7 +60,7 @@ Use a modern browser and one of the following local server options:
 * Python 3
 * Any static file server that serves this repository root
 
-### Run Locally
+### Run Static Mode
 
 ```sh
 git clone https://github.com/arcazj/openbexi_hbds.git
@@ -47,7 +70,7 @@ python -m http.server 8000
 
 Then open:
 
-* Main simulator: `http://localhost:8000/`
+* Main shell: `http://localhost:8000/`
 * Dynamic layout test page: `http://localhost:8000/test_dynamic_hbds_layout.html`
 
 On systems where `python` points to Python 2, use:
@@ -56,86 +79,173 @@ On systems where `python` points to Python 2, use:
 python3 -m http.server 8000
 ```
 
-### Run With Model Save/Load API
+Static mode can view and edit in the browser, but server save/load, API docs, connection status, and collaboration require `server.py`.
 
-The connected mode uses the included Python server. It serves the UI and exposes the model API used by the connection indicator, server model selector, and server save action.
+### Run Connected Server Mode
+
+The connected mode uses the included Python server. It serves the UI, refreshes manifests at startup, and exposes model, documentation, event, draft, and operation APIs.
 
 ```sh
 python server.py --port 8010
 ```
 
-On Windows with the Python launcher, use `py -3 server.py --port 8010`.
+On Windows with the Python launcher:
 
-Then open `http://127.0.0.1:8010/index.html`.
+```sh
+py server.py --port 8010
+```
 
-API endpoints:
+Then open:
+
+```text
+http://127.0.0.1:8010/index.html
+```
+
+When overwriting an existing model, the server writes a timestamped backup under the matching `.backups/` directory before replacing the file.
+
+## Workspaces
+
+The main shell has four menu entries:
+
+* **Models**: read-focused model viewer. It keeps model selection, 3-D toggle, fit, zoom, and overview behavior. Save and layout-edit controls are hidden.
+* **Edit**: editable workspace for files from `models/`.
+* **Tests**: editable workspace for files from `test_models/`; server saves stay under `./test_models/`.
+* **Help**: project help, API documentation links, and keyboard help.
+
+## Collaboration
+
+Live collaboration is available in Edit and Tests when the Python server is running.
+
+* Each browser tab or external client can publish live draft state.
+* The floating panel appears only when another user is connected to the same model and has relevant state.
+* The panel shows `Live Collaboration`, `Others' View`, the number of connected users for the current model, and a collaborator dropdown.
+* The panel can be moved, resized, and zoomed.
+* `Remote changes vs mine` is scrollable and reports detailed property-level differences.
+* Each remote change keeps its first-seen timestamp; later remote updates do not rewrite older change times.
+* Save conflict actions:
+  * `Merge Both` combines non-conflicting changes.
+  * `Use Theirs` applies the selected remote diagram.
+  * `Keep Mine` keeps the local diagram and saves it.
+
+The current merge support handles simple element-level, non-conflicting edits. More complex simultaneous edits can still require manual choice.
+
+## API
+
+Connected mode exposes these main endpoints:
 
 * `GET /api/health` - connection status for the menu bar.
 * `GET /api/models` - list JSON models in `models/`.
 * `GET /api/models/{modelName}` - load one model from `models/`.
 * `POST /api/models/{modelName}` - validate and save one model into `models/`.
-* `GET /api/openapi.json` - OpenAPI specification.
+* `POST /api/models/{modelName}/ops` - apply element-level model operations with revision checks.
+* `GET /api/models/{modelName}/drafts` - list live drafts for one model.
+* `POST /api/models/{modelName}/drafts/{clientId}` - publish one client's live model draft.
+* `DELETE /api/models/{modelName}/drafts/{clientId}` - clear one client's live draft.
+* `GET /api/model-files/{scope}/{modelName}` - load a model from `models` or `test_models`.
+* `POST /api/model-files/{scope}/{modelName}` - save a scoped model file; scoped saving is enabled for `test_models`.
+* `GET /api/drafts/{scope}/{modelName}` - list scoped live drafts.
+* `POST /api/drafts/{scope}/{modelName}/clients/{clientId}` - publish a scoped live draft.
+* `DELETE /api/drafts/{scope}/{modelName}/clients/{clientId}` - clear a scoped live draft.
+* `GET /api/events` - Server-Sent Events stream for presence, model updates, draft updates, and draft clears.
 * `GET /api/docs` - browser-readable API documentation.
+* `GET /api/openapi.json` - machine-readable OpenAPI specification.
 
-When overwriting an existing model, the server writes a timestamped backup under `models/.backups/` before replacing the file.
+## Models And Manifests
 
-Run the server regression smoke test with:
+Models live in two directories:
+
+* `models/` - standard/sample models.
+* `test_models/` - regression and test models used by the Tests workspace.
+
+The Python server automatically regenerates both manifests on startup:
+
+* `models/models_manifest.json`
+* `test_models/test_models_manifest.json`
+
+Manifest entries are built from the `.json` files present in each directory. Hidden files and manifest files are skipped. For each model:
+
+* `value` is the relative path, for example `models/bridge_road_links.json`.
+* `label` is derived from the filename without `.json`, with `_` and `-` replaced by spaces.
+* `description` matches the label.
+
+When running with `server.py`, adding or removing a model file only requires restarting the server to refresh the manifests.
+
+## Usage
+
+* **Select a HBDS Model** to load a sample or test model.
+* **Enable 3-D View** to rotate the scene with the mouse.
+* **Fit Model** recenters and zooms the camera around the current model.
+* **Zoom** with the mouse wheel or trackpad.
+* **Pan** with right-click drag or two-finger trackpad drag.
+* **Rotate** in 3-D mode with left-click drag.
+* **Move nodes** in editable 2-D mode by dragging a class or hyperclass.
+* **Add elements** in Edit or Tests with Hyperclass, Class, Attribute, and Link controls.
+* **Delete Attribute** removes the selected attribute without deleting its owning class.
+* **Delete selected link** removes the selected link when a link is selected.
+* **Save** writes to the active workspace in connected mode or downloads JSON in browser-only mode.
+
+## Testing
+
+Run the server regression smoke test:
 
 ```sh
 python scripts/smoke_server.py
 ```
 
-On Windows with the Python launcher, use `py -3 scripts/smoke_server.py`.
-
-## Usage
-
-* **Select a model** from the control panel to load a sample from `models/`.
-* **Enable 3-D View** to rotate the scene with the mouse.
-* **Editable mode** controls whether model nodes can be dragged.
-* **Optimize Layout** recalculates node placement with the selected layout algorithm.
-* **Fit Model** recenters and zooms the camera around the current model.
-* **Save Model** downloads the current HBDS graph as JSON.
-
-Navigation:
-
-* **Pan**: Right-click and drag, or use a two-finger trackpad drag.
-* **Zoom**: Use the mouse wheel or trackpad scroll.
-* **Rotate**: In 3D mode, left-click and drag.
-* **Move nodes**: In 2D editable mode, left-click and drag a class or hyperclass.
-
-## Models
-
-Models live in the `models/` directory as JSON files. The main page discovers its models from `models/models_manifest.json` at runtime.
-
-When adding a new model for the main simulator:
-
-1. Add the JSON file under `models/`.
-2. Add an entry to `models/models_manifest.json`.
-3. Serve the app locally and verify the model loads.
-
-You can validate model manifest integrity with:
+On Windows with the Python launcher:
 
 ```sh
-python3 tools/validate_manifests.py
+py scripts/smoke_server.py
 ```
 
-You can lint naming consistency (HBDS/HDBS labels, spaced values, missing files) with:
+The smoke test starts a temporary server port and verifies:
+
+* health and disconnected states
+* OpenAPI generation
+* automatic manifest generation
+* model list/load/save
+* revision conflict handling
+* Server-Sent Events
+* presence
+* live draft state
+* scoped `test_models` save/load
+* operation updates
+* stale operation automatic merge
+* stale operation and stale save conflicts
+
+Optional model checks:
 
 ```sh
-python3 tools/lint_model_naming.py
+python tools/validate_manifests.py
+python tools/lint_model_naming.py
 ```
+
+On systems where Maven is installed, Java tests can be run with:
+
+```sh
+mvn test
+```
+
+This repository currently does not include a Maven wrapper, so `mvn` must be installed separately.
 
 ## Project Structure
 
 ```text
 .
-|-- css/                         # Application styles
-|-- js/                          # HBDS rendering, model, layout, and link modules
-|-- models/                      # Sample HBDS JSON models
-|-- pictures/                    # README and project images
-|-- index.html                   # Main simulator
-|-- test_dynamic_hbds_layout.html # Development/test UI for dynamic edits
-`-- pom.xml                      # Java/Maven scaffold, not required for the browser app
+|-- css/                           # Application styles
+|-- icons/                         # Shell and menu icons
+|-- images/                        # Model/image assets
+|-- js/                            # HBDS rendering, model, layout, server, and collaboration modules
+|-- models/                        # Standard/sample HBDS JSON models
+|-- test_models/                   # Regression and test HBDS JSON models
+|-- pictures/                      # README and project images
+|-- scripts/smoke_server.py        # Server regression smoke suite
+|-- tools/                         # Manifest and naming validation helpers
+|-- index.html                     # Main shell: Models, Edit, Tests, Help
+|-- index_models.html              # Models viewer
+|-- test_dynamic_hbds_layout.html  # Editable dynamic layout/test UI
+|-- server.py                      # Local UI/API/collaboration server
+`-- pom.xml                        # Java/Maven scaffold, not required for the browser app
 ```
 
 ## Roadmap
@@ -143,8 +253,8 @@ python3 tools/lint_model_naming.py
 * [ ] Expand hyperclass editing workflows.
 * [ ] Add richer relationship editing between hyperclasses and classes.
 * [ ] Implement search or filtering for classes and attributes.
-* [ ] Add model validation feedback in the UI.
-* [ ] Move the main model selector to manifest-based discovery.
+* [ ] Add stronger visual conflict resolution for complex simultaneous edits.
+* [ ] Add a committed Maven wrapper so Java tests can run without a global Maven install.
 
 See the [open issues](https://github.com/arcazj/openbexi_hbds/issues) for proposed features and known issues.
 
