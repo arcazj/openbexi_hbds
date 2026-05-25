@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Dynamic Layout Test</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=collab-colors-20260525a">
+  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=export-snapshot-20260525a">
   <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -65,12 +65,20 @@
       <div class="stat"><span class="stat-value" id="stat-link-count">0</span><span class="stat-label" id="stat-link-label">links</span></div>
     </div>
     <div id="validation-status" class="status-chip">No model loaded</div>
+    <div id="save-status" class="status-chip save-status">Saved</div>
 
     <section class="control-group" data-default-open="true" data-section="scenario-suite">
       <div class="section-title">Scenario Suite</div>
       <button id="run-scenario-suite-button" type="button" class="quiet">Run Scenario Suite</button>
       <div id="scenario-status" class="status-chip">Scenario suite idle</div>
     </section>
+
+    <details class="control-group" data-section="validation" open>
+      <summary><span class="section-title">Validation</span></summary>
+      <div class="details-body">
+        <div id="validation-issues" class="validation-issues" aria-live="polite">No model loaded</div>
+      </div>
+    </details>
 
     <section class="control-group" data-default-open="true">
       <div class="section-title">Model</div>
@@ -163,6 +171,24 @@
       </div>
     </details>
 
+    <section class="control-group" data-section="share">
+      <div class="section-title">Share</div>
+      <div id="share-local-warning" class="section-meta"></div>
+      <div class="action-grid share-actions">
+        <button id="copy-share-link-button" type="button">Copy Link</button>
+        <button id="share-native-button" type="button">Share</button>
+        <button id="export-png-button" type="button">PNG Snapshot</button>
+        <button id="export-svg-button" type="button">SVG Snapshot</button>
+        <button id="export-vector-svg-button" type="button">SVG Vector</button>
+      </div>
+      <div class="action-grid share-actions">
+        <button id="share-email-button" type="button">Email</button>
+        <button id="share-linkedin-button" type="button">LinkedIn</button>
+        <button id="share-facebook-button" type="button">Facebook</button>
+        <button id="share-x-button" type="button">X</button>
+      </div>
+    </section>
+
     <section class="control-group" data-default-open="true">
       <div class="section-title">Session</div>
       <div class="control-row">
@@ -174,7 +200,14 @@
   </aside>
 
   <div id="toast" role="status" aria-live="polite"></div>
+  <div id="command-palette" class="command-palette" role="dialog" aria-modal="true" aria-labelledby="command-palette-title" hidden>
+    <div class="command-palette-panel">
+      <label id="command-palette-title" for="command-palette-input">Command</label>
+      <input id="command-palette-input" type="text" autocomplete="off" placeholder="Search actions">
+      <div id="command-palette-list" class="command-palette-list" role="listbox"></div>
+    </div>
+  </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=material-surface-20260525a"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=export-snapshot-20260525a"></script>
 </body>
 </html>

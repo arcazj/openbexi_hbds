@@ -86,6 +86,7 @@ let selectedRemoteClientId = '';
 let draftPublishTimer = null;
 let localDraftModelName = '';
 let localDraftDirty = false;
+let savedSnapshotKey = '';
 let collaborationBaseModel = null;
 let collaborationWarningVisible = false;
 let collaborationPreviewZoom = 1;
@@ -109,6 +110,9 @@ let sceneLights = {};
 let propertyPanelTargetKey = null;
 let propertyPanelOpenSection = null;
 let nextInspectorListId = 1;
+let commandPaletteOpen = false;
+let commandPaletteActiveIndex = 0;
+let commandPaletteVisibleCommands = [];
 
 const CLASS_COLORS = [
   { fill: '#ffd166', border: '#7a4f00' },
@@ -1042,11 +1046,79 @@ function setStatus(message, tone = 'ok') {
   status.textContent = message;
 }
 
+function validationIssueTargetId(message) {
+  const text = String(message || '');
+  const patterns = [
+    /\b(?:class|hyperclass)\s+([A-Za-z0-9_.:-]+)/i,
+    /\bfor\s+([A-Za-z0-9_.:-]+)\s*$/i,
+    /\bsource\s+([A-Za-z0-9_.:-]+)/i,
+    /\btarget\s+([A-Za-z0-9_.:-]+)/i,
+    /\bid\s+([A-Za-z0-9_.:-]+)/i
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    const candidate = match?.[1]?.replace(/[.,;:)]$/, '');
+    if (candidate && nodeById(candidate)) return candidate;
+  }
+  return '';
+}
+
+function renderValidationIssueList(result, nodeCount) {
+  const list = $('validation-issues');
+  if (!list) return;
+  list.innerHTML = '';
+
+  if (!nodeCount) {
+    list.textContent = 'No model loaded';
+    return;
+  }
+
+  const issues = [
+    ...(result.errors || []).map(message => ({ tone: 'error', label: 'Error', message })),
+    ...(result.warnings || []).map(message => ({ tone: 'warn', label: 'Warning', message }))
+  ];
+
+  if (!issues.length) {
+    const empty = document.createElement('div');
+    empty.className = 'validation-empty';
+    empty.textContent = 'No validation issues';
+    list.appendChild(empty);
+    return;
+  }
+
+  for (const issue of issues) {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = `validation-issue ${issue.tone}`;
+    const targetId = validationIssueTargetId(issue.message);
+    if (targetId) {
+      item.dataset.validationTarget = targetId;
+      item.title = `Select ${targetId}`;
+    } else {
+      item.disabled = true;
+      item.title = 'No matching canvas element';
+    }
+
+    const kind = document.createElement('span');
+    kind.className = 'validation-issue-kind';
+    kind.textContent = issue.label;
+
+    const text = document.createElement('span');
+    text.className = 'validation-issue-text';
+    text.textContent = String(issue.message);
+
+    item.append(kind, text);
+    list.appendChild(item);
+  }
+}
+
 function updateValidationStatus() {
   const status = $('validation-status');
   const nodeCount = nodes().length;
   const result = validateData(getData());
+  if (!status) return;
   status.className = 'status-chip';
+  renderValidationIssueList(result, nodeCount);
 
   if (!nodeCount) {
     status.textContent = 'No model loaded';
@@ -1377,6 +1449,7 @@ function updateInterface(options = {}) {
     updateLinkBuilderStatus();
     updateModeControls();
     updateCanvasTitle();
+    updateSaveStatus();
     return;
   }
   updateSmartMenusFromData();
@@ -1392,6 +1465,8 @@ function updateInterface(options = {}) {
   applySelectionHighlight();
   updateModelSummary();
   updateCanvasTitle();
+  updateSharePanel();
+  updateSaveStatus();
   if (options.json !== false) updateJsonPreviewFromData();
   updateRenderDiagnostics();
 }
@@ -1413,6 +1488,673 @@ function cloneValue(value) {
 
 function isPlainObject(value) {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function modelSnapshotKey() {
+  try {
+    return JSON.stringify({
+      model: getData(),
+      scene: getSceneSettings(),
+      layout: getLayoutSettings(),
+      font: getFontSettings()
+    });
+  } catch (error) {
+    return String(Date.now());
+  }
+}
+
+function updateSaveStatus() {
+  const chip = $('save-status');
+  if (!chip) return;
+  const dirty = Boolean(savedSnapshotKey && modelSnapshotKey() !== savedSnapshotKey);
+  chip.className = 'status-chip save-status';
+  chip.classList.add(dirty ? 'warn' : 'ok');
+  chip.textContent = dirty ? 'Unsaved changes' : 'Saved';
+  const saveButton = $('save-model-button');
+  if (saveButton) {
+    saveButton.textContent = dirty ? 'Save Changes' : 'Save';
+    saveButton.title = dirty ? 'Save current model changes' : 'Current model matches the last saved or loaded state';
+  }
+}
+
+function markSavedState() {
+  savedSnapshotKey = modelSnapshotKey();
+  localDraftDirty = false;
+  updateSaveStatus();
+}
+
+function sanitizeDownloadStem(value) {
+  return String(value || 'hbds_model')
+    .replace(/\.json$/i, '')
+    .replace(/[^a-z0-9_-]+/gi, '_')
+    .replace(/^_+|_+$/g, '') || 'hbds_model';
+}
+
+function selectedModelFileName(fallback = 'hbds_model.json') {
+  const value = $('test-model-select')?.value || '';
+  return modelFileNameFromValue(value, fallback);
+}
+
+function selectedModelTitle() {
+  const select = $('test-model-select');
+  const option = select?.selectedOptions?.[0];
+  return option?.textContent?.trim() || 'HBDS model';
+}
+
+function currentDownloadStem() {
+  return sanitizeDownloadStem(selectedModelFileName('hbds_model.json') || selectedModelTitle());
+}
+
+function downloadTextFile(fileName, contents, mimeType) {
+  const blob = new Blob([contents], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function downloadDataUrl(fileName, dataUrl) {
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+function diagramExportStyle() {
+  return `
+    .collaboration-diagram-bg { fill: #f8fafc; stroke: #d8e2ef; stroke-width: 1; }
+    .collaboration-diagram-link { stroke-linecap: round; opacity: 0.86; }
+    .collaboration-diagram-link.is-selected { stroke: #e11d48; stroke-width: 3.2; }
+    .collaboration-diagram-node-body { stroke-width: 2; }
+    .collaboration-diagram-node.is-selected .collaboration-diagram-node-body { stroke: #e11d48; stroke-width: 3; }
+    .collaboration-diagram-title { font: 600 13px Arial, sans-serif; dominant-baseline: middle; }
+    .collaboration-diagram-attribute-label,
+    .collaboration-diagram-attribute-more { font: 11px Arial, sans-serif; fill: #475569; }
+    .collaboration-diagram-attribute-count text { font: 600 10px Arial, sans-serif; fill: #ffffff; text-anchor: middle; }
+  `;
+}
+
+function buildVectorDiagramSvgText(options = {}) {
+  const html = renderDraftDiagramSvg(getData(), {
+    selection: getDraftSelection(),
+    width: options.width ?? 960,
+    height: options.height ?? 640,
+    zoom: options.zoom ?? 1.15,
+    dense: options.dense
+  });
+  const template = document.createElement('template');
+  template.innerHTML = html.trim();
+  const svg = template.content.querySelector('svg');
+  if (!svg) throw new Error('No diagram content to export');
+  const clone = svg.cloneNode(true);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('role', 'img');
+  clone.setAttribute('aria-label', selectedModelTitle());
+  const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+  title.textContent = selectedModelTitle();
+  const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+  style.textContent = diagramExportStyle();
+  clone.insertBefore(style, clone.firstChild);
+  clone.insertBefore(title, clone.firstChild);
+  return `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(clone)}`;
+}
+
+function getLiveSnapshotMetrics() {
+  const canvas = renderer?.domElement;
+  if (!canvas) throw new Error('Renderer is not ready');
+  const rect = canvas.getBoundingClientRect();
+  const cssWidth = Math.max(1, Math.round(rect.width));
+  const cssHeight = Math.max(1, Math.round(rect.height));
+  const pixelWidth = Math.max(1, canvas.width || cssWidth);
+  const pixelHeight = Math.max(1, canvas.height || cssHeight);
+  return {
+    cssWidth,
+    cssHeight,
+    pixelWidth,
+    pixelHeight,
+    scaleX: pixelWidth / cssWidth,
+    scaleY: pixelHeight / cssHeight
+  };
+}
+
+function liveCanvasDataUrl() {
+  renderOnce();
+  return renderer.domElement.toDataURL('image/png');
+}
+
+function copyComputedSnapshotStyles(source, target) {
+  const computed = window.getComputedStyle(source);
+  const properties = [
+    'position',
+    'display',
+    'left',
+    'top',
+    'right',
+    'bottom',
+    'width',
+    'height',
+    'transform',
+    'transform-origin',
+    'opacity',
+    'visibility',
+    'box-sizing',
+    'color',
+    'background',
+    'background-color',
+    'border',
+    'border-radius',
+    'box-shadow',
+    'outline',
+    'outline-offset',
+    'padding',
+    'margin',
+    'font',
+    'font-family',
+    'font-size',
+    'font-weight',
+    'font-style',
+    'line-height',
+    'letter-spacing',
+    'text-align',
+    'text-decoration',
+    'text-transform',
+    'white-space',
+    'overflow',
+    'overflow-wrap',
+    'word-break',
+    'max-width',
+    'min-width',
+    'pointer-events',
+    'z-index'
+  ];
+  for (const property of properties) {
+    const value = computed.getPropertyValue(property);
+    if (value) target.style.setProperty(property, value);
+  }
+}
+
+function inlineComputedSnapshotStyles(sourceRoot, cloneRoot) {
+  copyComputedSnapshotStyles(sourceRoot, cloneRoot);
+  const sources = sourceRoot.querySelectorAll('*');
+  const clones = cloneRoot.querySelectorAll('*');
+  sources.forEach((source, index) => {
+    const clone = clones[index];
+    if (clone) copyComputedSnapshotStyles(source, clone);
+  });
+}
+
+function isSnapshotElementVisible(element, containerRect) {
+  const computed = window.getComputedStyle(element);
+  if (computed.display === 'none' || computed.visibility === 'hidden' || Number(computed.opacity) === 0) return false;
+  const rect = element.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return false;
+  return rect.right >= containerRect.left &&
+    rect.left <= containerRect.right &&
+    rect.bottom >= containerRect.top &&
+    rect.top <= containerRect.bottom;
+}
+
+function cloneLiveLabelLayerForSnapshot(metrics) {
+  const container = $('container');
+  const containerRect = container.getBoundingClientRect();
+  const layer = document.createElement('div');
+  layer.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+  layer.style.position = 'relative';
+  layer.style.width = `${metrics.cssWidth}px`;
+  layer.style.height = `${metrics.cssHeight}px`;
+  layer.style.overflow = 'hidden';
+  layer.style.pointerEvents = 'none';
+  layer.style.margin = '0';
+  layer.style.padding = '0';
+  layer.style.fontFamily = window.getComputedStyle(container).fontFamily;
+
+  const sourceLabels = [...(labelRenderer?.domElement?.children || [])]
+    .filter(element => isSnapshotElementVisible(element, containerRect));
+  for (const source of sourceLabels) {
+    const clone = source.cloneNode(true);
+    inlineComputedSnapshotStyles(source, clone);
+    layer.appendChild(clone);
+  }
+
+  const canvasTitle = $('canvas-model-title');
+  if (canvasTitle && isSnapshotElementVisible(canvasTitle, containerRect)) {
+    const titleClone = canvasTitle.cloneNode(true);
+    inlineComputedSnapshotStyles(canvasTitle, titleClone);
+    titleClone.style.position = 'absolute';
+    layer.appendChild(titleClone);
+  }
+
+  return layer;
+}
+
+function buildLiveSnapshotSvgText() {
+  setSceneSettings(lightingState, { applyContext: false });
+  const metrics = getLiveSnapshotMetrics();
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  svg.setAttribute('width', String(metrics.pixelWidth));
+  svg.setAttribute('height', String(metrics.pixelHeight));
+  svg.setAttribute('viewBox', `0 0 ${metrics.cssWidth} ${metrics.cssHeight}`);
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', `${selectedModelTitle()} canvas snapshot`);
+
+  const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+  title.textContent = `${selectedModelTitle()} canvas snapshot`;
+  svg.appendChild(title);
+
+  const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+  image.setAttribute('x', '0');
+  image.setAttribute('y', '0');
+  image.setAttribute('width', String(metrics.cssWidth));
+  image.setAttribute('height', String(metrics.cssHeight));
+  image.setAttribute('preserveAspectRatio', 'none');
+  image.setAttribute('href', liveCanvasDataUrl());
+  svg.appendChild(image);
+
+  const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+  foreignObject.setAttribute('x', '0');
+  foreignObject.setAttribute('y', '0');
+  foreignObject.setAttribute('width', String(metrics.cssWidth));
+  foreignObject.setAttribute('height', String(metrics.cssHeight));
+  foreignObject.appendChild(cloneLiveLabelLayerForSnapshot(metrics));
+  svg.appendChild(foreignObject);
+
+  return {
+    text: `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(svg)}`,
+    metrics
+  };
+}
+
+async function rasterizeSnapshotSvgToPng(svgText, metrics) {
+  const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  try {
+    const image = new Image();
+    const loaded = new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error('Could not render live snapshot SVG'));
+    });
+    image.src = url;
+    await loaded;
+    const canvas = document.createElement('canvas');
+    canvas.width = metrics.pixelWidth;
+    canvas.height = metrics.pixelHeight;
+    const canvasContext = canvas.getContext('2d');
+    canvasContext.drawImage(image, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/png');
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function parseCssPixelValue(value) {
+  const number = Number.parseFloat(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function cssColorHasPaint(value) {
+  const color = String(value || '').trim().toLowerCase();
+  return Boolean(color && color !== 'transparent' && color !== 'rgba(0, 0, 0, 0)' && color !== 'rgba(0,0,0,0)');
+}
+
+function drawRoundedRectPath(canvasContext, x, y, width, height, radius) {
+  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+  canvasContext.beginPath();
+  canvasContext.moveTo(x + r, y);
+  canvasContext.lineTo(x + width - r, y);
+  canvasContext.quadraticCurveTo(x + width, y, x + width, y + r);
+  canvasContext.lineTo(x + width, y + height - r);
+  canvasContext.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  canvasContext.lineTo(x + r, y + height);
+  canvasContext.quadraticCurveTo(x, y + height, x, y + height - r);
+  canvasContext.lineTo(x, y + r);
+  canvasContext.quadraticCurveTo(x, y, x + r, y);
+  canvasContext.closePath();
+}
+
+function drawSnapshotElement(canvasContext, element, containerRect) {
+  const rect = element.getBoundingClientRect();
+  const style = window.getComputedStyle(element);
+  const x = rect.left - containerRect.left;
+  const y = rect.top - containerRect.top;
+  const width = rect.width;
+  const height = rect.height;
+  const radius = parseCssPixelValue(style.borderTopLeftRadius);
+
+  if (cssColorHasPaint(style.backgroundColor)) {
+    canvasContext.fillStyle = style.backgroundColor;
+    drawRoundedRectPath(canvasContext, x, y, width, height, radius);
+    canvasContext.fill();
+  }
+
+  const borderWidth = parseCssPixelValue(style.borderTopWidth);
+  if (borderWidth > 0 && cssColorHasPaint(style.borderTopColor)) {
+    canvasContext.strokeStyle = style.borderTopColor;
+    canvasContext.lineWidth = borderWidth;
+    drawRoundedRectPath(canvasContext, x + borderWidth / 2, y + borderWidth / 2, width - borderWidth, height - borderWidth, radius);
+    canvasContext.stroke();
+  }
+
+  const text = String(element.textContent || '').trim();
+  if (!text) return;
+
+  const paddingLeft = parseCssPixelValue(style.paddingLeft);
+  const paddingRight = parseCssPixelValue(style.paddingRight);
+  const fontSize = parseCssPixelValue(style.fontSize) || 12;
+  const fontStyle = style.fontStyle || 'normal';
+  const fontWeight = style.fontWeight || '400';
+  const fontFamily = style.fontFamily || 'Arial, sans-serif';
+  const textAlign = style.textAlign === 'center' ? 'center' : (style.textAlign === 'right' || style.textAlign === 'end' ? 'right' : 'left');
+  const textX = textAlign === 'center'
+    ? x + width / 2
+    : (textAlign === 'right' ? x + width - paddingRight : x + paddingLeft);
+
+  canvasContext.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+  canvasContext.fillStyle = style.color || '#111827';
+  canvasContext.textAlign = textAlign;
+  canvasContext.textBaseline = 'middle';
+  canvasContext.fillText(text, textX, y + height / 2);
+}
+
+function buildManualLiveSnapshotPngDataUrl(metrics) {
+  renderOnce();
+  const canvas = document.createElement('canvas');
+  canvas.width = metrics.pixelWidth;
+  canvas.height = metrics.pixelHeight;
+  const canvasContext = canvas.getContext('2d');
+  canvasContext.drawImage(renderer.domElement, 0, 0, metrics.pixelWidth, metrics.pixelHeight);
+
+  const container = $('container');
+  const containerRect = container.getBoundingClientRect();
+  canvasContext.save();
+  canvasContext.scale(metrics.scaleX, metrics.scaleY);
+  const labels = [...(labelRenderer?.domElement?.children || [])]
+    .filter(element => isSnapshotElementVisible(element, containerRect));
+  labels.forEach(element => drawSnapshotElement(canvasContext, element, containerRect));
+  const canvasTitle = $('canvas-model-title');
+  if (canvasTitle && isSnapshotElementVisible(canvasTitle, containerRect)) {
+    drawSnapshotElement(canvasContext, canvasTitle, containerRect);
+  }
+  canvasContext.restore();
+  return canvas.toDataURL('image/png');
+}
+
+async function handleExportPng() {
+  const { text, metrics } = buildLiveSnapshotSvgText();
+  let pngDataUrl;
+  try {
+    pngDataUrl = await rasterizeSnapshotSvgToPng(text, metrics);
+  } catch (error) {
+    addLog(`PNG snapshot fallback: ${error?.message || error}`);
+    pngDataUrl = buildManualLiveSnapshotPngDataUrl(metrics);
+  }
+  downloadDataUrl(`${currentDownloadStem()}_snapshot.png`, pngDataUrl);
+  addLog('Exported PNG snapshot');
+  showToast('Exported PNG snapshot');
+}
+
+function handleExportSvg() {
+  const { text } = buildLiveSnapshotSvgText();
+  downloadTextFile(`${currentDownloadStem()}_snapshot.svg`, text, 'image/svg+xml;charset=utf-8');
+  addLog('Exported SVG snapshot');
+  showToast('Exported SVG snapshot');
+}
+
+function handleExportVectorSvg() {
+  setSceneSettings(lightingState, { applyContext: false });
+  downloadTextFile(`${currentDownloadStem()}_vector.svg`, buildVectorDiagramSvgText(), 'image/svg+xml;charset=utf-8');
+  addLog('Exported SVG vector preview');
+  showToast('Exported SVG vector preview');
+}
+
+function isLocalShareHost() {
+  const host = window.location.hostname;
+  return window.location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1' || host === '';
+}
+
+function buildShareUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('runScenarioSuite');
+  url.searchParams.delete('runSatelliteFontRegression');
+  const selected = $('test-model-select')?.value || '';
+  if (selected) {
+    url.searchParams.set('sharedModel', selected);
+  } else {
+    url.searchParams.delete('sharedModel');
+  }
+  return url.toString();
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  textarea.remove();
+}
+
+async function handleCopyShareLink() {
+  const url = buildShareUrl();
+  await copyTextToClipboard(url);
+  addLog('Copied share link');
+  showToast(isLocalShareHost() ? 'Copied local share link' : 'Copied share link');
+}
+
+async function handleNativeShare() {
+  const shareData = {
+    title: selectedModelTitle(),
+    text: `HBDS model: ${selectedModelTitle()}`,
+    url: buildShareUrl()
+  };
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+      addLog('Opened native share');
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+      throw error;
+    }
+  }
+  await handleCopyShareLink();
+}
+
+function openExternalShare(kind) {
+  const url = encodeURIComponent(buildShareUrl());
+  const title = encodeURIComponent(selectedModelTitle());
+  const text = encodeURIComponent(`HBDS model: ${selectedModelTitle()}`);
+  const targets = {
+    email: `mailto:?subject=${title}&body=${text}%0A%0A${url}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+    x: `https://twitter.com/intent/tweet?text=${text}&url=${url}`
+  };
+  const target = targets[kind];
+  if (!target) return;
+  window.open(target, '_blank', 'noopener,noreferrer,width=720,height=620');
+  showToast(isLocalShareHost() ? 'Opened share target with a local link' : 'Opened share target');
+}
+
+function updateSharePanel() {
+  const warning = $('share-local-warning');
+  if (warning) {
+    warning.classList.toggle('share-warning', isLocalShareHost());
+    warning.textContent = isLocalShareHost()
+      ? 'Local links only work on this machine. Host the app before sharing through social media.'
+      : 'Share the current model link or export a portable image.';
+  }
+  const canExportDiagram = nodes().length > 0;
+  ['export-png-button', 'export-svg-button', 'export-vector-svg-button'].forEach(id => {
+    const button = $(id);
+    if (button) button.disabled = !canExportDiagram;
+  });
+}
+
+function selectSharedModelFromUrl() {
+  const requested = new URLSearchParams(window.location.search).get('sharedModel');
+  const select = $('test-model-select');
+  if (!requested || !select) return false;
+  const options = [...select.options];
+  const requestedFileName = modelFileNameFromValue(requested, requested);
+  const match = options.find(option => (
+    option.value === requested ||
+    modelFileNameFromValue(option.value, option.value) === requestedFileName ||
+    option.textContent?.trim() === requested
+  ));
+  if (!match) return false;
+  select.value = match.value;
+  return true;
+}
+
+function openControlSection(sectionKey) {
+  const section = document.querySelector(`.control-group[data-section="${sectionKey}"]`);
+  if (section?.tagName?.toLowerCase() === 'details') section.open = true;
+  section?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+}
+
+function commandPaletteCommands() {
+  const canEdit = editMode !== 'readonly';
+  return [
+    { id: 'add-hyperclass', label: 'Add Hyperclass', keywords: 'builder parent group', enabled: () => canEdit, run: handleAddHyperclass },
+    { id: 'add-class', label: 'Add Class', keywords: 'builder node', enabled: () => canEdit, run: handleAddClass },
+    { id: 'add-attribute', label: 'Add Attribute', keywords: 'field property', enabled: () => canEdit && Boolean(selectedAttributeOwnerId || selectedElementId), run: handleAddAttribute },
+    { id: 'add-link', label: 'Start Link', keywords: 'relationship edge connection', enabled: () => canEdit, run: startLinkCreation },
+    { id: 'delete-selected', label: 'Delete Selected', keywords: 'remove node link', enabled: () => canEdit && Boolean(selectedElementId || selectedLinkId), run: handleDeleteSelected },
+    { id: 'save-model', label: 'Save Model', keywords: 'persist store', run: handleSaveModel },
+    { id: 'fit-view', label: 'Fit View', keywords: 'zoom canvas camera', run: handleFitModel },
+    { id: 'optimize-layout', label: 'Optimize Layout', keywords: 'arrange auto layout', run: handleOptimizeLayout },
+    { id: 'toggle-3d', label: 'Toggle 3-D View', keywords: 'view mode perspective', run: () => { const toggle = $('view-toggle'); if (toggle) { toggle.checked = !toggle.checked; handleViewToggle(); } } },
+    { id: 'copy-share-link', label: 'Copy Share Link', keywords: 'social url clipboard', run: handleCopyShareLink },
+    { id: 'native-share', label: 'Share Model', keywords: 'system share', run: handleNativeShare },
+    { id: 'export-png', label: 'Export PNG Snapshot', keywords: 'image exact canvas snapshot', enabled: () => nodes().length > 0, run: handleExportPng },
+    { id: 'export-svg', label: 'Export SVG Snapshot', keywords: 'exact canvas snapshot raster', enabled: () => nodes().length > 0, run: handleExportSvg },
+    { id: 'export-vector-svg', label: 'Export SVG Vector', keywords: 'editable approximate preview', enabled: () => nodes().length > 0, run: handleExportVectorSvg },
+    { id: 'export-json', label: 'Export JSON', keywords: 'model data download', run: handleExportJson },
+    { id: 'run-scenarios', label: 'Run Scenario Suite', keywords: 'test regression', enabled: () => !HIDE_SCENARIO_SUITE, run: runScenarioSuite },
+    { id: 'open-validation', label: 'Open Validation', keywords: 'errors warnings issues', run: () => openControlSection('validation') },
+    { id: 'open-builder', label: 'Open Model Builder', keywords: 'inspector properties edit', run: () => openControlSection('model-builder') },
+    { id: 'open-share', label: 'Open Share', keywords: 'social export link', run: () => openControlSection('share') },
+    { id: 'open-json', label: 'Open JSON', keywords: 'raw model', run: () => openControlSection('json') }
+  ];
+}
+
+function commandMatchesQuery(command, query) {
+  if (!query) return true;
+  const haystack = `${command.label} ${command.keywords || ''} ${command.id}`.toLowerCase();
+  return query.split(/\s+/).every(part => haystack.includes(part));
+}
+
+function commandEnabled(command) {
+  return command.enabled ? command.enabled() !== false : true;
+}
+
+function filteredCommandPaletteCommands() {
+  const query = $('command-palette-input')?.value?.trim().toLowerCase() || '';
+  return commandPaletteCommands().filter(command => commandMatchesQuery(command, query));
+}
+
+function renderCommandPalette() {
+  const list = $('command-palette-list');
+  if (!list) return;
+  commandPaletteVisibleCommands = filteredCommandPaletteCommands();
+  if (commandPaletteActiveIndex >= commandPaletteVisibleCommands.length) {
+    commandPaletteActiveIndex = Math.max(0, commandPaletteVisibleCommands.length - 1);
+  }
+  list.innerHTML = '';
+  if (!commandPaletteVisibleCommands.length) {
+    const empty = document.createElement('div');
+    empty.className = 'command-empty';
+    empty.textContent = 'No matching commands';
+    list.appendChild(empty);
+    return;
+  }
+  commandPaletteVisibleCommands.forEach((command, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `command-item${index === commandPaletteActiveIndex ? ' is-active' : ''}`;
+    button.dataset.commandIndex = String(index);
+    button.disabled = !commandEnabled(command);
+    button.setAttribute('role', 'option');
+    button.setAttribute('aria-selected', index === commandPaletteActiveIndex ? 'true' : 'false');
+
+    const label = document.createElement('span');
+    label.className = 'command-label';
+    label.textContent = command.label;
+    const meta = document.createElement('span');
+    meta.className = 'command-meta';
+    meta.textContent = button.disabled ? 'Unavailable' : '';
+    button.append(label, meta);
+    list.appendChild(button);
+  });
+}
+
+function openCommandPalette() {
+  const palette = $('command-palette');
+  const input = $('command-palette-input');
+  if (!palette || !input) return;
+  commandPaletteOpen = true;
+  commandPaletteActiveIndex = 0;
+  palette.hidden = false;
+  input.value = '';
+  renderCommandPalette();
+  requestAnimationFrame(() => input.focus());
+}
+
+function closeCommandPalette() {
+  const palette = $('command-palette');
+  if (!palette) return;
+  commandPaletteOpen = false;
+  palette.hidden = true;
+}
+
+function executeCommandPaletteCommand(index = commandPaletteActiveIndex) {
+  const command = commandPaletteVisibleCommands[index];
+  if (!command) return;
+  if (!commandEnabled(command)) {
+    showToast('Command is not available');
+    return;
+  }
+  closeCommandPalette();
+  runAction(command.run);
+}
+
+function handleCommandPaletteKeydown(event) {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    openCommandPalette();
+    return;
+  }
+
+  if (!commandPaletteOpen) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeCommandPalette();
+  } else if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    commandPaletteActiveIndex = Math.min(commandPaletteActiveIndex + 1, Math.max(0, commandPaletteVisibleCommands.length - 1));
+    renderCommandPalette();
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault();
+    commandPaletteActiveIndex = Math.max(0, commandPaletteActiveIndex - 1);
+    renderCommandPalette();
+  } else if (event.key === 'Enter') {
+    event.preventDefault();
+    executeCommandPaletteCommand();
+  }
 }
 
 function getCollaborationClientName() {
@@ -2132,9 +2874,10 @@ function describeDraftSelection(draft) {
 }
 
 function scheduleLocalDraftPublish(reason = 'Updated draft') {
+  localDraftDirty = Boolean(savedSnapshotKey && modelSnapshotKey() !== savedSnapshotKey);
+  updateSaveStatus();
   const modelName = getSelectedCollaborationModelName();
   if (!COLLABORATION_ENABLED || !serverConnected || !serverEvents || !modelName) return;
-  localDraftDirty = true;
   window.clearTimeout(draftPublishTimer);
   draftPublishTimer = window.setTimeout(() => publishLocalDraft(reason), 450);
 }
@@ -4104,6 +4847,7 @@ async function updateSelectedProperty(path, value, options = {}) {
       updateJsonPreviewFromData();
       updateStats();
       updateValidationStatus();
+      updateSharePanel();
       applySelectionHighlight();
       scheduleLocalDraftPublish('Editing properties');
       return;
@@ -4143,6 +4887,7 @@ async function updateSelectedProperty(path, value, options = {}) {
     updateJsonPreviewFromData();
     updateStats();
     updateValidationStatus();
+    updateSharePanel();
     applySelectionHighlight();
     scheduleLocalDraftPublish('Editing properties');
     return;
@@ -5332,6 +6077,7 @@ async function handleSaveModel(options = {}) {
     updateJsonPreviewFromData();
     localDraftDirty = false;
     collaborationBaseModel = cloneValue(getData());
+    markSavedState();
     await clearLocalServerDraft(result.data.saved);
     await publishLocalPresenceDraft('Viewing saved model');
     addLog(`Saved ${result.data.saved} to server`);
@@ -5361,6 +6107,7 @@ async function handleSaveModel(options = {}) {
     updateJsonPreviewFromData();
     localDraftDirty = false;
     collaborationBaseModel = cloneValue(getData());
+    markSavedState();
     await clearLocalServerDraft(result.data.modelName || savedValue);
     await publishLocalPresenceDraft('Viewing saved test model');
     addLog(`Saved ${savedName} to ${TEST_MODEL_ROOT}`);
@@ -5376,6 +6123,7 @@ async function handleSaveModel(options = {}) {
     await clearLocalServerDraft();
     await publishLocalPresenceDraft('Viewing saved model');
   }
+  markSavedState();
   addLog(`Saved model JSON (${fileName})`);
   showToast(`Saved model JSON (${fileName})`);
 }
@@ -5608,6 +6356,7 @@ async function refreshCurrentServerModelFromEvent(event) {
       publishDraft: false
     });
     localDraftDirty = false;
+    markSavedState();
     await publishLocalPresenceDraft('Viewing updated model');
   } finally {
     remoteRefreshInFlight = false;
@@ -5643,6 +6392,7 @@ async function handleLoadModel() {
     await handleResetModel();
     localDraftDirty = false;
     collaborationBaseModel = cloneValue(getData());
+    markSavedState();
     return;
   }
 
@@ -5678,6 +6428,7 @@ async function handleLoadModel() {
     publishDraft: false
   });
   localDraftDirty = false;
+  markSavedState();
   await loadRemoteDraftsForCurrentModel();
   if (getSelectedCollaborationModelName()) {
     await publishLocalPresenceDraft('Viewing model');
@@ -6147,10 +6898,38 @@ function bindUi() {
   $('fit-model-button').addEventListener('click', handleFitModel);
   $('save-model-button').addEventListener('click', () => runAction(handleSaveModel));
   $('export-json-button').addEventListener('click', handleExportJson);
+  $('export-png-button')?.addEventListener('click', () => runAction(handleExportPng));
+  $('export-svg-button')?.addEventListener('click', () => runAction(handleExportSvg));
+  $('export-vector-svg-button')?.addEventListener('click', () => runAction(handleExportVectorSvg));
+  $('copy-share-link-button')?.addEventListener('click', () => runAction(handleCopyShareLink));
+  $('share-native-button')?.addEventListener('click', () => runAction(handleNativeShare));
+  $('share-email-button')?.addEventListener('click', () => openExternalShare('email'));
+  $('share-linkedin-button')?.addEventListener('click', () => openExternalShare('linkedin'));
+  $('share-facebook-button')?.addEventListener('click', () => openExternalShare('facebook'));
+  $('share-x-button')?.addEventListener('click', () => openExternalShare('x'));
   $('apply-json-button').addEventListener('click', () => runAction(handleApplyJson));
   $('reset-model-button').addEventListener('click', () => runAction(handleResetModel));
   $('run-scenario-suite-button')?.addEventListener('click', () => runAction(runScenarioSuite));
   $('cancel-link-button').addEventListener('click', cancelLinkCreation);
+  $('validation-issues')?.addEventListener('click', event => {
+    const target = event.target.closest?.('[data-validation-target]');
+    if (!target?.dataset?.validationTarget) return;
+    selectElement(target.dataset.validationTarget, { instant: true, log: false });
+    showToast(`Selected ${target.dataset.validationTarget}`);
+  });
+  $('command-palette-input')?.addEventListener('input', () => {
+    commandPaletteActiveIndex = 0;
+    renderCommandPalette();
+  });
+  $('command-palette-list')?.addEventListener('click', event => {
+    const target = event.target.closest?.('[data-command-index]');
+    if (!target) return;
+    executeCommandPaletteCommand(Number(target.dataset.commandIndex));
+  });
+  $('command-palette')?.addEventListener('pointerdown', event => {
+    if (event.target === $('command-palette')) closeCommandPalette();
+  });
+  document.addEventListener('keydown', handleCommandPaletteKeydown);
   ['selected-color-input', 'selected-border-color-input', 'selected-opacity-input', 'selected-corner-radius-input', 'selected-text-color-input']
     .forEach(id => $(id)?.addEventListener('input', () => runAction(handleSelectedRenderingChange)));
   $('selected-name-input')?.addEventListener('change', () => runAction(handleSelectedNameChange));
@@ -6256,7 +7035,7 @@ async function init() {
   camera = new THREE.PerspectiveCamera(52, size.width / size.height, 0.1, 2000);
   camera.position.set(0, 0, 12);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(size.width, size.height);
   container.appendChild(renderer.domElement);
@@ -6294,7 +7073,12 @@ async function init() {
   clearOverview();
   await refreshServerConnection();
   await populateModelSelect();
-  updateInterface();
+  if (selectSharedModelFromUrl()) {
+    await handleLoadModel();
+  } else {
+    updateInterface();
+    markSavedState();
+  }
   addLog('Ready');
   const params = new URLSearchParams(window.location.search);
   if (!HIDE_SCENARIO_SUITE && params.has('runScenarioSuite')) {
