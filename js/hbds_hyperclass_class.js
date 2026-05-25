@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { attachAttributesToMesh, createIconTitleLabel, applyLabelFontSettings } from './hbds_class.js?v=font-zoom-20260523a';
+import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings } from './hbds_class.js?v=material-surface-20260525a';
 
 const hyperclassLabels = [];
 let lastSizingCamera = null;
@@ -26,18 +26,17 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
   const geom = new THREE.ExtrudeGeometry(shape, { depth: 0.03, bevelEnabled: false });
   const hyperColor = new THREE.Color(classCfg.metallicColor ?? classCfg.color ?? '#FFFFFF');
   const opacity = classCfg.opacity ?? 0.18;
-  const mat = new THREE.MeshStandardMaterial({
-    color: hyperColor,
-    metalness: classCfg.metalness ?? 0.42,
-    roughness: classCfg.roughness ?? 0.28,
-    emissive: hyperColor,
-    emissiveIntensity: classCfg.emissiveIntensity ?? 0.035,
-    side: THREE.DoubleSide,
-    depthWrite: opacity >= 0.85,
-    transparent: opacity < 1,
-    opacity
-  });
-  mat.userData.hbdsMetallicPanel = true;
+  const mat = createClassSurfaceMaterial(
+    {
+      ...classCfg,
+      opacity,
+      metalness: classCfg.metalness ?? 0.42,
+      roughness: classCfg.roughness ?? 0.28
+    },
+    hyperColor,
+    opacity,
+    { depthWrite: opacity >= 0.85 }
+  );
   mat.userData.hbdsHyperclassPanel = true;
 
   const hyperMesh = new THREE.Mesh(geom, mat);
@@ -232,9 +231,10 @@ export function normalizeHyperclassData(h={}) {
       ...(h.rendering||{}),
       class:{
         ...(h.rendering?.class||{}),
-        material:'metallic',
+        material:h.rendering?.class?.material ?? 'metallic',
         metalness:h.rendering?.class?.metalness ?? 0.42,
-        roughness:h.rendering?.class?.roughness ?? 0.28
+        roughness:h.rendering?.class?.roughness ?? 0.28,
+        emissiveIntensity:h.rendering?.class?.emissiveIntensity ?? 0.035
       }
     }
   };

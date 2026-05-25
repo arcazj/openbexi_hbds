@@ -7,6 +7,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 CLASS_BODY_TYPES = {"rectangle", "image", "shape"}
 CLASS_IMAGE_FITS = {"contain", "cover"}
+CLASS_SURFACE_MATERIALS = {"metallic", "flat", "basic", "matte", "mat", "glossy", "shine", "shiny", "plastic", "glass", "transparent"}
 CLASS_SHAPE_TYPES = {
     "roundedRectangle",
     "rectangle",
@@ -140,6 +141,7 @@ def validate_model_file(model_path: Path):
         by_id[node_id] = node
         if not isinstance(node.get("attributes", []), list):
             errors.append(f"{model_path}: class {node_id} attributes must be an array")
+        errors.extend(validate_class_surface_fields(model_path, node))
         errors.extend(validate_class_body_fields(model_path, node))
         errors.extend(validate_font_fields(model_path, (node.get("rendering") or {}).get("font"), f"class {node_id} rendering.font"))
         for attr_idx, attribute in enumerate(node.get("attributes", []) if isinstance(node.get("attributes", []), list) else []):
@@ -223,6 +225,22 @@ def validate_class_body_fields(model_path: Path, node: dict):
         shape_type = rendering_class.get("shapeType", "roundedRectangle")
         if shape_type not in CLASS_SHAPE_TYPES:
             errors.append(f"{model_path}: class {node_id} unsupported shapeType {shape_type}")
+    return errors
+
+
+def validate_class_surface_fields(model_path: Path, node: dict):
+    errors = []
+    node_id = node.get("id", "<missing>")
+    rendering_class = ((node.get("rendering") or {}).get("class") or {})
+    material = rendering_class.get("material", rendering_class.get("surfaceMaterial"))
+    if material is not None and str(material).strip().lower() not in CLASS_SURFACE_MATERIALS:
+        errors.append(f"{model_path}: class {node_id} unsupported material {material}")
+    for key in ("metalness", "roughness", "opacity", "emissiveIntensity"):
+        if key not in rendering_class:
+            continue
+        value = rendering_class.get(key)
+        if not isinstance(value, (int, float)) or value < 0 or value > 1:
+            errors.append(f"{model_path}: class {node_id} {key} must be a number between 0 and 1")
     return errors
 
 

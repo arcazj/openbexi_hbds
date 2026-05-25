@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=font-zoom-20260523a';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=font-zoom-20260523a';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=material-surface-20260525a';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=material-surface-20260525a';
 import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=font-zoom-20260523a';
 import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=font-zoom-20260523a';
 
@@ -45,6 +45,7 @@ const HIDDEN_MODEL_VALUES = new Set([
 ]);
 const CLASS_BODY_TYPES = new Set(['rectangle','image','shape']);
 const CLASS_IMAGE_FITS = new Set(['contain','cover']);
+const CLASS_SURFACE_MATERIALS = new Set(['metallic','flat','basic','matte','mat','glossy','shine','shiny','plastic','glass','transparent']);
 const CLASS_SHAPE_TYPES = new Set([
   'roundedRectangle',
   'rectangle',
@@ -334,6 +335,7 @@ export function validateData(currentData=data){
 }
 function validateClassBodyRendering(node,warnings){
   const renderingClass=node?.rendering?.class||{};
+  validateClassSurfaceRendering(node,renderingClass,warnings);
   const hasBodyFields=['bodyType','imageSrc','imageFit','shapeType'].some(key=>renderingClass[key]!==undefined);
   if(node?.type==='hyperclass'){
     if(hasBodyFields) warnings.push(`hyperclass ${node.id} ignores image/shape body rendering fields`);
@@ -351,6 +353,19 @@ function validateClassBodyRendering(node,warnings){
   }
   if(bodyType==='shape'&&renderingClass.shapeType!==undefined&&!CLASS_SHAPE_TYPES.has(renderingClass.shapeType)){
     warnings.push(`class ${node.id} has unsupported shapeType ${renderingClass.shapeType}`);
+  }
+}
+function validateClassSurfaceRendering(node,renderingClass,warnings){
+  const material=renderingClass.material ?? renderingClass.surfaceMaterial;
+  if(material!==undefined&&!CLASS_SURFACE_MATERIALS.has(String(material).trim().toLowerCase())){
+    warnings.push(`class ${node.id} has unsupported material ${material}`);
+  }
+  for(const key of ['metalness','roughness','opacity','emissiveIntensity']){
+    if(renderingClass[key]===undefined) continue;
+    const value=Number(renderingClass[key]);
+    if(!Number.isFinite(value)||value<0||value>1){
+      warnings.push(`class ${node.id} has invalid ${key} ${renderingClass[key]}`);
+    }
   }
 }
 function isAllowedClassImageSource(value){

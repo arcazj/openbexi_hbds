@@ -117,8 +117,12 @@ export const Loader = {
                     rendering: {
                         class: {
                             color: '#FFD700',
+                            material: 'metallic',
                             borderColor: '#000080',
-                            cornerRadius: 0.1
+                            cornerRadius: 0.1,
+                            metalness: 0.46,
+                            roughness: 0.24,
+                            emissiveIntensity: 0.035
                         },
                         attributes: {
                             checkboxColor: '#A9A9A9',
@@ -156,11 +160,29 @@ export const Loader = {
  * Returns `{ group, classMesh }` so the caller can attach DragControls
  * to `classMesh` but add the entire `group` to the scene.
  */
+const CLASS_SURFACE_MATERIAL_PROFILES = {
+    metallic: {metalness: 0.46, roughness: 0.24, emissiveIntensity: 0.035},
+    matte: {metalness: 0.02, roughness: 0.82, emissiveIntensity: 0.012},
+    glossy: {metalness: 0.08, roughness: 0.08, emissiveIntensity: 0.018},
+    plastic: {metalness: 0, roughness: 0.36, emissiveIntensity: 0.014},
+    glass: {metalness: 0, roughness: 0.02, emissiveIntensity: 0, transmission: 0.55, clearcoat: 1, clearcoatRoughness: 0.04}
+};
+
+function normalizeClassSurfaceMaterial(value) {
+    const clean = String(value || 'metallic').trim().toLowerCase();
+    if (clean === 'basic') return 'flat';
+    if (clean === 'mat') return 'matte';
+    if (clean === 'shine' || clean === 'shiny') return 'glossy';
+    if (clean === 'transparent') return 'glass';
+    if (clean === 'flat' || CLASS_SURFACE_MATERIAL_PROFILES[clean]) return clean;
+    return 'metallic';
+}
+
 export function createClass(classData) {
     const defaults = {
         size: {width: 1, height: 2},
         rendering: {
-            class: {color: '#FFD700', cornerRadius: 0.1},
+            class: {color: '#FFD700', cornerRadius: 0.1, material: 'metallic', metalness: 0.46, roughness: 0.24, emissiveIntensity: 0.035},
             attributes: {
                 checkboxColor: '#A9A9A9',
                 checkboxMaterial: 'metallic',
@@ -299,19 +321,58 @@ function normalizeClassImageSource(value) {
 }
 
 function createClassPanelMaterial(classCfg, classColor, classOpacity) {
-    const classMat = new THREE.MeshStandardMaterial({
+    return createClassSurfaceMaterial(classCfg, classColor, classOpacity);
+}
+
+export function createClassSurfaceMaterial(classCfg = {}, classColor = new THREE.Color('#FFD700'), classOpacity = 1, options = {}) {
+    const materialName = normalizeClassSurfaceMaterial(classCfg.material ?? classCfg.surfaceMaterial);
+    const isGlass = materialName === 'glass';
+    const opacityFallback = isGlass ? 0.42 : 1;
+    const opacitySource = classCfg.opacity === undefined && isGlass ? opacityFallback : (classCfg.opacity ?? classOpacity);
+    const opacity = toFiniteNumber(opacitySource, opacityFallback);
+    const transparent = options.transparent ?? (opacity < 1 || isGlass);
+    const base = {
         color: classColor,
-        metalness: classCfg.metalness ?? 0.46,
-        roughness: classCfg.roughness ?? 0.24,
-        emissive: classColor,
-        emissiveIntensity: classCfg.emissiveIntensity ?? 0.035,
         side: THREE.DoubleSide,
-        transparent: classOpacity < 1,
-        opacity: classOpacity
-    });
-    classMat.userData.hbdsMetallicPanel = true;
-    classMat.userData.hbdsClassPanel = true;
-    return classMat;
+        transparent,
+        opacity
+    };
+    if (options.map) base.map = options.map;
+    if (options.alphaTest !== undefined) base.alphaTest = options.alphaTest;
+    if (options.depthWrite !== undefined) base.depthWrite = options.depthWrite;
+
+    let material;
+    if (materialName === 'flat') {
+        material = new THREE.MeshBasicMaterial(base);
+        material.userData.hbdsFlatPanel = true;
+    } else {
+        const profile = CLASS_SURFACE_MATERIAL_PROFILES[materialName] || CLASS_SURFACE_MATERIAL_PROFILES.metallic;
+        if (isGlass && typeof THREE.MeshPhysicalMaterial === 'function') {
+            material = new THREE.MeshPhysicalMaterial({
+                ...base,
+                metalness: toFiniteNumber(classCfg.metalness, profile.metalness),
+                roughness: toFiniteNumber(classCfg.roughness, profile.roughness),
+                transmission: toFiniteNumber(classCfg.transmission, profile.transmission),
+                clearcoat: toFiniteNumber(classCfg.clearcoat, profile.clearcoat),
+                clearcoatRoughness: toFiniteNumber(classCfg.clearcoatRoughness, profile.clearcoatRoughness),
+                emissive: classColor,
+                emissiveIntensity: toFiniteNumber(classCfg.emissiveIntensity, profile.emissiveIntensity),
+                depthWrite: options.depthWrite ?? false
+            });
+        } else {
+            material = new THREE.MeshStandardMaterial({
+                ...base,
+                metalness: toFiniteNumber(classCfg.metalness, profile.metalness),
+                roughness: toFiniteNumber(classCfg.roughness, profile.roughness),
+                emissive: classColor,
+                emissiveIntensity: toFiniteNumber(classCfg.emissiveIntensity, profile.emissiveIntensity)
+            });
+        }
+        material.userData.hbdsMetallicPanel = materialName === 'metallic';
+    }
+    material.userData.hbdsClassPanel = true;
+    material.userData.hbdsClassSurfaceMaterial = materialName;
+    return material;
 }
 
 function createClassHitMaterial() {
@@ -401,19 +462,22 @@ function installImageClassBody(classMesh, border, bodyRendering, classCfg, size,
 }
 
 function createImageBodyMaterial(texture, classCfg, classOpacity) {
-    const material = new THREE.MeshStandardMaterial({
-        map: texture,
-        color: '#ffffff',
-        metalness: classCfg.metalness ?? 0.18,
-        roughness: classCfg.roughness ?? 0.42,
-        emissive: '#ffffff',
-        emissiveIntensity: 0,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: classOpacity,
-        alphaTest: 0.02,
-        depthWrite: false
-    });
+    const material = createClassSurfaceMaterial(
+        {
+            ...classCfg,
+            metalness: classCfg.metalness ?? 0.18,
+            roughness: classCfg.roughness ?? 0.42,
+            emissiveIntensity: classCfg.emissiveIntensity ?? 0
+        },
+        new THREE.Color('#ffffff'),
+        classOpacity,
+        {
+            map: texture,
+            transparent: true,
+            alphaTest: 0.02,
+            depthWrite: false
+        }
+    );
     material.userData.hbdsImageClassBody = true;
     return material;
 }

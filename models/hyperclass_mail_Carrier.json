@@ -28,8 +28,8 @@
       "fit": {
         "padding": 1.15,
         "fitHeightDistance": 8.5341,
-        "fitWidthDistance": 5.4181,
-        "distance": 8.5341,
+        "fitWidthDistance": 6.576,
+        "distance": 7.3169,
         "diagramWidth": 4.45,
         "diagramHeight": 5.3,
         "diagramDepth": 0.08,
@@ -39,7 +39,7 @@
           "y": 4.9699,
           "z": 0.04
         },
-        "cameraAspect": 1.5751,
+        "cameraAspect": 1.2978,
         "cameraFov": 50
       }
     },
@@ -79,8 +79,8 @@
           "hyperclass_mail_carrier_5"
         ],
         "position": {
-          "x": 9.5,
-          "y": 4.8,
+          "x": 10.7202,
+          "y": 4.7163,
           "z": 0
         },
         "size": {
@@ -95,8 +95,9 @@
             "borderWidth": 0.02,
             "cornerRadius": 0.3,
             "opacity": 0.12,
-            "metalness": 0.42,
-            "roughness": 0.28
+            "metalness": 1,
+            "roughness": 0.15,
+            "emissiveIntensity": 0.4
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -127,8 +128,8 @@
         ],
         "parentClassId": "hyperclass_mail_carrier_3",
         "position": {
-          "x": 8.9,
-          "y": 5.4,
+          "x": 10.1202,
+          "y": 5.3163,
           "z": 0
         },
         "size": {
@@ -182,8 +183,8 @@
         ],
         "parentClassId": "hyperclass_mail_carrier_3",
         "position": {
-          "x": 8.9244,
-          "y": 3.3653,
+          "x": 10.1446,
+          "y": 3.2816,
           "z": 0
         },
         "size": {

@@ -38,7 +38,7 @@ import {
   getFontSettings,
   setFontSettings,
   normalizeFontSettings
-} from './hbds_model.js?v=font-zoom-20260523a';
+} from './hbds_model.js?v=material-surface-20260525a';
 import { recalculateAllLinks } from './hbds_class_link.js?v=font-zoom-20260523a';
 import {
   applyServerModelOperations,
@@ -244,6 +244,7 @@ const KNOWN_ENUMS = {
     'tableColumns',
     'tableRows'
   ],
+  material: ['metallic', 'flat', 'matte', 'glossy', 'plastic', 'glass'],
   checkboxMaterial: ['metallic', 'flat'],
   shape: ['square', 'circle', 'diamond', 'triangle']
 };
@@ -305,6 +306,10 @@ const CLASS_2D_DEFAULTS = {
   fillColor: '#ffd166',
   borderColor: '#7a4f00',
   borderWidth: 1,
+  classMaterial: 'metallic',
+  classMetalness: 0.46,
+  classRoughness: 0.24,
+  classEmissiveIntensity: 0.035,
   cornerRadius: 0.1,
   opacity: 1,
   textColor: '#111827',
@@ -323,6 +328,14 @@ const CLASS_2D_DEFAULTS = {
   lineWidth: 0.01,
   visible: true,
   locked: false
+};
+const CLASS_MATERIAL_PRESETS = {
+  metallic: { metalness: 0.46, roughness: 0.24, emissiveIntensity: 0.035 },
+  flat: { metalness: 0, roughness: 1, emissiveIntensity: 0 },
+  matte: { metalness: 0.02, roughness: 0.82, emissiveIntensity: 0.012 },
+  glossy: { metalness: 0.08, roughness: 0.08, emissiveIntensity: 0.018 },
+  plastic: { metalness: 0, roughness: 0.36, emissiveIntensity: 0.014 },
+  glass: { metalness: 0, roughness: 0.02, emissiveIntensity: 0 }
 };
 const LINK_2D_DEFAULTS = {
   labelText: '',
@@ -416,7 +429,16 @@ function nodeLabel(node) {
 function classRendering(index) {
   const color = CLASS_COLORS[index % CLASS_COLORS.length];
   return {
-    class: { color: color.fill, borderColor: color.border, cornerRadius: 0.1 },
+    class: {
+      color: color.fill,
+      metallicColor: color.fill,
+      material: CLASS_2D_DEFAULTS.classMaterial,
+      borderColor: color.border,
+      cornerRadius: 0.1,
+      metalness: CLASS_2D_DEFAULTS.classMetalness,
+      roughness: CLASS_2D_DEFAULTS.classRoughness,
+      emissiveIntensity: CLASS_2D_DEFAULTS.classEmissiveIntensity
+    },
     attributes: {
       checkboxColor: color.border,
       checkboxMaterial: CLASS_2D_DEFAULTS.attributeCheckboxMaterial,
@@ -433,7 +455,17 @@ function classRendering(index) {
 function hyperclassRendering(index) {
   const color = HYPER_COLORS[index % HYPER_COLORS.length];
   return {
-    class: { color: color.fill, borderColor: color.border, opacity: 0.2, cornerRadius: 0.22 },
+    class: {
+      color: color.fill,
+      metallicColor: color.fill,
+      material: CLASS_2D_DEFAULTS.classMaterial,
+      borderColor: color.border,
+      opacity: 0.2,
+      cornerRadius: 0.22,
+      metalness: CLASS_2D_DEFAULTS.classMetalness,
+      roughness: CLASS_2D_DEFAULTS.classRoughness,
+      emissiveIntensity: CLASS_2D_DEFAULTS.classEmissiveIntensity
+    },
     attributes: {
       checkboxColor: color.border,
       checkboxMaterial: CLASS_2D_DEFAULTS.attributeCheckboxMaterial,
@@ -1983,6 +2015,9 @@ function propertyPathLabel(path) {
     'rendering.class.color': 'class fill color',
     'rendering.class.metallicColor': 'class metallic color',
     'rendering.class.material': 'class material',
+    'rendering.class.metalness': 'class metalness',
+    'rendering.class.roughness': 'class roughness',
+    'rendering.class.emissiveIntensity': 'class glow',
     'rendering.class.borderColor': 'class border color',
     'rendering.class.borderWidth': 'class border width',
     'rendering.class.cornerRadius': 'class corner radius',
@@ -2653,6 +2688,13 @@ function renderClass2DInspector(panel, target) {
     value: renderingClass.color || renderingClass.metallicColor || CLASS_2D_DEFAULTS.fillColor,
     defaultValue: CLASS_2D_DEFAULTS.fillColor
   });
+  appendSelectControl(appearance.body, {
+    label: 'Material',
+    path: ['rendering', 'class', 'material'],
+    value: renderingClass.material || CLASS_2D_DEFAULTS.classMaterial,
+    options: KNOWN_ENUMS.material,
+    defaultValue: CLASS_2D_DEFAULTS.classMaterial
+  });
   appendColorControl(appearance.body, {
     label: 'Border',
     path: ['rendering', 'class', 'borderColor'],
@@ -2685,6 +2727,33 @@ function renderClass2DInspector(panel, target) {
     max: 1,
     step: 0.01,
     defaultValue: CLASS_2D_DEFAULTS.opacity
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Metalness',
+    path: ['rendering', 'class', 'metalness'],
+    value: renderingClass.metalness ?? CLASS_2D_DEFAULTS.classMetalness,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.classMetalness
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Roughness',
+    path: ['rendering', 'class', 'roughness'],
+    value: renderingClass.roughness ?? CLASS_2D_DEFAULTS.classRoughness,
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.classRoughness
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Glow',
+    path: ['rendering', 'class', 'emissiveIntensity'],
+    value: renderingClass.emissiveIntensity ?? CLASS_2D_DEFAULTS.classEmissiveIntensity,
+    min: 0,
+    max: 1,
+    step: 0.005,
+    defaultValue: CLASS_2D_DEFAULTS.classEmissiveIntensity
   });
   appendFontControls(appearance.body, {
     labelPrefix: 'Name ',
@@ -2936,6 +3005,13 @@ function renderMultiClass2DInspector(panel, target) {
     value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'color'], renderingClass.color || renderingClass.metallicColor || CLASS_2D_DEFAULTS.fillColor),
     defaultValue: CLASS_2D_DEFAULTS.fillColor
   });
+  appendSelectControl(appearance.body, {
+    label: 'Material',
+    path: ['rendering', 'class', 'material'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'material'], renderingClass.material || CLASS_2D_DEFAULTS.classMaterial),
+    options: KNOWN_ENUMS.material,
+    defaultValue: CLASS_2D_DEFAULTS.classMaterial
+  });
   appendColorControl(appearance.body, {
     label: 'Border',
     path: ['rendering', 'class', 'borderColor'],
@@ -2968,6 +3044,33 @@ function renderMultiClass2DInspector(panel, target) {
     max: 1,
     step: 0.01,
     defaultValue: CLASS_2D_DEFAULTS.opacity
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Metalness',
+    path: ['rendering', 'class', 'metalness'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'metalness'], renderingClass.metalness ?? CLASS_2D_DEFAULTS.classMetalness),
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.classMetalness
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Roughness',
+    path: ['rendering', 'class', 'roughness'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'roughness'], renderingClass.roughness ?? CLASS_2D_DEFAULTS.classRoughness),
+    min: 0,
+    max: 1,
+    step: 0.01,
+    defaultValue: CLASS_2D_DEFAULTS.classRoughness
+  });
+  appendSliderNumberControl(appearance.body, {
+    label: 'Glow',
+    path: ['rendering', 'class', 'emissiveIntensity'],
+    value: getCommonPropertyValue(selectedNodes, ['rendering', 'class', 'emissiveIntensity'], renderingClass.emissiveIntensity ?? CLASS_2D_DEFAULTS.classEmissiveIntensity),
+    min: 0,
+    max: 1,
+    step: 0.005,
+    defaultValue: CLASS_2D_DEFAULTS.classEmissiveIntensity
   });
   appendFontControls(appearance.body, {
     labelPrefix: 'Name ',
@@ -3954,6 +4057,28 @@ async function handlePropertyPanelChange(event, options = {}) {
   });
 }
 
+function normalizeInspectorClassMaterial(value) {
+  const clean = String(value || CLASS_2D_DEFAULTS.classMaterial).trim().toLowerCase();
+  if (clean === 'basic') return 'flat';
+  if (clean === 'mat') return 'matte';
+  if (clean === 'shine' || clean === 'shiny') return 'glossy';
+  if (clean === 'transparent') return 'glass';
+  return CLASS_MATERIAL_PRESETS[clean] ? clean : CLASS_2D_DEFAULTS.classMaterial;
+}
+
+function applyClassMaterialPreset(node, value) {
+  const material = normalizeInspectorClassMaterial(value);
+  const preset = CLASS_MATERIAL_PRESETS[material];
+  if (!node || !preset) return;
+  node.rendering = node.rendering || {};
+  node.rendering.class = node.rendering.class || {};
+  Object.assign(node.rendering.class, { material }, preset);
+  if (material === 'glass') {
+    const opacity = Number(node.rendering.class.opacity);
+    if (!Number.isFinite(opacity) || opacity >= 0.85) node.rendering.class.opacity = 0.42;
+  }
+}
+
 async function updateSelectedProperty(path, value, options = {}) {
   const target = getSelectedPropertyTarget();
   if (!target) return;
@@ -3967,6 +4092,7 @@ async function updateSelectedProperty(path, value, options = {}) {
         nextNode.rendering.class = nextNode.rendering.class || {};
         nextNode.rendering.class.metallicColor = value;
       }
+      if (path.join('.') === 'rendering.class.material') applyClassMaterialPreset(nextNode, value);
       const updater = nextNode.type === 'hyperclass' ? updateHyperclass : updateClass;
       await updater(node.id, nextNode, { context: ctx(), refresh: false, saveHistory: false });
     }
@@ -3991,6 +4117,9 @@ async function updateSelectedProperty(path, value, options = {}) {
     next.rendering = next.rendering || {};
     next.rendering.class = next.rendering.class || {};
     next.rendering.class.metallicColor = value;
+  }
+  if ((target.kind === 'class' || target.kind === 'hyperclass') && path.join('.') === 'rendering.class.material') {
+    applyClassMaterialPreset(next, value);
   }
   if (target.kind === 'link' && path.join('.') === 'rendering.labelText') {
     next.name = value;
@@ -4168,6 +4297,7 @@ function normalizeClassSurfaceMaterials() {
   diagramGroup.traverse(object => {
     if (!object.isMesh || !object.userData?.isClassLike || object.name === 'class-hub') return;
     if (object.userData?.isHyperClass) return;
+    if (object.material?.userData?.hbdsClassPanel) return;
     if (object.material?.userData?.hbdsMetallicPanel) return;
     if (object.material?.userData?.hbdsFlatPanel) return;
     const source = object.material;
