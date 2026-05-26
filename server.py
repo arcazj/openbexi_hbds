@@ -167,10 +167,92 @@ def validate_model_payload(payload: object) -> dict | None:
     hypergraph = payload.get("hypergraph")
     if not isinstance(hypergraph, dict):
         return error_payload("invalid_model", "Model JSON must contain hypergraph")
-    if not isinstance(hypergraph.get("class"), list):
+    if "hyperclass" in hypergraph:
+        return error_payload("invalid_model", "Legacy hypergraph.hyperclass must be migrated into hypergraph.class")
+    if "relationships" in hypergraph:
+        return error_payload("invalid_model", "Legacy hypergraph.relationships must be migrated into hypergraph.link")
+
+    classes = hypergraph.get("class")
+    links = hypergraph.get("link")
+    if not isinstance(classes, list):
         return error_payload("invalid_model", "Model hypergraph.class must be an array")
-    if not isinstance(hypergraph.get("link"), list):
+    if not isinstance(links, list):
         return error_payload("invalid_model", "Model hypergraph.link must be an array")
+
+    seen_ids: dict[str, list[str]] = {}
+    class_ids: set[str] = set()
+
+    def clean_id(value: object) -> str:
+        return str(value).strip() if value is not None else ""
+
+    def register_id(value: object, owner: str) -> dict | None:
+        entity_id = clean_id(value)
+        if not entity_id:
+            return error_payload("invalid_model", f"{owner} missing id")
+        seen_ids.setdefault(entity_id, []).append(owner)
+        return None
+
+    parent_refs: list[tuple[str, str]] = []
+    child_refs: list[tuple[str, str]] = []
+    for class_index, node in enumerate(classes):
+        owner = f"class[{class_index}]"
+        if not isinstance(node, dict):
+            return error_payload("invalid_model", f"{owner} must be an object")
+        validation_error = register_id(node.get("id"), owner)
+        if validation_error:
+            return validation_error
+        node_id = clean_id(node.get("id"))
+        class_ids.add(node_id)
+
+        attributes = node.get("attributes", [])
+        if not isinstance(attributes, list):
+            return error_payload("invalid_model", f"class {node_id} attributes must be an array")
+        for attr_index, attribute in enumerate(attributes):
+            attr_owner = f"class[{node_id}].attributes[{attr_index}]"
+            if not isinstance(attribute, dict):
+                continue
+            validation_error = register_id(attribute.get("id"), attr_owner)
+            if validation_error:
+                return validation_error
+
+        parent_id = clean_id(node.get("parentClassId"))
+        if parent_id:
+            parent_refs.append((node_id, parent_id))
+        children = node.get("children", [])
+        if children is None:
+            children = []
+        if not isinstance(children, list):
+            return error_payload("invalid_model", f"class {node_id} children must be an array")
+        for child_index, child_id in enumerate(children):
+            child_ref = clean_id(child_id)
+            if not child_ref:
+                return error_payload("invalid_model", f"class {node_id} children[{child_index}] must be a non-empty id")
+            child_refs.append((node_id, child_ref))
+
+    for link_index, link in enumerate(links):
+        owner = f"link[{link_index}]"
+        if not isinstance(link, dict):
+            return error_payload("invalid_model", f"{owner} must be an object")
+        validation_error = register_id(link.get("id"), owner)
+        if validation_error:
+            return validation_error
+        link_id = clean_id(link.get("id"))
+        source_id = clean_id(link.get("sourceClassId"))
+        target_id = clean_id(link.get("targetClassId"))
+        if not source_id or source_id not in class_ids:
+            return error_payload("invalid_model", f"link {link_id} sourceClassId must reference an existing class")
+        if not target_id or target_id not in class_ids:
+            return error_payload("invalid_model", f"link {link_id} targetClassId must reference an existing class")
+
+    for entity_id, owners in sorted(seen_ids.items()):
+        if len(owners) > 1:
+            return error_payload("invalid_model", f"Duplicate model id '{entity_id}' used by {', '.join(owners)}")
+    for node_id, parent_id in parent_refs:
+        if parent_id not in class_ids:
+            return error_payload("invalid_model", f"class {node_id} parentClassId must reference an existing class")
+    for node_id, child_id in child_refs:
+        if child_id not in class_ids:
+            return error_payload("invalid_model", f"class {node_id} children must reference existing classes")
     return None
 
 
@@ -1156,6 +1238,16 @@ class HBDSLocalServer(ThreadingHTTPServer):
         self._revision_order: dict[str, list[str]] = {}
         self._draft_lock = threading.Lock()
         self._drafts: dict[str, dict[str, dict]] = {}
+        self._model_locks_guard = threading.Lock()
+        self._model_locks: dict[str, threading.RLock] = {}
+
+    def model_lock(self, model_name: str) -> threading.RLock:
+        with self._model_locks_guard:
+            lock = self._model_locks.get(model_name)
+            if lock is None:
+                lock = threading.RLock()
+                self._model_locks[model_name] = lock
+            return lock
 
     def add_event_subscriber(self, client_id: str = "", client_name: str = "") -> tuple[queue.Queue, dict]:
         subscriber: queue.Queue = queue.Queue(maxsize=100)
@@ -1380,19 +1472,21 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         if error:
             self.json_error(HTTPStatus.BAD_REQUEST, error["code"], error["message"])
             return
-        target = MODELS_DIR / name
-        if not target.exists():
-            self.json_error(HTTPStatus.NOT_FOUND, "model_not_found", "Model not found")
-            return
-        try:
-            with target.open("r", encoding="utf-8") as handle:
-                model = json.load(handle)
-        except json.JSONDecodeError:
-            self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "invalid_stored_model", "Stored model JSON is invalid")
-            return
-        metadata = model_metadata(target)
-        self.remember_model_revision(name, metadata["revision"], model)
-        self.json_response({"ok": True, "model": model_with_server_metadata(model, metadata), "metadata": metadata})
+        with self.server.model_lock(name):
+            target = MODELS_DIR / name
+            if not target.exists():
+                self.json_error(HTTPStatus.NOT_FOUND, "model_not_found", "Model not found")
+                return
+            try:
+                with target.open("r", encoding="utf-8") as handle:
+                    model = json.load(handle)
+            except json.JSONDecodeError:
+                self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "invalid_stored_model", "Stored model JSON is invalid")
+                return
+            metadata = model_metadata(target)
+            self.remember_model_revision(name, metadata["revision"], model)
+            response = {"ok": True, "model": model_with_server_metadata(model, metadata), "metadata": metadata}
+        self.json_response(response)
 
     def save_model(self, raw_name: str) -> None:
         name, error = validate_model_name(raw_name)
@@ -1408,43 +1502,43 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             return
 
         MODELS_DIR.mkdir(parents=True, exist_ok=True)
-        target = MODELS_DIR / name
-        if target.exists():
-            current_metadata = model_metadata(target)
-            current_revision = current_metadata["revision"]
-            client_revision = client_revision_from_request(self.headers, payload)
-            if not client_revision:
-                self.json_error(
-                    HTTPStatus.CONFLICT,
-                    "missing_revision",
-                    "Model already exists. Reload it before saving so the server can prevent overwrites.",
-                    modelName=name,
-                    currentRevision=current_revision,
-                    metadata=current_metadata,
-                )
-                return
-            if client_revision != current_revision:
-                self.json_error(
-                    HTTPStatus.CONFLICT,
-                    "model_conflict",
-                    "Model has changed on the server. Reload before saving or merge your changes.",
-                    modelName=name,
-                    attemptedRevision=client_revision,
-                    currentRevision=current_revision,
-                    metadata=current_metadata,
-                )
-                return
+        with self.server.model_lock(name):
+            target = MODELS_DIR / name
+            if target.exists():
+                current_metadata = model_metadata(target)
+                current_revision = current_metadata["revision"]
+                client_revision = client_revision_from_request(self.headers, payload)
+                if not client_revision:
+                    self.json_error(
+                        HTTPStatus.CONFLICT,
+                        "missing_revision",
+                        "Model already exists. Reload it before saving so the server can prevent overwrites.",
+                        modelName=name,
+                        currentRevision=current_revision,
+                        metadata=current_metadata,
+                    )
+                    return
+                if client_revision != current_revision:
+                    self.json_error(
+                        HTTPStatus.CONFLICT,
+                        "model_conflict",
+                        "Model has changed on the server. Reload before saving or merge your changes.",
+                        modelName=name,
+                        attemptedRevision=client_revision,
+                        currentRevision=current_revision,
+                        metadata=current_metadata,
+                    )
+                    return
 
-        backup_name = write_model_payload(target, payload)
-
-        metadata = model_metadata(target)
-        self.remember_model_revision(target.name, metadata["revision"], payload)
-        response = {
-            "ok": True,
-            "saved": target.name,
-            "backup": backup_name,
-            "metadata": metadata,
-        }
+            backup_name = write_model_payload(target, payload)
+            metadata = model_metadata(target)
+            self.remember_model_revision(target.name, metadata["revision"], payload)
+            response = {
+                "ok": True,
+                "saved": target.name,
+                "backup": backup_name,
+                "metadata": metadata,
+            }
         self.publish_model_updated(target.name, metadata, backup_name)
         self.json_response(response)
 
@@ -1453,21 +1547,26 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         if parsed is None:
             return
         _scope, name, target, model_key = parsed
-        try:
-            with target.open("r", encoding="utf-8") as handle:
-                model = json.load(handle)
-        except json.JSONDecodeError:
-            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_json", "Model file is not valid JSON")
-            return
-        metadata = model_metadata(target)
-        self.remember_model_revision(model_key, metadata["revision"], model)
-        self.json_response({
-            "ok": True,
-            "modelName": model_key,
-            "saved": name,
-            "model": model_with_server_metadata(model, metadata),
-            "metadata": metadata,
-        })
+        with self.server.model_lock(model_key):
+            if not target.exists():
+                self.json_error(HTTPStatus.NOT_FOUND, "model_not_found", "Model not found")
+                return
+            try:
+                with target.open("r", encoding="utf-8") as handle:
+                    model = json.load(handle)
+            except json.JSONDecodeError:
+                self.json_error(HTTPStatus.BAD_REQUEST, "invalid_json", "Model file is not valid JSON")
+                return
+            metadata = model_metadata(target)
+            self.remember_model_revision(model_key, metadata["revision"], model)
+            response = {
+                "ok": True,
+                "modelName": model_key,
+                "saved": name,
+                "model": model_with_server_metadata(model, metadata),
+                "metadata": metadata,
+            }
+        self.json_response(response)
 
     def save_scoped_model(self, raw_path: str) -> None:
         parsed = self.parse_scoped_model_path(raw_path, require_exists=False)
@@ -1485,16 +1584,17 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             self.json_error(HTTPStatus.BAD_REQUEST, validation_error["code"], validation_error["message"])
             return
 
-        backup_name = write_model_payload(target, payload)
-        metadata = model_metadata(target)
-        self.remember_model_revision(model_key, metadata["revision"], payload)
-        response = {
-            "ok": True,
-            "saved": name,
-            "modelName": model_key,
-            "backup": backup_name,
-            "metadata": metadata,
-        }
+        with self.server.model_lock(model_key):
+            backup_name = write_model_payload(target, payload)
+            metadata = model_metadata(target)
+            self.remember_model_revision(model_key, metadata["revision"], payload)
+            response = {
+                "ok": True,
+                "saved": name,
+                "modelName": model_key,
+                "backup": backup_name,
+                "metadata": metadata,
+            }
         self.publish_model_updated(model_key, metadata, backup_name, client_id=self.headers.get("X-Client-Id", ""))
         self.json_response(response)
 
@@ -1504,87 +1604,89 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             self.json_error(HTTPStatus.BAD_REQUEST, error["code"], error["message"])
             return
         target = MODELS_DIR / name
-        if not target.exists():
-            self.json_error(HTTPStatus.NOT_FOUND, "model_not_found", "Model not found")
-            return
 
         payload = self.read_json_request_payload()
         if payload is None:
             return
 
-        current_metadata = model_metadata(target)
-        current_revision = current_metadata["revision"]
-        client_revision = client_revision_from_request(self.headers, payload)
-        if not client_revision:
-            self.json_error(
-                HTTPStatus.CONFLICT,
-                "missing_revision",
-                "Operation request must include baseModelRevision or If-Match.",
-                modelName=name,
-                currentRevision=current_revision,
-                metadata=current_metadata,
-            )
-            return
-        try:
-            model = read_stored_model(target)
-        except json.JSONDecodeError:
-            self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "invalid_stored_model", "Stored model JSON is invalid")
-            return
-        self.remember_model_revision(name, current_revision, model)
+        with self.server.model_lock(name):
+            if not target.exists():
+                self.json_error(HTTPStatus.NOT_FOUND, "model_not_found", "Model not found")
+                return
 
-        merged_from_stale_revision = False
-        if client_revision != current_revision:
-            base_model = self.get_model_revision(name, client_revision)
-            if base_model is None:
+            current_metadata = model_metadata(target)
+            current_revision = current_metadata["revision"]
+            client_revision = client_revision_from_request(self.headers, payload)
+            if not client_revision:
                 self.json_error(
                     HTTPStatus.CONFLICT,
-                    "base_revision_unavailable",
-                    "Base revision is no longer available for automatic merge. Reload before applying operations.",
+                    "missing_revision",
+                    "Operation request must include baseModelRevision or If-Match.",
                     modelName=name,
-                    attemptedRevision=client_revision,
                     currentRevision=current_revision,
                     metadata=current_metadata,
                 )
                 return
             try:
-                ensure_operations_can_merge(base_model, model, payload.get("operations"))
+                model = read_stored_model(target)
+            except json.JSONDecodeError:
+                self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "invalid_stored_model", "Stored model JSON is invalid")
+                return
+            self.remember_model_revision(name, current_revision, model)
+
+            merged_from_stale_revision = False
+            if client_revision != current_revision:
+                base_model = self.get_model_revision(name, client_revision)
+                if base_model is None:
+                    self.json_error(
+                        HTTPStatus.CONFLICT,
+                        "base_revision_unavailable",
+                        "Base revision is no longer available for automatic merge. Reload before applying operations.",
+                        modelName=name,
+                        attemptedRevision=client_revision,
+                        currentRevision=current_revision,
+                        metadata=current_metadata,
+                    )
+                    return
+                try:
+                    ensure_operations_can_merge(base_model, model, payload.get("operations"))
+                except OperationError as operation_error:
+                    self.json_error(
+                        operation_error.status,
+                        operation_error.code,
+                        operation_error.message,
+                        modelName=name,
+                        attemptedRevision=client_revision,
+                        currentRevision=current_revision,
+                        **operation_error.details,
+                    )
+                    return
+                merged_from_stale_revision = True
+
+            try:
+                applied_operations = apply_model_operations(model, payload.get("operations"))
             except OperationError as operation_error:
                 self.json_error(
                     operation_error.status,
                     operation_error.code,
                     operation_error.message,
                     modelName=name,
-                    attemptedRevision=client_revision,
                     currentRevision=current_revision,
                     **operation_error.details,
                 )
                 return
-            merged_from_stale_revision = True
 
-        try:
-            applied_operations = apply_model_operations(model, payload.get("operations"))
-        except OperationError as operation_error:
-            self.json_error(
-                operation_error.status,
-                operation_error.code,
-                operation_error.message,
-                modelName=name,
-                currentRevision=current_revision,
-                **operation_error.details,
-            )
-            return
-
-        backup_name = write_model_payload(target, model)
-        metadata = model_metadata(target)
-        self.remember_model_revision(target.name, metadata["revision"], model)
-        response = {
-            "ok": True,
-            "saved": target.name,
-            "backup": backup_name,
-            "metadata": metadata,
-            "operations": applied_operations,
-            "merged": merged_from_stale_revision,
-        }
+            backup_name = write_model_payload(target, model)
+            metadata = model_metadata(target)
+            self.remember_model_revision(target.name, metadata["revision"], model)
+            response = {
+                "ok": True,
+                "saved": target.name,
+                "backup": backup_name,
+                "metadata": metadata,
+                "operations": applied_operations,
+                "merged": merged_from_stale_revision,
+            }
         self.publish_model_updated(
             target.name,
             metadata,

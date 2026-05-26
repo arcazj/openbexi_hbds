@@ -336,6 +336,29 @@ def main() -> int:
             expected=(400,),
         )
         assert_ok(bad_payload.get("ok") is False, "Invalid model payload was accepted")
+        duplicate_id_payload = minimal_model_payload("duplicate ids")
+        duplicate_id_payload["hypergraph"]["class"] = [{"id": "dup"}, {"id": "dup"}]
+        duplicate_id = request_json(
+            base_url,
+            f"/api/models/{SMOKE_MODEL_NAME}",
+            method="POST",
+            payload=duplicate_id_payload,
+            expected=(400,),
+        )
+        assert_ok(duplicate_id.get("error", {}).get("code") == "invalid_model", "Duplicate model ids were accepted")
+        missing_link_target_payload = minimal_model_payload("missing link target")
+        missing_link_target_payload["hypergraph"]["class"] = [{"id": "class_a"}]
+        missing_link_target_payload["hypergraph"]["link"] = [
+            {"id": "link_a", "sourceClassId": "class_a", "targetClassId": "missing_class"}
+        ]
+        missing_link_target = request_json(
+            base_url,
+            f"/api/models/{SMOKE_MODEL_NAME}",
+            method="POST",
+            payload=missing_link_target_payload,
+            expected=(400,),
+        )
+        assert_ok(missing_link_target.get("error", {}).get("code") == "invalid_model", "Broken link endpoint was accepted")
         print("PASS validation")
 
         saved_model = json.loads(json.dumps(model_payload))
