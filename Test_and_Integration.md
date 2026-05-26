@@ -26,7 +26,7 @@ Use this guide to validate:
 * API documentation and OpenAPI output
 * server connection indicator
 * collaboration panel and conflict-resolution choices
-* smoke tests, manifest validation, naming lint, productivity helper tests, and optional Maven tests
+* smoke tests, manifest validation, naming lint, productivity helper tests, browser collaboration regression, and optional Maven tests
 
 ## 2. Prerequisites
 
@@ -334,6 +334,53 @@ Expected:
 * The panel is resizable.
 * The preview can zoom in, zoom out, and fit.
 * The panel does not appear in Models view.
+* Presence updates show the remote user's selection, viewport, status, and model name without marking the remote user as editing.
+* Editing updates mark the remote user as dirty and enable the correct collaboration choices.
+* Remote disconnect or draft clear removes the remote user from the panel without leaving stale warnings.
+
+Live presence workflow:
+
+1. In window A and window B, load the same model and make no edits.
+2. In window B, select a class, select an attribute, select a link, zoom, pan, and fit the view.
+3. In window A, confirm the remote selection and viewport information update without requiring a full model merge.
+4. Close window B.
+5. Confirm window A removes the remote user after the leave or draft-clear event.
+
+Draft publishing workflow:
+
+1. In window B, move one class, edit a class name, edit an attribute name, and edit a link style.
+2. In window A, confirm the collaboration panel updates after each action.
+3. Confirm normal editing in window B remains responsive while drafts are publishing.
+4. Confirm the wait/loading popup does not appear during ordinary selection, movement, or property edits.
+5. In browser DevTools, inspect the hidden diagnostics output when available:
+
+```javascript
+JSON.parse(document.getElementById('collaboration-performance-diagnostics')?.textContent || '{}')
+```
+
+Expected diagnostics:
+
+* `draft.build.presence`, `draft.build.dirty`, `draft.publish`, `draft.network`, `panel.render`, `diff.compute`, and `preview.build` appear after exercising those paths.
+* Duplicate or coalesced draft counters may increase during rapid edits.
+* Slow samples are rare during ordinary edits and should correspond to genuinely expensive work.
+
+Lightweight draft and full snapshot fallback:
+
+1. In window B, make several small edits within 15 seconds.
+2. In window A, confirm remote status, summary, selection, and operations continue to update even when the full model snapshot is omitted.
+3. Confirm `Use Theirs` is disabled when the selected remote draft has no current full snapshot.
+4. Confirm `Merge Both` is enabled when safe operations are present.
+5. Wait for the next full snapshot interval, or force a larger edit that includes a snapshot.
+6. Confirm `Use Theirs` becomes available when a current full snapshot is received.
+
+Performance pass criteria:
+
+* ordinary local edits should feel immediate
+* remote draft updates should appear without freezing the editor
+* panel rendering should not block canvas interaction
+* preview generation should be throttled and should not run on every presence update
+* full snapshots should not be sent on every small edit
+* the wait/loading popup should appear only for genuinely long-running work, such as server load/save, large merge, or large preview generation
 
 ## 13. Remote Changes Vs Mine
 
@@ -355,6 +402,30 @@ Expected:
 * timestamps appear on all rows
 * old timestamps are not overwritten by later updates
 * repeated unchanged differences do not create duplicate rows
+* omitted full snapshots show operation summaries instead of stale model differences
+* preserved previews are labelled clearly when the latest update is lightweight
+
+Operation-based merge coverage:
+
+1. In window B, move a class.
+2. In window A, choose `Merge Both` and confirm the move applies.
+3. Reload the model from the server and confirm the move persists.
+4. In window B, rename a class and change its rendering.
+5. In window A, choose `Merge Both` and confirm both fields apply.
+6. In window B, add a class, add a link to it, rename the new class, and move it.
+7. In window A, choose `Merge Both` and confirm the new class and link apply together.
+8. In window B, delete an existing link.
+9. In window A, choose `Merge Both` and confirm the link is removed.
+10. In window B, delete an existing class.
+11. In window A, choose `Merge Both` and confirm the class and its links are removed.
+12. In window B, change a class parent hyperclass.
+13. In window A, choose `Merge Both` and confirm both `parentClassId` and parent `children` membership are correct.
+
+Fallback merge coverage:
+
+1. In window B, use JSON editing, reset, duplicate/paste, or another complex edit path.
+2. In window A, confirm the UI falls back to full snapshot merge when operations are not sufficient.
+3. Confirm no partial operation merge is offered for an incomplete operation buffer.
 
 ## 14. Conflict Choice Test
 
@@ -385,6 +456,28 @@ Expected:
 * simple non-conflicting changes can merge
 * conflicting same-property changes warn or require a manual choice
 * action buttons remain compact and readable
+* `Use Theirs` is unavailable when only lightweight operations are present
+* `Keep Mine` clears or ignores the remote draft and allows saving the local state
+* stale server revisions return conflict warnings instead of overwriting remote saves
+
+Save conflict workflow:
+
+1. In window A and window B, load the same server model.
+2. In window B, make a change and save.
+3. In window A, make a different local change without reloading.
+4. Try to save in window A.
+5. Confirm the UI blocks or warns about the remote edit and presents `Merge Both`, `Use Theirs`, or `Keep Mine`.
+6. Resolve with `Merge Both` and save.
+7. Reload in both windows and confirm the final model is correct.
+
+Same-field conflict workflow:
+
+1. In window A, rename class `X` to one value.
+2. In window B, rename the same class `X` to a different value.
+3. In window A, choose `Merge Both`.
+4. Confirm a merge conflict warning appears and neither value is silently lost.
+5. Resolve with `Use Theirs` or `Keep Mine`.
+6. Save and reload to confirm the selected resolution persists.
 
 ## 15. External Client Collaboration Test
 
@@ -422,6 +515,151 @@ Validate:
 * browser UI shows the external client in the collaboration dropdown
 * selection and draft status appear
 * clearing the draft removes the external client panel state
+* operation-only drafts show readable operation summaries
+* operation-only drafts can be merged when the base model revision matches
+* stale operation drafts return a conflict instead of overwriting changed fields
+
+Example operation draft shape:
+
+```json
+{
+  "clientName": "External Python Client",
+  "mode": "editing",
+  "dirty": true,
+  "isDirty": true,
+  "baseModelRevision": "revision-from-loaded-model",
+  "modelOmitted": true,
+  "operations": [
+    {
+      "type": "updateClass",
+      "targetId": "class_1",
+      "patch": {
+        "name": "Updated by external client"
+      }
+    }
+  ],
+  "selection": {
+    "selectedElementId": "class_1"
+  }
+}
+```
+
+External client operation checks:
+
+1. Load a model through `/api/models/{modelName}` and record its revision.
+2. Publish an operation-only draft using the revision as `baseModelRevision`.
+3. Confirm the browser shows the external draft without requiring a full model snapshot.
+4. Merge from the browser and confirm the operation applies.
+5. Publish a stale operation draft after another client changes the same field.
+6. Confirm merge reports a conflict.
+7. Clear the external draft and confirm the browser panel removes it.
+
+## 15A. Large-Model Collaboration Performance Test
+
+Use this section whenever collaboration publishing, remote draft handling, preview generation, merge/diff rendering, or wait/loading behavior changes.
+
+Large model setup:
+
+1. Start connected server mode.
+2. Open two browser windows or two browser profiles.
+3. In both windows, open `Edit`.
+4. Load the largest available model from `models/`. If no large model exists, use the densest linked or hyperclass model available.
+5. Fit the model in both windows.
+6. Open browser DevTools in both windows.
+
+Rapid edit workload:
+
+1. In window B, drag 10 different classes in sequence.
+2. Rename 10 classes or hyperclasses.
+3. Rename 10 attributes.
+4. Change 5 link styles or route presets.
+5. Add 5 classes.
+6. Add 5 links.
+7. Delete 2 links.
+8. Delete 1 non-critical class.
+9. Reparent one class into a hyperclass and then back out.
+10. Continue interacting with the canvas while updates publish.
+
+Expected large-model behavior:
+
+* window B remains responsive while publishing drafts
+* window A receives remote updates without freezing normal pan, zoom, or selection
+* the collaboration panel updates are batched and do not visibly stutter on every event
+* full snapshots are throttled and are not sent after every small edit
+* operation updates are used for safe class, link, attribute, move, create, delete, and parent-change paths
+* complex unsupported paths fall back to full snapshots without offering incomplete operation merges
+* preview generation is throttled and does not block ordinary editing
+* merge/diff rendering is bounded and long lists remain scrollable
+* the wait/loading popup appears only during genuinely long-running work
+* the centered canvas collaboration progress indicator appears only after the delayed threshold for long preview, diff, merge, apply, or server sync work
+* the centered canvas collaboration progress indicator uses `pointer-events: none` and does not prevent selecting, moving, panning, or zooming the model
+* no browser console errors appear
+
+Performance diagnostics check:
+
+1. In each browser window, run:
+
+```javascript
+JSON.parse(document.getElementById('collaboration-performance-diagnostics')?.textContent || '{}')
+```
+
+2. Inspect counters and timings.
+3. Confirm repeated rapid edits increase coalescing or duplicate-skip counters.
+4. Confirm `preview.build` count is much lower than the number of presence or small edit updates.
+5. Confirm `diff.compute` is bounded and does not grow with every remote update.
+6. Confirm slow samples have a clear reason, such as large preview or merge work.
+
+Large-model pass criteria:
+
+* collaboration remains correct after the workload
+* `Merge Both`, `Use Theirs`, and `Keep Mine` still produce correct final models
+* save conflict detection still blocks unsafe saves
+* normal edits feel responsive in both windows
+* large-model collaboration does not create excessive wait popups
+* remote presence and live preview continue to work
+* no unnecessary full snapshots are sent or rendered during rapid small edits
+
+## 15B. Sequential Live Remote Operations Regression
+
+Use this section whenever `Live Collaboration`, draft publishing, remote draft refresh, merge policy, or the `Remote operations` UI changes.
+
+Automated command:
+
+```powershell
+py scripts\collaboration_browser_regression.py
+```
+
+The browser regression opens two real clients and publishes a sequence of operation-only drafts from one remote client. The receiving client must update the visible `Remote operations` list for each draft in real time, with no stale operation rows and no `No diagram differences detected` placeholder while operations exist.
+
+Sequential operation coverage:
+
+* class rename
+* class move and position values
+* combined class update with name, position, attributes, parent hyperclass, fill color, border color, corner radius, and text color
+* class rendering update with material, opacity, attribute shape and size, connection style, and font family
+* layout display operation
+* font display operation
+* scene/background display operation
+* viewport/view display operation
+* link update with name, label text, line color, width, and arrowhead type
+* class create with name, parent, position, and attributes
+* class delete
+* link create with name, source, and target
+* link delete
+
+Expected sequential behavior:
+
+* every publish replaces the previous remote operation text for that same client
+* new property names and values appear without waiting for a full snapshot
+* prior unique values disappear when the next draft arrives
+* merge is enabled for mergeable class and link CRUD operations
+* merge is disabled for layout, font, scene, and view display-only operations
+* normal sequential updates do not show a wait/loading popup
+* normal sequential updates do not show the canvas collaboration progress indicator
+* the canvas collaboration progress indicator appears for genuinely long work, explains the active task, and does not block pointer interaction
+* expensive remote preview and diff rendering is deferred so selection, movement, pan, and zoom stay responsive during collaboration updates
+* each remote operation update appears within the browser regression timing budget
+* the mixed operation matrix still renders all covered operation types and disables merge when non-mergeable display operations are present
 
 ## 16. Rendering And Navigation Regression
 
@@ -551,7 +789,7 @@ Known limitations:
 Run Python compile checks:
 
 ```powershell
-py -m py_compile server.py scripts\smoke_server.py tools\validate_manifests.py tools\validate_models.py tools\validate_test_models.py tools\lint_model_naming.py
+py -m py_compile server.py scripts\smoke_server.py scripts\collaboration_browser_regression.py tools\validate_manifests.py tools\validate_models.py tools\validate_test_models.py tools\lint_model_naming.py
 ```
 
 Run the full server smoke suite:
@@ -590,6 +828,20 @@ Run productivity helper tests:
 node scripts\productivity_helpers_test.mjs
 ```
 
+Run collaboration draft helper tests:
+
+```powershell
+node scripts\collaboration_drafts_test.mjs
+```
+
+Run the browser-level collaboration regression:
+
+```powershell
+py scripts\collaboration_browser_regression.py
+```
+
+This opens two headless Edge/Chrome clients against a temporary server model, verifies real draft publishing, sequential real-time `Remote operations` list updates, remote operation rendering for class, link, layout, font, scene, view, movement, rendering, parent, attribute, create, and delete updates, merge behavior, collaboration performance diagnostics, absence of normal-update wait/status dialogs, and the non-blocking long-work canvas progress indicator.
+
 Run Java/Maven tests if Maven is installed:
 
 ```powershell
@@ -601,6 +853,7 @@ Run JavaScript syntax checks for touched modules:
 ```powershell
 Get-Content -Raw js\test_dynamic_hbds_layout.js | node --input-type=module --check
 Get-Content -Raw js\hbds_model_productivity.js | node --input-type=module --check
+Get-Content -Raw js\hbds_collaboration_drafts.js | node --input-type=module --check
 Get-Content -Raw js\hbds_collaboration_preview.js | node --input-type=module --check
 Get-Content -Raw js\hbds_floating_panel.js | node --input-type=module --check
 ```
@@ -659,11 +912,28 @@ Collaboration:
 * two browser windows on same model
 * two browser windows on different models
 * external client draft
+* live presence without dirty state
+* lightweight remote draft update
+* full snapshot fallback
+* operation-based merge for move, rename, rendering, attribute, create, delete, link, and parent-change paths
+* sequential `Remote operations` updates for class, link, layout, font, scene, view, parent, rendering, attribute, create, and delete operations
+* `Remote operations` never reports `No diagram differences detected` while operation rows exist
 * remote movement
 * remote attribute change
 * remote link change
+* remote class/link create and delete
+* `Use Theirs` with a current full snapshot
+* `Use Theirs` disabled for operation-only drafts
+* `Keep Mine` and follow-up save
 * same-property conflict
 * different-property merge
+* stale operation conflict
+* stale save conflict
+* preview generation throttling
+* panel render batching
+* diagnostics output review
+* large-model rapid edit workload
+* wait/loading popup only for long-running work
 * disconnect/reconnect
 * panel resize and drag
 
@@ -731,13 +1001,15 @@ OpenAPI or docs returns JSON when HTML was expected:
 
 Before release:
 
-* run `py -m py_compile server.py scripts\smoke_server.py tools\validate_manifests.py tools\validate_models.py tools\validate_test_models.py tools\lint_model_naming.py`
+* run `py -m py_compile server.py scripts\smoke_server.py scripts\collaboration_browser_regression.py tools\validate_manifests.py tools\validate_models.py tools\validate_test_models.py tools\lint_model_naming.py`
 * run `py scripts\smoke_server.py`
 * run `py tools\validate_manifests.py`
 * run `py tools\validate_models.py`
 * run `py tools\validate_test_models.py`
 * run `py tools\lint_model_naming.py`
 * run `node scripts\productivity_helpers_test.mjs`
+* run `node scripts\collaboration_drafts_test.mjs`
+* run `py scripts\collaboration_browser_regression.py`
 * run JavaScript syntax checks for touched modules
 * run `mvn test` if Maven is installed
 * run `git diff --check`
@@ -749,8 +1021,11 @@ Before release:
 * verify model tree search and selection
 * verify productivity tools for duplicate, paste, bulk attributes, link routes, and selected export
 * verify collaboration with two browser windows
+* verify large-model collaboration performance
+* verify operation-based merge and full snapshot fallback
 * verify per-change timestamps in collaboration
 * verify `Merge Both`, `Use Theirs`, and `Keep Mine`
+* verify wait/loading popup behavior during collaboration
 * verify server disconnect/reconnect status
 * verify no temporary smoke files remain
 * review `git status --short`

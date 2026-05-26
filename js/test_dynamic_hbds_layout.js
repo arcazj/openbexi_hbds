@@ -56,6 +56,20 @@ import {
   modelNameFromValue,
   serverModelValue
 } from './hbds_server_api.js?v=server-api-20260524f';
+import {
+  collaborationWorkStatusDecision,
+  coalesceDraftOperations,
+  coalesceDraftPublishRequest,
+  createBoundedChangeCollector,
+  createCollaborationPerformanceTracker,
+  draftPublishSignature,
+  estimateDraftModelBytes,
+  isMergeableDraftOperation,
+  mergeDraftUpdate,
+  shouldBuildDraftPreview,
+  shouldKeepCollaborationStatusVisible,
+  shouldIncludeDraftModel
+} from './hbds_collaboration_drafts.js?v=collab-drafts-20260526b';
 import { renderDraftDiagramSvg } from './hbds_collaboration_preview.js?v=collab-preview-20260524d';
 import { bindFloatingPanel, clampFloatingPanel } from './hbds_floating_panel.js?v=floating-panel-20260524d';
 import {
@@ -93,18 +107,51 @@ let remoteRefreshTimer = null;
 let remoteRefreshInFlight = false;
 const remoteDrafts = new Map();
 const collaborationChangeHistory = new Map();
+const collaborationDiffCache = new Map();
+const collaborationPerformance = createCollaborationPerformanceTracker({ maxSamples: 80, slowThresholdMs: 120 });
 let selectedRemoteClientId = '';
 let draftPublishTimer = null;
+let scheduledDraftPublish = null;
+let pendingDraftPublish = null;
+let draftPublishInFlight = false;
+let collaborationPanelRenderTimer = null;
+let collaborationPerformanceDiagnosticsTimer = null;
+let remoteDraftRefreshTimer = null;
+let remoteDraftRefreshInFlight = false;
+let collaborationPreviewRenderToken = 0;
+let collaborationStatusTaskId = 0;
+let collaborationStatusHideTimer = null;
+let collaborationStatusVisibleAt = 0;
+let collaborationCanvasInteractionUntil = 0;
+const collaborationStatusTasks = new Map();
 let localDraftModelName = '';
 let localDraftDirty = false;
 let savedSnapshotKey = '';
 let lastCollaborationPreviewSnapshot = null;
 let lastCollaborationPreviewSnapshotAt = 0;
+let lastCollaborationDraftSnapshotAt = 0;
+let lastCollaborationDraftSnapshotKey = '';
+let lastCollaborationDraftSnapshotModelName = '';
+let lastPublishedDraftSignature = '';
+let localDraftOperations = [];
+let localDraftDisplayOperations = [];
+let localDraftOperationsOverflow = false;
+let nextLocalDraftOperationId = 1;
 let collaborationBaseModel = null;
 let collaborationWarningVisible = false;
 let collaborationPreviewZoom = 1;
 const collaborationLivePreviewZoomByDraft = new Map();
-const COLLABORATION_DIFF_DEFAULT_LIMIT = Number.POSITIVE_INFINITY;
+const COLLABORATION_DIFF_DEFAULT_LIMIT = 80;
+const COLLABORATION_PANEL_RENDER_DELAY_MS = 90;
+const COLLABORATION_DEFERRED_RENDER_TIMEOUT_MS = 220;
+const COLLABORATION_STATUS_SHOW_AFTER_MS = 900;
+const COLLABORATION_STATUS_MIN_VISIBLE_MS = 450;
+const COLLABORATION_CANVAS_INTERACTION_IDLE_MS = 360;
+const COLLABORATION_REMOTE_DRAFT_REFRESH_INTERVAL_MS = 2500;
+const COLLABORATION_DRAFT_PUBLISH_DELAY_MS = 450;
+const COLLABORATION_DRAFT_PUBLISH_BACKOFF_MS = 120;
+const COLLABORATION_DRAFT_MAX_OPERATIONS = 80;
+const COLLABORATION_DRAFT_MAX_DISPLAY_OPERATIONS = 16;
 const COLLABORATION_PREVIEW_MAX_WIDTH = 1024;
 const COLLABORATION_PREVIEW_MAX_HEIGHT = 1024;
 const COLLABORATION_PREVIEW_MAX_DATA_URL_CHARS = 480000;
@@ -1075,6 +1122,148 @@ function setStatus(message, tone = 'ok') {
   status.textContent = message;
 }
 
+function markCanvasInteraction() {
+  collaborationCanvasInteractionUntil = collaborationPerfNow() + COLLABORATION_CANVAS_INTERACTION_IDLE_MS;
+}
+
+function isCanvasInteractionActive() {
+  return collaborationPerfNow() < collaborationCanvasInteractionUntil;
+}
+
+function bindCanvasInteractionTracking() {
+  const container = $('container');
+  if (!container) return;
+  container.addEventListener('pointerdown', markCanvasInteraction, { passive: true });
+  container.addEventListener('pointermove', event => {
+    if (event.buttons) markCanvasInteraction();
+  }, { passive: true });
+  container.addEventListener('wheel', markCanvasInteraction, { passive: true });
+  window.addEventListener('pointerup', markCanvasInteraction, { passive: true });
+}
+
+function startCollaborationWorkStatus(kind = 'sync', options = {}) {
+  const token = ++collaborationStatusTaskId;
+  const startedAt = collaborationPerfNow();
+  const showAfterMs = Number.isFinite(Number(options.showAfterMs))
+    ? Number(options.showAfterMs)
+    : COLLABORATION_STATUS_SHOW_AFTER_MS;
+  const task = {
+    token,
+    kind,
+    startedAt,
+    showAfterMs,
+    message: options.message || '',
+    visible: false,
+    timer: null
+  };
+  collaborationStatusTasks.set(token, task);
+  window.clearTimeout(collaborationStatusHideTimer);
+  task.timer = window.setTimeout(() => {
+    const current = collaborationStatusTasks.get(token);
+    if (!current) return;
+    const decision = collaborationWorkStatusDecision({
+      kind: current.kind,
+      message: current.message,
+      startedAt: current.startedAt,
+      now: collaborationPerfNow(),
+      showAfterMs: current.showAfterMs
+    });
+    if (!decision.show) return;
+    current.visible = true;
+    showCollaborationWorkStatus(decision.message, token);
+    countCollaborationPerformance('status.shown');
+  }, showAfterMs);
+  return () => finishCollaborationWorkStatus(token);
+}
+
+function showCollaborationWorkStatus(message, token) {
+  const status = $('canvas-collaboration-status');
+  if (!status) return;
+  const label = status.querySelector('[data-collaboration-status-text]') || status;
+  label.textContent = message;
+  status.dataset.token = String(token);
+  status.hidden = false;
+  collaborationStatusVisibleAt = collaborationPerfNow();
+}
+
+function finishCollaborationWorkStatus(token) {
+  const task = collaborationStatusTasks.get(token);
+  if (!task) return;
+  window.clearTimeout(task.timer);
+  collaborationStatusTasks.delete(token);
+  const status = $('canvas-collaboration-status');
+  if (collaborationStatusTasks.size > 0) {
+    const latest = [...collaborationStatusTasks.values()].at(-1);
+    if (status && !status.hidden && latest) {
+      const decision = collaborationWorkStatusDecision({
+        kind: latest.kind,
+        message: latest.message,
+        startedAt: latest.startedAt,
+        now: collaborationPerfNow(),
+        showAfterMs: latest.showAfterMs,
+        force: true
+      });
+      latest.visible = true;
+      showCollaborationWorkStatus(decision.message, latest.token);
+    }
+    return;
+  }
+  if (!status || status.hidden) return;
+  const hide = () => {
+    if (collaborationStatusTasks.size > 0) return;
+    status.hidden = true;
+    delete status.dataset.token;
+  };
+  window.clearTimeout(collaborationStatusHideTimer);
+  if (shouldKeepCollaborationStatusVisible({
+    visibleAt: collaborationStatusVisibleAt,
+    now: collaborationPerfNow(),
+    minVisibleMs: COLLABORATION_STATUS_MIN_VISIBLE_MS
+  })) {
+    const remaining = Math.max(0, COLLABORATION_STATUS_MIN_VISIBLE_MS - (collaborationPerfNow() - collaborationStatusVisibleAt));
+    collaborationStatusHideTimer = window.setTimeout(hide, remaining);
+    return;
+  }
+  hide();
+}
+
+async function withCollaborationWorkStatus(kind, action, options = {}) {
+  const finish = startCollaborationWorkStatus(kind, options);
+  try {
+    return await action();
+  } finally {
+    finish();
+  }
+}
+
+function getCollaborationStatusState() {
+  const status = $('canvas-collaboration-status');
+  if (!status) return { visible: false, text: '', pointerEvents: '' };
+  const rect = status.getBoundingClientRect();
+  return {
+    visible: !status.hidden && rect.width > 0 && rect.height > 0 && getComputedStyle(status).display !== 'none',
+    text: status.textContent.trim(),
+    pointerEvents: getComputedStyle(status).pointerEvents
+  };
+}
+
+async function triggerCollaborationStatusForTest(kind = 'sync', durationMs = 100, options = {}) {
+  const finish = startCollaborationWorkStatus(kind, options);
+  await new Promise(resolve => window.setTimeout(resolve, durationMs));
+  const shown = getCollaborationStatusState();
+  const centerX = Math.round(window.innerWidth / 2);
+  const centerY = Math.round(window.innerHeight / 2);
+  const centerElement = document.elementFromPoint(centerX, centerY);
+  const status = $('canvas-collaboration-status');
+  finish();
+  await new Promise(resolve => window.setTimeout(resolve, COLLABORATION_STATUS_MIN_VISIBLE_MS + 80));
+  return {
+    shown,
+    hiddenAfterFinish: !getCollaborationStatusState().visible,
+    centerHitsStatus: Boolean(status && centerElement && status.contains(centerElement))
+  };
+}
+
 function validationIssueTargetId(message) {
   const text = String(message || '');
   const patterns = [
@@ -1487,6 +1676,15 @@ function renderModelTree() {
 
 function setModelTreeCollapsed(collapsed) {
   document.body.classList.toggle('model-tree-collapsed', Boolean(collapsed));
+  const container = $('container');
+  if (container) {
+    container.style.left = collapsed ? '0px' : '';
+  }
+  const sidebar = $('model-tree-sidebar');
+  if (sidebar) {
+    sidebar.style.width = collapsed ? '0px' : '';
+    sidebar.style.minWidth = collapsed ? '0px' : '';
+  }
   const button = $('model-tree-toggle');
   if (button) {
     button.textContent = collapsed ? 'Show Tree' : 'Hide';
@@ -1702,10 +1900,10 @@ function isPlainObject(value) {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value));
 }
 
-function modelSnapshotKey() {
+function modelSnapshotKey(model = getData()) {
   try {
     return JSON.stringify({
-      model: getData(),
+      model,
       scene: getSceneSettings(),
       layout: getLayoutSettings(),
       font: getFontSettings()
@@ -1715,10 +1913,12 @@ function modelSnapshotKey() {
   }
 }
 
-function updateSaveStatus() {
+function updateSaveStatus(options = {}) {
   const chip = $('save-status');
   if (!chip) return;
-  const dirty = Boolean(savedSnapshotKey && modelSnapshotKey() !== savedSnapshotKey);
+  const dirty = Object.prototype.hasOwnProperty.call(options, 'dirty')
+    ? Boolean(options.dirty)
+    : Boolean(savedSnapshotKey && modelSnapshotKey() !== savedSnapshotKey);
   chip.className = 'status-chip save-status';
   chip.classList.add(dirty ? 'warn' : 'ok');
   chip.textContent = dirty ? 'Unsaved changes' : 'Saved';
@@ -1732,6 +1932,7 @@ function updateSaveStatus() {
 function markSavedState() {
   savedSnapshotKey = modelSnapshotKey();
   localDraftDirty = false;
+  clearLocalDraftOperations();
   updateSaveStatus();
 }
 
@@ -2148,19 +2349,216 @@ function canvasToPreviewDataUrl(canvas, quality = COLLABORATION_PREVIEW_JPEG_QUA
 function clearCollaborationPreviewSnapshotCache() {
   lastCollaborationPreviewSnapshot = null;
   lastCollaborationPreviewSnapshotAt = 0;
+  clearCollaborationDraftSnapshotCache();
+}
+
+function clearCollaborationDraftSnapshotCache() {
+  lastCollaborationDraftSnapshotAt = 0;
+  lastCollaborationDraftSnapshotKey = '';
+  lastCollaborationDraftSnapshotModelName = '';
+  lastPublishedDraftSignature = '';
+}
+
+function clearLocalDraftOperations() {
+  localDraftOperations = [];
+  localDraftDisplayOperations = [];
+  localDraftOperationsOverflow = false;
+  nextLocalDraftOperationId = 1;
+}
+
+function invalidateLocalDraftOperations(reason = 'untracked') {
+  if (!localDraftOperations.length && localDraftOperationsOverflow) return;
+  localDraftOperations = [];
+  localDraftOperationsOverflow = true;
+  countCollaborationPerformance(`draft.operation.invalidated.${reason}`);
+}
+
+function recordLocalDraftOperation(operationOrType, targetId, patch) {
+  if (localDraftOperationsOverflow) return false;
+  const operation = isPlainObject(operationOrType)
+    ? cloneValue(operationOrType)
+    : { type: operationOrType, targetId, patch: cloneValue(patch) };
+  if (!operation?.type) return false;
+  if ((operation.type === 'updateClass' || operation.type === 'updateLink') && (operation.targetId == null || !isPlainObject(operation.patch))) {
+    return false;
+  }
+  operation.opId = operation.opId || `draft-${nextLocalDraftOperationId++}`;
+  operation.updatedAt = operation.updatedAt || new Date().toISOString();
+  const result = coalesceDraftOperations(localDraftOperations, operation, {
+    maxOperations: COLLABORATION_DRAFT_MAX_OPERATIONS
+  });
+  if (result.overflow) {
+    localDraftOperations = [];
+    localDraftOperationsOverflow = true;
+    countCollaborationPerformance('draft.operation.overflow');
+    return false;
+  }
+  localDraftOperations = result.operations;
+  countCollaborationPerformance('draft.operation.recorded');
+  return true;
+}
+
+function draftOperationsForPublish() {
+  const mergeableOperations = localDraftOperationsOverflow ? [] : localDraftOperations;
+  return cloneValue([...mergeableOperations, ...localDraftDisplayOperations]);
+}
+
+function recordLocalDraftDisplayOperation(type, patch = {}, options = {}) {
+  const cleanType = String(type || 'updateModel').trim();
+  if (!cleanType) return false;
+  const targetId = options.targetId || 'model';
+  const operation = {
+    opId: `draft-display-${cleanType}-${targetId}`,
+    type: cleanType,
+    targetId,
+    patch: cloneValue(patch),
+    mergeable: false,
+    updatedAt: new Date().toISOString()
+  };
+  const existingIndex = localDraftDisplayOperations.findIndex(item => item.opId === operation.opId);
+  if (existingIndex >= 0) {
+    localDraftDisplayOperations[existingIndex] = operation;
+  } else {
+    localDraftDisplayOperations.push(operation);
+  }
+  while (localDraftDisplayOperations.length > COLLABORATION_DRAFT_MAX_DISPLAY_OPERATIONS) {
+    localDraftDisplayOperations.shift();
+  }
+  countCollaborationPerformance('draft.operation.display_recorded');
+  return true;
+}
+
+function recordUntrackedDraftDisplayOperation(reason) {
+  const cleanReason = String(reason || 'Updated model');
+  if (/layout/i.test(cleanReason)) {
+    return recordLocalDraftDisplayOperation('updateLayout', { layout: getLayoutSettings() });
+  }
+  if (/font/i.test(cleanReason)) {
+    return recordLocalDraftDisplayOperation('updateFont', { font: getFontSettings() });
+  }
+  if (/scene|light|background/i.test(cleanReason)) {
+    return recordLocalDraftDisplayOperation('updateScene', { sceneSettings: getSceneSettings() });
+  }
+  if (/fit|view|zoom|pan/i.test(cleanReason)) {
+    return recordLocalDraftDisplayOperation('updateView', { viewport: getSerializableViewState() });
+  }
+  return recordLocalDraftDisplayOperation('updateModel', { status: cleanReason });
+}
+
+function draftPatchFromPath(path, value) {
+  if (!Array.isArray(path) || !path.length) return {};
+  return setDeepValue({}, path, cloneValue(value));
+}
+
+function classDraftPatchFromUpdatedEntity(path, value, entity) {
+  const pathKey = path.join('.');
+  if (pathKey === 'rendering.class.material' && entity?.rendering?.class) {
+    return { rendering: { class: cloneValue(entity.rendering.class) } };
+  }
+  const patch = draftPatchFromPath(path, value);
+  if (pathKey === 'rendering.class.color') {
+    setDeepValue(patch, ['rendering', 'class', 'metallicColor'], value);
+  }
+  return patch;
+}
+
+function linkDraftPatchFromUpdatedEntity(path, value) {
+  const pathKey = path.join('.');
+  const patch = draftPatchFromPath(path, value);
+  if (pathKey === 'rendering.labelText') patch.name = value;
+  return patch;
+}
+
+function recordClassDraftUpdate(classId, patch) {
+  return recordLocalDraftOperation('updateClass', classId, patch);
+}
+
+function recordClassDraftCreate(node) {
+  if (!node?.id) return false;
+  return recordLocalDraftOperation({
+    type: 'createClass',
+    targetId: node.id,
+    class: cloneValue(node)
+  });
+}
+
+function recordClassDraftDelete(classId) {
+  if (classId == null) return false;
+  return recordLocalDraftOperation({
+    type: 'deleteClass',
+    targetId: classId
+  });
+}
+
+function recordLinkDraftUpdate(linkId, patch) {
+  return recordLocalDraftOperation('updateLink', linkId, patch);
+}
+
+function recordLinkDraftCreate(link) {
+  if (!link?.id) return false;
+  return recordLocalDraftOperation({
+    type: 'createLink',
+    targetId: link.id,
+    link: cloneValue(link)
+  });
+}
+
+function recordLinkDraftDelete(linkId) {
+  if (linkId == null) return false;
+  return recordLocalDraftOperation({
+    type: 'deleteLink',
+    targetId: linkId
+  });
+}
+
+function recordAttributeOwnerDraftUpdate(ownerId) {
+  const owner = nodeById(ownerId);
+  if (!owner) return false;
+  return recordClassDraftUpdate(owner.id, { attributes: cloneValue(owner.attributes || []) });
+}
+
+function recordParentChildrenDraftUpdate(parentId) {
+  const parent = nodeById(parentId);
+  if (!parent || parent.type !== 'hyperclass') return true;
+  return recordClassDraftUpdate(parent.id, { children: cloneValue(parent.children || []) });
+}
+
+function draftOperationTargetId(operation) {
+  if (!operation || typeof operation !== 'object') return null;
+  return operation.targetId
+    ?? operation.classId
+    ?? operation.linkId
+    ?? operation.id
+    ?? operation.class?.id
+    ?? operation.node?.id
+    ?? operation.link?.id
+    ?? operation.value?.id
+    ?? null;
+}
+
+function localDraftHasCreatedClassDependency(classIds) {
+  const ids = new Set([...classIds].map(id => String(id)));
+  return localDraftOperations.some(operation => {
+    if (operation?.type === 'createClass' && ids.has(String(draftOperationTargetId(operation)))) return true;
+    const link = operation?.type === 'createLink' ? (operation.link || operation.value) : null;
+    return Boolean(link && (ids.has(String(link.sourceClassId)) || ids.has(String(link.targetClassId))));
+  });
 }
 
 async function buildCollaborationPreviewSnapshot(options = {}) {
   if (!renderer || !labelRenderer || !nodes().length) return null;
+  const startedAt = collaborationPerfNow();
   const now = Date.now();
   if (
     !options.force &&
     lastCollaborationPreviewSnapshot &&
     now - lastCollaborationPreviewSnapshotAt < COLLABORATION_PREVIEW_MIN_INTERVAL_MS
   ) {
+    countCollaborationPerformance('preview.cache.hit');
     return lastCollaborationPreviewSnapshot;
   }
 
+  const finishStatus = startCollaborationWorkStatus('preview');
   try {
     const metrics = getLiveSnapshotMetrics();
     let scale = 1;
@@ -2177,6 +2575,8 @@ async function buildCollaborationPreviewSnapshot(options = {}) {
 
     if (encoded.dataUrl.length > COLLABORATION_PREVIEW_MAX_DATA_URL_CHARS) {
       addLog(`Skipped collaboration preview snapshot (${encoded.dataUrl.length} chars)`);
+      countCollaborationPerformance('preview.skipped.too_large');
+      recordCollaborationPerformance('preview.build', startedAt, { result: 'too-large', chars: encoded.dataUrl.length });
       return lastCollaborationPreviewSnapshot;
     }
 
@@ -2194,10 +2594,19 @@ async function buildCollaborationPreviewSnapshot(options = {}) {
       selection: getDraftSelection()
     };
     lastCollaborationPreviewSnapshotAt = now;
+    recordCollaborationPerformance('preview.build', startedAt, {
+      width: size.width,
+      height: size.height,
+      chars: encoded.dataUrl.length
+    });
     return lastCollaborationPreviewSnapshot;
   } catch (error) {
     addLog(`Collaboration preview snapshot failed: ${error?.message || error}`);
+    countCollaborationPerformance('preview.failed');
+    recordCollaborationPerformance('preview.build', startedAt, { result: 'failed' });
     return lastCollaborationPreviewSnapshot;
+  } finally {
+    finishStatus();
   }
 }
 
@@ -2532,6 +2941,47 @@ function getRemoteDraftList() {
     .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
 }
 
+function storeRemoteDraft(draft) {
+  if (!draft?.clientId) return;
+  const existing = remoteDrafts.get(draft.clientId);
+  remoteDrafts.set(draft.clientId, mergeDraftUpdate(existing, draft));
+}
+
+function removeMissingRemoteDrafts(modelName, seenClientIds) {
+  if (!modelName) return;
+  for (const [clientId, draft] of remoteDrafts.entries()) {
+    if (draft?.modelName !== modelName || seenClientIds.has(clientId)) continue;
+    clearCollaborationChangeHistory(clientId, modelName);
+    clearCollaborationLivePreviewZoomForClient(clientId);
+    remoteDrafts.delete(clientId);
+  }
+}
+
+function scheduleRemoteDraftRefreshLoop() {
+  window.clearTimeout(remoteDraftRefreshTimer);
+  remoteDraftRefreshTimer = null;
+  if (!COLLABORATION_ENABLED || !serverConnected || !getSelectedCollaborationModelName()) return;
+  remoteDraftRefreshTimer = window.setTimeout(async () => {
+    remoteDraftRefreshTimer = null;
+    await refreshRemoteDraftsForCurrentModel({ immediate: false });
+    scheduleRemoteDraftRefreshLoop();
+  }, COLLABORATION_REMOTE_DRAFT_REFRESH_INTERVAL_MS);
+}
+
+function scheduleCollaborationPanelUpdate(options = {}) {
+  if (options.immediate === true) {
+    window.clearTimeout(collaborationPanelRenderTimer);
+    collaborationPanelRenderTimer = null;
+    updateCollaborationPanel();
+    return;
+  }
+  if (collaborationPanelRenderTimer) return;
+  collaborationPanelRenderTimer = window.setTimeout(() => {
+    collaborationPanelRenderTimer = null;
+    requestAnimationFrame(updateCollaborationPanel);
+  }, COLLABORATION_PANEL_RENDER_DELAY_MS);
+}
+
 function getBlockingRemoteDraftList() {
   return getRemoteDraftList().filter(isEditingRemoteDraft);
 }
@@ -2549,11 +2999,15 @@ function selectedRemoteDraft() {
 }
 
 function updateCollaborationPanel() {
+  const startedAt = collaborationPerfNow();
   const drafts = getRemoteDraftList();
   const panel = $('collaboration-split');
   const select = $('collaboration-client-select');
   const count = $('collaboration-count');
-  if (!panel || !select || !count) return;
+  if (!panel || !select || !count) {
+    recordCollaborationPerformance('panel.render', startedAt, { result: 'missing-elements' });
+    return;
+  }
 
   const hasDrafts = drafts.length > 0;
   panel.hidden = !hasDrafts;
@@ -2565,6 +3019,7 @@ function updateCollaborationPanel() {
     select.innerHTML = '';
     renderCollaborationPreview(null);
     setCollaborationWarning(false);
+    recordCollaborationPerformance('panel.render', startedAt, { drafts: 0 });
     return;
   }
 
@@ -2582,6 +3037,7 @@ function updateCollaborationPanel() {
   select.value = selectedRemoteClientId;
   renderCollaborationPreview(selectedRemoteDraft());
   requestAnimationFrame(() => clampFloatingPanel(panel));
+  recordCollaborationPerformance('panel.render', startedAt, { drafts: drafts.length });
 }
 
 function collaborationConnectionLabel(userCount) {
@@ -2607,6 +3063,41 @@ function setCollaborationWarning(visible, message = '') {
   if (!warning) return;
   warning.hidden = !collaborationWarningVisible;
   if (message) warning.textContent = message;
+}
+
+function collaborationPerfNow() {
+  return typeof performance !== 'undefined' && typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
+}
+
+function recordCollaborationPerformance(name, startedAt, details = {}) {
+  collaborationPerformance.record(name, collaborationPerfNow() - startedAt, details);
+  scheduleCollaborationPerformanceDiagnosticsUpdate();
+}
+
+function countCollaborationPerformance(name, amount = 1) {
+  collaborationPerformance.count(name, amount);
+  scheduleCollaborationPerformanceDiagnosticsUpdate();
+}
+
+function scheduleCollaborationPerformanceDiagnosticsUpdate() {
+  if (collaborationPerformanceDiagnosticsTimer) return;
+  collaborationPerformanceDiagnosticsTimer = window.setTimeout(() => {
+    collaborationPerformanceDiagnosticsTimer = null;
+    updateCollaborationPerformanceDiagnostics();
+  }, 120);
+}
+
+function updateCollaborationPerformanceDiagnostics() {
+  let diagnostics = $('collaboration-performance-diagnostics');
+  if (!diagnostics) {
+    diagnostics = document.createElement('output');
+    diagnostics.id = 'collaboration-performance-diagnostics';
+    diagnostics.hidden = true;
+    document.body.appendChild(diagnostics);
+  }
+  diagnostics.textContent = JSON.stringify(collaborationPerformance.summary());
 }
 
 function safePreviewImageSrc(value) {
@@ -2648,7 +3139,12 @@ function clearCollaborationLivePreviewZoomForClient(clientId) {
 }
 
 function renderCollaborationVisualPreview(draft) {
-  return renderCollaborationLiveSnapshotPreview(draft) || renderCollaborationModelPreview(draft);
+  const livePreview = renderCollaborationLiveSnapshotPreview(draft);
+  if (livePreview) return livePreview;
+  if (draft?.modelOmitted && draft?.modelPreservedFromPreviousDraft) {
+    return '<div class="collaboration-diagram-empty">Lightweight update received. Full preview refresh is pending.</div>';
+  }
+  return renderCollaborationModelPreview(draft);
 }
 
 function renderCollaborationLiveSnapshotPreview(draft) {
@@ -2691,11 +3187,12 @@ function renderCollaborationModelPreview(draft) {
   if (!draft?.model) {
     return '<div class="collaboration-diagram-empty">No model preview available</div>';
   }
+  const label = draft.modelPreservedFromPreviousDraft ? 'last full snapshot' : 'fallback';
   return `
     <div class="collaboration-model-preview">
       <div class="collaboration-preview-mode">
         <span>Model Preview</span>
-        <span>fallback</span>
+        <span>${escapeHtml(label)}</span>
       </div>
       ${renderDraftDiagramSvg(draft.model, {
         selection: draft.selection,
@@ -2705,12 +3202,80 @@ function renderCollaborationModelPreview(draft) {
   `;
 }
 
-function renderCollaborationPreview(draft) {
+function getCollaborationPreviewRenderPlan(draft, operations = [], options = {}) {
+  const hasOperations = operations.length > 0;
+  const hasLivePreview = Boolean(draftPreviewPayload(draft)?.dataUrl);
+  const hasFullModelPreview = Boolean(draft?.model && draft.modelOmitted !== true && !hasLivePreview);
+  const canDefer = options.deferExpensive !== false;
+  return {
+    deferVisual: canDefer && hasFullModelPreview,
+    deferDiff: canDefer && !hasOperations && hasCurrentDraftModelSnapshot(draft)
+  };
+}
+
+function renderCollaborationDeferredDetail(message, kind) {
+  return `
+    <div class="collaboration-deferred-detail" data-collaboration-deferred="${escapeHtml(kind)}">
+      <span class="collaboration-deferred-spinner" aria-hidden="true"></span>
+      <span>${escapeHtml(message)}</span>
+    </div>
+  `;
+}
+
+function renderCollaborationChangeSummaryPending() {
+  return `
+    <div class="collaboration-diff" data-collaboration-deferred="diff">
+      <div class="collaboration-section-title">Remote changes vs mine</div>
+      <ul class="collaboration-operation-list">
+        <li class="change-none">Preparing remote differences...</li>
+      </ul>
+    </div>
+  `;
+}
+
+function scheduleDeferredCollaborationPreviewDetails(draft, operations, renderToken, plan) {
+  void renderDeferredCollaborationPreviewDetails(draft, operations, renderToken, plan);
+}
+
+async function renderDeferredCollaborationPreviewDetails(draft, operations, renderToken, plan) {
+  const startedAt = collaborationPerfNow();
+  const finishStatus = startCollaborationWorkStatus(plan.deferDiff ? 'render' : 'preview');
+  try {
+    await yieldToBrowser({ timeoutMs: isCanvasInteractionActive() ? COLLABORATION_CANVAS_INTERACTION_IDLE_MS : COLLABORATION_DEFERRED_RENDER_TIMEOUT_MS });
+    const preview = $('collaboration-preview');
+    if (!preview || preview.dataset.renderToken !== String(renderToken)) return;
+    if (plan.deferVisual) {
+      const visualStartedAt = collaborationPerfNow();
+      const visual = renderCollaborationVisualPreview(draft);
+      recordCollaborationPerformance('panel.visual.render', visualStartedAt, { deferred: true });
+      const slot = preview.querySelector('[data-collaboration-deferred="visual"]');
+      if (slot && preview.dataset.renderToken === String(renderToken)) slot.outerHTML = visual;
+      await yieldToBrowser({ timeoutMs: 80 });
+    }
+    if (plan.deferDiff) {
+      const diffStartedAt = collaborationPerfNow();
+      const diff = renderCollaborationChangeSummary(draft, operations);
+      recordCollaborationPerformance('panel.diff.render', diffStartedAt, { deferred: true });
+      const slot = preview.querySelector('[data-collaboration-deferred="diff"]');
+      if (slot && preview.dataset.renderToken === String(renderToken)) slot.outerHTML = diff;
+    }
+    recordCollaborationPerformance('panel.deferred.render', startedAt, {
+      visual: plan.deferVisual,
+      diff: plan.deferDiff
+    });
+  } finally {
+    finishStatus();
+  }
+}
+
+function renderCollaborationPreview(draft, options = {}) {
   const preview = $('collaboration-preview');
   const mergeButton = $('collaboration-merge-button');
   const applyRightButton = $('collaboration-apply-right-button');
   const applyLeftButton = $('collaboration-apply-left-button');
   if (!preview) return;
+  const renderToken = ++collaborationPreviewRenderToken;
+  preview.dataset.renderToken = String(renderToken);
   if (!draft) {
     preview.innerHTML = '<div class="collaboration-empty">No collaborator selected</div>';
     if (mergeButton) mergeButton.disabled = true;
@@ -2721,6 +3286,8 @@ function renderCollaborationPreview(draft) {
 
   const summary = draft.summary || summarizeModel(draft.model);
   const operations = Array.isArray(draft.operations) ? draft.operations : [];
+  const hasCurrentModel = hasCurrentDraftModelSnapshot(draft);
+  const plan = getCollaborationPreviewRenderPlan(draft, operations, options);
   preview.innerHTML = `
     <div class="collaboration-preview-title">
       <span>${escapeHtml(draft.status || draft.summaryText || 'Live draft update')} ${draft.updatedAt ? `- ${escapeHtml(draft.updatedAt)}` : ''}</span>
@@ -2732,12 +3299,28 @@ function renderCollaborationPreview(draft) {
       ${renderCollaborationStat('Attrs', summary.attributes ?? 0)}
     </div>
     ${renderCollaborationSelectionDetails(draft)}
-    ${renderCollaborationVisualPreview(draft)}
-    ${renderCollaborationChangeSummary(draft, operations)}
+    ${plan.deferVisual ? renderCollaborationDeferredDetail('Preparing remote preview...', 'visual') : renderCollaborationVisualPreview(draft)}
+    ${plan.deferDiff ? renderCollaborationChangeSummaryPending() : renderCollaborationChangeSummary(draft, operations)}
   `;
-  if (mergeButton) mergeButton.disabled = !draft.model && operations.length === 0;
-  if (applyRightButton) applyRightButton.disabled = !draft.model;
+  if (mergeButton) mergeButton.disabled = !hasCurrentModel && !canMergeDraftOperations(operations);
+  if (applyRightButton) applyRightButton.disabled = !hasCurrentModel;
   if (applyLeftButton) applyLeftButton.disabled = false;
+  if (plan.deferVisual || plan.deferDiff) {
+    scheduleDeferredCollaborationPreviewDetails(draft, operations, renderToken, plan);
+  }
+}
+
+function hasCurrentDraftModelSnapshot(draft) {
+  return Boolean(draft?.model && draft.modelPreservedFromPreviousDraft !== true && draft.modelOmitted !== true);
+}
+
+function mergeableDraftOperations(operations = []) {
+  return (Array.isArray(operations) ? operations : []).filter(isMergeableDraftOperation);
+}
+
+function canMergeDraftOperations(operations = []) {
+  const list = Array.isArray(operations) ? operations : [];
+  return list.length > 0 && list.every(isMergeableDraftOperation);
 }
 
 function renderCollaborationStat(label, value) {
@@ -2799,13 +3382,14 @@ function summarizeModel(model) {
 
 function describeDraftOperation(operation, draft = {}) {
   const type = String(operation?.type || 'operation');
-  const target = operation?.targetId ?? operation?.id ?? operation?.classId ?? operation?.linkId ?? '';
+  const target = draftOperationTargetId(operation) ?? '';
   const changedAt = operation?.updatedAt || operation?.timestamp || draft?.updatedAt || draft?.timestamp || '';
   const kind = type.toLowerCase().includes('delete') || type.toLowerCase().includes('remove')
     ? 'removed'
     : (type.toLowerCase().includes('create') || type.toLowerCase().includes('add') ? 'added' : 'updated');
   const patch = operation?.patch && typeof operation.patch === 'object' ? operation.patch : null;
-  if (!patch) {
+  const payload = operation?.class || operation?.node || operation?.link || operation?.value || null;
+  if (!patch && !payload) {
     return {
       kind,
       key: `operation:${operation?.opId || type}:${target}`,
@@ -2813,7 +3397,7 @@ function describeDraftOperation(operation, draft = {}) {
       text: `${operationTypeLabel(type)}${target ? ` on ${valuePreview(target)}` : ''}`
     };
   }
-  const fields = describePatchFields(patch);
+  const fields = patch ? describeOperationPatchFields(operation, patch) : describeOperationPayloadFields(operation, payload);
   return {
     kind,
     key: `operation:${operation?.opId || type}:${target}:${fields.join('|')}`,
@@ -2822,16 +3406,80 @@ function describeDraftOperation(operation, draft = {}) {
   };
 }
 
+function describeOperationPayloadFields(operation, payload) {
+  if (!payload || typeof payload !== 'object') return [];
+  if (operation?.type === 'createClass') {
+    return [
+      payload.name ? `name ${valuePreview(payload.name)}` : '',
+      payload.type === 'hyperclass' ? 'hyperclass' : 'class',
+      payload.parentClassId ? `parent hyperclass ${valuePreview(payload.parentClassId)}` : '',
+      payload.position ? `position ${positionPreview(payload.position)}` : '',
+      Array.isArray(payload.attributes) ? `${payload.attributes.length} attributes` : ''
+    ].filter(Boolean);
+  }
+  if (operation?.type === 'createLink') {
+    const label = payload.name || payload.rendering?.labelText || '';
+    return [
+      label ? `name ${valuePreview(label)}` : '',
+      payload.sourceClassId ? `source ${valuePreview(payload.sourceClassId)}` : '',
+      payload.targetClassId ? `target ${valuePreview(payload.targetClassId)}` : ''
+    ].filter(Boolean);
+  }
+  return describeOperationPatchFields(operation, payload);
+}
+
+function describeOperationPatchFields(operation, patch) {
+  if (!patch || typeof patch !== 'object') return [];
+  const handledRoots = new Set();
+  const fields = [];
+  if (patch.position) {
+    fields.push(`position ${positionPreview(patch.position)}`);
+    handledRoots.add('position');
+  }
+  if (Array.isArray(patch.attributes)) {
+    fields.push(`attributes ${patch.attributes.length}`);
+    handledRoots.add('attributes');
+  }
+  if (Array.isArray(patch.children)) {
+    fields.push(`children ${patch.children.length}`);
+    handledRoots.add('children');
+  }
+  const leafFields = draftPatchLeafPaths(patch)
+    .filter(path => !handledRoots.has(String(path).split('.')[0]))
+    .sort(compareDiffPaths)
+    .map(path => {
+      const field = propertyPathLabel(path);
+      const value = getPathValue(patch, path);
+      if (value === undefined || value === null || typeof value === 'object') return field;
+      return `${field} ${valuePreview(value)}`;
+    });
+  return [...fields, ...leafFields];
+}
+
+function draftPatchLeafPaths(value, prefix = '') {
+  if (Array.isArray(value)) return prefix ? [prefix] : [];
+  if (!isPlainObject(value)) return prefix ? [prefix] : [];
+  const entries = Object.entries(value);
+  if (!entries.length) return prefix ? [prefix] : [];
+  return [...new Set(entries.flatMap(([key, child]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (isPlainObject(child)) return draftPatchLeafPaths(child, path);
+    return [path];
+  }))];
+}
+
 function renderCollaborationChangeSummary(draft, operations = []) {
   const changedAt = draft?.updatedAt || draft?.timestamp || operations.find(operation => operation?.updatedAt || operation?.timestamp)?.updatedAt || operations.find(operation => operation?.updatedAt || operation?.timestamp)?.timestamp || '';
-  const currentChanges = (draft?.model
-    ? summarizeCollaborationDifferences(getData(), draft.model)
-    : operations.map(operation => describeDraftOperation(operation, draft)))
+  const hasCurrentModel = hasCurrentDraftModelSnapshot(draft);
+  const hasOperations = operations.length > 0;
+  const currentChanges = (hasOperations
+    ? operations.map(operation => describeDraftOperation(operation, draft))
+    : (hasCurrentModel ? summarizeCollaborationDifferencesCached(draft) : []))
     .map(change => withChangeTimestamp(change, changedAt));
   const changes = applyCollaborationChangeHistory(draft, currentChanges, changedAt);
-  const title = draft?.model ? 'Remote changes vs mine' : 'Remote operations';
+  const title = hasOperations ? 'Remote operations' : 'Remote changes vs mine';
   const empty = isEditingRemoteDraft(draft)
-    ? 'No diagram differences detected.'
+    ? (draft?.modelOmitted ? 'Waiting for the next operation or full draft snapshot.' : 'No diagram differences detected.')
     : 'No unsaved diagram changes.';
   return `
     <div class="collaboration-diff">
@@ -2843,6 +3491,28 @@ function renderCollaborationChangeSummary(draft, operations = []) {
       </ul>
     </div>
   `;
+}
+
+function summarizeCollaborationDifferencesCached(draft) {
+  const localKey = modelSnapshotKey();
+  const draftKey = draft?.modelSnapshotKey || draft?.updatedAt || draft?.timestamp || '';
+  const cacheKey = `${draft?.modelName || ''}::${draft?.clientId || ''}::${draftKey}::${localKey}`;
+  if (collaborationDiffCache.has(cacheKey)) {
+    countCollaborationPerformance('diff.cache.hit');
+    return cloneValue(collaborationDiffCache.get(cacheKey));
+  }
+  const startedAt = collaborationPerfNow();
+  const changes = summarizeCollaborationDifferences(getData(), draft.model, { limit: COLLABORATION_DIFF_DEFAULT_LIMIT });
+  recordCollaborationPerformance('diff.compute', startedAt, {
+    changes: changes.length,
+    truncated: changes.some(change => change?.kind === 'more')
+  });
+  collaborationDiffCache.set(cacheKey, cloneValue(changes));
+  while (collaborationDiffCache.size > 32) {
+    const firstKey = collaborationDiffCache.keys().next().value;
+    collaborationDiffCache.delete(firstKey);
+  }
+  return changes;
 }
 
 function applyCollaborationChangeHistory(draft, changes, fallbackTimestamp = '') {
@@ -2898,6 +3568,7 @@ function collaborationChangeKey(change) {
 function clearCollaborationChangeHistory(draftOrClientId = null, modelName = '') {
   if (!draftOrClientId && !modelName) {
     collaborationChangeHistory.clear();
+    collaborationDiffCache.clear();
     return;
   }
   const draft = typeof draftOrClientId === 'object'
@@ -2905,6 +3576,11 @@ function clearCollaborationChangeHistory(draftOrClientId = null, modelName = '')
     : { clientId: draftOrClientId, modelName: modelName || getSelectedCollaborationModelName() };
   const key = collaborationHistoryKey(draft);
   if (key) collaborationChangeHistory.delete(key);
+  if (key) {
+    [...collaborationDiffCache.keys()].forEach(cacheKey => {
+      if (cacheKey.startsWith(`${key}::`)) collaborationDiffCache.delete(cacheKey);
+    });
+  }
 }
 
 function renderCollaborationChangeItem(change) {
@@ -2951,61 +3627,86 @@ function summarizeCollaborationDifferences(localModel, remoteModel, options = {}
   const limit = typeof options === 'number'
     ? options
     : (Number.isFinite(Number(options?.limit)) ? Number(options.limit) : COLLABORATION_DIFF_DEFAULT_LIMIT);
-  const changes = [];
-  compareClassDifferences(localModel, remoteModel, changes);
-  compareLinkDifferences(localModel, remoteModel, changes);
-  if (Number.isFinite(limit) && changes.length > limit) {
-    const remaining = changes.length - limit;
-    return [
-      ...changes.slice(0, limit),
-      { kind: 'more', text: `${remaining} more change${remaining === 1 ? '' : 's'}` }
-    ];
+  const collector = createBoundedChangeCollector(limit);
+  compareModelMetadataDifferences(localModel, remoteModel, collector);
+  if (collector.shouldContinue()) {
+    compareClassDifferences(localModel, remoteModel, collector);
   }
+  if (collector.shouldContinue()) {
+    compareLinkDifferences(localModel, remoteModel, collector);
+  }
+  const changes = collector.toArray();
+  if (collector.truncated) changes.push({ kind: 'more', text: 'More changes not shown' });
   return changes;
+}
+
+function compareModelMetadataDifferences(localModel, remoteModel, changes) {
+  if (!changes.shouldContinue()) return;
+  const localMetadata = comparableMetadataForDiff(localModel?.metadata);
+  const remoteMetadata = comparableMetadataForDiff(remoteModel?.metadata);
+  const paths = [...changedPathsBetween(localMetadata, remoteMetadata)].sort(compareDiffPaths);
+  for (const path of paths) {
+    if (!changes.shouldContinue()) return;
+    if (!changes.push({
+      kind: 'updated',
+      text: `Changed model ${describePropertyDelta(localMetadata, remoteMetadata, path)}`
+    })) return;
+  }
+}
+
+function comparableMetadataForDiff(metadata = {}) {
+  const source = metadata && typeof metadata === 'object' ? metadata : {};
+  return {
+    sceneSettings: source.sceneSettings || null,
+    layout: source.layout || null,
+    font: source.font || null,
+    fit: source.fit || source.view || null
+  };
 }
 
 function compareClassDifferences(localModel, remoteModel, changes) {
   const localById = mapClassItems(localModel);
   const remoteById = mapClassItems(remoteModel);
   const ids = new Set([...localById.keys(), ...remoteById.keys()]);
-  ids.forEach(id => {
+  for (const id of ids) {
+    if (!changes.shouldContinue()) return;
     const localNode = localById.get(id);
     const remoteNode = remoteById.get(id);
     if (!localNode && remoteNode) {
-      changes.push({ kind: 'added', text: `Added ${classKindLabel(remoteNode)} ${nodeDisplayName(remoteNode)}` });
+      if (!changes.push({ kind: 'added', text: `Added ${classKindLabel(remoteNode)} ${nodeDisplayName(remoteNode)}` })) return;
       compareAttributeDifferences(null, remoteNode, changes);
-      return;
+      continue;
     }
     if (localNode && !remoteNode) {
-      changes.push({ kind: 'removed', text: `Removed ${classKindLabel(localNode)} ${nodeDisplayName(localNode)}` });
-      return;
+      if (!changes.push({ kind: 'removed', text: `Removed ${classKindLabel(localNode)} ${nodeDisplayName(localNode)}` })) return;
+      continue;
     }
-    if (!localNode || !remoteNode) return;
+    if (!localNode || !remoteNode) continue;
 
     compareNodePropertyDifferences(localNode, remoteNode, changes);
     compareAttributeDifferences(localNode, remoteNode, changes);
-  });
+  }
 }
 
 function compareNodePropertyDifferences(localNode, remoteNode, changes) {
+  if (!changes.shouldContinue()) return;
   const localComparable = comparableNodeForDiff(localNode);
   const remoteComparable = comparableNodeForDiff(remoteNode);
   const paths = [...changedPathsBetween(localComparable, remoteComparable)].sort(compareDiffPaths);
   if (!paths.length) return;
   if (paths.some(isPositionPath)) {
-    changes.push({
+    if (!changes.push({
       kind: 'moved',
       text: `Moved ${classKindLabel(remoteNode)} ${nodeDisplayName(remoteNode)} position: ${positionPreview(localNode.position)} -> ${positionPreview(remoteNode.position)}`
-    });
+    })) return;
   }
-  paths
-    .filter(path => !isPositionPath(path))
-    .forEach(path => {
-      changes.push({
-        kind: 'updated',
-        text: `Changed ${classKindLabel(remoteNode)} ${nodeDisplayName(remoteNode)} ${describePropertyDelta(localNode, remoteNode, path)}`
-      });
-    });
+  for (const path of paths) {
+    if (isPositionPath(path)) continue;
+    if (!changes.push({
+      kind: 'updated',
+      text: `Changed ${classKindLabel(remoteNode)} ${nodeDisplayName(remoteNode)} ${describePropertyDelta(localNode, remoteNode, path)}`
+    })) return;
+  }
 }
 
 function comparableNodeForDiff(node) {
@@ -3016,60 +3717,64 @@ function comparableNodeForDiff(node) {
 }
 
 function compareAttributeDifferences(localNode, remoteNode, changes) {
+  if (!changes.shouldContinue()) return;
   const localMap = mapAttributeItems(localNode);
   const remoteMap = mapAttributeItems(remoteNode);
   const keys = new Set([...localMap.keys(), ...remoteMap.keys()]);
-  keys.forEach(key => {
+  for (const key of keys) {
+    if (!changes.shouldContinue()) return;
     const localAttr = localMap.get(key);
     const remoteAttr = remoteMap.get(key);
     if (!localAttr && remoteAttr) {
-      changes.push({
+      if (!changes.push({
         kind: 'added',
         text: `Added attribute ${attributePath(remoteNode, remoteAttr)}`
-      });
-      return;
+      })) return;
+      continue;
     }
     if (localAttr && !remoteAttr) {
-      changes.push({
+      if (!changes.push({
         kind: 'removed',
         text: `Removed attribute ${attributePath(localNode, localAttr)}`
-      });
-      return;
+      })) return;
+      continue;
     }
-    if (!localAttr || !remoteAttr || valuesEqual(localAttr.attribute, remoteAttr.attribute)) return;
+    if (!localAttr || !remoteAttr || valuesEqual(localAttr.attribute, remoteAttr.attribute)) continue;
     const deltas = describeAttributeDeltas(localAttr.attribute, remoteAttr.attribute);
     if (!deltas.length) {
-      changes.push({
+      if (!changes.push({
         kind: 'updated',
         text: `Changed attribute ${attributePath(remoteNode, remoteAttr)}`
-      });
-      return;
+      })) return;
+      continue;
     }
-    deltas.forEach(delta => {
-      changes.push({
+    for (const delta of deltas) {
+      if (!changes.push({
         kind: 'updated',
         text: `Changed attribute ${attributePath(remoteNode, remoteAttr)} ${delta}`
-      });
-    });
-  });
+      })) return;
+    }
+  }
 }
 
 function compareLinkDifferences(localModel, remoteModel, changes) {
+  if (!changes.shouldContinue()) return;
   const localById = mapLinkItems(localModel);
   const remoteById = mapLinkItems(remoteModel);
   const localNodeMap = mapClassItems(localModel);
   const remoteNodeMap = mapClassItems(remoteModel);
   const ids = new Set([...localById.keys(), ...remoteById.keys()]);
-  ids.forEach(id => {
+  for (const id of ids) {
+    if (!changes.shouldContinue()) return;
     const localLink = localById.get(id);
     const remoteLink = remoteById.get(id);
     if (!localLink && remoteLink) {
-      changes.push({ kind: 'added', text: `Added link ${linkDisplayName(remoteLink, remoteNodeMap)}` });
-      return;
+      if (!changes.push({ kind: 'added', text: `Added link ${linkDisplayName(remoteLink, remoteNodeMap)}` })) return;
+      continue;
     }
     if (localLink && !remoteLink) {
-      changes.push({ kind: 'removed', text: `Removed link ${linkDisplayName(localLink, localNodeMap)}` });
-      return;
+      if (!changes.push({ kind: 'removed', text: `Removed link ${linkDisplayName(localLink, localNodeMap)}` })) return;
+      continue;
     }
     if (localLink && remoteLink && !valuesEqual(localLink, remoteLink)) {
       const deltas = describePathDeltas(localLink, remoteLink, {
@@ -3077,17 +3782,17 @@ function compareLinkDifferences(localModel, remoteModel, changes) {
         remoteNodeMap
       });
       if (!deltas.length) {
-        changes.push({ kind: 'updated', text: `Changed link ${linkDisplayName(remoteLink, remoteNodeMap)}` });
-        return;
+        if (!changes.push({ kind: 'updated', text: `Changed link ${linkDisplayName(remoteLink, remoteNodeMap)}` })) return;
+        continue;
       }
-      deltas.forEach(delta => {
-        changes.push({
+      for (const delta of deltas) {
+        if (!changes.push({
           kind: 'updated',
           text: `Changed link ${linkDisplayName(remoteLink, remoteNodeMap)} ${delta}`
-        });
-      });
+        })) return;
+      }
     }
-  });
+  }
 }
 
 function mapClassItems(model) {
@@ -3299,49 +4004,201 @@ function describeDraftSelection(draft) {
   return node ? `${classKindLabel(node)} ${nodeDisplayName(node)}` : (id || '');
 }
 
-function scheduleLocalDraftPublish(reason = 'Updated draft') {
-  localDraftDirty = Boolean(savedSnapshotKey && modelSnapshotKey() !== savedSnapshotKey);
-  updateSaveStatus();
+function scheduleLocalDraftPublish(reason = 'Updated draft', options = {}) {
+  localDraftDirty = Boolean(savedSnapshotKey);
+  updateSaveStatus({ dirty: localDraftDirty });
+  if (options.operationsTracked !== true) {
+    invalidateLocalDraftOperations('untracked');
+    recordUntrackedDraftDisplayOperation(reason);
+  }
   const modelName = getSelectedCollaborationModelName();
   if (!COLLABORATION_ENABLED || !serverConnected || !serverEvents || !modelName) return;
+  if (scheduledDraftPublish) countCollaborationPerformance('draft.coalesced.scheduled');
+  scheduledDraftPublish = coalesceDraftPublishRequest(scheduledDraftPublish, { reason, options: {} });
   window.clearTimeout(draftPublishTimer);
-  draftPublishTimer = window.setTimeout(() => publishLocalDraft(reason), 450);
+  draftPublishTimer = window.setTimeout(() => {
+    const request = scheduledDraftPublish || { reason, options: {} };
+    scheduledDraftPublish = null;
+    void publishLocalDraft(request.reason, request.options);
+  }, COLLABORATION_DRAFT_PUBLISH_DELAY_MS);
 }
 
 async function publishLocalDraft(reason = 'Updated draft', options = {}) {
   const modelName = getSelectedCollaborationModelName();
   if (!COLLABORATION_ENABLED || !serverConnected || !serverEvents || !modelName) return;
+  if (draftPublishInFlight) {
+    countCollaborationPerformance('draft.coalesced.inflight');
+    pendingDraftPublish = coalesceDraftPublishRequest(pendingDraftPublish, { reason, options });
+    return;
+  }
+  draftPublishInFlight = true;
+  const startedAt = collaborationPerfNow();
+  let draftMode = 'unknown';
   try {
-    const snapshot = cloneValue(prepareSceneSnapshot(ctx(), { updateFitMetadata: false }));
     const isDirty = options.dirty !== false;
-    const preview = await buildCollaborationPreviewSnapshot({ force: options.forcePreview === true });
-    await publishServerDraft(modelName, {
+    draftMode = isDirty ? 'editing' : 'presence';
+    const draftBuild = isDirty || options.forceSnapshot === true || options.forcePreview === true
+      ? await buildDirtyDraftPayload(modelName, reason, options)
+      : buildPresenceDraftPayload(reason);
+    if (!draftBuild) return;
+    const { payload: draftPayload, modelDecision } = draftBuild;
+    if (getSelectedCollaborationModelName() !== modelName) {
+      countCollaborationPerformance('draft.skipped.stale_model');
+      return;
+    }
+    const signature = draftPublishSignature(modelName, draftPayload);
+    if (!options.forcePublish && signature === lastPublishedDraftSignature) {
+      countCollaborationPerformance('draft.skipped.duplicate');
+      return;
+    }
+    const networkStartedAt = collaborationPerfNow();
+    const result = await withCollaborationWorkStatus('sync', () => publishServerDraft(modelName, draftPayload, {
+      clientId: serverEvents.clientId,
+      clientName: getCollaborationClientName(),
+      draftScope: COLLABORATION_DRAFT_SCOPE,
+      timeoutMs: 2500
+    }), { showAfterMs: 1200 });
+    recordCollaborationPerformance('draft.network', networkStartedAt, { mode: draftMode });
+    if (!result.ok) {
+      throw new Error(result.error?.message || 'Server rejected draft update');
+    }
+    if (modelDecision.include) {
+      lastCollaborationDraftSnapshotAt = Date.now();
+      lastCollaborationDraftSnapshotKey = draftPayload.modelSnapshotKey;
+      lastCollaborationDraftSnapshotModelName = modelName;
+    }
+    lastPublishedDraftSignature = signature;
+    localDraftModelName = modelName;
+  } catch (error) {
+    countCollaborationPerformance('draft.failed');
+    addLog(`Draft publish failed: ${error?.message || String(error)}`);
+  } finally {
+    recordCollaborationPerformance('draft.publish', startedAt, { mode: draftMode });
+    draftPublishInFlight = false;
+    if (pendingDraftPublish) {
+      const request = pendingDraftPublish;
+      pendingDraftPublish = null;
+      window.clearTimeout(draftPublishTimer);
+      draftPublishTimer = window.setTimeout(() => {
+        void publishLocalDraft(request.reason, request.options);
+      }, COLLABORATION_DRAFT_PUBLISH_BACKOFF_MS);
+    }
+  }
+}
+
+async function buildDirtyDraftPayload(modelName, reason, options = {}) {
+  const startedAt = collaborationPerfNow();
+  await yieldToBrowser();
+  const snapshot = cloneValue(prepareSceneSnapshot(ctx(), { updateFitMetadata: false }));
+  if (getSelectedCollaborationModelName() !== modelName) {
+    countCollaborationPerformance('draft.skipped.stale_model');
+    recordCollaborationPerformance('draft.build.dirty', startedAt, { result: 'stale-model' });
+    return null;
+  }
+  const snapshotKey = modelSnapshotKey(snapshot);
+  const modelBytes = estimateDraftModelBytes(snapshot);
+  const modelDecision = shouldIncludeDraftModel({
+    dirty: true,
+    force: options.forceSnapshot === true,
+    model: snapshot,
+    modelBytes,
+    modelName,
+    snapshotKey,
+    lastSnapshotAt: lastCollaborationDraftSnapshotAt,
+    lastSnapshotKey: lastCollaborationDraftSnapshotKey,
+    lastModelName: lastCollaborationDraftSnapshotModelName
+  });
+  const previewDecision = shouldBuildDraftPreview({
+    dirty: true,
+    force: options.forcePreview === true,
+    hasCachedPreview: Boolean(lastCollaborationPreviewSnapshot),
+    lastPreviewAt: lastCollaborationPreviewSnapshotAt
+  });
+  await yieldToBrowser();
+  if (getSelectedCollaborationModelName() !== modelName) {
+    countCollaborationPerformance('draft.skipped.stale_model');
+    recordCollaborationPerformance('draft.build.dirty', startedAt, { result: 'stale-model' });
+    return null;
+  }
+  const preview = previewDecision.include
+    ? await buildCollaborationPreviewSnapshot({ force: options.forcePreview === true })
+    : null;
+  const result = {
+    modelDecision,
+    payload: {
       clientName: getCollaborationClientName(),
       baseModelRevision: snapshot?.metadata?.revision || snapshot?.metadata?.contentHash || '',
-      mode: isDirty ? 'editing' : 'presence',
-      dirty: isDirty,
-      isDirty,
-      model: snapshot,
-      operations: [],
+      mode: 'editing',
+      dirty: true,
+      isDirty: true,
+      model: modelDecision.include ? snapshot : undefined,
+      modelOmitted: !modelDecision.include,
+      modelOmittedReason: modelDecision.include ? '' : modelDecision.reason,
+      modelPayloadBytes: modelDecision.modelBytes,
+      modelSnapshotKey: snapshotKey,
+      previewOmitted: !previewDecision.include,
+      previewOmittedReason: previewDecision.include ? '' : previewDecision.reason,
+      operations: draftOperationsForPublish(),
       selection: getDraftSelection(),
       viewport: getSerializableViewState(),
       preview: preview || { kind: 'model-preview', label: 'Model Preview' },
       summary: summarizeModel(snapshot),
       status: reason || 'Editing'
-    }, {
-      clientId: serverEvents.clientId,
+    }
+  };
+  recordCollaborationPerformance('draft.build.dirty', startedAt, {
+    modelIncluded: modelDecision.include,
+    previewIncluded: previewDecision.include,
+    modelBytes: modelDecision.modelBytes,
+    operations: result.payload.operations.length
+  });
+  return result;
+}
+
+function buildPresenceDraftPayload(reason = 'Viewing model') {
+  const startedAt = collaborationPerfNow();
+  const model = getData();
+  const modelRevision = model?.metadata?.revision || model?.metadata?.contentHash || '';
+  const result = {
+    modelDecision: { include: false, reason: 'presence', modelBytes: 0 },
+    payload: {
       clientName: getCollaborationClientName(),
-      draftScope: COLLABORATION_DRAFT_SCOPE,
-      timeoutMs: 2500
-    });
-    localDraftModelName = modelName;
-  } catch (error) {
-    addLog(`Draft publish failed: ${error?.message || String(error)}`);
-  }
+      baseModelRevision: modelRevision,
+      mode: 'presence',
+      dirty: false,
+      isDirty: false,
+      model: undefined,
+      modelOmitted: true,
+      modelOmittedReason: 'presence',
+      modelPayloadBytes: 0,
+      modelSnapshotKey: modelRevision || savedSnapshotKey || '',
+      previewOmitted: true,
+      previewOmittedReason: 'presence',
+      operations: [],
+      selection: getDraftSelection(),
+      viewport: getSerializableViewState(),
+      preview: { kind: 'model-preview', label: 'Model Preview' },
+      summary: summarizeModel(model),
+      status: reason || 'Viewing model'
+    }
+  };
+  recordCollaborationPerformance('draft.build.presence', startedAt);
+  return result;
 }
 
 async function publishLocalPresenceDraft(reason = 'Viewing model') {
   await publishLocalDraft(reason, { dirty: false });
+}
+
+function yieldToBrowser(options = {}) {
+  const timeoutMs = Number.isFinite(Number(options.timeoutMs)) ? Number(options.timeoutMs) : 80;
+  return new Promise(resolve => {
+    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(() => resolve(), { timeout: timeoutMs });
+      return;
+    }
+    requestAnimationFrame(() => window.setTimeout(resolve, 0));
+  });
 }
 
 function getDraftSelection() {
@@ -3376,6 +4233,10 @@ function vectorToPlain(vector) {
 async function clearLocalServerDraft(modelName = localDraftModelName || getSelectedCollaborationModelName()) {
   if (!COLLABORATION_ENABLED || !serverConnected || !modelName || !serverEvents) return;
   window.clearTimeout(draftPublishTimer);
+  scheduledDraftPublish = null;
+  pendingDraftPublish = null;
+  lastPublishedDraftSignature = '';
+  clearLocalDraftOperations();
   try {
     await clearServerDraft(modelName, {
       clientId: serverEvents.clientId,
@@ -3396,26 +4257,52 @@ async function loadRemoteDraftsForCurrentModel() {
   selectedRemoteClientId = '';
   if (!COLLABORATION_ENABLED || !serverConnected || !modelName) {
     updateCollaborationPanel();
+    scheduleRemoteDraftRefreshLoop();
     return;
   }
-  const result = await listServerDrafts(modelName, {
-    draftScope: COLLABORATION_DRAFT_SCOPE,
-    timeoutMs: 2500
+  await refreshRemoteDraftsForCurrentModel({ immediate: true });
+  scheduleRemoteDraftRefreshLoop();
+}
+
+async function refreshRemoteDraftsForCurrentModel(options = {}) {
+  const modelName = getSelectedCollaborationModelName();
+  if (!COLLABORATION_ENABLED || !serverConnected || !modelName || remoteDraftRefreshInFlight) return;
+  remoteDraftRefreshInFlight = true;
+  const startedAt = collaborationPerfNow();
+  const finishStatus = startCollaborationWorkStatus('sync', {
+    showAfterMs: options.immediate === true ? COLLABORATION_STATUS_SHOW_AFTER_MS : 1400
   });
-  if (result.ok) {
-    (result.data?.drafts || [])
-      .filter(draft => draft.clientId && draft.clientId !== serverEvents?.clientId)
-      .forEach(draft => remoteDrafts.set(draft.clientId, draft));
+  try {
+    const result = await listServerDrafts(modelName, {
+      draftScope: COLLABORATION_DRAFT_SCOPE,
+      timeoutMs: 2500
+    });
+    if (result.ok) {
+      const seenClientIds = new Set();
+      (result.data?.drafts || [])
+        .filter(draft => draft.clientId && draft.clientId !== serverEvents?.clientId)
+        .forEach(draft => {
+          seenClientIds.add(draft.clientId);
+          storeRemoteDraft(draft);
+        });
+      removeMissingRemoteDrafts(modelName, seenClientIds);
+      scheduleCollaborationPanelUpdate({ immediate: options.immediate === true });
+    } else {
+      countCollaborationPerformance('draft.remote_refresh.failed');
+    }
+  } finally {
+    recordCollaborationPerformance('draft.remote_refresh', startedAt, { immediate: options.immediate === true });
+    remoteDraftRefreshInFlight = false;
+    finishStatus();
   }
-  updateCollaborationPanel();
 }
 
 function handleServerDraftUpdated(event) {
   if (!event?.clientId || event.clientId === serverEvents?.clientId) return;
   const currentName = getSelectedCollaborationModelName();
   if (!currentName || event.modelName !== currentName) return;
-  remoteDrafts.set(event.clientId, event);
-  updateCollaborationPanel();
+  storeRemoteDraft(event);
+  scheduleCollaborationPanelUpdate();
 }
 
 function handleServerDraftCleared(event) {
@@ -3423,7 +4310,7 @@ function handleServerDraftCleared(event) {
   clearCollaborationChangeHistory(event.clientId, event.modelName);
   clearCollaborationLivePreviewZoomForClient(event.clientId);
   remoteDrafts.delete(event.clientId);
-  updateCollaborationPanel();
+  scheduleCollaborationPanelUpdate();
 }
 
 function handleServerClientLeft(event) {
@@ -3431,16 +4318,16 @@ function handleServerClientLeft(event) {
   clearCollaborationChangeHistory(event.clientId);
   clearCollaborationLivePreviewZoomForClient(event.clientId);
   remoteDrafts.delete(event.clientId);
-  updateCollaborationPanel();
+  scheduleCollaborationPanelUpdate();
 }
 
 async function captureRemoteSavedModel(event) {
   const currentName = getSelectedServerModelName();
   if (!currentName || event.modelName !== currentName) return;
-  const result = await loadServerModel(currentName, { timeoutMs: 6000 });
+  const result = await withCollaborationWorkStatus('sync', () => loadServerModel(currentName, { timeoutMs: 6000 }));
   if (!result.ok) return;
   const clientId = event.clientId || `server-${event.sequence || Date.now()}`;
-  remoteDrafts.set(clientId, {
+  storeRemoteDraft({
     clientId,
     clientName: event.clientId ? `Saved by ${event.clientId}` : 'Server update',
     modelName: currentName,
@@ -3460,27 +4347,30 @@ async function captureRemoteSavedModel(event) {
 
 async function applySelectedRemoteDraft() {
   const draft = selectedRemoteDraft();
-  if (!draft?.model) {
-    showToast('Selected user has no draft snapshot');
+  if (!hasCurrentDraftModelSnapshot(draft)) {
+    showToast('Selected user has no current draft snapshot');
     return;
   }
-  await setData(draft.model, { context: ctx(), refresh: true });
-  selectedElementId = draft.selection?.selectedElementId || null;
-  selectedAttributeOwnerId = draft.selection?.selectedAttributeOwnerId || selectedElementId;
-  selectedAttributeKey = draft.selection?.selectedAttributeKey || null;
-  selectedLinkId = draft.selection?.selectedLinkId || null;
-  selectedLinkSourceId = draft.selection?.selectedLinkSourceId || null;
-  selectedLinkTargetId = draft.selection?.selectedLinkTargetId || null;
-  syncCountersFromData();
-  setCollaborationWarning(false);
-  collaborationBaseModel = cloneValue(draft.model);
-  clearCollaborationChangeHistory(draft);
-  remoteDrafts.delete(draft.clientId);
-  updateCollaborationPanel();
-  await refreshWorkspace(`Applied ${draft.clientName || draft.clientId}`, {
-    refresh: false,
-    optimize: false,
-    fit: false
+  await withCollaborationWorkStatus('apply', async () => {
+    await yieldToBrowser();
+    await setData(draft.model, { context: ctx(), refresh: true });
+    selectedElementId = draft.selection?.selectedElementId || null;
+    selectedAttributeOwnerId = draft.selection?.selectedAttributeOwnerId || selectedElementId;
+    selectedAttributeKey = draft.selection?.selectedAttributeKey || null;
+    selectedLinkId = draft.selection?.selectedLinkId || null;
+    selectedLinkSourceId = draft.selection?.selectedLinkSourceId || null;
+    selectedLinkTargetId = draft.selection?.selectedLinkTargetId || null;
+    syncCountersFromData();
+    setCollaborationWarning(false);
+    collaborationBaseModel = cloneValue(draft.model);
+    clearCollaborationChangeHistory(draft);
+    remoteDrafts.delete(draft.clientId);
+    updateCollaborationPanel();
+    await refreshWorkspace(`Applied ${draft.clientName || draft.clientId}`, {
+      refresh: false,
+      optimize: false,
+      fit: false
+    });
   });
 }
 
@@ -3489,58 +4379,67 @@ async function mergeSelectedRemoteDraft() {
   const currentName = getSelectedServerModelName();
   if (!draft) return;
 
-  if (Array.isArray(draft.operations) && draft.operations.length > 0 && draft.baseModelRevision) {
+  const allOperations = Array.isArray(draft.operations) ? draft.operations : [];
+  const operations = mergeableDraftOperations(allOperations);
+  if (operations.length > 0 && operations.length === allOperations.length && draft.baseModelRevision) {
     if (!currentName) {
       showToast('Operation merge is available only for server models');
       return;
     }
-    const result = await applyServerModelOperations(currentName, draft.operations, {
+    const result = await withCollaborationWorkStatus('merge', () => applyServerModelOperations(currentName, operations, {
       baseModelRevision: draft.baseModelRevision,
       timeoutMs: 8000
-    });
+    }));
     if (result.ok) {
-      const loaded = await loadServerModel(currentName, { timeoutMs: 6000 });
-      if (loaded.ok) await setData(loaded.data.model, { context: ctx(), refresh: true });
-      localDraftDirty = false;
-      clearCollaborationChangeHistory(draft);
-      remoteDrafts.delete(draft.clientId);
-      updateCollaborationPanel();
-      await refreshWorkspace(`Merged ${draft.clientName || draft.clientId}`, {
-        refresh: false,
-        optimize: false,
-        fit: false,
-        publishDraft: false
+      await withCollaborationWorkStatus('apply', async () => {
+        const loaded = await loadServerModel(currentName, { timeoutMs: 6000 });
+        if (loaded.ok) await setData(loaded.data.model, { context: ctx(), refresh: true });
+        localDraftDirty = false;
+        clearCollaborationChangeHistory(draft);
+        remoteDrafts.delete(draft.clientId);
+        updateCollaborationPanel();
+        await refreshWorkspace(`Merged ${draft.clientName || draft.clientId}`, {
+          refresh: false,
+          optimize: false,
+          fit: false,
+          publishDraft: false
+        });
       });
       return;
     }
     addLog(`Operation merge failed: ${result.error?.message || 'request failed'}`);
   }
 
-  if (!draft.model) {
-    showToast('Selected user has no mergeable draft');
+  if (!hasCurrentDraftModelSnapshot(draft)) {
+    showToast('Selected user has no current mergeable draft');
     return;
   }
   let baseModel = collaborationBaseModel ? cloneValue(collaborationBaseModel) : cloneValue(getData());
   if (currentName) {
-    const baseResult = await loadServerModel(currentName, { timeoutMs: 6000 });
+    const baseResult = await withCollaborationWorkStatus('sync', () => loadServerModel(currentName, { timeoutMs: 6000 }));
     if (!baseResult.ok) throw new Error(baseResult.error?.message || 'Unable to load merge base');
     baseModel = baseResult.data.model;
   }
-  const merge = mergeModelSnapshots(baseModel, cloneValue(getData()), draft.model);
+  const merge = await withCollaborationWorkStatus('merge', async () => {
+    await yieldToBrowser();
+    return mergeModelSnapshots(baseModel, cloneValue(getData()), draft.model);
+  });
   if (merge.conflicts.length) {
     setCollaborationWarning(true, `Merge needs manual resolution: ${merge.conflicts.slice(0, 2).join('; ')}`);
     showToast('Merge conflict');
     return;
   }
-  await setData(merge.model, { context: ctx(), refresh: true });
-  setCollaborationWarning(false);
-  clearCollaborationChangeHistory(draft);
-  remoteDrafts.delete(draft.clientId);
-  updateCollaborationPanel();
-  await refreshWorkspace(`Merged ${draft.clientName || draft.clientId}`, {
-    refresh: false,
-    optimize: false,
-    fit: false
+  await withCollaborationWorkStatus('apply', async () => {
+    await setData(merge.model, { context: ctx(), refresh: true });
+    setCollaborationWarning(false);
+    clearCollaborationChangeHistory(draft);
+    remoteDrafts.delete(draft.clientId);
+    updateCollaborationPanel();
+    await refreshWorkspace(`Merged ${draft.clientName || draft.clientId}`, {
+      refresh: false,
+      optimize: false,
+      fit: false
+    });
   });
 }
 
@@ -5259,6 +6158,7 @@ async function updateSelectedProperty(path, value, options = {}) {
 
   const before = options.history === false ? null : cloneValue(getData());
   if (target.kind === 'multi-class') {
+    let operationsTracked = true;
     for (const node of target.nodes || []) {
       const nextNode = setDeepValue(cloneValue(node), path, value);
       if (path.join('.') === 'rendering.class.color') {
@@ -5269,6 +6169,7 @@ async function updateSelectedProperty(path, value, options = {}) {
       if (path.join('.') === 'rendering.class.material') applyClassMaterialPreset(nextNode, value);
       const updater = nextNode.type === 'hyperclass' ? updateHyperclass : updateClass;
       await updater(node.id, nextNode, { context: ctx(), refresh: false, saveHistory: false });
+      operationsTracked = recordClassDraftUpdate(node.id, classDraftPatchFromUpdatedEntity(path, value, nextNode)) && operationsTracked;
     }
     const after = options.history === false ? null : cloneValue(getData());
     if (before && after) recordPropertyHistory(before, after);
@@ -5280,10 +6181,10 @@ async function updateSelectedProperty(path, value, options = {}) {
       updateValidationStatus();
       updateSharePanel();
       applySelectionHighlight();
-      scheduleLocalDraftPublish('Editing properties');
+      scheduleLocalDraftPublish('Editing properties', { operationsTracked });
       return;
     }
-    await refreshWorkspace(null, { refresh: true, fit: false });
+    await refreshWorkspace(null, { refresh: true, fit: false, operationTracked: operationsTracked });
     return;
   }
 
@@ -5300,13 +6201,17 @@ async function updateSelectedProperty(path, value, options = {}) {
     next.name = value;
   }
 
+  let operationsTracked = false;
   if (target.kind === 'class' || target.kind === 'hyperclass') {
     const updater = target.kind === 'hyperclass' ? updateHyperclass : updateClass;
     await updater(target.node.id, next, { context: ctx(), refresh: false });
+    operationsTracked = recordClassDraftUpdate(target.node.id, classDraftPatchFromUpdatedEntity(path, value, next));
   } else if (target.kind === 'link') {
     await updateLink(target.value.id, next, { context: ctx(), refresh: false });
+    operationsTracked = recordLinkDraftUpdate(target.value.id, linkDraftPatchFromUpdatedEntity(path, value));
   } else if (target.kind === 'attribute') {
     await updateAttribute(target.owner.id, target.key, next, { context: ctx(), refresh: false });
+    operationsTracked = recordAttributeOwnerDraftUpdate(target.owner.id);
   }
 
   const after = options.history === false ? null : cloneValue(getData());
@@ -5320,11 +6225,11 @@ async function updateSelectedProperty(path, value, options = {}) {
     updateValidationStatus();
     updateSharePanel();
     applySelectionHighlight();
-    scheduleLocalDraftPublish('Editing properties');
+    scheduleLocalDraftPublish('Editing properties', { operationsTracked });
     return;
   }
 
-  await refreshWorkspace(null, { refresh: true, fit: false });
+  await refreshWorkspace(null, { refresh: true, fit: false, operationTracked: operationsTracked });
 }
 
 function attributeDisplayName(attribute, index) {
@@ -5412,7 +6317,12 @@ async function handleSelectedRenderingChange() {
   };
   const updater = selected.type === 'hyperclass' ? updateHyperclass : updateClass;
   await updater(selected.id, { rendering: nextRendering }, { context: ctx(), refresh: false });
-  await refreshWorkspace(`Updated rendering for ${selected.name || selected.id}`, { refresh: true, fit: false });
+  const operationsTracked = recordClassDraftUpdate(selected.id, { rendering: nextRendering });
+  await refreshWorkspace(`Updated rendering for ${selected.name || selected.id}`, {
+    refresh: true,
+    fit: false,
+    operationTracked: operationsTracked
+  });
 }
 
 function syncLinkEditControls() {
@@ -5447,7 +6357,12 @@ async function handleSelectedNameChange() {
   if (!nextName || nextName === selected.name) return;
   const updater = selected.type === 'hyperclass' ? updateHyperclass : updateClass;
   await updater(selected.id, { name: nextName }, { context: ctx(), refresh: false });
-  await refreshWorkspace(`Renamed ${selected.id} to ${nextName}`, { refresh: true, fit: false });
+  const operationsTracked = recordClassDraftUpdate(selected.id, { name: nextName });
+  await refreshWorkspace(`Renamed ${selected.id} to ${nextName}`, {
+    refresh: true,
+    fit: false,
+    operationTracked: operationsTracked
+  });
 }
 
 async function handleSelectedAttributeRename() {
@@ -5457,7 +6372,12 @@ async function handleSelectedAttributeRename() {
   if (!value) return;
   const key = String(selectedAttributeKey).startsWith('idx-') ? Number(String(selectedAttributeKey).slice(4)) : selectedAttributeKey;
   await updateAttribute(owner.id, key, { name: value }, { context: ctx(), refresh: false });
-  await refreshWorkspace(`Renamed attribute on ${owner.name || owner.id}`, { refresh: true, fit: false });
+  const operationsTracked = recordAttributeOwnerDraftUpdate(owner.id);
+  await refreshWorkspace(`Renamed attribute on ${owner.name || owner.id}`, {
+    refresh: true,
+    fit: false,
+    operationTracked: operationsTracked
+  });
 }
 
 async function handleSelectedLinkUpdate() {
@@ -5469,7 +6389,11 @@ async function handleSelectedLinkUpdate() {
     name,
     rendering: { labelText: name, lineColor: color, lineWidth: Number.isFinite(lineWidth) ? lineWidth : LINK_2D_DEFAULTS.lineWidth }
   }, { context: ctx(), refresh: false });
-  await refreshWorkspace('Updated link style', { refresh: true, fit: false });
+  const operationsTracked = recordLinkDraftUpdate(selectedLinkId, {
+    name,
+    rendering: { labelText: name, lineColor: color, lineWidth: Number.isFinite(lineWidth) ? lineWidth : LINK_2D_DEFAULTS.lineWidth }
+  });
+  await refreshWorkspace('Updated link style', { refresh: true, fit: false, operationTracked: operationsTracked });
 }
 
 function normalizeClassSurfaceMaterials() {
@@ -5930,6 +6854,10 @@ function installDebugHooks() {
       selectedLinkTargetId,
       editMode,
       serverConnected,
+      serverClientId: serverEvents?.clientId || null,
+      collaborationModelName: getSelectedCollaborationModelName(),
+      collaborationStatus: getCollaborationStatusState(),
+      canvasInteractionActive: isCanvasInteractionActive(),
       validation: validateData(getData()),
       canvas: renderer ? {
         width: renderer.domElement.width,
@@ -5945,6 +6873,7 @@ function installDebugHooks() {
       } : null,
       layout: getLayoutSettings()
     }),
+    triggerCollaborationStatusForTest,
     getLinkHubMetrics: collectLinkHubMetrics,
     getLabelMetrics: collectLabelMetrics,
     sampleRendererPixels
@@ -6251,7 +7180,7 @@ async function refreshWorkspace(message, options = {}) {
     showToast(message);
   }
   if (options.publishDraft !== false) {
-    scheduleLocalDraftPublish(message || 'Editing');
+    scheduleLocalDraftPublish(message || 'Editing', { operationsTracked: options.operationTracked === true });
   }
 }
 
@@ -6330,7 +7259,9 @@ async function handleAddClass() {
 
   selectedElementId = created.id;
   selectedAttributeOwnerId = created.id;
-  await refreshWorkspace(`Added ${created.name}`, { refresh: true });
+  let operationsTracked = recordClassDraftCreate(created);
+  if (parentId) operationsTracked = recordParentChildrenDraftUpdate(parentId) && operationsTracked;
+  await refreshWorkspace(`Added ${created.name}`, { refresh: true, operationTracked: operationsTracked });
 }
 
 async function handleAddHyperclass() {
@@ -6347,7 +7278,9 @@ async function handleAddHyperclass() {
   selectedElementId = created.id;
   selectedParentHyperclassId = created.parentClassId ?? null;
   selectedAttributeOwnerId = created.id;
-  await refreshWorkspace(`Added ${created.name}`, { refresh: true });
+  let operationsTracked = recordClassDraftCreate(created);
+  if (parentId) operationsTracked = recordParentChildrenDraftUpdate(parentId) && operationsTracked;
+  await refreshWorkspace(`Added ${created.name}`, { refresh: true, operationTracked: operationsTracked });
 }
 
 function getCreationParentId() {
@@ -6373,7 +7306,11 @@ async function handleAddAttribute() {
   const lastIndex = (updatedOwner?.attributes?.length ?? 0) - 1;
   if (lastIndex >= 0) selectedAttributeKey = attributeKeyFor(updatedOwner.attributes[lastIndex], lastIndex);
   selectedLinkId = null;
-  await refreshWorkspace(`Added attribute to ${owner.name || owner.id}`, { refresh: true });
+  const operationsTracked = recordAttributeOwnerDraftUpdate(owner.id);
+  await refreshWorkspace(`Added attribute to ${owner.name || owner.id}`, {
+    refresh: true,
+    operationTracked: operationsTracked
+  });
 }
 
 async function handleAddLink() {
@@ -6400,7 +7337,11 @@ async function handleAddLink() {
   selectedLinkSourceId = target.id;
   selectedLinkTargetId = null;
   linkPickActive = false;
-  await refreshWorkspace(`Linked ${source.name || source.id} to ${target.name || target.id}`, { refresh: true });
+  const operationsTracked = recordLinkDraftCreate(created);
+  await refreshWorkspace(`Linked ${source.name || source.id} to ${target.name || target.id}`, {
+    refresh: true,
+    operationTracked: operationsTracked
+  });
 }
 
 async function handleDeleteSelected() {
@@ -6411,7 +7352,8 @@ async function handleDeleteSelected() {
     selectedLinkId = null;
     selectedLinkSourceId = null;
     selectedLinkTargetId = null;
-    await refreshWorkspace(`Deleted link ${label}`, { refresh: true });
+    const operationsTracked = recordLinkDraftDelete(link.id);
+    await refreshWorkspace(`Deleted link ${label}`, { refresh: true, operationTracked: operationsTracked });
     return;
   }
 
@@ -6423,6 +7365,7 @@ async function handleDeleteSelected() {
 
   const selected = nodeById(selectedElementId);
   if (!selected) return;
+  const deletedIds = new Set([String(selected.id), ...getDescendantIds(selected.id)]);
 
   if (selected.type === 'hyperclass') {
     await deleteHyperclass(selected.id, { context: ctx(), refresh: false, cascade: true });
@@ -6436,7 +7379,19 @@ async function handleDeleteSelected() {
   if (sameId(selectedLinkSourceId, selected.id)) selectedLinkSourceId = null;
   if (sameId(selectedLinkTargetId, selected.id)) selectedLinkTargetId = null;
 
-  await refreshWorkspace(`Deleted ${selected.name || selected.id}`, { refresh: true });
+  let operationsTracked = true;
+  if (localDraftHasCreatedClassDependency(deletedIds)) {
+    invalidateLocalDraftOperations('delete_created_class_dependency');
+    operationsTracked = false;
+  } else {
+    deletedIds.forEach(id => {
+      operationsTracked = recordClassDraftDelete(id) && operationsTracked;
+    });
+  }
+  await refreshWorkspace(`Deleted ${selected.name || selected.id}`, {
+    refresh: true,
+    operationTracked: operationsTracked
+  });
 }
 
 async function handleDeleteAttribute() {
@@ -6447,7 +7402,8 @@ async function handleDeleteAttribute() {
   selectedElementId = attr.owner.id;
   selectedAttributeOwnerId = attr.owner.id;
   selectedAttributeKey = null;
-  await refreshWorkspace(`Deleted attribute ${label}`, { refresh: true });
+  const operationsTracked = recordAttributeOwnerDraftUpdate(attr.owner.id);
+  await refreshWorkspace(`Deleted attribute ${label}`, { refresh: true, operationTracked: operationsTracked });
 }
 
 function selectedNodesForProductivity() {
@@ -6570,7 +7526,12 @@ async function handleBulkAddAttributes() {
   selectedAttributeKey = attributeKeyFor(owner.attributes[lastIndex], lastIndex);
   selectedLinkId = null;
   if (input) input.value = '';
-  await refreshWorkspace(`Added ${parsed.names.length} attributes to ${owner.name || owner.id}`, { refresh: true, fit: false });
+  const operationsTracked = recordAttributeOwnerDraftUpdate(owner.id);
+  await refreshWorkspace(`Added ${parsed.names.length} attributes to ${owner.name || owner.id}`, {
+    refresh: true,
+    fit: false,
+    operationTracked: operationsTracked
+  });
 }
 
 async function handleMoveSelectedAttribute(delta) {
@@ -6583,9 +7544,11 @@ async function handleMoveSelectedAttribute(delta) {
   if (!result.moved) return;
   attr.owner.attributes = result.items;
   selectedAttributeKey = attributeKeyFor(attr.owner.attributes[result.toIndex], result.toIndex);
+  const operationsTracked = recordAttributeOwnerDraftUpdate(attr.owner.id);
   await refreshWorkspace(`Moved attribute ${attributeDisplayName(attr.owner.attributes[result.toIndex], result.toIndex)}`, {
     refresh: true,
-    fit: false
+    fit: false,
+    operationTracked: operationsTracked
   });
 }
 
@@ -6601,7 +7564,15 @@ async function handleSwapSelectedLinkEndpoints() {
   }, { context: ctx(), refresh: false });
   selectedLinkSourceId = link.targetClassId;
   selectedLinkTargetId = link.sourceClassId;
-  await refreshWorkspace(`Swapped link ${link.rendering?.labelText || link.name || link.id}`, { refresh: true, fit: false });
+  const operationsTracked = recordLinkDraftUpdate(link.id, {
+    sourceClassId: link.targetClassId,
+    targetClassId: link.sourceClassId
+  });
+  await refreshWorkspace(`Swapped link ${link.rendering?.labelText || link.name || link.id}`, {
+    refresh: true,
+    fit: false,
+    operationTracked: operationsTracked
+  });
 }
 
 async function handleLinkRoutePresetChange() {
@@ -6612,7 +7583,12 @@ async function handleLinkRoutePresetChange() {
   await updateLink(link.id, {
     rendering: routePresetPatch(preset)
   }, { context: ctx(), refresh: false });
-  await refreshWorkspace(`Applied ${preset} route to ${link.rendering?.labelText || link.name || link.id}`, { refresh: true, fit: false });
+  const operationsTracked = recordLinkDraftUpdate(link.id, { rendering: routePresetPatch(preset) });
+  await refreshWorkspace(`Applied ${preset} route to ${link.rendering?.labelText || link.name || link.id}`, {
+    refresh: true,
+    fit: false,
+    operationTracked: operationsTracked
+  });
 }
 
 function handleExportSelectedSubgraph() {
@@ -6975,7 +7951,8 @@ function handleServerModelUpdated(event) {
     return;
   }
   window.clearTimeout(remoteRefreshTimer);
-  remoteRefreshTimer = window.setTimeout(() => runAction(() => refreshCurrentServerModelFromEvent(event)), 200);
+  const delay = isCanvasInteractionActive() ? COLLABORATION_CANVAS_INTERACTION_IDLE_MS : 200;
+  remoteRefreshTimer = window.setTimeout(() => runAction(() => refreshCurrentServerModelFromEvent(event)), delay);
 }
 
 async function refreshCurrentServerModelFromEvent(event) {
@@ -6986,10 +7963,12 @@ async function refreshCurrentServerModelFromEvent(event) {
   const currentName = getSelectedServerModelName();
   if (!currentName || event.modelName !== currentName) return;
   remoteRefreshInFlight = true;
+  const finishStatus = startCollaborationWorkStatus('sync');
   try {
     const viewState = captureViewState();
     const result = await loadServerModel(currentName, { timeoutMs: 6000 });
     if (!result.ok) throw new Error(result.error?.message || 'Server refresh failed');
+    await yieldToBrowser();
     setData(result.data.model, { context: ctx(), refresh: true });
     restoreViewState(viewState);
     syncCountersFromData();
@@ -7004,6 +7983,7 @@ async function refreshCurrentServerModelFromEvent(event) {
     await publishLocalPresenceDraft('Viewing updated model');
   } finally {
     remoteRefreshInFlight = false;
+    finishStatus();
   }
 }
 
@@ -7306,9 +8286,13 @@ async function handleSelectChange(id, value) {
   if (id === 'parent-hyperclass-select') {
     const selected = nodeById(selectedElementId);
     if (selected) {
+      const previousParentId = selected.parentClassId ?? null;
       await moveChildToHyperclass(selected.id, resolved || null, { context: ctx(), refresh: false });
       selectedParentHyperclassId = resolved || null;
-      await refreshWorkspace(null, { refresh: true, fit: false });
+      let operationsTracked = recordClassDraftUpdate(selected.id, { parentClassId: resolved || null });
+      if (previousParentId) operationsTracked = recordParentChildrenDraftUpdate(previousParentId) && operationsTracked;
+      if (resolved) operationsTracked = recordParentChildrenDraftUpdate(resolved) && operationsTracked;
+      await refreshWorkspace(null, { refresh: true, fit: false, operationTracked: operationsTracked });
       return;
     }
   }
@@ -7524,8 +8508,9 @@ function setupDrag() {
       updateOverview();
       updateInterface({ json: false });
       const moved = nodeById(event.object.userData?.hbdsId);
+      const operationsTracked = moved ? recordClassDraftUpdate(moved.id, { position: cloneValue(moved.position || {}) }) : false;
       if (moved) addLog(`Moved ${moved.name || moved.id}`);
-      scheduleLocalDraftPublish('Moved element');
+      scheduleLocalDraftPublish('Moved element', { operationsTracked });
     }
   });
 
@@ -7554,6 +8539,7 @@ function handleModelTreeClick(event) {
 }
 
 function bindUi() {
+  bindCanvasInteractionTracking();
   bindCollaborationControls();
   restoreModelTreeState();
   $('model-tree-toggle')?.addEventListener('click', () => {

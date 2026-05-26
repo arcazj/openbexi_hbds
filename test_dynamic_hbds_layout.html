@@ -5,12 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Dynamic Layout Test</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=productivity-20260525a">
+  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=collab-responsive-20260526a">
   <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
 <body>
   <main id="container">
     <div id="canvas-model-title" aria-live="polite"></div>
+    <div id="canvas-collaboration-status" class="canvas-collaboration-status" role="status" aria-live="polite" hidden>
+      <span class="canvas-collaboration-status-spinner" aria-hidden="true"></span>
+      <span data-collaboration-status-text>Syncing with server...</span>
+    </div>
   </main>
 
   <div id="model-overview" aria-label="Model overview">
@@ -253,6 +257,6 @@
     </div>
   </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=productivity-20260525a"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=collab-responsive-20260526a"></script>
 </body>
 </html>
