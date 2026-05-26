@@ -33,6 +33,8 @@ This week the project added a larger local-server workflow and collaboration sur
 * **Live collaboration**: Edit and Tests views publish live draft state over Server-Sent Events and show other users in a floating collaboration panel.
 * **Collaboration conflict choices**: users can choose `Merge Both`, `Use Theirs`, or `Keep Mine` before saving over another active edit.
 * **Collaboration preview**: the floating panel is draggable, resizable, zoomable, and shows the selected user's diagram without taking over the canvas.
+* **Model tree sidebar**: Edit and Tests now include a collapsible searchable tree for classes, hyperclasses, attributes, and links.
+* **Modeling productivity tools**: selected nodes can be duplicated, copied, pasted, exported as a subgraph, and edited with bulk attribute and link route helpers.
 * **Detailed remote changes**: `Remote changes vs mine` reports class/hyperclass movement, attributes, links, rendering properties, route changes, and per-change timestamps.
 * **Per-change timestamp history**: older remote changes keep their first-seen time when later remote updates arrive.
 * **Models view cleanup**: Models mode is read-focused and keeps model selection, 3-D view, fit, zoom, and overview behavior without edit/save controls.
@@ -47,6 +49,9 @@ This week the project added a larger local-server workflow and collaboration sur
 * **Direct manipulation**: drag classes and hyperclasses in editable mode.
 * **Layout tools**: fit models to the canvas and optimize placement with `grid`, `hierarchy`, or `radial` layout algorithms where editing is enabled.
 * **Overview minimap**: navigate larger models with the built-in model overview.
+* **Model tree navigation**: search, inspect, and select classes, hyperclasses, attributes, and links from a compact tree sidebar in editable workspaces.
+* **Productivity editing**: duplicate or copy/paste selected nodes, add multiple attributes at once, reorder attributes, swap link endpoints, and apply route presets.
+* **Selected subgraph export**: download JSON for selected nodes plus links whose endpoints are included.
 * **Model export and server save**: download JSON locally or save through the Python server when connected.
 * **Live collaboration UI**: see other connected users, inspect their live draft, review remote differences, and choose how to resolve save conflicts.
 * **Local model API**: load, save, draft, stream, and merge model changes through the Python backend.
@@ -189,6 +194,13 @@ When running with `server.py`, adding or removing a model file only requires res
 * **Rotate** in 3-D mode with left-click drag.
 * **Move nodes** in editable 2-D mode by dragging a class or hyperclass.
 * **Add elements** in Edit or Tests with Hyperclass, Class, Attribute, and Link controls.
+* **Use the Model Tree** in Edit or Tests to search by name, ID, type, link endpoint, or attribute text. Click tree rows to select canvas elements; Shift-click node rows to build a multi-selection.
+* **Use Productivity tools** to duplicate or copy/paste selected classes and hyperclasses. Pasted nodes get new IDs and are offset from the originals.
+* **Bulk Attributes** accepts one attribute name per line and rejects duplicate names before applying changes.
+* **Move Attr Up** and **Move Attr Down** reorder the selected attribute while preserving its data and rendering fields.
+* **Swap Link** reverses the selected link source and target.
+* **Route** presets update selected link routing with `auto`, `horizontal`, `vertical`, `direct`, or `orthogonal`.
+* **Export Selected** downloads a JSON subgraph containing selected nodes, descendants of selected hyperclasses, and links where both endpoints are included.
 * **Delete Attribute** removes the selected attribute without deleting its owning class.
 * **Delete selected link** removes the selected link when a link is selected.
 * **Save** writes to the active workspace in connected mode or downloads JSON in browser-only mode.
@@ -229,6 +241,19 @@ python tools/validate_manifests.py
 python tools/lint_model_naming.py
 ```
 
+Run productivity helper coverage:
+
+```sh
+node scripts/productivity_helpers_test.mjs
+```
+
+Run JavaScript syntax checks for the editable workspace and helper modules:
+
+```sh
+Get-Content -Raw js/test_dynamic_hbds_layout.js | node --input-type=module --check
+Get-Content -Raw js/hbds_model_productivity.js | node --input-type=module --check
+```
+
 On systems where Maven is installed, Java tests can be run with:
 
 ```sh
@@ -245,10 +270,12 @@ This repository currently does not include a Maven wrapper, so `mvn` must be ins
 |-- icons/                         # Shell and menu icons
 |-- images/                        # Model/image assets
 |-- js/                            # HBDS rendering, model, layout, server, and collaboration modules
+|-- js/hbds_model_productivity.js  # Pure helpers for duplicate, paste, route preset, and subgraph export workflows
 |-- models/                        # Standard/sample HBDS JSON models
 |-- test_models/                   # Regression and test HBDS JSON models
 |-- pictures/                      # README and project images
 |-- scripts/smoke_server.py        # Server regression smoke suite
+|-- scripts/productivity_helpers_test.mjs # Node checks for productivity helper behavior
 |-- tools/                         # Manifest and naming validation helpers
 |-- index.html                     # Main shell: Models, Edit, Tests, Help
 |-- index_models.html              # Models viewer
@@ -259,10 +286,11 @@ This repository currently does not include a Maven wrapper, so `mvn` must be ins
 
 ## Roadmap
 
+* [ ] Add richer tree actions such as drag-to-reparent and inline rename.
 * [ ] Expand hyperclass editing workflows.
 * [ ] Add richer relationship editing between hyperclasses and classes.
-* [ ] Implement search or filtering for classes and attributes.
 * [ ] Add stronger visual conflict resolution for complex simultaneous edits.
+* [ ] Add undo/redo coverage for productivity operations.
 * [ ] Add a committed Maven wrapper so Java tests can run without a global Maven install.
 
 See the [open issues](https://github.com/arcazj/openbexi_hbds/issues) for proposed features and known issues.

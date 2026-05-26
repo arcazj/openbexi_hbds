@@ -58,6 +58,16 @@ import {
 } from './hbds_server_api.js?v=server-api-20260524f';
 import { renderDraftDiagramSvg } from './hbds_collaboration_preview.js?v=collab-preview-20260524d';
 import { bindFloatingPanel, clampFloatingPanel } from './hbds_floating_panel.js?v=floating-panel-20260524d';
+import {
+  buildSelectedSubgraph,
+  cloneNodesForPaste,
+  makeUniqueId,
+  moveArrayItem,
+  parseBulkAttributeNames,
+  PRODUCTIVITY_ROUTE_PRESETS,
+  routePresetFromRendering,
+  routePresetPatch
+} from './hbds_model_productivity.js?v=productivity-20260525a';
 
 let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
 const draggableObjects = [];
@@ -70,6 +80,7 @@ let selectedLinkTargetId = null;
 let selectedAttributeKey = null;
 let selectedLinkId = null;
 const selectedElementIds = new Set();
+let copiedProductivityNodes = [];
 let canvasTitleOverride = null;
 let multiSelectionMode = false;
 let editMode = 'full';
@@ -1323,6 +1334,172 @@ function syncAttributeAndLinkMenus() {
   syncLinkEditControls();
 }
 
+function modelTreeQueryText() {
+  return String($('model-tree-search-input')?.value || '').trim().toLowerCase();
+}
+
+function modelTreeNodeMatches(node, query) {
+  if (!query) return true;
+  const haystack = [
+    node?.id,
+    node?.name,
+    node?.type === 'hyperclass' ? 'hyperclass' : 'class',
+    ...(node?.attributes || []).map(attributeDisplayName)
+  ].join(' ').toLowerCase();
+  return haystack.includes(query);
+}
+
+function modelTreeLinkMatches(link, query, nodeMap) {
+  if (!query) return true;
+  const source = nodeMap.get(String(link?.sourceClassId));
+  const target = nodeMap.get(String(link?.targetClassId));
+  const haystack = [
+    link?.id,
+    link?.name,
+    link?.rendering?.labelText,
+    link?.sourceClassId,
+    link?.targetClassId,
+    source?.name,
+    target?.name,
+    'link'
+  ].join(' ').toLowerCase();
+  return haystack.includes(query);
+}
+
+function modelTreeVisibleNodeIds(query) {
+  const visible = new Set();
+  const allNodes = nodes();
+  const childrenByParent = new Map();
+  allNodes.forEach(node => {
+    if (!node?.parentClassId) return;
+    const key = String(node.parentClassId);
+    const list = childrenByParent.get(key) || [];
+    list.push(node);
+    childrenByParent.set(key, list);
+  });
+  const includeAncestors = node => {
+    let current = node;
+    while (current) {
+      visible.add(String(current.id));
+      current = current.parentClassId ? nodeById(current.parentClassId) : null;
+    }
+  };
+  allNodes.forEach(node => {
+    if (modelTreeNodeMatches(node, query)) includeAncestors(node);
+  });
+  return { visible, childrenByParent };
+}
+
+function modelTreeItemHtml({ kind, id, label, meta, depth = 0, selected = false, ownerId = '', attributeKey = '' }) {
+  return `
+    <button class="model-tree-item${selected ? ' is-selected' : ''}" type="button" role="treeitem"
+      style="--depth:${depth}"
+      data-model-tree-kind="${escapeHtml(kind)}"
+      data-model-tree-id="${escapeHtml(id)}"
+      data-owner-id="${escapeHtml(ownerId)}"
+      data-attribute-key="${escapeHtml(attributeKey)}">
+      <span class="model-tree-kind">${escapeHtml(kind.slice(0, 1).toUpperCase())}</span>
+      <span class="model-tree-name">${escapeHtml(label)}</span>
+      <span class="model-tree-meta">${escapeHtml(meta)}</span>
+    </button>
+  `;
+}
+
+function renderModelTree() {
+  const host = $('model-tree-list');
+  if (!host) return;
+  const allNodes = nodes();
+  const allLinks = links();
+  if (!allNodes.length && !allLinks.length) {
+    host.innerHTML = '<div class="model-tree-empty">No model loaded</div>';
+    return;
+  }
+
+  const query = modelTreeQueryText();
+  const nodeMap = new Map(allNodes.map(node => [String(node.id), node]));
+  const { visible, childrenByParent } = modelTreeVisibleNodeIds(query);
+  const roots = allNodes
+    .filter(node => !node.parentClassId || !nodeMap.has(String(node.parentClassId)))
+    .sort((a, b) => String(a.name || a.id).localeCompare(String(b.name || b.id)));
+
+  const renderNode = (node, depth = 0) => {
+    if (query && !visible.has(String(node.id))) return '';
+    const attrs = Array.isArray(node.attributes) ? node.attributes : [];
+    const children = (childrenByParent.get(String(node.id)) || [])
+      .sort((a, b) => String(a.name || a.id).localeCompare(String(b.name || b.id)));
+    const nodeHtml = modelTreeItemHtml({
+      kind: node.type === 'hyperclass' ? 'hyperclass' : 'class',
+      id: node.id,
+      label: node.name || node.id,
+      meta: `${attrs.length} attr${attrs.length === 1 ? '' : 's'}`,
+      depth,
+      selected: selectedElementIds.has(String(node.id)) && !selectedAttributeKey && !selectedLinkId
+    });
+    const attributeHtml = attrs
+      .map((attribute, index) => {
+        const key = attributeKeyFor(attribute, index);
+        const name = attributeDisplayName(attribute, index);
+        if (query && !name.toLowerCase().includes(query) && !visible.has(String(node.id))) return '';
+        return modelTreeItemHtml({
+          kind: 'attribute',
+          id: `${node.id}:${key}`,
+          ownerId: node.id,
+          attributeKey: key,
+          label: name,
+          meta: String(index + 1),
+          depth: depth + 1,
+          selected: sameId(selectedAttributeOwnerId, node.id) && sameId(selectedAttributeKey, key)
+        });
+      })
+      .join('');
+    return `${nodeHtml}${attributeHtml}${children.map(child => renderNode(child, depth + 1)).join('')}`;
+  };
+
+  const nodeHtml = roots.map(root => renderNode(root, 0)).join('');
+  const linkHtml = allLinks
+    .filter(link => modelTreeLinkMatches(link, query, nodeMap))
+    .map(link => modelTreeItemHtml({
+      kind: 'link',
+      id: link.id,
+      label: link.rendering?.labelText || link.name || link.id,
+      meta: `${link.sourceClassId} -> ${link.targetClassId}`,
+      depth: 0,
+      selected: sameId(selectedLinkId, link.id)
+    }))
+    .join('');
+
+  const sections = [
+    nodeHtml ? `<div class="model-tree-section">Nodes</div><div class="model-tree-group">${nodeHtml}</div>` : '',
+    linkHtml ? `<div class="model-tree-section">Links</div><div class="model-tree-group">${linkHtml}</div>` : ''
+  ].filter(Boolean).join('');
+  host.innerHTML = sections || '<div class="model-tree-empty">No matching items</div>';
+}
+
+function setModelTreeCollapsed(collapsed) {
+  document.body.classList.toggle('model-tree-collapsed', Boolean(collapsed));
+  const button = $('model-tree-toggle');
+  if (button) {
+    button.textContent = collapsed ? 'Tree' : 'Hide';
+    button.title = collapsed ? 'Expand model tree' : 'Collapse model tree';
+  }
+  try {
+    localStorage.setItem('hbds.dynamic.modelTreeCollapsed', collapsed ? '1' : '0');
+  } catch {
+    // Local persistence is optional.
+  }
+  resizeRenderers();
+}
+
+function restoreModelTreeState() {
+  let collapsed = false;
+  try {
+    collapsed = localStorage.getItem('hbds.dynamic.modelTreeCollapsed') === '1';
+  } catch {
+    collapsed = false;
+  }
+  setModelTreeCollapsed(collapsed);
+}
+
 function updateSelectedCard() {
   const card = $('selected-card');
   const multiNodes = selectedClassNodes();
@@ -1375,6 +1552,7 @@ function updateModeControls() {
   const owner = nodeById(selectedAttributeOwnerId) || selected;
   const attr = selectedAttributeEntry();
   const link = selectedLinkId ? links().find(item => sameId(item.id, selectedLinkId)) : null;
+  const productivityNodes = selectedNodesForProductivity();
 
   const disable = (id, state) => {
     const element = $(id);
@@ -1391,6 +1569,15 @@ function updateModeControls() {
   disable('add-link-button', isReadOnly || structureOnly || linkPickActive);
   disable('delete-selected-button', isReadOnly || Boolean(attr) || (!selected && !link));
   disable('delete-attribute-button', isReadOnly || structureOnly || !attr);
+  disable('duplicate-node-button', isReadOnly || !productivityNodes.length);
+  disable('copy-node-button', !productivityNodes.length);
+  disable('paste-node-button', isReadOnly || copiedProductivityNodes.length === 0);
+  disable('export-subgraph-button', productivityNodes.length === 0);
+  disable('bulk-add-attributes-button', isReadOnly || structureOnly || !owner);
+  disable('attribute-move-up-button', isReadOnly || structureOnly || !attr || attr.index <= 0);
+  disable('attribute-move-down-button', isReadOnly || structureOnly || !attr || attr.index >= (attr.owner.attributes || []).length - 1);
+  disable('swap-link-endpoints-button', isReadOnly || structureOnly || !link);
+  disable('link-route-preset-select', isReadOnly || structureOnly || !link);
   disable('selected-color-input', isReadOnly || !selected);
   disable('selected-border-color-input', isReadOnly || !selected);
   disable('selected-opacity-input', isReadOnly || !selected);
@@ -1418,6 +1605,10 @@ function updateModeControls() {
   $(`mode-${editMode}`)?.classList.add('active');
   const editModeSelect = $('edit-mode-select');
   if (editModeSelect) editModeSelect.value = editMode;
+  const routePresetSelect = $('link-route-preset-select');
+  if (routePresetSelect) {
+    routePresetSelect.value = link ? routePresetFromRendering(link.rendering || {}) : 'auto';
+  }
   updateDragControlsEnabled();
 }
 
@@ -1455,6 +1646,7 @@ function updateInterface(options = {}) {
   if (options.lightweight === true) {
     updateSelectedCard();
     updateLinkBuilderStatus();
+    renderModelTree();
     updateModeControls();
     updateCanvasTitle();
     updateSaveStatus();
@@ -1465,6 +1657,7 @@ function updateInterface(options = {}) {
   updateValidationStatus();
   updateSelectedCard();
   updateLinkBuilderStatus();
+  renderModelTree();
   renderPropertyPanel();
   updateModeControls();
   repairAttributeLabels();
@@ -2146,6 +2339,11 @@ function commandPaletteCommands() {
     { id: 'add-attribute', label: 'Add Attribute', keywords: 'field property', enabled: () => canEdit && Boolean(selectedAttributeOwnerId || selectedElementId), run: handleAddAttribute },
     { id: 'add-link', label: 'Start Link', keywords: 'relationship edge connection', enabled: () => canEdit, run: startLinkCreation },
     { id: 'delete-selected', label: 'Delete Selected', keywords: 'remove node link', enabled: () => canEdit && Boolean(selectedElementId || selectedLinkId), run: handleDeleteSelected },
+    { id: 'duplicate-node', label: 'Duplicate Selection', keywords: 'copy paste class hyperclass node', enabled: () => canEdit && selectedNodesForProductivity().length > 0, run: handleDuplicateSelectedNodes },
+    { id: 'copy-node', label: 'Copy Selection', keywords: 'copy class hyperclass node', enabled: () => selectedNodesForProductivity().length > 0, run: handleCopySelectedNodes },
+    { id: 'paste-node', label: 'Paste Nodes', keywords: 'paste duplicate node', enabled: () => canEdit && copiedProductivityNodes.length > 0, run: handlePasteCopiedNodes },
+    { id: 'export-subgraph', label: 'Export Selected Subgraph', keywords: 'json selected nodes links', enabled: () => selectedNodesForProductivity().length > 0, run: handleExportSelectedSubgraph },
+    { id: 'swap-link', label: 'Swap Link Ends', keywords: 'source target route', enabled: () => canEdit && Boolean(selectedLinkId), run: handleSwapSelectedLinkEndpoints },
     { id: 'save-model', label: 'Save Model', keywords: 'persist store', run: handleSaveModel },
     { id: 'fit-view', label: 'Fit View', keywords: 'zoom canvas camera', run: handleFitModel },
     { id: 'optimize-layout', label: 'Optimize Layout', keywords: 'arrange auto layout', run: handleOptimizeLayout },
@@ -2159,6 +2357,7 @@ function commandPaletteCommands() {
     { id: 'run-scenarios', label: 'Run Scenario Suite', keywords: 'test regression', enabled: () => !HIDE_SCENARIO_SUITE, run: runScenarioSuite },
     { id: 'open-validation', label: 'Open Validation', keywords: 'errors warnings issues', run: () => openControlSection('validation') },
     { id: 'open-builder', label: 'Open Model Builder', keywords: 'inspector properties edit', run: () => openControlSection('model-builder') },
+    { id: 'open-productivity', label: 'Open Productivity', keywords: 'tree duplicate bulk attributes route subgraph', run: () => openControlSection('productivity') },
     { id: 'open-share', label: 'Open Share', keywords: 'social export link', run: () => openControlSection('share') },
     { id: 'open-json', label: 'Open JSON', keywords: 'raw model', run: () => openControlSection('json') }
   ];
@@ -5211,6 +5410,7 @@ function syncLinkEditControls() {
   const nameInput = $('selected-link-name-input');
   const colorInput = $('selected-link-color-input');
   const widthInput = $('selected-link-width-input');
+  const routePresetSelect = $('link-route-preset-select');
   if (nameInput) {
     nameInput.disabled = disabled;
     nameInput.value = selectedLink ? (selectedLink.rendering?.labelText || selectedLink.name || '') : '';
@@ -5222,6 +5422,10 @@ function syncLinkEditControls() {
   if (widthInput) {
     widthInput.disabled = disabled;
     widthInput.value = String(Number(selectedLink?.rendering?.lineWidth ?? LINK_2D_DEFAULTS.lineWidth));
+  }
+  if (routePresetSelect) {
+    routePresetSelect.disabled = disabled || editMode === 'structure';
+    routePresetSelect.value = selectedLink ? routePresetFromRendering(selectedLink.rendering || {}) : 'auto';
   }
 }
 
@@ -6067,6 +6271,34 @@ function selectElement(id, options = {}) {
   if (options.log !== false) addLog(`Selected ${selected.name || selected.id}`);
 }
 
+function selectAttribute(ownerId, attributeKey, options = {}) {
+  const owner = nodeById(ownerId);
+  if (!owner) return;
+  setPrimarySelection(owner.id);
+  selectedAttributeOwnerId = owner.id;
+  selectedParentHyperclassId = owner.parentClassId ?? null;
+  selectedAttributeKey = attributeKey;
+  selectedLinkId = null;
+  updateInterface({ json: false });
+  revealModelBuilderProperties({ instant: options.instant === true });
+  if (options.log !== false) addLog(`Selected attribute ${attributeKey}`);
+}
+
+function selectLink(linkId, options = {}) {
+  const link = links().find(item => sameId(item.id, linkId));
+  if (!link) return;
+  setPrimarySelection(link.sourceClassId);
+  selectedAttributeOwnerId = link.sourceClassId;
+  selectedParentHyperclassId = nodeById(link.sourceClassId)?.parentClassId ?? null;
+  selectedAttributeKey = null;
+  selectedLinkId = link.id;
+  selectedLinkSourceId = link.sourceClassId;
+  selectedLinkTargetId = link.targetClassId;
+  updateInterface({ json: false });
+  revealModelBuilderProperties({ instant: options.instant === true });
+  if (options.log !== false) addLog(`Selected link ${link.rendering?.labelText || link.name || link.id}`);
+}
+
 function syncCountersFromData() {
   const allNodes = nodes();
   nextClassNumber = Math.max(1, allNodes.filter(node => node.type !== 'hyperclass').length + 1);
@@ -6205,6 +6437,184 @@ async function handleDeleteAttribute() {
   selectedAttributeOwnerId = attr.owner.id;
   selectedAttributeKey = null;
   await refreshWorkspace(`Deleted attribute ${label}`, { refresh: true });
+}
+
+function selectedNodesForProductivity() {
+  if (selectedAttributeKey || selectedLinkId) return [];
+  const selected = selectedClassNodes();
+  if (selected.length) return selected;
+  const node = nodeById(selectedElementId);
+  return node ? [node] : [];
+}
+
+function selectMultipleNodes(ids) {
+  selectedElementIds.clear();
+  ids.forEach(id => selectedElementIds.add(String(id)));
+  multiSelectionMode = selectedElementIds.size > 1;
+  selectedElementId = ids[0] || null;
+  selectedAttributeOwnerId = selectedElementId;
+  selectedParentHyperclassId = nodeById(selectedElementId)?.parentClassId ?? null;
+  selectedAttributeKey = null;
+  selectedLinkId = null;
+}
+
+function repairHyperclassChildren() {
+  const modelNodes = nodes();
+  const byId = new Map(modelNodes.map(node => [String(node.id), node]));
+  modelNodes
+    .filter(node => node.type === 'hyperclass')
+    .forEach(node => {
+      const uniqueChildren = new Set((node.children || []).filter(childId => byId.has(String(childId))).map(String));
+      node.children = [...uniqueChildren];
+    });
+  modelNodes.forEach(node => {
+    if (!node.parentClassId) return;
+    const parent = byId.get(String(node.parentClassId));
+    if (!parent || parent.type !== 'hyperclass') {
+      node.parentClassId = null;
+      return;
+    }
+    parent.children = Array.isArray(parent.children) ? parent.children : [];
+    if (!parent.children.some(childId => sameId(childId, node.id))) parent.children.push(node.id);
+  });
+}
+
+function copySelectedNodesToProductivityBuffer() {
+  const selected = selectedNodesForProductivity();
+  if (!selected.length) {
+    showToast('Select a class or hyperclass to copy');
+    return false;
+  }
+  copiedProductivityNodes = selected.map(cloneValue);
+  updateModeControls();
+  addLog(`Copied ${selected.length} node${selected.length === 1 ? '' : 's'}`);
+  showToast(`Copied ${selected.length} node${selected.length === 1 ? '' : 's'}`);
+  return true;
+}
+
+async function pasteProductivityNodes(sourceNodes = copiedProductivityNodes, message = 'Pasted nodes') {
+  const source = (sourceNodes || []).map(cloneValue).filter(Boolean);
+  if (!source.length) {
+    showToast('Copy or select nodes first');
+    return;
+  }
+  const existingIds = new Set(nodes().map(node => String(node.id)));
+  const cloned = cloneNodesForPaste(source, existingIds);
+  if (!cloned.nodes.length) return;
+  const model = getData();
+  model.hypergraph = model.hypergraph || {};
+  model.hypergraph.class = Array.isArray(model.hypergraph.class) ? model.hypergraph.class : [];
+  model.hypergraph.class.push(...cloned.nodes);
+  repairHyperclassChildren();
+  selectMultipleNodes(cloned.nodes.map(node => node.id));
+  syncCountersFromData();
+  await refreshWorkspace(`${message}: ${cloned.nodes.length}`, { refresh: true, fit: false });
+}
+
+async function handleDuplicateSelectedNodes() {
+  const selected = selectedNodesForProductivity();
+  if (!selected.length) {
+    showToast('Select a class or hyperclass to duplicate');
+    return;
+  }
+  await pasteProductivityNodes(selected, 'Duplicated nodes');
+}
+
+function handleCopySelectedNodes() {
+  copySelectedNodesToProductivityBuffer();
+}
+
+async function handlePasteCopiedNodes() {
+  await pasteProductivityNodes();
+}
+
+async function handleBulkAddAttributes() {
+  const owner = nodeById(selectedAttributeOwnerId || selectedElementId);
+  if (!owner) {
+    showToast('Select a class or hyperclass first');
+    return;
+  }
+  const input = $('bulk-attribute-input');
+  const parsed = parseBulkAttributeNames(input?.value || '', owner.attributes || []);
+  if (parsed.duplicates.length) {
+    showToast(`Duplicate attributes: ${parsed.duplicates.slice(0, 3).join(', ')}`);
+    return;
+  }
+  if (!parsed.names.length) {
+    showToast('Enter one attribute per line');
+    return;
+  }
+  const attrs = Array.isArray(owner.attributes) ? owner.attributes : [];
+  const useStringAttributes = attrs.length > 0 && attrs.every(attribute => typeof attribute === 'string');
+  const existingAttributeIds = new Set(attrs.filter(attribute => attribute && typeof attribute === 'object' && attribute.id != null).map(attribute => String(attribute.id)));
+  parsed.names.forEach(name => {
+    attrs.push(useStringAttributes
+      ? name
+      : { id: makeUniqueId(`att_${name}`, existingAttributeIds, 'att'), name });
+  });
+  owner.attributes = attrs;
+  selectedElementId = owner.id;
+  selectedAttributeOwnerId = owner.id;
+  const lastIndex = owner.attributes.length - 1;
+  selectedAttributeKey = attributeKeyFor(owner.attributes[lastIndex], lastIndex);
+  selectedLinkId = null;
+  if (input) input.value = '';
+  await refreshWorkspace(`Added ${parsed.names.length} attributes to ${owner.name || owner.id}`, { refresh: true, fit: false });
+}
+
+async function handleMoveSelectedAttribute(delta) {
+  const attr = selectedAttributeEntry();
+  if (!attr) {
+    showToast('Select an attribute first');
+    return;
+  }
+  const result = moveArrayItem(attr.owner.attributes || [], attr.index, delta);
+  if (!result.moved) return;
+  attr.owner.attributes = result.items;
+  selectedAttributeKey = attributeKeyFor(attr.owner.attributes[result.toIndex], result.toIndex);
+  await refreshWorkspace(`Moved attribute ${attributeDisplayName(attr.owner.attributes[result.toIndex], result.toIndex)}`, {
+    refresh: true,
+    fit: false
+  });
+}
+
+async function handleSwapSelectedLinkEndpoints() {
+  const link = selectedLinkId ? links().find(item => sameId(item.id, selectedLinkId)) : null;
+  if (!link) {
+    showToast('Select a link first');
+    return;
+  }
+  await updateLink(link.id, {
+    sourceClassId: link.targetClassId,
+    targetClassId: link.sourceClassId
+  }, { context: ctx(), refresh: false });
+  selectedLinkSourceId = link.targetClassId;
+  selectedLinkTargetId = link.sourceClassId;
+  await refreshWorkspace(`Swapped link ${link.rendering?.labelText || link.name || link.id}`, { refresh: true, fit: false });
+}
+
+async function handleLinkRoutePresetChange() {
+  const link = selectedLinkId ? links().find(item => sameId(item.id, selectedLinkId)) : null;
+  if (!link) return;
+  const preset = $('link-route-preset-select')?.value || 'auto';
+  if (!PRODUCTIVITY_ROUTE_PRESETS.includes(preset)) return;
+  await updateLink(link.id, {
+    rendering: routePresetPatch(preset)
+  }, { context: ctx(), refresh: false });
+  await refreshWorkspace(`Applied ${preset} route to ${link.rendering?.labelText || link.name || link.id}`, { refresh: true, fit: false });
+}
+
+function handleExportSelectedSubgraph() {
+  const selectedIds = new Set(selectedNodesForProductivity().map(node => String(node.id)));
+  if (!selectedIds.size) {
+    showToast('Select a class or hyperclass to export');
+    return;
+  }
+  const subgraph = buildSelectedSubgraph(getData(), selectedIds);
+  const fileName = `${currentDownloadStem()}_selected_subgraph.json`;
+  downloadTextFile(fileName, JSON.stringify(subgraph, null, 2), 'application/json;charset=utf-8');
+  addLog(`Exported selected subgraph (${subgraph.hypergraph.class.length} nodes, ${subgraph.hypergraph.link.length} links)`);
+  showToast('Exported selected subgraph');
 }
 
 async function handleOptimizeLayout() {
@@ -7111,14 +7521,50 @@ function setupDrag() {
   updateModeControls();
 }
 
+function handleModelTreeClick(event) {
+  const item = event.target.closest?.('[data-model-tree-kind]');
+  if (!item) return;
+  const kind = item.dataset.modelTreeKind;
+  if (kind === 'attribute') {
+    selectAttribute(item.dataset.ownerId, item.dataset.attributeKey);
+    return;
+  }
+  if (kind === 'link') {
+    selectLink(item.dataset.modelTreeId);
+    return;
+  }
+  if (event.shiftKey) {
+    toggleMultiSelection(item.dataset.modelTreeId);
+    updateInterface({ json: false });
+    addLog(`Selected ${selectedElementIds.size} item${selectedElementIds.size === 1 ? '' : 's'}`);
+    return;
+  }
+  selectElement(item.dataset.modelTreeId);
+}
+
 function bindUi() {
   bindCollaborationControls();
+  restoreModelTreeState();
+  $('model-tree-toggle')?.addEventListener('click', () => {
+    setModelTreeCollapsed(!document.body.classList.contains('model-tree-collapsed'));
+  });
+  $('model-tree-search-input')?.addEventListener('input', renderModelTree);
+  $('model-tree-list')?.addEventListener('click', handleModelTreeClick);
   $('add-class-button').addEventListener('click', () => runAction(handleAddClass));
   $('add-hyperclass-button').addEventListener('click', () => runAction(handleAddHyperclass));
   $('add-attribute-button').addEventListener('click', () => runAction(handleAddAttribute));
   $('add-link-button').addEventListener('click', startLinkCreation);
   $('delete-selected-button').addEventListener('click', () => runAction(handleDeleteSelected));
   $('delete-attribute-button')?.addEventListener('click', () => runAction(handleDeleteAttribute));
+  $('duplicate-node-button')?.addEventListener('click', () => runAction(handleDuplicateSelectedNodes));
+  $('copy-node-button')?.addEventListener('click', handleCopySelectedNodes);
+  $('paste-node-button')?.addEventListener('click', () => runAction(handlePasteCopiedNodes));
+  $('export-subgraph-button')?.addEventListener('click', handleExportSelectedSubgraph);
+  $('bulk-add-attributes-button')?.addEventListener('click', () => runAction(handleBulkAddAttributes));
+  $('attribute-move-up-button')?.addEventListener('click', () => runAction(() => handleMoveSelectedAttribute(-1)));
+  $('attribute-move-down-button')?.addEventListener('click', () => runAction(() => handleMoveSelectedAttribute(1)));
+  $('swap-link-endpoints-button')?.addEventListener('click', () => runAction(handleSwapSelectedLinkEndpoints));
+  $('link-route-preset-select')?.addEventListener('change', () => runAction(handleLinkRoutePresetChange));
   $('optimize-layout-button').addEventListener('click', () => runAction(handleOptimizeLayout));
   $('fit-model-button').addEventListener('click', handleFitModel);
   $('save-model-button').addEventListener('click', () => runAction(handleSaveModel));

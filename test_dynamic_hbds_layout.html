@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Dynamic Layout Test</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=collab-preview-zoom-20260525a">
+  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=productivity-20260525a">
   <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -17,6 +17,23 @@
     <canvas id="model-overview-canvas"></canvas>
     <div id="model-overview-viewport"></div>
   </div>
+
+  <aside id="model-tree-sidebar" aria-label="Model tree">
+    <div class="model-tree-header">
+      <div>
+        <div class="eyebrow">Model Tree</div>
+        <h2>Structure</h2>
+      </div>
+      <button id="model-tree-toggle" type="button" title="Collapse model tree">Tree</button>
+    </div>
+    <label class="model-tree-search" for="model-tree-search-input">
+      <span>Search</span>
+      <input id="model-tree-search-input" type="text" autocomplete="off" placeholder="Name, id, type, attribute">
+    </label>
+    <div id="model-tree-list" class="model-tree-list" role="tree" aria-label="HBDS model tree">
+      <div class="model-tree-empty">No model loaded</div>
+    </div>
+  </aside>
 
   <section id="collaboration-split" aria-label="Collaborator live view" hidden>
     <div class="collaboration-header">
@@ -109,7 +126,7 @@
       </div>
     </section>
 
-    <section class="control-group">
+    <section class="control-group" data-section="model-builder">
       <div class="section-title">Model Builder <span id="link-builder-status" class="section-meta">Ready</span></div>
       <div class="action-grid">
         <button id="add-hyperclass-button" type="button" class="primary">Hyperclass</button>
@@ -189,6 +206,34 @@
       </div>
     </section>
 
+    <section class="control-group" data-section="productivity">
+      <div class="section-title">Productivity</div>
+      <div class="action-grid">
+        <button id="duplicate-node-button" type="button">Duplicate</button>
+        <button id="copy-node-button" type="button">Copy</button>
+        <button id="paste-node-button" type="button">Paste</button>
+        <button id="export-subgraph-button" type="button">Export Selected</button>
+      </div>
+      <label for="bulk-attribute-input">Bulk Attributes</label>
+      <textarea id="bulk-attribute-input" class="compact-textarea" spellcheck="false" placeholder="One attribute per line"></textarea>
+      <button id="bulk-add-attributes-button" type="button">Add Attributes</button>
+      <div class="control-row">
+        <button id="attribute-move-up-button" type="button">Move Attr Up</button>
+        <button id="attribute-move-down-button" type="button">Move Attr Down</button>
+      </div>
+      <div class="builder-separator" aria-hidden="true"></div>
+      <div class="control-row">
+        <button id="swap-link-endpoints-button" type="button">Swap Link</button>
+        <label class="compact-field" for="link-route-preset-select"><span>Route</span><select id="link-route-preset-select">
+          <option value="auto">Auto</option>
+          <option value="horizontal">Horizontal</option>
+          <option value="vertical">Vertical</option>
+          <option value="direct">Direct</option>
+          <option value="orthogonal">Orthogonal</option>
+        </select></label>
+      </div>
+    </section>
+
     <section class="control-group" data-default-open="true">
       <div class="section-title">Session</div>
       <div class="control-row">
@@ -208,6 +253,6 @@
     </div>
   </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=collab-preview-zoom-20260525a"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=productivity-20260525a"></script>
 </body>
 </html>

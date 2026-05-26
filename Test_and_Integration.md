@@ -17,11 +17,16 @@ Use this guide to validate:
 * 2-D and 3-D rendering
 * zoom, pan, fit, and overview behavior
 * class, hyperclass, attribute, and link editing
+* model tree sidebar search, selection, and multi-selection
+* duplicate, copy, and paste for selected class and hyperclass nodes
+* bulk attribute add and selected attribute reorder
+* link source/target swap and route presets
+* selected subgraph export
 * layout algorithms
 * API documentation and OpenAPI output
 * server connection indicator
 * collaboration panel and conflict-resolution choices
-* smoke tests, manifest validation, naming lint, and optional Maven tests
+* smoke tests, manifest validation, naming lint, productivity helper tests, and optional Maven tests
 
 ## 2. Prerequisites
 
@@ -155,18 +160,27 @@ Validate:
 Manual edit workflow:
 
 1. Load a model.
-2. Add a hyperclass.
-3. Add a class.
-4. Add attributes to the selected class.
-5. Add a link between two elements.
-6. Select an attribute and click `Delete Attribute`.
-7. Select a link and verify the delete button reads `Delete selected link`.
-8. Delete the selected link.
-9. Move a class in 2-D mode.
-10. Switch to 3-D and rotate the scene.
-11. Switch back to 2-D and verify layout is preserved.
-12. Save.
-13. Reload the model and verify the saved changes are present.
+2. Search the Model Tree by name, ID, type, attribute text, and link endpoint.
+3. Select a class, hyperclass, attribute, and link from the Model Tree and confirm canvas and property panel selection stay synchronized.
+4. Shift-click class or hyperclass rows in the Model Tree to build a multi-selection.
+5. Add a hyperclass.
+6. Add a class.
+7. Add attributes to the selected class.
+8. Add multiple attributes through Bulk Attributes and confirm duplicate names are rejected.
+9. Move a selected attribute up and down and confirm its data is preserved.
+10. Duplicate selected class or hyperclass nodes and confirm new IDs, offset positions, and copied rendering.
+11. Copy and paste selected class or hyperclass nodes and confirm pasted nodes get new IDs and offset positions.
+12. Add a link between two elements.
+13. Select a link and verify the delete button reads `Delete selected link`.
+14. Swap the selected link source and target, then apply `auto`, `horizontal`, `vertical`, `direct`, and `orthogonal` route presets.
+15. Export Selected and confirm the JSON includes selected nodes, selected hyperclass descendants, and only links whose endpoints are included.
+16. Select an attribute and click `Delete Attribute`.
+17. Delete the selected link.
+18. Move a class in 2-D mode.
+19. Switch to 3-D and rotate the scene.
+20. Switch back to 2-D and verify layout is preserved.
+21. Save.
+22. Reload the model and verify the saved changes are present.
 
 ## 8. Tests View Test
 
@@ -472,7 +486,67 @@ Server validation:
 
 The smoke suite covers these server cases.
 
-## 19. Automated Regression Commands
+## 19. Medium-Risk Modeling Productivity Validation
+
+Validate this section whenever the model tree sidebar, productivity panel, copy/paste behavior, attribute helpers, link helpers, or selected subgraph export changes.
+
+Feature scope:
+
+* model tree sidebar for classes, hyperclasses, attributes, and links
+* tree search by name, ID, type, attribute text, and link endpoint
+* tree selection and Shift-click multi-selection for class and hyperclass nodes
+* duplicate, copy, and paste for selected class and hyperclass nodes
+* bulk attribute add with duplicate-name rejection
+* selected attribute move up/down
+* selected link source/target swap
+* selected link route presets
+* selected subgraph JSON export
+
+Affected source and documentation files:
+
+```text
+test_dynamic_hbds_layout.html
+css/test_dynamic_hbds_layout.css
+js/test_dynamic_hbds_layout.js
+js/hbds_model_productivity.js
+scripts/productivity_helpers_test.mjs
+README.md
+Test_and_Integration.md
+Prompt4HDBS_graphi_ simulator.md
+```
+
+Manual validation:
+
+1. Open Edit or Tests in connected mode.
+2. Confirm the Model Tree is visible, collapsible, and searchable.
+3. Load a model and search by class name, ID, type, attribute text, and link endpoint.
+4. Click class, hyperclass, attribute, and link tree rows and confirm the canvas and property panel reflect the same selection.
+5. Shift-click multiple class or hyperclass rows and confirm the multi-selection status updates.
+6. Duplicate selected node rows and confirm new IDs, copied attributes, copied rendering, offset positions, and no unexpected link duplication.
+7. Copy and paste selected node rows and confirm the same ID, rendering, and offset behavior.
+8. Add multiple attributes with Bulk Attributes and confirm duplicate names are rejected before applying.
+9. Move the selected attribute up and down, preserving its name, type, value, and rendering fields.
+10. Select a link, swap source and target, then apply `auto`, `horizontal`, `vertical`, `direct`, and `orthogonal` route presets.
+11. Export Selected and confirm the JSON includes selected nodes, descendants of selected hyperclasses, and links where both endpoints are included.
+12. Confirm Export Selected does not mutate the active model or current selection.
+
+Expected pass criteria:
+
+* Productivity controls are hidden or disabled when no compatible selection exists.
+* Duplicate and paste produce unique IDs and readable names.
+* Link helpers operate only on selected links.
+* Bulk attribute actions do not create duplicate attribute names.
+* Export Selected produces valid model JSON without changing the open model.
+* The browser console has no new runtime errors during the workflow.
+
+Known limitations:
+
+* Link duplication is intentionally not included.
+* Hyperclass duplication does not implicitly duplicate children unless children are selected with it.
+* Selected subgraph export is JSON only.
+* Model tree drag-to-reparent and inline rename are not included.
+
+## 20. Automated Regression Commands
 
 Run Python compile checks:
 
@@ -510,6 +584,12 @@ Lint naming:
 py tools\lint_model_naming.py
 ```
 
+Run productivity helper tests:
+
+```powershell
+node scripts\productivity_helpers_test.mjs
+```
+
 Run Java/Maven tests if Maven is installed:
 
 ```powershell
@@ -520,6 +600,7 @@ Run JavaScript syntax checks for touched modules:
 
 ```powershell
 Get-Content -Raw js\test_dynamic_hbds_layout.js | node --input-type=module --check
+Get-Content -Raw js\hbds_model_productivity.js | node --input-type=module --check
 Get-Content -Raw js\hbds_collaboration_preview.js | node --input-type=module --check
 Get-Content -Raw js\hbds_floating_panel.js | node --input-type=module --check
 ```
@@ -530,7 +611,7 @@ Run Git whitespace checks:
 git diff --check
 ```
 
-## 20. Deep Manual Regression Matrix
+## 21. Deep Manual Regression Matrix
 
 Run this matrix before major releases.
 
@@ -544,10 +625,17 @@ Models view:
 Edit view:
 
 * load from `models/`
+* search and select elements through the Model Tree
 * create class
 * create hyperclass
 * add attributes
+* bulk add attributes
+* reorder selected attributes
 * add links
+* swap link source and target
+* apply link route presets
+* duplicate, copy, and paste selected nodes
+* export a selected subgraph
 * update class and hyperclass rendering properties
 * move elements
 * save and reload
@@ -579,7 +667,7 @@ Collaboration:
 * disconnect/reconnect
 * panel resize and drag
 
-## 21. Troubleshooting
+## 22. Troubleshooting
 
 Port already in use:
 
@@ -639,7 +727,7 @@ OpenAPI or docs returns JSON when HTML was expected:
 * `/api/docs` is the readable documentation page
 * `/api/openapi.json` is the machine-readable JSON specification
 
-## 22. Release Checklist
+## 23. Release Checklist
 
 Before release:
 
@@ -649,6 +737,8 @@ Before release:
 * run `py tools\validate_models.py`
 * run `py tools\validate_test_models.py`
 * run `py tools\lint_model_naming.py`
+* run `node scripts\productivity_helpers_test.mjs`
+* run JavaScript syntax checks for touched modules
 * run `mvn test` if Maven is installed
 * run `git diff --check`
 * start `py server.py --port 8010`
@@ -656,6 +746,8 @@ Before release:
 * verify API docs and OpenAPI
 * verify save to `models/`
 * verify save to `test_models/`
+* verify model tree search and selection
+* verify productivity tools for duplicate, paste, bulk attributes, link routes, and selected export
 * verify collaboration with two browser windows
 * verify per-change timestamps in collaboration
 * verify `Merge Both`, `Use Theirs`, and `Keep Mine`
@@ -664,7 +756,7 @@ Before release:
 * review `git status --short`
 * update README or this guide if behavior changed
 
-## 23. Expected Clean-Up
+## 24. Expected Clean-Up
 
 After tests, confirm no temporary smoke files remain:
 

@@ -157,6 +157,7 @@ Main JavaScript responsibilities:
 - `hbds_server_api.js`: HTTP and event API client wrapper.
 - `hbds_collaboration_preview.js`: remote draft preview rendering.
 - `hbds_floating_panel.js`: draggable and resizable panels.
+- `hbds_model_productivity.js`: pure helpers for duplicate, paste, route preset, and selected subgraph export workflows.
 - `test_dynamic_hbds_layout.js`: interactive UI state, selection, property panels, builder actions, layout controls, JSON editor, scenario suite, collaboration controls, and regression workflows.
 
 ## Capability Inventory
@@ -179,6 +180,11 @@ The phased implementation must cover these capabilities:
 - Support fit, zoom, pan, and overview/minimap behavior.
 - Support model builder workflows.
 - Support direct manipulation of selected objects.
+- Support searchable model tree navigation for classes, hyperclasses, attributes, and links.
+- Support duplicate, copy, and paste for selected class and hyperclass nodes with generated IDs.
+- Support bulk attribute creation and selected attribute reordering.
+- Support link source/target swap and link route presets.
+- Support exporting the selected subgraph without mutating the active model.
 - Support JSON editing and validation feedback.
 - Support save/load through the local server.
 - Support operation-based updates.
@@ -202,6 +208,8 @@ Check these carefully during implementation:
 - Test fixtures covering only happy paths.
 - Server validation accepting data that the frontend cannot render.
 - Frontend normalization hiding invalid fixture data.
+- Duplicate, copy, and paste workflows generating unstable IDs or broken parent/child references.
+- Selected subgraph export accidentally mutating the active model or including stale links.
 - Collaboration drafts using a different shape than saved models.
 - Documentation drifting from actual test commands.
 
@@ -390,8 +398,15 @@ Tasks:
 - Verify class creation, update, and deletion.
 - Verify hyperclass or nested class creation and update if supported.
 - Verify attribute editing.
+- Verify bulk attribute add and duplicate-name rejection.
+- Verify selected attribute move up/down preserves attribute data.
 - Verify link creation, update, and deletion.
+- Verify link source/target swap.
+- Verify link route presets.
 - Verify selection and property panel synchronization.
+- Verify model tree search, tree selection, and multi-selection synchronization.
+- Verify duplicate, copy, and paste of selected class and hyperclass nodes.
+- Verify selected subgraph export includes only selected nodes, selected hyperclass descendants, and links whose endpoints are included.
 - Verify JSON editor validation and apply behavior.
 - Verify undo-like or draft recovery behavior if present.
 - Ensure deletes remove or repair dependent links safely.
@@ -399,12 +414,20 @@ Tasks:
 Deliverables:
 
 - Reliable edit workflows.
+- Medium-risk modeling productivity controls for repeated editing tasks.
+- Pure helper coverage for duplicate, paste, route preset, and subgraph export behavior.
 - Test fixtures or smoke coverage for create/update/delete operations.
 
 Validation:
 
 - Use builder controls to create a small model from scratch.
+- Use the model tree to search and select classes, hyperclasses, attributes, and links.
+- Duplicate and paste selected nodes, then confirm new IDs, offset coordinates, copied rendering, and no unexpected link duplication.
+- Add bulk attributes and reorder selected attributes.
+- Swap a selected link and apply all route presets.
+- Export a selected subgraph and verify the active model is unchanged.
 - Save and reload the model through the server.
+- Run `node scripts\productivity_helpers_test.mjs`.
 - Run operation endpoint smoke checks if available.
 
 ### Phase 9: Collaboration, Drafts, and Conflict Handling
@@ -463,6 +486,7 @@ Tasks:
 
 - Update `README.md` if startup, architecture, or API behavior changes.
 - Update `Test_and_Integration.md` if tests, validators, or manual scenarios change.
+- Update `Prompt4HDBS_graphi_ simulator.md` when phased scope, feature inventory, or required validation changes.
 - Document generated files and when to regenerate them.
 - Document fixture authoring rules.
 - Document model schema expectations.
@@ -514,7 +538,9 @@ py tools\validate_manifests.py
 py tools\validate_models.py
 py tools\validate_test_models.py
 py tools\lint_model_naming.py
+node scripts\productivity_helpers_test.mjs
 Get-Content -Raw js\test_dynamic_hbds_layout.js | node --input-type=module --check
+Get-Content -Raw js\hbds_model_productivity.js | node --input-type=module --check
 Get-Content -Raw js\hbds_collaboration_preview.js | node --input-type=module --check
 Get-Content -Raw js\hbds_floating_panel.js | node --input-type=module --check
 git diff --check
