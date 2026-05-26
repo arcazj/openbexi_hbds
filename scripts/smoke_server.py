@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """Smoke-test the local HBDS Python server."""
 
 from __future__ import annotations

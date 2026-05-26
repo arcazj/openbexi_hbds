@@ -159,6 +159,7 @@ const DEFAULT_TEST_MODEL_HIDDEN_VALUES = [
   'test_models/models.json',
   'test_models/transportation_links.json'
 ];
+const MODEL_TREE_COLLAPSED_STORAGE_KEY = 'hbds.dynamic.modelTreeCollapsed.v2';
 const MODEL_SOURCE_CONFIG = getModelSourceConfig();
 const TEST_MODEL_ROOT = MODEL_SOURCE_CONFIG.root;
 const TEST_MODEL_MANIFEST = MODEL_SOURCE_CONFIG.manifest;
@@ -542,6 +543,15 @@ function resizeRenderers() {
   labelRenderer.setSize(size.width, size.height);
   renderOnce();
   updateOverview();
+}
+
+function resizeRenderersAfterLayoutChange() {
+  resizeRenderers();
+  requestAnimationFrame(() => {
+    resizeRenderers();
+    requestAnimationFrame(resizeRenderers);
+  });
+  window.setTimeout(resizeRenderers, 190);
 }
 
 function is3DViewEnabled() {
@@ -1479,23 +1489,24 @@ function setModelTreeCollapsed(collapsed) {
   document.body.classList.toggle('model-tree-collapsed', Boolean(collapsed));
   const button = $('model-tree-toggle');
   if (button) {
-    button.textContent = collapsed ? 'Tree' : 'Hide';
-    button.title = collapsed ? 'Expand model tree' : 'Collapse model tree';
+    button.textContent = collapsed ? 'Show Tree' : 'Hide';
+    button.title = collapsed ? 'Show model tree' : 'Hide model tree';
   }
   try {
-    localStorage.setItem('hbds.dynamic.modelTreeCollapsed', collapsed ? '1' : '0');
+    localStorage.setItem(MODEL_TREE_COLLAPSED_STORAGE_KEY, collapsed ? '1' : '0');
   } catch {
     // Local persistence is optional.
   }
-  resizeRenderers();
+  resizeRenderersAfterLayoutChange();
 }
 
 function restoreModelTreeState() {
-  let collapsed = false;
+  let collapsed = true;
   try {
-    collapsed = localStorage.getItem('hbds.dynamic.modelTreeCollapsed') === '1';
+    const stored = localStorage.getItem(MODEL_TREE_COLLAPSED_STORAGE_KEY);
+    collapsed = stored == null ? true : stored === '1';
   } catch {
-    collapsed = false;
+    collapsed = true;
   }
   setModelTreeCollapsed(collapsed);
 }

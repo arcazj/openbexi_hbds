@@ -159,7 +159,7 @@ textarea.compact-textarea {
 }
 
 body.model-tree-collapsed #container {
-  left: var(--tree-collapsed-width);
+  left: 0;
 }
 
 #container canvas {
@@ -269,8 +269,11 @@ body.has-model #canvas-model-title {
 }
 
 body.model-tree-collapsed #model-tree-sidebar {
-  width: var(--tree-collapsed-width);
-  padding: 10px 6px;
+  width: 0;
+  border-right: 0;
+  box-shadow: none;
+  padding: 0;
+  pointer-events: none;
 }
 
 .model-tree-header {
@@ -307,9 +310,15 @@ body.model-tree-collapsed .model-tree-list {
 }
 
 body.model-tree-collapsed #model-tree-toggle {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 34;
   min-width: 34px;
-  padding: 4px 5px;
-  writing-mode: vertical-rl;
+  width: auto;
+  padding: 5px 9px;
+  pointer-events: auto;
+  writing-mode: horizontal-tb;
   text-orientation: mixed;
 }
 
@@ -429,7 +438,7 @@ body.model-tree-collapsed #model-tree-toggle {
 }
 
 body.model-tree-collapsed #model-overview {
-  left: calc(var(--tree-collapsed-width) + 16px);
+  left: 116px;
 }
 
 #collaboration-split {

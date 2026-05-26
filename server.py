@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """Local HBDS static file and model API server."""
 
 from __future__ import annotations
