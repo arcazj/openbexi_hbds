@@ -9,10 +9,10 @@
       "algorithm": "grid",
       "mode": "Radial",
       "fit": {
-        "padding": 1.15,
-        "fitHeightDistance": 23.8342,
-        "fitWidthDistance": 16.2993,
-        "distance": 13.909,
+        "padding": 1.18,
+        "fitHeightDistance": 24.4559,
+        "fitWidthDistance": 16.8539,
+        "distance": 24.4559,
         "diagramWidth": 16.77,
         "diagramHeight": 9.61,
         "diagramDepth": 0.13,
@@ -20,9 +20,9 @@
         "center": {
           "x": -0.6775,
           "y": 0.275,
-          "z": 0.068
+          "z": 0.065
         },
-        "cameraAspect": 1.4623,
+        "cameraAspect": 1.4511,
         "cameraFov": 50
       }
     },
@@ -121,7 +121,8 @@
             "borderWidth": 0.025,
             "cornerRadius": 0.12,
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           }
         }
       },
@@ -173,7 +174,8 @@
             "borderWidth": 0.025,
             "cornerRadius": 0.12,
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           }
         }
       },
