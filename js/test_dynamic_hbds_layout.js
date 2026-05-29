@@ -110,6 +110,8 @@ const collaborationChangeHistory = new Map();
 const collaborationDiffCache = new Map();
 const collaborationPerformance = createCollaborationPerformanceTracker({ maxSamples: 80, slowThresholdMs: 120 });
 let selectedRemoteClientId = '';
+let modelLoadRequestId = 0;
+let scheduledModelLoadTimer = null;
 let draftPublishTimer = null;
 let scheduledDraftPublish = null;
 let pendingDraftPublish = null;
@@ -1752,6 +1754,15 @@ function updateLinkBuilderStatus() {
   }
 
   status.textContent = 'Ready';
+}
+
+function setEditMode(nextMode = 'full') {
+  const startedAt = collaborationPerfNow();
+  editMode = ['full', 'structure', 'readonly'].includes(nextMode) ? nextMode : 'full';
+  if (editMode !== 'full') linkPickActive = false;
+  updateLinkBuilderStatus();
+  updateModeControls();
+  recordCollaborationPerformance('ui.edit_mode', startedAt, { mode: editMode });
 }
 
 function updateModeControls() {
@@ -4230,13 +4241,18 @@ function vectorToPlain(vector) {
   };
 }
 
-async function clearLocalServerDraft(modelName = localDraftModelName || getSelectedCollaborationModelName()) {
-  if (!COLLABORATION_ENABLED || !serverConnected || !modelName || !serverEvents) return;
+function resetLocalDraftPublishState() {
   window.clearTimeout(draftPublishTimer);
+  draftPublishTimer = null;
   scheduledDraftPublish = null;
   pendingDraftPublish = null;
   lastPublishedDraftSignature = '';
   clearLocalDraftOperations();
+}
+
+async function clearLocalServerDraft(modelName = localDraftModelName || getSelectedCollaborationModelName()) {
+  resetLocalDraftPublishState();
+  if (!COLLABORATION_ENABLED || !serverConnected || !modelName || !serverEvents) return;
   try {
     await clearServerDraft(modelName, {
       clientId: serverEvents.clientId,
@@ -4249,8 +4265,8 @@ async function clearLocalServerDraft(modelName = localDraftModelName || getSelec
   }
 }
 
-async function loadRemoteDraftsForCurrentModel() {
-  const modelName = getSelectedCollaborationModelName();
+async function loadRemoteDraftsForCurrentModel(options = {}) {
+  const modelName = options.modelName || getSelectedCollaborationModelName();
   remoteDrafts.clear();
   collaborationLivePreviewZoomByDraft.clear();
   clearCollaborationChangeHistory();
@@ -4260,12 +4276,12 @@ async function loadRemoteDraftsForCurrentModel() {
     scheduleRemoteDraftRefreshLoop();
     return;
   }
-  await refreshRemoteDraftsForCurrentModel({ immediate: true });
+  await refreshRemoteDraftsForCurrentModel({ immediate: true, modelName });
   scheduleRemoteDraftRefreshLoop();
 }
 
 async function refreshRemoteDraftsForCurrentModel(options = {}) {
-  const modelName = getSelectedCollaborationModelName();
+  const modelName = options.modelName || getSelectedCollaborationModelName();
   if (!COLLABORATION_ENABLED || !serverConnected || !modelName || remoteDraftRefreshInFlight) return;
   remoteDraftRefreshInFlight = true;
   const startedAt = collaborationPerfNow();
@@ -4277,6 +4293,10 @@ async function refreshRemoteDraftsForCurrentModel(options = {}) {
       draftScope: COLLABORATION_DRAFT_SCOPE,
       timeoutMs: 2500
     });
+    if (getSelectedCollaborationModelName() !== modelName) {
+      countCollaborationPerformance('draft.remote_refresh.stale_model');
+      return;
+    }
     if (result.ok) {
       const seenClientIds = new Set();
       (result.data?.drafts || [])
@@ -6805,6 +6825,12 @@ function sampleRendererPixels(step = 28) {
   renderOnce();
   const gl = renderer.getContext();
   const canvas = renderer.domElement;
+  if (!gl || !canvas?.width || !canvas?.height) return null;
+  const maxSamples = 180;
+  const effectiveStep = Math.max(
+    step,
+    Math.ceil(Math.sqrt((canvas.width * canvas.height) / maxSamples))
+  );
   const pixel = new Uint8Array(4);
   const background = { r: 238, g: 242, b: 246 };
   let sampled = 0;
@@ -6812,8 +6838,8 @@ function sampleRendererPixels(step = 28) {
   let colored = 0;
   let luminanceTotal = 0;
 
-  for (let y = step; y < canvas.height; y += step) {
-    for (let x = step; x < canvas.width; x += step) {
+  for (let y = effectiveStep; y < canvas.height; y += effectiveStep) {
+    for (let x = effectiveStep; x < canvas.width; x += effectiveStep) {
       gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
       sampled += 1;
       const [r, g, b, a] = pixel;
@@ -6832,6 +6858,7 @@ function sampleRendererPixels(step = 28) {
   return {
     width: canvas.width,
     height: canvas.height,
+    step: effectiveStep,
     sampled,
     nonBackground,
     colored,
@@ -6873,6 +6900,10 @@ function installDebugHooks() {
       } : null,
       layout: getLayoutSettings()
     }),
+    setEditMode: mode => {
+      setEditMode(mode);
+      return editMode;
+    },
     triggerCollaborationStatusForTest,
     getLinkHubMetrics: collectLinkHubMetrics,
     getLabelMetrics: collectLabelMetrics,
@@ -7623,8 +7654,12 @@ function handleFitModel() {
   scheduleLocalDraftPublish('Fit view');
 }
 
-async function handleResetModel() {
-  const previousCollaborationModel = getSelectedCollaborationModelName();
+async function handleResetModel(options = {}) {
+  if (options.invalidateLoad !== false) {
+    clearScheduledModelLoad();
+    beginModelLoadRequest();
+  }
+  const previousCollaborationModel = options.draftModelName || getSelectedCollaborationModelName();
   clearCollaborationPreviewSnapshotCache();
   await resetData({ context: ctx(), refresh: false });
   const select = $('test-model-select');
@@ -7639,7 +7674,16 @@ async function handleResetModel() {
   selectedLinkTargetId = null;
   selectedLinkId = null;
   linkPickActive = false;
-  if (previousCollaborationModel) await clearLocalServerDraft(previousCollaborationModel);
+  if (options.clearDraft === false) {
+    resetLocalDraftPublishState();
+  } else {
+    const clearDraft = clearLocalServerDraft(previousCollaborationModel);
+    if (options.awaitDraftClear === false) {
+      void clearDraft;
+    } else {
+      await clearDraft;
+    }
+  }
   remoteDrafts.clear();
   collaborationLivePreviewZoomByDraft.clear();
   clearCollaborationChangeHistory();
@@ -7942,6 +7986,37 @@ function getSelectedCollaborationModelName() {
   return `${COLLABORATION_DRAFT_SCOPE}/${modelFileNameFromValue(value)}`;
 }
 
+function beginModelLoadRequest() {
+  modelLoadRequestId += 1;
+  return modelLoadRequestId;
+}
+
+function isCurrentModelLoad(requestId, value) {
+  return requestId === modelLoadRequestId && (($('test-model-select')?.value || '') === String(value || ''));
+}
+
+function scheduleSelectedModelLoad(value = $('test-model-select')?.value || '') {
+  const requestValue = String(value || '');
+  const requestId = beginModelLoadRequest();
+  window.clearTimeout(scheduledModelLoadTimer);
+  scheduledModelLoadTimer = window.setTimeout(() => {
+    scheduledModelLoadTimer = null;
+    if (!isCurrentModelLoad(requestId, requestValue)) return;
+    runAction(() => handleLoadModel({ value: requestValue, requestId }));
+  }, 0);
+}
+
+function clearScheduledModelLoad() {
+  window.clearTimeout(scheduledModelLoadTimer);
+  scheduledModelLoadTimer = null;
+}
+
+function runBackgroundTask(label, task) {
+  Promise.resolve()
+    .then(task)
+    .catch(error => addLog(`${label} failed: ${error?.message || String(error)}`));
+}
+
 function handleServerModelUpdated(event) {
   if (event.clientId && event.clientId === serverEvents?.clientId) return;
   const currentName = getSelectedServerModelName();
@@ -8005,34 +8080,55 @@ function restoreViewState(state) {
   orbitControls.update();
 }
 
-async function handleLoadModel() {
+async function handleLoadModel(options = {}) {
+  const select = $('test-model-select');
+  const value = String(options.value ?? select?.value ?? '');
+  const requestId = Number.isFinite(Number(options.requestId)) ? Number(options.requestId) : beginModelLoadRequest();
+  if (!isCurrentModelLoad(requestId, value)) return;
+  const previousCollaborationModel = localDraftModelName || getSelectedCollaborationModelName();
+  clearScheduledModelLoad();
   clearCollaborationPreviewSnapshotCache();
-  await clearLocalServerDraft();
+  window.clearTimeout(remoteDraftRefreshTimer);
+  remoteDraftRefreshTimer = null;
+  window.clearTimeout(collaborationPanelRenderTimer);
+  collaborationPanelRenderTimer = null;
+  collaborationPreviewRenderToken += 1;
+  void clearLocalServerDraft(previousCollaborationModel);
   remoteDrafts.clear();
   collaborationLivePreviewZoomByDraft.clear();
   clearCollaborationChangeHistory();
   selectedRemoteClientId = '';
   updateCollaborationPanel();
-  const value = $('test-model-select').value;
+  await yieldToBrowser({ timeoutMs: 16 });
+  if (!isCurrentModelLoad(requestId, value)) return;
   if (!value) {
-    await handleResetModel();
+    await handleResetModel({
+      awaitDraftClear: false,
+      draftModelName: previousCollaborationModel,
+      clearDraft: false,
+      invalidateLoad: false
+    });
+    if (!isCurrentModelLoad(requestId, value)) return;
     localDraftDirty = false;
     collaborationBaseModel = cloneValue(getData());
     markSavedState();
     return;
   }
 
-  const selectedLabel = $('test-model-select').selectedOptions[0]?.textContent || value;
+  const selectedLabel = select?.selectedOptions?.[0]?.textContent || value;
   let loadedModel;
   if (isServerModelValue(value)) {
     const result = await loadServerModel(modelNameFromValue(value), { timeoutMs: 6000 });
+    if (!isCurrentModelLoad(requestId, value)) return;
     if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
     loadedModel = setData(result.data.model, { context: ctx(), refresh: true });
   } else {
     loadedModel = await loadAndRenderScene(value, ctx(), {
       allowedBasePath: TEST_MODEL_ROOT,
-      defaultBasePath: TEST_MODEL_ROOT
+      defaultBasePath: TEST_MODEL_ROOT,
+      isCurrent: () => isCurrentModelLoad(requestId, value)
     });
+    if (!loadedModel || !isCurrentModelLoad(requestId, value)) return;
   }
   const preserveLayout = Boolean(loadedModel?.metadata?.preserveLayout || loadedModel?.hypergraph?.metadata?.preserveLayout);
   const hasSavedFit = hasFitMetadata(loadedModel);
@@ -8053,12 +8149,17 @@ async function handleLoadModel() {
     fit: optimize || !hasSavedFit,
     publishDraft: false
   });
+  if (!isCurrentModelLoad(requestId, value)) return;
   localDraftDirty = false;
   markSavedState();
-  await loadRemoteDraftsForCurrentModel();
-  if (getSelectedCollaborationModelName()) {
-    await publishLocalPresenceDraft('Viewing model');
-  }
+  runBackgroundTask('Collaboration model refresh', async () => {
+    if (!isCurrentModelLoad(requestId, value)) return;
+    const modelName = getSelectedCollaborationModelName();
+    await loadRemoteDraftsForCurrentModel({ modelName });
+    if (isCurrentModelLoad(requestId, value) && getSelectedCollaborationModelName()) {
+      await publishLocalPresenceDraft('Viewing model');
+    }
+  });
 }
 
 async function runScenarioSuite() {
@@ -8665,28 +8766,21 @@ function bindUi() {
 
   $('test-model-select').addEventListener('change', () => {
     updateModelSummary();
-    runAction(handleLoadModel);
+    scheduleSelectedModelLoad($('test-model-select')?.value || '');
   });
 
   $('edit-mode-select')?.addEventListener('change', event => {
-    editMode = event.target.value || 'full';
-    if (editMode !== 'full') linkPickActive = false;
-    updateInterface({ json: false });
+    setEditMode(event.target.value || 'full');
   });
 
   $('mode-full')?.addEventListener('click', () => {
-    editMode = 'full';
-    updateInterface({ json: false });
+    setEditMode('full');
   });
   $('mode-structure')?.addEventListener('click', () => {
-    editMode = 'structure';
-    linkPickActive = false;
-    updateInterface({ json: false });
+    setEditMode('structure');
   });
   $('mode-readonly')?.addEventListener('click', () => {
-    editMode = 'readonly';
-    linkPickActive = false;
-    updateInterface({ json: false });
+    setEditMode('readonly');
   });
 
   ['selected-element-select', 'parent-hyperclass-select', 'selected-attribute-select', 'selected-link-select'].forEach(id => {
@@ -8756,13 +8850,16 @@ async function init() {
     setTimeout(() => runAction(runSatelliteFontZoomRegression), 0);
   }
 
-  requestAnimationFrame(animate);
+  if (!params.has('sharedModel')) {
+    requestAnimationFrame(animate);
+  }
 }
 
 function animate() {
   requestAnimationFrame(animate);
-  orbitControls?.update();
-  renderOnce();
+  if (orbitControls?.update?.()) {
+    renderOnce();
+  }
 }
 
 init().catch(error => {

@@ -16,34 +16,14 @@
       "description": "human"
     },
     {
-      "value": "models/human_and_car.json",
-      "label": "human and car",
-      "description": "human and car"
-    },
-    {
-      "value": "models/human_and_car_and_more.json",
-      "label": "human and car and more",
-      "description": "human and car and more"
-    },
-    {
       "value": "models/human_and_car_links.json",
       "label": "human and car links",
       "description": "human and car links"
     },
     {
-      "value": "models/hyperclass_mail_Carrier.json",
-      "label": "hyperclass mail Carrier",
-      "description": "hyperclass mail Carrier"
-    },
-    {
       "value": "models/hyperclass_mail_Carrier_with_links.json",
       "label": "hyperclass mail Carrier with links",
       "description": "hyperclass mail Carrier with links"
-    },
-    {
-      "value": "models/hyperclasse_human_and_car.json",
-      "label": "hyperclasse human and car",
-      "description": "hyperclasse human and car"
     },
     {
       "value": "models/hyperclasse_link_human_and_car.json",
@@ -56,9 +36,9 @@
       "description": "multimodal transportation diagram"
     },
     {
-      "value": "models/opera_de_Paris.json",
-      "label": "opera de Paris",
-      "description": "opera de Paris"
+      "value": "models/openshift_cloud_network.json",
+      "label": "openshift cloud network",
+      "description": "openshift cloud network"
     },
     {
       "value": "models/satellite_world_complete_structure.json",
@@ -69,16 +49,6 @@
       "value": "models/satellite_world_simple_structure.json",
       "label": "satellite world simple structure",
       "description": "satellite world simple structure"
-    },
-    {
-      "value": "models/TGV.json",
-      "label": "TGV",
-      "description": "TGV"
-    },
-    {
-      "value": "models/transportation.json",
-      "label": "transportation",
-      "description": "transportation"
     },
     {
       "value": "models/transportation_links.json",

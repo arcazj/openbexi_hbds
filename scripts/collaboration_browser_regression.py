@@ -32,6 +32,8 @@ MODELS_DIR = ROOT_DIR / "models"
 TEST_MODELS_DIR = ROOT_DIR / "test_models"
 TEMP_MODEL_NAME = f"_collab_browser_{os.getpid()}.json"
 TEMP_PROFILE_DIR = ROOT_DIR / f".tmp-collab-browser-profile-{os.getpid()}"
+HUMAN_AND_CAR_LINKS_MODEL_NAME = "human_and_car_links.json"
+HUMAN_AND_CAR_LINKS_SELECTION_MAX_MS = 250.0
 SOURCE_MODEL_CANDIDATES = [
     MODELS_DIR / "bridge_road_links.json",
     MODELS_DIR / "satellite_world_complete_structure.json",
@@ -437,7 +439,22 @@ class BrowserPage:
         self.cdp.close()
 
     def navigate(self, url: str) -> None:
+        start_index = len(self.cdp.events)
         self.cdp.send("Page.navigate", {"url": url}, timeout=10)
+        self.wait_for_load(start_index=start_index)
+
+    def wait_for_load(self, *, start_index: int | None = None, timeout: float = 25.0) -> None:
+        event_start = len(self.cdp.events) if start_index is None else start_index
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            self.cdp.drain(0.2)
+            if any(
+                event.get("method") in {"Page.loadEventFired", "Page.frameStoppedLoading"}
+                for event in self.cdp.events[event_start:]
+            ):
+                return
+            time.sleep(0.05)
+        raise BrowserRegressionError("Timed out waiting for page load event")
 
     def bring_to_front(self) -> None:
         self.cdp.send("Page.bringToFront", timeout=5)
@@ -572,6 +589,7 @@ def wait_for_server_draft(base_url: str, model_name: str, expected_text: str, ti
 
 def wait_for_pages_loaded(pages: list[BrowserPage], model_name: str) -> None:
     for index, page in enumerate(pages, start=1):
+        page.bring_to_front()
         wait_for(
             page,
             f"""
@@ -586,6 +604,68 @@ return Boolean(
             f"page {index} to load temporary server model",
             timeout=35,
         )
+
+
+def dynamic_layout_url(base_url: str, shared_model: str | None = None) -> str:
+    params = {"modelsPath": "models/"}
+    if shared_model:
+        params["sharedModel"] = shared_model
+    return f"{base_url}/test_dynamic_hbds_layout.html?{urllib.parse.urlencode(params)}"
+
+
+def wait_for_page_ready(page: BrowserPage, label: str, *, timeout: float = 35.0) -> None:
+    wait_for(
+        page,
+        """
+return Boolean(
+  window.__hbdsDynamicTest &&
+  window.__hbdsDynamicTest.getState().serverConnected === true &&
+  document.querySelector('#test-model-select')?.options?.length > 1
+);
+""",
+        label,
+        timeout=timeout,
+    )
+
+
+def set_page_edit_mode(page: BrowserPage, mode: str = "full") -> None:
+    result = page.evaluate(
+        f"""
+(() => {{
+  const api = window.__hbdsDynamicTest;
+  const select = document.querySelector('#edit-mode-select');
+  if (select) {{
+    select.value = {json.dumps(mode)};
+    select.dispatchEvent(new Event('change', {{ bubbles: true }}));
+  }} else if (api?.setEditMode) {{
+    api.setEditMode({json.dumps(mode)});
+  }} else {{
+    return {{ ok: false, reason: 'edit mode control unavailable' }};
+  }}
+  return {{ ok: true, mode: api?.getState?.().editMode || '' }};
+}})()
+""",
+        timeout=8,
+    )
+    if not isinstance(result, dict) or result.get("ok") is not True or result.get("mode") != mode:
+        raise BrowserRegressionError(f"Could not set edit mode to {mode}: {result}")
+
+
+def wait_for_model_loaded(page: BrowserPage, model_name: str, label: str, *, timeout: float = 35.0) -> None:
+    wait_for(
+        page,
+        f"""
+const select = document.querySelector('#test-model-select');
+const state = window.__hbdsDynamicTest?.getState?.();
+return Boolean(
+  select?.value?.includes({json.dumps(model_name)}) &&
+  state?.counts?.nodes > 0 &&
+  document.querySelector('#save-status')?.textContent?.includes('Saved')
+);
+""",
+        label,
+        timeout=timeout,
+    )
 
 
 def assert_model_tree_canvas_space(page: BrowserPage) -> None:
@@ -758,6 +838,22 @@ def assert_no_collaboration_status(page: BrowserPage, label: str) -> None:
         raise BrowserRegressionError(f"{label} showed collaboration progress status during a normal update: {state}")
 
 
+def wait_for_no_collaboration_status(page: BrowserPage, label: str, *, timeout: float = 6.0) -> None:
+    wait_for(
+        page,
+        """
+const element = document.querySelector('#canvas-collaboration-status');
+if (!element) return true;
+const style = getComputedStyle(element);
+const rect = element.getBoundingClientRect();
+return element.hidden || style.display === 'none' || style.visibility === 'hidden' || rect.width <= 0 || rect.height <= 0;
+""",
+        label,
+        timeout=timeout,
+        interval=0.1,
+    )
+
+
 def assert_collaboration_status_indicator(page: BrowserPage) -> None:
     result = page.evaluate(
         """
@@ -779,6 +875,169 @@ def assert_collaboration_status_indicator(page: BrowserPage) -> None:
         raise BrowserRegressionError(f"Collaboration status blocks canvas pointer interaction: {result}")
     if result.get("hiddenAfterFinish") is not True:
         raise BrowserRegressionError(f"Collaboration status did not hide after work finished: {result}")
+
+
+def assert_edit_mode_responsive(page: BrowserPage, label: str, max_ms: float = 180.0) -> float:
+    result = page.evaluate(
+        """
+(() => {
+  const select = document.querySelector('#edit-mode-select');
+  const api = window.__hbdsDynamicTest;
+  if (!select && !api?.setEditMode) return { supported: false, reason: 'missing edit-mode control and debug hook' };
+  const original = select?.value || api?.getState?.().editMode || 'full';
+  const timings = [];
+  for (const mode of ['readonly', 'structure', 'full']) {
+    const started = performance.now();
+    if (select) {
+      select.value = mode;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+      api.setEditMode(mode);
+    }
+    timings.push({
+      mode,
+      elapsedMs: performance.now() - started,
+      state: api?.getState?.().editMode || ''
+    });
+  }
+  if (select) {
+    select.value = original;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  } else {
+    api.setEditMode(original);
+  }
+  return {
+    supported: true,
+    timings,
+    maxMs: Math.max(...timings.map(item => item.elapsedMs))
+  };
+})()
+""",
+        timeout=8,
+    )
+    if not isinstance(result, dict) or result.get("supported") is not True:
+        raise BrowserRegressionError(f"{label} edit-mode responsiveness check is unavailable: {result}")
+    max_observed = float(result.get("maxMs") or 0)
+    bad_states = [item for item in result.get("timings", []) if item.get("mode") != item.get("state")]
+    if bad_states:
+        raise BrowserRegressionError(f"{label} edit-mode state did not update immediately: {result}")
+    if max_observed > max_ms:
+        raise BrowserRegressionError(f"{label} edit-mode dispatch took {max_observed:.2f}ms > {max_ms}ms: {result}")
+    return max_observed
+
+
+def assert_model_selection_controls_responsive(page: BrowserPage, model_name: str, max_ms: float = 250.0) -> dict:
+    result = page.evaluate(
+        """
+(() => {
+  const modelSelect = document.querySelector('#test-model-select');
+  const editSelect = document.querySelector('#edit-mode-select');
+  const api = window.__hbdsDynamicTest;
+  if (!modelSelect || (!editSelect && !api?.setEditMode)) return { supported: false, reason: 'missing model or edit controls' };
+  const original = modelSelect.value;
+  if (!original) return { supported: false, reason: 'no selected model to restore' };
+
+  const blankStarted = performance.now();
+  modelSelect.value = '';
+  modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  const blankDispatchMs = performance.now() - blankStarted;
+
+  const editStarted = performance.now();
+  if (editSelect) {
+    editSelect.value = 'structure';
+    editSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  } else {
+    api.setEditMode('structure');
+  }
+  const editDuringModelChangeMs = performance.now() - editStarted;
+
+  const restoreStarted = performance.now();
+  modelSelect.value = original;
+  modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  const restoreDispatchMs = performance.now() - restoreStarted;
+
+  return {
+    supported: true,
+    original,
+    selectedAfterRestore: modelSelect.value,
+    editMode: window.__hbdsDynamicTest?.getState?.().editMode || '',
+    blankDispatchMs,
+    editDuringModelChangeMs,
+    restoreDispatchMs,
+    maxMs: Math.max(blankDispatchMs, editDuringModelChangeMs, restoreDispatchMs)
+  };
+})()
+""",
+        timeout=10,
+    )
+    if not isinstance(result, dict) or result.get("supported") is not True:
+        raise BrowserRegressionError(f"Model-selection responsiveness check is unavailable: {result}")
+    if result.get("selectedAfterRestore") != result.get("original"):
+        raise BrowserRegressionError(f"Model select did not restore synchronously: {result}")
+    max_observed = float(result.get("maxMs") or 0)
+    if max_observed > max_ms:
+        raise BrowserRegressionError(f"Model selection controls took {max_observed:.2f}ms > {max_ms}ms: {result}")
+    wait_for(
+        page,
+        f"""
+return Boolean(
+  document.querySelector('#test-model-select')?.value?.includes({json.dumps(model_name)}) &&
+  window.__hbdsDynamicTest?.getState?.().counts.nodes > 0 &&
+  document.querySelector('#save-status')?.textContent?.includes('Saved')
+);
+""",
+        "model selection to restore without stale load",
+        timeout=25,
+    )
+    return result
+
+
+def assert_select_model_without_latency(page: BrowserPage, model_name: str, max_ms: float) -> dict:
+    result = page.evaluate(
+        f"""
+(() => {{
+  const modelSelect = document.querySelector('#test-model-select');
+  if (!modelSelect) return {{ ok: false, reason: 'missing model select' }};
+  const requested = {json.dumps(model_name)};
+  const requestedStem = requested.replace(/\\.json$/i, '').toLowerCase();
+  const options = [...modelSelect.options];
+  const match = options.find(option => {{
+    const value = String(option.value || '');
+    const text = String(option.textContent || '').trim().toLowerCase();
+    const valueFile = value.split(':').pop().split('/').pop().toLowerCase();
+    return value === requested ||
+      value.endsWith('/' + requested) ||
+      valueFile === requested.toLowerCase() ||
+      text === requestedStem.replace(/[_-]+/g, ' ');
+  }});
+  if (!match) {{
+    return {{
+      ok: false,
+      reason: 'model option not found',
+      options: options.map(option => ({{ value: option.value, text: option.textContent }})).slice(0, 20)
+    }};
+  }}
+  const started = performance.now();
+  modelSelect.value = match.value;
+  modelSelect.dispatchEvent(new Event('change', {{ bubbles: true }}));
+  const dispatchMs = performance.now() - started;
+  return {{
+    ok: true,
+    selectedValue: modelSelect.value,
+    selectedText: match.textContent,
+    dispatchMs
+  }};
+}})()
+""",
+        timeout=10,
+    )
+    if not isinstance(result, dict) or result.get("ok") is not True:
+        raise BrowserRegressionError(f"Could not select {model_name}: {result}")
+    observed = float(result.get("dispatchMs") or 0)
+    if observed > max_ms:
+        raise BrowserRegressionError(f"{model_name} selection dispatch took {observed:.2f}ms > {max_ms}ms: {result}")
+    wait_for_model_loaded(page, model_name, f"{model_name} to load after second-page selection", timeout=35)
+    return result
 
 
 def read_diagnostics(page: BrowserPage) -> dict:
@@ -1011,6 +1270,7 @@ def assert_remote_operations_update_realtime(page: BrowserPage, base_url: str, m
         forbidden: list[str] | None = None,
     ) -> str:
         nonlocal previous_text
+        wait_for_no_collaboration_status(page, f"{status} pre-existing collaboration status to clear")
         started = time.perf_counter()
         publish_operations_draft(
             base_url,
@@ -1368,14 +1628,58 @@ def assert_browser_errors(pages: list[BrowserPage]) -> None:
         raise BrowserRegressionError(f"Browser reported significant errors:\n{rendered}")
 
 
+def run_human_and_car_second_page_selection_regression(base_url: str, debug_port: int) -> None:
+    model_path = MODELS_DIR / HUMAN_AND_CAR_LINKS_MODEL_NAME
+    if not model_path.exists():
+        raise BrowserRegressionError(f"Required model is missing: {model_path.relative_to(ROOT_DIR)}")
+
+    page_a = BrowserPage(create_target(debug_port))
+    page_b = BrowserPage(create_target(debug_port))
+    pages = [page_a, page_b]
+    try:
+        page_a.navigate(dynamic_layout_url(base_url, HUMAN_AND_CAR_LINKS_MODEL_NAME))
+        wait_for_page_ready(page_a, "first human_and_car_links collaboration page")
+        wait_for_model_loaded(page_a, HUMAN_AND_CAR_LINKS_MODEL_NAME, "first page human_and_car_links load")
+        set_page_edit_mode(page_a, "full")
+
+        page_b.navigate(dynamic_layout_url(base_url))
+        wait_for_page_ready(page_b, "second blank collaboration page")
+        set_page_edit_mode(page_b, "full")
+
+        page_b.bring_to_front()
+        selection = assert_select_model_without_latency(
+            page_b,
+            HUMAN_AND_CAR_LINKS_MODEL_NAME,
+            HUMAN_AND_CAR_LINKS_SELECTION_MAX_MS,
+        )
+        assert_no_wait_popup(page_b)
+        assert_no_collaboration_status(page_b, "human_and_car_links second-page selection")
+
+        page_a.bring_to_front()
+        wait_for(
+            page_a,
+            """
+const panel = document.querySelector('#collaboration-split');
+const text = document.querySelector('#collaboration-count')?.innerText || '';
+return Boolean(panel && panel.hidden === false && /user/.test(text));
+""",
+            "first page collaboration panel after second page selects human_and_car_links",
+            timeout=12,
+        )
+        assert_no_wait_popup(page_a)
+        assert_browser_errors(pages)
+        print(
+            "PASS human_and_car_links second-page selection "
+            f"dispatch={float(selection['dispatchMs']):.2f}ms "
+            f"value={selection['selectedValue']}"
+        )
+    finally:
+        for page in pages:
+            page.close()
+
+
 def run_regression(base_url: str, debug_port: int, loaded_model: dict) -> None:
-    url = (
-        f"{base_url}/test_dynamic_hbds_layout.html?"
-        + urllib.parse.urlencode({
-            "modelsPath": "models/",
-            "sharedModel": TEMP_MODEL_NAME,
-        })
-    )
+    url = dynamic_layout_url(base_url, TEMP_MODEL_NAME)
     page_a = BrowserPage(create_target(debug_port))
     page_b = BrowserPage(create_target(debug_port))
     pages = [page_a, page_b]
@@ -1403,6 +1707,7 @@ def run_regression(base_url: str, debug_port: int, loaded_model: dict) -> None:
             raise BrowserRegressionError(f"Real UI draft update took {remote_update_seconds:.2f}s")
         assert_no_wait_popup(page_a)
         assert_no_collaboration_status(page_a, "real UI draft update")
+        edit_mode_max_ms = assert_edit_mode_responsive(page_a, "collaboration panel")
         remote_client_id = str(page_a.evaluate("(() => document.querySelector('#collaboration-client-select')?.value || '')()")) or str(server_draft.get("clientId") or "")
         wait_for(
             page_a,
@@ -1447,18 +1752,22 @@ def run_regression(base_url: str, debug_port: int, loaded_model: dict) -> None:
         )
         assert_no_wait_popup(page_a)
         clear_draft(base_url, TEMP_MODEL_NAME, matrix_client_id)
+        model_select_latency = assert_model_selection_controls_responsive(page_a, TEMP_MODEL_NAME)
 
         wait_for(page_a, "return Boolean(document.querySelector('#collaboration-performance-diagnostics')?.textContent);", "panel diagnostics", timeout=5)
         wait_for(page_b, "return Boolean(document.querySelector('#collaboration-performance-diagnostics')?.textContent);", "draft diagnostics", timeout=5)
         page_a_diagnostics = read_diagnostics(page_a)
         page_b_diagnostics = read_diagnostics(page_b)
         assert_performance_metric(page_a_diagnostics, "panel.render", 1000)
+        assert_performance_metric(page_a_diagnostics, "ui.edit_mode", 180)
         assert_performance_metric(page_b_diagnostics, "draft.publish", 10000)
         assert_performance_metric(page_b_diagnostics, "draft.build.dirty", 10000)
         assert_browser_errors(pages)
 
         print(f"PASS browser collaboration model={TEMP_MODEL_NAME}")
         print(f"PASS real draft update {remote_update_seconds:.2f}s")
+        print(f"PASS edit-mode dispatch max={edit_mode_max_ms:.2f}ms")
+        print(f"PASS model-select dispatch max={float(model_select_latency['maxMs']):.2f}ms")
         print(f"PASS realtime remote operations updates max={max(realtime_timings):.2f}s count={len(realtime_timings)}")
         print(f"PASS remote operations UI text sample: {rename_text.splitlines()[-1][:120]}")
         print(f"PASS diagnostics panel.render={page_a_diagnostics['metrics']['panel.render']['maxMs']}ms draft.publish={page_b_diagnostics['metrics']['draft.publish']['maxMs']}ms")
@@ -1500,6 +1809,7 @@ def main() -> int:
 
         browser_process = launch_browser(debug_port)
         wait_for_browser(debug_port, browser_process)
+        run_human_and_car_second_page_selection_regression(base_url, debug_port)
         run_regression(base_url, debug_port, loaded_model)
         return 0
     finally:

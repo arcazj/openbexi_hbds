@@ -661,6 +661,31 @@ Expected sequential behavior:
 * each remote operation update appears within the browser regression timing budget
 * the mixed operation matrix still renders all covered operation types and disables merge when non-mergeable display operations are present
 
+## 15C. Second-Page Model Selection Collaboration Latency Regression
+
+Use this section whenever collaboration startup, model selection, edit-mode controls, draft cleanup, or remote draft refresh changes.
+
+Automated command:
+
+```powershell
+py scripts\collaboration_browser_regression.py
+```
+
+The browser regression includes a dedicated `human_and_car_links.json` workflow:
+
+1. Open a first real browser client on `human_and_car_links.json` in edit mode.
+2. Open a second real browser client in edit mode with no model selected.
+3. Select `human_and_car_links.json` on the second client.
+4. Verify the model-select `change` dispatch stays under the latency budget.
+5. Verify the second client loads the model, does not show a wait/loading popup, and does not show the canvas collaboration progress indicator for the normal selection path.
+6. Verify the first client sees the collaboration panel after the second client joins the same model.
+
+Expected output includes:
+
+```text
+PASS human_and_car_links second-page selection dispatch=<number>ms value=<selected option>
+```
+
 ## 16. Rendering And Navigation Regression
 
 2-D checks:
@@ -840,7 +865,7 @@ Run the browser-level collaboration regression:
 py scripts\collaboration_browser_regression.py
 ```
 
-This opens two headless Edge/Chrome clients against a temporary server model, verifies real draft publishing, sequential real-time `Remote operations` list updates, remote operation rendering for class, link, layout, font, scene, view, movement, rendering, parent, attribute, create, and delete updates, merge behavior, collaboration performance diagnostics, absence of normal-update wait/status dialogs, and the non-blocking long-work canvas progress indicator.
+This opens real headless Edge/Chrome clients, verifies second-page `human_and_car_links.json` model-selection latency during collaboration, then verifies a temporary server model for real draft publishing, sequential real-time `Remote operations` list updates, remote operation rendering for class, link, layout, font, scene, view, movement, rendering, parent, attribute, create, and delete updates, merge behavior, collaboration performance diagnostics, absence of normal-update wait/status dialogs, and the non-blocking long-work canvas progress indicator.
 
 Run Java/Maven tests if Maven is installed:
 

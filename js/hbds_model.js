@@ -3,6 +3,8 @@ import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontS
 import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=material-surface-20260525a';
 import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=font-zoom-20260523a';
 import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=font-zoom-20260523a';
+import { initModelOverview as initModelOverviewPanel, updateModelOverview as updateModelOverviewPanel } from './hbds_model_overview.js?v=overview-module-20260529a';
+export { drawOverviewHyperclasses, drawOverviewClasses, drawOverviewLinks, updateOverviewViewport } from './hbds_model_overview.js?v=overview-module-20260529a';
 
 export const DEFAULT_SCENE_SETTINGS = {
   background: '#eef2f6',
@@ -551,50 +553,13 @@ export function panCameraByScreenDelta(context, dx, dy) {
 }
 
 export function initModelOverview(context) {
-  const canvas = document.getElementById('model-overview-canvas');
-  if (!canvas) return;
-  canvas.width = Math.max(1, canvas.clientWidth || 180);
-  canvas.height = Math.max(1, canvas.clientHeight || 140);
-  updateModelOverview(context);
+  return initModelOverviewPanel(context, data);
 }
 
-function getOverviewTransform(context, canvas) {
-  const box = new THREE.Box3().setFromObject(context.diagramGroup);
-  if (box.isEmpty()) return null;
-  const size = box.getSize(new THREE.Vector3());
-  const min = box.min.clone();
-  const max = box.max.clone();
-  const pad = 12;
-  const scaleX = (canvas.width - 2 * pad) / Math.max(size.x, 1e-6);
-  const scaleY = (canvas.height - 2 * pad) / Math.max(size.y, 1e-6);
-  const scale = Math.min(scaleX, scaleY);
-  return { min, max, pad, scale, box };
+export function updateModelOverview(context) {
+  return updateModelOverviewPanel(context, data);
 }
 
-function worldToOverview(pos, transform, canvas) {
-  const x = transform.pad + (pos.x - transform.min.x) * transform.scale;
-  const y = canvas.height - transform.pad - (pos.y - transform.min.y) * transform.scale;
-  return { x, y };
-}
-export function updateModelOverview(context){
-  const canvas = document.getElementById('model-overview-canvas');
-  if (!canvas || !context?.diagramGroup) return;
-  canvas.width = Math.max(1, canvas.clientWidth || 180);
-  canvas.height = Math.max(1, canvas.clientHeight || 140);
-  const transform = getOverviewTransform(context, canvas);
-  if (!transform) return;
-  context.diagramGroup.userData.boundingBox = transform.box.clone();
-  context.diagramGroup.userData.boundingSphere = transform.box.getBoundingSphere(new THREE.Sphere());
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#fbfbfb';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  drawOverviewLinks(ctx, transform, context);
-  drawOverviewHyperclasses(ctx, transform, context);
-  drawOverviewClasses(ctx, transform, context);
-  updateOverviewViewport(context, transform);
-}
 export function setupCanvasPanControls(context){
   const host = context?.css2DRenderer?.domElement || context?.renderer?.domElement;
   if (!host || !context?.camera) return;
@@ -636,102 +601,6 @@ export function setupCanvasPanControls(context){
   host.addEventListener('pointerup', stopPan);
   host.addEventListener('pointercancel', stopPan);
 }
-export function drawOverviewHyperclasses(ctx, transform, context) {
-  ctx.strokeStyle = '#2563eb';
-  ctx.lineWidth = 1.5;
-  context.diagramGroup.traverse(obj => {
-    if (!obj.userData?.isHyperClass) return;
-    const box = new THREE.Box3().setFromObject(obj);
-    if (box.isEmpty()) return;
-    const canvas = ctx.canvas;
-    const p1 = worldToOverview(new THREE.Vector3(box.min.x, box.max.y, 0), transform, canvas);
-    const p2 = worldToOverview(new THREE.Vector3(box.max.x, box.min.y, 0), transform, canvas);
-    ctx.strokeRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
-  });
-}
-export function drawOverviewClasses(ctx, transform, context) {
-  ctx.fillStyle = '#1f6feb';
-  context.diagramGroup.traverse(obj => {
-    if (!obj.userData?.isClassLike || obj.userData?.isHyperClass) return;
-    const p = worldToOverview(obj.getWorldPosition(new THREE.Vector3()), transform, ctx.canvas);
-    ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
-  });
-}
-export function drawOverviewLinks(ctx, transform, context) {
-  ctx.strokeStyle = '#94a3b8';
-  ctx.lineWidth = 1;
-  const byId = new Map();
-  context.diagramGroup.traverse(obj => {
-    if (obj.userData?.hbdsId) byId.set(obj.userData.hbdsId, obj);
-  });
-  data.hypergraph.link.forEach(l => {
-    const s = byId.get(l.sourceClassId);
-    const t = byId.get(l.targetClassId);
-    if (!s || !t) return;
-    const ps = worldToOverview(s.getWorldPosition(new THREE.Vector3()), transform, ctx.canvas);
-    const pt = worldToOverview(t.getWorldPosition(new THREE.Vector3()), transform, ctx.canvas);
-    ctx.beginPath(); ctx.moveTo(ps.x, ps.y); ctx.lineTo(pt.x, pt.y); ctx.stroke();
-  });
-}
-export function updateOverviewViewport(context, transform) {
-  const viewport = document.getElementById('model-overview-viewport');
-  if (!viewport || !context?.camera || !context?.orbitControls) return;
-  const canvas = document.getElementById('model-overview-canvas');
-  const distance = context.camera.position.distanceTo(context.orbitControls.target);
-  const fov = context.camera.fov * Math.PI / 180;
-  const visibleHeight = 2 * Math.tan(fov / 2) * distance;
-  const visibleWidth = visibleHeight * context.camera.aspect;
-  const left = context.orbitControls.target.x - visibleWidth / 2;
-  const right = context.orbitControls.target.x + visibleWidth / 2;
-  const top = context.orbitControls.target.y + visibleHeight / 2;
-  const bottom = context.orbitControls.target.y - visibleHeight / 2;
-  const p1 = worldToOverview(new THREE.Vector3(left, top, 0), transform, canvas);
-  const p2 = worldToOverview(new THREE.Vector3(right, bottom, 0), transform, canvas);
-  viewport.style.left = `${Math.min(p1.x, p2.x)}px`;
-  viewport.style.top = `${Math.min(p1.y, p2.y)}px`;
-  viewport.style.width = `${Math.abs(p2.x - p1.x)}px`;
-  viewport.style.height = `${Math.abs(p2.y - p1.y)}px`;
-  setupOverviewViewportDrag(context, transform);
-}
-let overviewDragBound = false;
-function overviewToWorld(x, y, transform, canvas) {
-  const worldX = transform.min.x + (x - transform.pad) / transform.scale;
-  const worldY = transform.min.y + ((canvas.height - y) - transform.pad) / transform.scale;
-  return { x: worldX, y: worldY };
-}
-function setupOverviewViewportDrag(context, transform) {
-  if (overviewDragBound) return;
-  const viewport = document.getElementById('model-overview-viewport');
-  const canvas = document.getElementById('model-overview-canvas');
-  if (!viewport || !canvas) return;
-  let dragging = false;
-  viewport.addEventListener('pointerdown', (e) => {
-    dragging = true;
-    viewport.setPointerCapture?.(e.pointerId);
-  });
-  viewport.addEventListener('pointermove', (e) => {
-    if (!dragging || !context?.camera || !context?.orbitControls) return;
-    const rect = canvas.getBoundingClientRect();
-    const cx = e.clientX - rect.left;
-    const cy = e.clientY - rect.top;
-    const world = overviewToWorld(cx, cy, getOverviewTransform(context, canvas), canvas);
-    const dx = world.x - context.orbitControls.target.x;
-    const dy = world.y - context.orbitControls.target.y;
-    context.orbitControls.target.set(world.x, world.y, context.orbitControls.target.z);
-    context.camera.position.x += dx;
-    context.camera.position.y += dy;
-    context.orbitControls.update();
-    context.renderOnce?.();
-    updateModelOverview(context);
-  });
-  const stop = (e) => {
-    dragging = false;
-    viewport.releasePointerCapture?.(e.pointerId);
-  };
-  viewport.addEventListener('pointerup', stop);
-  viewport.addEventListener('pointercancel', stop);
-  overviewDragBound = true;
-}
 export function commitDataChange(operationName, updater, options={}){ const before=clone(data); const result=updater(data); data=normalizeData(data); const v=validateData(data); if(!v.valid && options.rollbackOnError!==false){ data=before; throw new Error(`Invalid data after ${operationName}: ${v.errors.join('; ')}`);} if(options.refresh!==false) refreshSceneFromData(options.context); if(options.optimizeLayout===true) updateLayoutFromData(options.context); if(options.saveHistory!==false) history.push({operationName,before,after:clone(data)}); return result; }
 export function setData(nextData, options={}){ data=normalizeData(nextData); const v=validateData(data); if(!v.valid) throw new Error(v.errors.join('; ')); if(options.refresh!==false) refreshSceneFromData(options.context); applyDataMetadataToContext(options.context); return getData(); }
 export function resetData(options={}){ return setData({metadata:{layout:DEFAULT_LAYOUT_SETTINGS,sceneSettings:DEFAULT_SCENE_SETTINGS,font:DEFAULT_FONT_SETTINGS},hypergraph:{class:[],link:[]}},options); }
@@ -754,7 +623,7 @@ export const readLink=(idOrPred)=>typeof idOrPred==='function'?data.hypergraph.l
 export const createLink=(input,options={})=>commitDataChange('createLink',d=>{const l=createLinkData(input); const byId=new Map(d.hypergraph.class.map(c=>[c.id,c])); const v=validateLinkData(l,byId); if(!v.valid) throw new Error(v.errors.join('; ')); d.hypergraph.link.push(l); return l;},options);
 export const updateLink=(idOrPred,patch,options={})=>commitDataChange('updateLink',d=>{const i=d.hypergraph.link.findIndex(l=>typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred); if(i<0) throw new Error('link not found'); d.hypergraph.link[i]=updateLinkData(d.hypergraph.link[i],patch);},options);
 export const deleteLink=(idOrPred,options={})=>commitDataChange('deleteLink',d=>{d.hypergraph.link=d.hypergraph.link.filter(l=>!(typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred||(idOrPred?.sourceClassId===l.sourceClassId&&idOrPred?.targetClassId===l.targetClassId)));},options);
-async function loadModelData(modelName, options={}){
+export async function loadModelData(modelName, options={}){
   const value=String(modelName||'').trim();
   const allowedBasePath=options.allowedBasePath==null?null:normalizeModelDirectoryPath(options.allowedBasePath);
   const defaultBasePath=normalizeModelDirectoryPath(options.defaultBasePath ?? allowedBasePath ?? 'models/');
@@ -900,13 +769,17 @@ async function loadTextResource(path){
   throw new Error('No browser request API available');
 }
 export async function loadAndRenderScene(modelName, context, options={}){
+  const isCurrent=typeof options.isCurrent==='function'?options.isCurrent:null;
   const raw=await loadModelData(modelName,options);
+  if(isCurrent && !isCurrent()) return null;
   setData(raw,{context,refresh:true});
   const loaded=getData();
   const layoutAlgorithm=loaded?.metadata?.layout?.algorithm || 'none';
   if(options.autoApplyLayout!==false && layoutAlgorithm!=='none' && modelNeedsLayoutPlacement(loaded)){
+    if(isCurrent && !isCurrent()) return null;
     await optimizeAndRefreshLayout(context,{ algorithm:layoutAlgorithm });
   }
+  if(isCurrent && !isCurrent()) return null;
   applyFitMetadataToContext(context,{ updateOverview:true, preserveMetadata:true });
   return getData();
 }
