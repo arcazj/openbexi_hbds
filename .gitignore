@@ -38,3 +38,6 @@ build/
 ### Mac OS ###
 .DS_Store
 /js/hbds_class_old.js
+/debug_logs/
+__pycache__/
+/.codex_server_*.log

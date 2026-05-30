@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HBDS Dynamic Layout Test</title>
+  <title>HBDS Lab</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=collab-responsive-20260526a">
   <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
@@ -35,7 +35,7 @@
       <input id="model-tree-search-input" type="text" autocomplete="off" placeholder="Name, id, type, attribute">
     </label>
     <div id="model-tree-list" class="model-tree-list" role="tree" aria-label="HBDS model tree">
-      <div class="model-tree-empty">No model loaded</div>
+      <div class="model-tree-empty">Empty workspace</div>
     </div>
   </aside>
 
@@ -75,8 +75,10 @@
 
   <aside id="dynamic-test-panel" aria-label="HBDS dynamic controls">
     <header class="panel-header">
-      <div class="eyebrow">HBDS Lab</div>
-      <h1>Dynamic Layout Test</h1>
+      <div class="panel-title-row">
+        <div class="eyebrow">HBDS Lab</div>
+        <div id="validation-status" class="status-chip validation-status" hidden aria-live="polite"></div>
+      </div>
     </header>
 
     <div class="stats-grid" aria-label="Model statistics">
@@ -85,8 +87,6 @@
       <div class="stat"><span class="stat-value" id="stat-attribute-count">0</span><span class="stat-label" id="stat-attribute-label">attributes</span></div>
       <div class="stat"><span class="stat-value" id="stat-link-count">0</span><span class="stat-label" id="stat-link-label">links</span></div>
     </div>
-    <div id="validation-status" class="status-chip">No model loaded</div>
-    <div id="save-status" class="status-chip save-status">Saved</div>
 
     <section class="control-group" data-default-open="true" data-section="scenario-suite">
       <div class="section-title">Scenario Suite</div>
@@ -94,14 +94,7 @@
       <div id="scenario-status" class="status-chip">Scenario suite idle</div>
     </section>
 
-    <details class="control-group" data-section="validation" open>
-      <summary><span class="section-title">Validation</span></summary>
-      <div class="details-body">
-        <div id="validation-issues" class="validation-issues" aria-live="polite">No model loaded</div>
-      </div>
-    </details>
-
-    <section class="control-group" data-default-open="true">
+    <section class="control-group" data-default-open="true" data-section="model">
       <div class="section-title">Model</div>
       <label for="test-model-select">Select a HBDS Model</label>
       <select id="test-model-select">
@@ -163,8 +156,11 @@
       </div>
     </section>
 
-    <section class="control-group" data-default-open="false" data-section="settings">
-      <div class="section-title">Setting</div>
+    <section class="control-group" data-section="settings">
+      <div class="section-title">Settings</div>
+      <div class="settings-subtitle">Debug</div>
+      <label class="checkbox-wrapper" for="debug-mode-toggle"><input type="checkbox" id="debug-mode-toggle"><span>Debug Logging</span></label>
+      <div id="debug-session-id" class="section-meta" aria-live="polite"></div>
       <div class="settings-subtitle">Font</div>
       <label class="range-field" for="model-font-size-input"><span>Size</span><span class="range-control"><input type="range" id="model-font-size-input" min="6" max="48" step="1" value="12"><output id="model-font-size-value" class="range-value" for="model-font-size-input">12px</output></span></label>
       <label class="inline-field" for="model-font-family-input"><span>Family</span><input type="text" id="model-font-family-input" value="Arial, sans-serif"></label>
@@ -257,6 +253,6 @@
     </div>
   </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=collab-responsive-20260526a"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=debug-20260530c"></script>
 </body>
 </html>

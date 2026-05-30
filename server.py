@@ -7,15 +7,19 @@ import argparse
 import copy
 import datetime as _dt
 import hashlib
+import html
 import json
 import os
 import queue
 import shutil
+import sys
 import tempfile
 import threading
+import time
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from typing import TextIO
 from urllib.parse import parse_qs, unquote, urlparse
 
 
@@ -25,6 +29,9 @@ TEST_MODELS_DIR = (ROOT_DIR / "test_models").resolve()
 MODELS_MANIFEST_PATH = MODELS_DIR / "models_manifest.json"
 TEST_MODELS_MANIFEST_PATH = TEST_MODELS_DIR / "test_models_manifest.json"
 BACKUP_DIR = MODELS_DIR / ".backups"
+DEBUG_LOG_DIR = ROOT_DIR / "debug_logs"
+SERVER_STDOUT_LOG_PATH = ROOT_DIR / ".codex_server_out.log"
+SERVER_STDERR_LOG_PATH = ROOT_DIR / ".codex_server_err.log"
 MAX_JSON_BYTES = 5 * 1024 * 1024
 EVENT_HEARTBEAT_SECONDS = 15
 MAX_REVISION_SNAPSHOTS_PER_MODEL = 20
@@ -40,6 +47,40 @@ LOCAL_ORIGINS = {
 
 def utc_now_iso() -> str:
     return _dt.datetime.now(_dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def debug_now_iso() -> str:
+    return _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
+
+
+def reset_startup_logs() -> TextIO | None:
+    visible_stdout = sys.stdout
+    if os.environ.get("HBDS_KEEP_SERVER_LOGS") == "1":
+        return visible_stdout
+    if sys.stdout and not sys.stdout.isatty():
+        sys.stdout = SERVER_STDOUT_LOG_PATH.open("w", encoding="utf-8", buffering=1)
+    else:
+        SERVER_STDOUT_LOG_PATH.write_text("", encoding="utf-8")
+    if sys.stderr and not sys.stderr.isatty():
+        sys.stderr = SERVER_STDERR_LOG_PATH.open("w", encoding="utf-8", buffering=1)
+    else:
+        SERVER_STDERR_LOG_PATH.write_text("", encoding="utf-8")
+    DEBUG_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    for log_path in DEBUG_LOG_DIR.glob("*.jsonl"):
+        try:
+            log_path.unlink()
+        except OSError:
+            pass
+    return visible_stdout
+
+
+def print_startup_message(message: str, visible_stdout: TextIO | None) -> None:
+    print(message, flush=True)
+    if visible_stdout and visible_stdout is not sys.stdout:
+        try:
+            print(message, file=visible_stdout, flush=True)
+        except (OSError, ValueError):
+            pass
 
 
 def label_from_model_name(name: str) -> str:
@@ -87,6 +128,54 @@ def write_json_atomic(target: Path, payload: dict) -> None:
     finally:
         if tmp.exists():
             tmp.unlink()
+
+
+def clean_debug_log_token(value: object, fallback: str = "unknown") -> str:
+    clean = "".join(
+        char if char.isalnum() or char in ("-", "_", ".") else "_"
+        for char in str(value or "").strip()
+    ).strip("._")
+    return (clean or fallback)[:MAX_CLIENT_ID_LENGTH]
+
+
+def debug_event_payload(event_type: str, client_id: str, ui_name: str = "", **details) -> dict:
+    return {
+        **details,
+        "timestamp": debug_now_iso(),
+        "type": event_type,
+        "clientId": clean_client_text(client_id, max_length=MAX_CLIENT_ID_LENGTH),
+        "uiName": clean_client_text(ui_name, max_length=MAX_CLIENT_NAME_LENGTH),
+    }
+
+
+def missing_icon_svg(path: str) -> bytes:
+    stem = Path(unquote(urlparse(path).path)).stem
+    label = " ".join(stem.replace("_", " ").replace("-", " ").split()) or "Icon"
+    initials = "".join(part[0] for part in label.split()[:2]).upper() or "?"
+    hue = int(hashlib.sha1(stem.encode("utf-8")).hexdigest()[:6], 16) % 360
+    safe_label = html.escape(label.title())
+    safe_initials = html.escape(initials[:3])
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="{safe_label}">
+  <title>{safe_label}</title>
+  <rect x="10" y="10" width="76" height="76" rx="18" fill="hsl({hue} 72% 93%)" stroke="hsl({hue} 58% 38%)" stroke-width="5"/>
+  <circle cx="48" cy="38" r="13" fill="none" stroke="#0f172a" stroke-width="5" opacity=".88"/>
+  <path d="M26 68c8-12 18-18 22-18s14 6 22 18" fill="none" stroke="#0f172a" stroke-width="5" stroke-linecap="round" opacity=".88"/>
+  <text x="48" y="86" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="hsl({hue} 58% 30%)">{safe_initials}</text>
+</svg>
+"""
+    return svg.encode("utf-8")
+
+
+def is_missing_svg_icon_request(path: str) -> bool:
+    parsed_path = unquote(urlparse(path).path)
+    if not parsed_path.startswith("/icons/") or not parsed_path.lower().endswith(".svg"):
+        return False
+    requested = (ROOT_DIR / parsed_path.lstrip("/")).resolve()
+    try:
+        requested.relative_to((ROOT_DIR / "icons").resolve())
+    except ValueError:
+        return False
+    return not requested.exists()
 
 
 def refresh_model_manifests() -> list[Path]:
@@ -757,6 +846,7 @@ def openapi_spec(host: str) -> dict:
             {"name": "Server", "description": "Local server status and API documentation."},
             {"name": "Models", "description": "List, load, and save HBDS model JSON files."},
             {"name": "Collaboration", "description": "Presence and live draft state used by collaborative editing UI."},
+            {"name": "Debug", "description": "Per-UI debug logging and function timing controls."},
         ],
         "paths": {
             "/api/health": {
@@ -768,6 +858,76 @@ def openapi_spec(host: str) -> dict:
                             "description": "Server is reachable",
                             "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HealthResponse"}}},
                         }
+                    },
+                }
+            },
+            "/api/debug": {
+                "get": {
+                    "tags": ["Debug"],
+                    "summary": "Return debug state for one UI client",
+                    "parameters": [
+                        {
+                            "name": "clientId",
+                            "in": "query",
+                            "required": False,
+                            "schema": {"type": "string"},
+                            "description": "Client id to inspect. X-Client-Id may also be used.",
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Debug status",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DebugStatusResponse"}}},
+                        }
+                    },
+                },
+                "post": {
+                    "tags": ["Debug"],
+                    "summary": "Enable or disable debug logging for one UI client",
+                    "parameters": [
+                        {
+                            "name": "X-Client-Id",
+                            "in": "header",
+                            "required": False,
+                            "schema": {"type": "string"},
+                            "description": "Client id. Request body clientId may also be used.",
+                        },
+                        {
+                            "name": "X-Client-Name",
+                            "in": "header",
+                            "required": False,
+                            "schema": {"type": "string"},
+                            "description": "UI name used to split logs by open UI.",
+                        },
+                    ],
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DebugConfigureRequest"}}},
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Debug mode updated",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DebugConfigureResponse"}}},
+                        },
+                        "400": {"description": "Missing client id", "content": {"application/json": {"schema": error_schema}}},
+                    },
+                },
+            },
+            "/api/debug/logs": {
+                "post": {
+                    "tags": ["Debug"],
+                    "summary": "Record one client-side debug event",
+                    "description": "Writes a JSONL entry when debug is enabled for the supplied client id.",
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DebugLogEntry"}}},
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Log event accepted",
+                            "content": {"application/json": {"schema": {"type": "object"}}},
+                        },
+                        "400": {"description": "Missing client id", "content": {"application/json": {"schema": error_schema}}},
                     },
                 }
             },
@@ -1185,6 +1345,58 @@ def openapi_spec(host: str) -> dict:
                     },
                     "required": ["ok", "modelName", "clientId", "deleted"],
                 },
+                "DebugSession": {
+                    "type": "object",
+                    "properties": {
+                        "clientId": {"type": "string", "example": "ui-lx9ad3-tab-q4x5"},
+                        "uiName": {"type": "string", "example": "edit-ui"},
+                        "enabled": {"type": "boolean"},
+                        "enabledAt": {"type": "string", "format": "date-time"},
+                        "disabledAt": {"type": "string", "format": "date-time"},
+                    },
+                },
+                "DebugStatusResponse": {
+                    "type": "object",
+                    "properties": {
+                        "ok": {"type": "boolean", "example": True},
+                        "clientId": {"type": "string"},
+                        "debug": {"type": "boolean"},
+                        "session": {"$ref": "#/components/schemas/DebugSession"},
+                    },
+                    "required": ["ok", "clientId", "debug", "session"],
+                },
+                "DebugConfigureRequest": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {"type": "boolean"},
+                        "clientId": {"type": "string"},
+                        "uiName": {"type": "string", "example": "models-ui"},
+                    },
+                    "required": ["enabled"],
+                },
+                "DebugConfigureResponse": {
+                    "type": "object",
+                    "properties": {
+                        "ok": {"type": "boolean", "example": True},
+                        "debug": {"type": "boolean"},
+                        "session": {"$ref": "#/components/schemas/DebugSession"},
+                    },
+                    "required": ["ok", "debug", "session"],
+                },
+                "DebugLogEntry": {
+                    "type": "object",
+                    "properties": {
+                        "timestamp": {"type": "string", "format": "date-time"},
+                        "type": {"type": "string", "example": "client.user-action"},
+                        "source": {"type": "string", "example": "client"},
+                        "clientId": {"type": "string"},
+                        "uiName": {"type": "string"},
+                        "functionName": {"type": "string"},
+                        "action": {"type": "string"},
+                        "durationMs": {"type": "number"},
+                    },
+                    "required": ["type", "clientId"],
+                },
                 "ErrorResponse": {
                     "type": "object",
                     "properties": {
@@ -1240,6 +1452,8 @@ class HBDSLocalServer(ThreadingHTTPServer):
         self._drafts: dict[str, dict[str, dict]] = {}
         self._model_locks_guard = threading.Lock()
         self._model_locks: dict[str, threading.RLock] = {}
+        self._debug_lock = threading.Lock()
+        self._debug_sessions: dict[str, dict] = {}
 
     def model_lock(self, model_name: str) -> threading.RLock:
         with self._model_locks_guard:
@@ -1347,6 +1561,69 @@ class HBDSLocalServer(ThreadingHTTPServer):
             drafts = list(self._drafts.get(model_name, {}).values())
         return sorted((copy.deepcopy(draft) for draft in drafts), key=lambda item: item.get("updatedAt", ""))
 
+    def set_debug_session(self, client_id: str, enabled: bool, ui_name: str = "") -> dict:
+        clean_client_id = clean_client_text(client_id, max_length=MAX_CLIENT_ID_LENGTH)
+        if not clean_client_id:
+            clean_client_id = f"client-{id(self):x}"
+        clean_ui_name = clean_client_text(ui_name, max_length=MAX_CLIENT_NAME_LENGTH)
+        with self._debug_lock:
+            if enabled:
+                session = {
+                    "clientId": clean_client_id,
+                    "uiName": clean_ui_name,
+                    "enabled": True,
+                    "enabledAt": debug_now_iso(),
+                }
+                self._debug_sessions[clean_client_id] = session
+            else:
+                previous = self._debug_sessions.pop(clean_client_id, None) or {
+                    "clientId": clean_client_id,
+                    "uiName": clean_ui_name,
+                }
+                session = {
+                    **previous,
+                    "uiName": clean_ui_name or previous.get("uiName", ""),
+                    "enabled": False,
+                    "disabledAt": debug_now_iso(),
+                }
+        self.write_debug_log(debug_event_payload(
+            "server.debug-toggle",
+            clean_client_id,
+            session.get("uiName", ""),
+            enabled=enabled,
+        ), force=True)
+        return copy.deepcopy(session)
+
+    def debug_session(self, client_id: str) -> dict | None:
+        clean_client_id = clean_client_text(client_id, max_length=MAX_CLIENT_ID_LENGTH)
+        if not clean_client_id:
+            return None
+        with self._debug_lock:
+            session = self._debug_sessions.get(clean_client_id)
+            return copy.deepcopy(session) if session else None
+
+    def debug_enabled(self, client_id: str) -> bool:
+        return self.debug_session(client_id) is not None
+
+    def write_debug_log(self, payload: dict, *, force: bool = False) -> None:
+        client_id = clean_client_text(payload.get("clientId"), max_length=MAX_CLIENT_ID_LENGTH)
+        if not client_id:
+            return
+        session = self.debug_session(client_id)
+        if not force and session is None:
+            return
+        entry = {
+            **payload,
+            "clientId": client_id,
+            "uiName": payload.get("uiName") or (session or {}).get("uiName", ""),
+        }
+        DEBUG_LOG_DIR.mkdir(parents=True, exist_ok=True)
+        log_path = DEBUG_LOG_DIR / f"{clean_debug_log_token(client_id)}.jsonl"
+        with self._debug_lock:
+            with log_path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(entry, ensure_ascii=False, sort_keys=True))
+                handle.write("\n")
+
 
 class HBDSRequestHandler(SimpleHTTPRequestHandler):
     server_version = "HBDSLocalServer/1.0"
@@ -1362,11 +1639,26 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, If-Match, X-Client-Id, X-Client-Name")
         self.send_header("X-Content-Type-Options", "nosniff")
+        static_path = urlparse(self.path).path
+        if static_path == "/" or static_path.endswith((".html", ".js", ".css")):
+            self.send_header("Cache-Control", "no-store, max-age=0")
+            self.send_header("Pragma", "no-cache")
         super().end_headers()
 
     def do_OPTIONS(self) -> None:
         self.send_response(HTTPStatus.NO_CONTENT)
         self.end_headers()
+
+    def serve_missing_icon(self, path: str) -> bool:
+        if not is_missing_svg_icon_request(path):
+            return False
+        body = missing_icon_svg(path)
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "image/svg+xml; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+        return True
 
     def do_GET(self) -> None:
         path = urlparse(self.path).path
@@ -1375,6 +1667,8 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             return
         if path == "/":
             self.path = "/index.html"
+        if self.serve_missing_icon(path):
+            return
         super().do_GET()
 
     def do_POST(self) -> None:
@@ -1391,58 +1685,195 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             return
         self.json_error(HTTPStatus.METHOD_NOT_ALLOWED, "method_not_allowed", "DELETE is only allowed for API endpoints")
 
+    def debug_client_id(self, payload: dict | None = None) -> str:
+        parsed = urlparse(self.path)
+        query = parse_qs(parsed.query)
+        return clean_client_text(
+            self.headers.get("X-Client-Id")
+            or (payload or {}).get("clientId")
+            or first_query_value(query, "clientId"),
+            max_length=MAX_CLIENT_ID_LENGTH,
+        )
+
+    def debug_ui_name(self, payload: dict | None = None) -> str:
+        return clean_client_text(
+            self.headers.get("X-Client-Name") or (payload or {}).get("uiName") or "",
+            max_length=MAX_CLIENT_NAME_LENGTH,
+        )
+
+    def debug_log(self, event_type: str, payload: dict | None = None, *, force: bool = False, **details) -> None:
+        if not hasattr(self.server, "write_debug_log"):
+            return
+        client_id = self.debug_client_id(payload)
+        if not client_id:
+            return
+        self.server.write_debug_log(debug_event_payload(
+            event_type,
+            client_id,
+            self.debug_ui_name(payload),
+            **details,
+        ), force=force)
+
+    def debug_timed_call(self, function_name: str, callback, **details):
+        client_id = self.debug_client_id()
+        ui_name = self.debug_ui_name()
+        start_perf = time.perf_counter()
+        start_iso = debug_now_iso()
+        status = "ok"
+        try:
+            return callback()
+        except Exception as error:
+            status = "error"
+            details = {**details, "error": str(error)}
+            raise
+        finally:
+            if client_id and hasattr(self.server, "write_debug_log"):
+                self.server.write_debug_log(debug_event_payload(
+                    "server.function-timing",
+                    client_id,
+                    ui_name,
+                    functionName=function_name,
+                    method=self.command,
+                    path=urlparse(self.path).path,
+                    startTime=start_iso,
+                    endTime=debug_now_iso(),
+                    durationMs=round((time.perf_counter() - start_perf) * 1000, 3),
+                    status=status,
+                    **details,
+                ))
+
+    def debug_request_timing(self, method: str, path: str, start_iso: str, start_perf: float, status: str) -> None:
+        self.debug_log(
+            "server.request-timing",
+            method=method,
+            path=path,
+            startTime=start_iso,
+            endTime=debug_now_iso(),
+            durationMs=round((time.perf_counter() - start_perf) * 1000, 3),
+            status=status,
+        )
+
     def handle_api_get(self, path: str) -> None:
+        request_start = time.perf_counter()
+        request_start_iso = debug_now_iso()
+        request_status = "ok"
         try:
             if path == "/api/health":
-                self.json_response({"ok": True, "status": "connected", "time": utc_now_iso()})
+                self.debug_timed_call("health", lambda: self.json_response({"ok": True, "status": "connected", "time": utc_now_iso()}))
+            elif path == "/api/debug":
+                self.debug_timed_call("debug_status", self.debug_status)
             elif path == "/api/models":
-                self.json_response({"ok": True, "models": list_models()})
+                self.debug_timed_call("list_models", lambda: self.json_response({"ok": True, "models": list_models()}))
             elif path == "/api/events":
-                self.event_stream()
+                self.debug_timed_call("event_stream", self.event_stream)
             elif path == "/api/openapi.json":
-                self.json_response(openapi_spec(self.headers.get("Host", "")))
+                self.debug_timed_call("openapi_spec", lambda: self.json_response(openapi_spec(self.headers.get("Host", ""))))
             elif path == "/api/docs":
-                self.swagger_docs()
+                self.debug_timed_call("swagger_docs", self.swagger_docs)
             elif path.startswith("/api/model-files/"):
-                self.load_scoped_model(path.removeprefix("/api/model-files/"))
+                self.debug_timed_call("load_scoped_model", lambda: self.load_scoped_model(path.removeprefix("/api/model-files/")))
             elif path.startswith("/api/drafts/"):
-                self.list_scoped_model_drafts(path.removeprefix("/api/drafts/"))
+                self.debug_timed_call("list_scoped_model_drafts", lambda: self.list_scoped_model_drafts(path.removeprefix("/api/drafts/")))
             elif path.startswith("/api/models/") and path.endswith("/drafts"):
-                self.list_model_drafts(path.removeprefix("/api/models/").removesuffix("/drafts"))
+                self.debug_timed_call("list_model_drafts", lambda: self.list_model_drafts(path.removeprefix("/api/models/").removesuffix("/drafts")))
             elif path.startswith("/api/models/"):
-                self.load_model(path.removeprefix("/api/models/"))
+                self.debug_timed_call("load_model", lambda: self.load_model(path.removeprefix("/api/models/")))
             else:
                 self.json_error(HTTPStatus.NOT_FOUND, "not_found", "API endpoint not found")
         except Exception:
+            request_status = "error"
             self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "server_error", "Server error")
+        finally:
+            self.debug_request_timing("GET", path, request_start_iso, request_start, request_status)
 
     def handle_api_post(self, path: str) -> None:
+        request_start = time.perf_counter()
+        request_start_iso = debug_now_iso()
+        request_status = "ok"
         try:
-            if path.startswith("/api/model-files/"):
-                self.save_scoped_model(path.removeprefix("/api/model-files/"))
+            if path == "/api/debug":
+                self.debug_timed_call("configure_debug", self.configure_debug)
+            elif path == "/api/debug/logs":
+                self.debug_timed_call("record_client_debug_log", self.record_client_debug_log)
+            elif path.startswith("/api/model-files/"):
+                self.debug_timed_call("save_scoped_model", lambda: self.save_scoped_model(path.removeprefix("/api/model-files/")))
             elif path.startswith("/api/drafts/") and "/clients/" in path:
-                self.save_scoped_model_draft(path.removeprefix("/api/drafts/"))
+                self.debug_timed_call("save_scoped_model_draft", lambda: self.save_scoped_model_draft(path.removeprefix("/api/drafts/")))
             elif path.startswith("/api/models/") and "/drafts/" in path:
-                self.save_model_draft(path.removeprefix("/api/models/"))
+                self.debug_timed_call("save_model_draft", lambda: self.save_model_draft(path.removeprefix("/api/models/")))
             elif path.startswith("/api/models/") and path.endswith("/ops"):
-                self.apply_model_ops(path.removeprefix("/api/models/").removesuffix("/ops"))
+                self.debug_timed_call("apply_model_ops", lambda: self.apply_model_ops(path.removeprefix("/api/models/").removesuffix("/ops")))
             elif path.startswith("/api/models/"):
-                self.save_model(path.removeprefix("/api/models/"))
+                self.debug_timed_call("save_model", lambda: self.save_model(path.removeprefix("/api/models/")))
             else:
                 self.json_error(HTTPStatus.NOT_FOUND, "not_found", "API endpoint not found")
         except Exception:
+            request_status = "error"
             self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "server_error", "Server error")
+        finally:
+            self.debug_request_timing("POST", path, request_start_iso, request_start, request_status)
 
     def handle_api_delete(self, path: str) -> None:
+        request_start = time.perf_counter()
+        request_start_iso = debug_now_iso()
+        request_status = "ok"
         try:
             if path.startswith("/api/drafts/") and "/clients/" in path:
-                self.delete_scoped_model_draft(path.removeprefix("/api/drafts/"))
+                self.debug_timed_call("delete_scoped_model_draft", lambda: self.delete_scoped_model_draft(path.removeprefix("/api/drafts/")))
             elif path.startswith("/api/models/") and "/drafts/" in path:
-                self.delete_model_draft(path.removeprefix("/api/models/"))
+                self.debug_timed_call("delete_model_draft", lambda: self.delete_model_draft(path.removeprefix("/api/models/")))
             else:
                 self.json_error(HTTPStatus.NOT_FOUND, "not_found", "API endpoint not found")
         except Exception:
+            request_status = "error"
             self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "server_error", "Server error")
+        finally:
+            self.debug_request_timing("DELETE", path, request_start_iso, request_start, request_status)
+
+    def debug_status(self) -> None:
+        client_id = self.debug_client_id()
+        session = self.server.debug_session(client_id) if hasattr(self.server, "debug_session") else None
+        self.json_response({
+            "ok": True,
+            "clientId": client_id,
+            "debug": bool(session),
+            "session": session or {},
+        })
+
+    def configure_debug(self) -> None:
+        payload = self.read_json_request_payload()
+        if payload is None:
+            return
+        client_id = self.debug_client_id(payload)
+        if not client_id:
+            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_client_id", "Debug client id is required")
+            return
+        enabled = bool(payload.get("enabled"))
+        ui_name = self.debug_ui_name(payload)
+        session = self.server.set_debug_session(client_id, enabled, ui_name) if hasattr(self.server, "set_debug_session") else {
+            "clientId": client_id,
+            "uiName": ui_name,
+            "enabled": enabled,
+        }
+        self.json_response({"ok": True, "debug": enabled, "session": session})
+
+    def record_client_debug_log(self) -> None:
+        payload = self.read_json_request_payload()
+        if payload is None:
+            return
+        client_id = self.debug_client_id(payload)
+        if not client_id:
+            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_client_id", "Debug client id is required")
+            return
+        event = {
+            **payload,
+            "timestamp": payload.get("timestamp") or debug_now_iso(),
+            "clientId": client_id,
+            "uiName": self.debug_ui_name(payload),
+        }
+        if hasattr(self.server, "write_debug_log"):
+            self.server.write_debug_log(event)
+        self.json_response({"ok": True, "recorded": True})
 
     def read_json_request_payload(self) -> dict | None:
         length_header = self.headers.get("Content-Length")
@@ -2187,11 +2618,12 @@ def main() -> int:
     parser.add_argument("--quiet", action="store_true")
     args = parser.parse_args()
 
+    visible_stdout = reset_startup_logs()
     refresh_model_manifests()
     httpd = HBDSLocalServer((args.host, args.port), HBDSRequestHandler)
     httpd.quiet = args.quiet
-    print(f"Serving HBDS on http://{args.host}:{args.port}")
-    print("Open http://127.0.0.1:%d/index.html" % args.port)
+    print_startup_message(f"Serving HBDS on http://{args.host}:{args.port}", visible_stdout)
+    print_startup_message("Open http://127.0.0.1:%d/index.html" % args.port, visible_stdout)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

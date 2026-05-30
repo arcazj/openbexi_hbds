@@ -22,34 +22,10 @@
         </select>
     </div>
     <div class="control-group">
-        <label class="checkbox-wrapper" for="view-toggle">
-            <input type="checkbox" id="view-toggle">
-            <span>Enable 3-D View</span>
-        </label>
-    </div>
-    <div class="control-group">
         <button id="fit-model-button">Fit Model</button>
     </div>
-    <details class="control-group settings-group help-group">
-        <summary class="settings-title">Help</summary>
-        <div class="settings-body">
-            <button id="help-shortcuts-button" type="button">Keyboard Help</button>
-        </div>
-    </details>
 </div>
-<div id="keyboard-help" class="help-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
-    <div class="help-card">
-        <h2 id="help-title">Keyboard Shortcuts</h2>
-        <ul>
-            <li><kbd>H</kbd> Toggle this help</li>
-            <li><kbd>F</kbd> Fit model</li>
-            <li><kbd>V</kbd> Toggle 2D/3D view</li>
-            <li><kbd>Esc</kbd> Close help</li>
-        </ul>
-        <p class="status-note">Focus order: model selector -> view toggle -> fit model -> help.</p>
-        <button id="close-help-button" type="button">Close</button>
-    </div>
-</div>
+<input type="checkbox" id="view-toggle" hidden aria-hidden="true">
 <script type="importmap">
     {
       "imports": {
@@ -70,7 +46,7 @@
     import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=font-zoom-20260523a';
     import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=font-zoom-20260523a';
     import { setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings } from './js/hbds_model.js?v=material-surface-20260525a';
-    import { checkServerConnection, clearServerDraft, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, saveServerModel, subscribeServerEvents, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260524f';
+    import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260530a';
 
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {
         document.body.classList.add('embedded-shell-menu');
@@ -100,6 +76,98 @@
     let localDraftModelName = '';
     let localDraftDirty = false;
     let collaborationWarningVisible = false;
+    const DEBUG_UI_NAME = 'models-ui';
+    const DEBUG_STORAGE_KEY = `hbds.debug.enabled.${DEBUG_UI_NAME}`;
+    let debugModeEnabled = readStoredDebugMode();
+
+    function readStoredDebugMode() {
+        try {
+            return window.localStorage?.getItem(DEBUG_STORAGE_KEY) === '1';
+        } catch {
+            return false;
+        }
+    }
+
+    function storeDebugMode(enabled) {
+        try {
+            window.localStorage?.setItem(DEBUG_STORAGE_KEY, enabled ? '1' : '0');
+        } catch {}
+    }
+
+    function syncDebugControls() {
+        const input = document.getElementById('debug-mode-toggle');
+        const label = document.getElementById('debug-session-id');
+        if (input) input.checked = debugModeEnabled;
+        if (label) label.textContent = `Session: ${getServerClientId()}`;
+    }
+
+    async function setDebugMode(enabled, options = {}) {
+        const previousEnabled = debugModeEnabled;
+        const requestedEnabled = Boolean(enabled);
+        debugModeEnabled = requestedEnabled;
+        storeDebugMode(debugModeEnabled);
+        syncDebugControls();
+        const result = await configureClientDebug(debugModeEnabled, {
+            uiName: DEBUG_UI_NAME,
+            timeoutMs: 2500
+        });
+        if (!result.ok) {
+            debugModeEnabled = previousEnabled;
+            storeDebugMode(debugModeEnabled);
+            syncDebugControls();
+            setLoadStatus(`Load status: debug ${requestedEnabled ? 'enable' : 'disable'} failed`, 'warn');
+            return false;
+        }
+        if (!options.silent) {
+            setLoadStatus(`Load status: debug ${debugModeEnabled ? 'enabled' : 'disabled'}`, 'ok');
+        }
+        return true;
+    }
+
+    function describeDebugTarget(target) {
+        const element = target instanceof Element ? target : null;
+        if (!element) return {};
+        const label = element.getAttribute('aria-label')
+            || element.getAttribute('title')
+            || element.textContent?.trim()
+            || element.value
+            || '';
+        return {
+            tag: element.tagName.toLowerCase(),
+            id: element.id || '',
+            name: element.getAttribute('name') || '',
+            inputType: element.getAttribute('type') || '',
+            value: element.matches('input, select, textarea') ? String(element.value || '').slice(0, 160) : '',
+            label: label.slice(0, 160)
+        };
+    }
+
+    function installDebugUserActionTracking() {
+        document.addEventListener('click', event => {
+            recordClientUserAction('click', describeDebugTarget(event.target));
+        }, true);
+        document.addEventListener('change', event => {
+            recordClientUserAction('change', describeDebugTarget(event.target));
+        }, true);
+        document.addEventListener('input', event => {
+            const target = event.target;
+            if (target?.matches?.('input[type="range"], input[type="color"], select, textarea')) {
+                recordClientUserAction('input', describeDebugTarget(target));
+            }
+        }, true);
+        document.addEventListener('keydown', event => {
+            if (event.ctrlKey || event.metaKey || event.altKey || ['Escape', 'Enter', 'Delete', 'Backspace'].includes(event.key)) {
+                recordClientUserAction('keydown', {
+                    key: event.key,
+                    ctrlKey: event.ctrlKey,
+                    metaKey: event.metaKey,
+                    altKey: event.altKey,
+                    shiftKey: event.shiftKey,
+                    ...describeDebugTarget(event.target)
+                });
+            }
+        }, true);
+    }
 
     /* ---------- MAIN APPLICATION ---------- */
     async function init() {
@@ -136,6 +204,9 @@
         });
 
         window.addEventListener('resize', onResize);
+        installDebugUserActionTracking();
+        syncDebugControls();
+        if (debugModeEnabled) await setDebugMode(true, { silent: true });
         const viewToggle = document.getElementById('view-toggle');
         viewToggle.checked = false;
         viewToggle.addEventListener('change', toggleView);
@@ -149,6 +220,9 @@
         document.getElementById('close-help-button')?.addEventListener('click', () => toggleHelpOverlay(false));
         document.getElementById('keyboard-help')?.addEventListener('click', event => {
             if (event.target?.id === 'keyboard-help') toggleHelpOverlay(false);
+        });
+        document.getElementById('debug-mode-toggle')?.addEventListener('change', event => {
+            setDebugMode(event.target.checked);
         });
 
         setupCanvasPanControls(getModelContext());
@@ -179,148 +253,156 @@
     }
 
     async function populateModelSelect() {
-        const select = document.getElementById('model-select');
-        const diagnostics = document.getElementById('model-select-diagnostics');
-        const selectedValue = select.value;
-        if (serverConnected) {
-            const serverResult = await listServerModels({ timeoutMs: 2500 });
-            if (serverResult.ok && serverResult.models.length) {
+        return trackClientFunction('models.populateModelSelect', async () => {
+            const select = document.getElementById('model-select');
+            const diagnostics = document.getElementById('model-select-diagnostics');
+            const selectedValue = select.value;
+            if (serverConnected) {
+                const serverResult = await listServerModels({ timeoutMs: 2500 });
+                if (serverResult.ok && serverResult.models.length) {
+                    select.innerHTML = '';
+                    serverResult.models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.value;
+                        option.textContent = model.label || model.value;
+                        select.appendChild(option);
+                    });
+                    select.value = serverResult.models.some(model => model.value === selectedValue)
+                        ? selectedValue
+                        : serverResult.models[0].value;
+                    if (diagnostics) diagnostics.textContent = `Loaded ${serverResult.models.length} models from server.`;
+                    setLoadStatus('Load status: server connected', 'ok');
+                    modelsLoadOk = true;
+                    return;
+                }
+                if (!serverResult.ok) {
+                    if (diagnostics) diagnostics.textContent = `Server unavailable: ${serverResult.error?.message || 'request failed'}. Falling back to manifest.`;
+                    serverConnected = false;
+                }
+            }
+            try {
+                const models = await listAvailableModels({
+                    manifestPath: 'models/models_manifest.json',
+                    modelsPath: 'models/'
+                });
+                if (!models.length) {
+                    setLoadStatus('Load status: no models found', 'warn');
+                    if (diagnostics) diagnostics.textContent = 'Manifest loaded but no usable models were found.';
+                    select.innerHTML = '<option value="">No models available</option>';
+                    modelsLoadOk = false;
+                    return;
+                }
+
                 select.innerHTML = '';
-                serverResult.models.forEach(model => {
+                models.forEach(model => {
                     const option = document.createElement('option');
                     option.value = model.value;
                     option.textContent = model.label || model.value;
                     select.appendChild(option);
                 });
-                select.value = serverResult.models.some(model => model.value === selectedValue)
+                select.value = models.some(model => model.value === selectedValue)
                     ? selectedValue
-                    : serverResult.models[0].value;
-                if (diagnostics) diagnostics.textContent = `Loaded ${serverResult.models.length} models from server.`;
-                setLoadStatus('Load status: server connected', 'ok');
+                    : models[0].value;
+                if (diagnostics) diagnostics.textContent = `Loaded ${models.length} models from manifest.`;
+                setLoadStatus('Load status: manifest loaded', 'ok');
                 modelsLoadOk = true;
-                return;
-            }
-            if (!serverResult.ok) {
-                if (diagnostics) diagnostics.textContent = `Server unavailable: ${serverResult.error?.message || 'request failed'}. Falling back to manifest.`;
-                serverConnected = false;
-            }
-        }
-        try {
-            const models = await listAvailableModels({
-                manifestPath: 'models/models_manifest.json',
-                modelsPath: 'models/'
-            });
-            if (!models.length) {
-                setLoadStatus('Load status: no models found', 'warn');
-                if (diagnostics) diagnostics.textContent = 'Manifest loaded but no usable models were found.';
-                select.innerHTML = '<option value="">No models available</option>';
+            } catch (error) {
+                select.innerHTML = '<option value="">Failed to load models</option>';
+                if (diagnostics) diagnostics.textContent = `Manifest error: ${error?.message || String(error)}`;
+                setLoadStatus('Load status: manifest error', 'error');
                 modelsLoadOk = false;
-                return;
             }
-
-            select.innerHTML = '';
-            models.forEach(model => {
-                const option = document.createElement('option');
-                option.value = model.value;
-                option.textContent = model.label || model.value;
-                select.appendChild(option);
-            });
-            select.value = models.some(model => model.value === selectedValue)
-                ? selectedValue
-                : models[0].value;
-            if (diagnostics) diagnostics.textContent = `Loaded ${models.length} models from manifest.`;
-            setLoadStatus('Load status: manifest loaded', 'ok');
-            modelsLoadOk = true;
-        } catch (error) {
-            select.innerHTML = '<option value="">Failed to load models</option>';
-            if (diagnostics) diagnostics.textContent = `Manifest error: ${error?.message || String(error)}`;
-            setLoadStatus('Load status: manifest error', 'error');
-            modelsLoadOk = false;
-        }
+        });
     }
 
     async function loadSelectedModel(modelPath) {
-        if (!modelPath) return;
-        const label = document.getElementById('model-select')?.selectedOptions?.[0]?.textContent?.trim() || modelPath;
-        setLoadStatus(`Load status: loading ${label}`, 'warn');
-        try {
-            if (isServerModelValue(modelPath)) {
-                const result = await loadServerModel(modelNameFromValue(modelPath), { timeoutMs: 6000 });
-                if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
-                const loadedModel = setData(result.data.model, { context: getModelContext(), refresh: true });
-                updateCanvasModelTitle(result.data.metadata?.label || label);
+        return trackClientFunction('models.loadSelectedModel', async () => {
+            if (!modelPath) return;
+            const label = document.getElementById('model-select')?.selectedOptions?.[0]?.textContent?.trim() || modelPath;
+            setLoadStatus(`Load status: loading ${label}`, 'warn');
+            try {
+                if (isServerModelValue(modelPath)) {
+                    const result = await loadServerModel(modelNameFromValue(modelPath), { timeoutMs: 6000 });
+                    if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
+                    const loadedModel = setData(result.data.model, { context: getModelContext(), refresh: true });
+                    updateCanvasModelTitle(result.data.metadata?.label || label);
+                    if (!hasFitMetadata(loadedModel)) {
+                        fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
+                    }
+                    localDraftDirty = false;
+                    setLoadStatus(`Load status: loaded ${label} from server`, 'ok');
+                    return;
+                }
+                const loadedModel = await loadAndRenderScene(modelPath, getModelContext(), { allowedBasePath: 'models/' });
+                updateCanvasModelTitle();
                 if (!hasFitMetadata(loadedModel)) {
                     fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
                 }
                 localDraftDirty = false;
-                setLoadStatus(`Load status: loaded ${label} from server`, 'ok');
-                return;
+                setLoadStatus(`Load status: loaded ${modelPath}`, 'ok');
+            } catch (error) {
+                setLoadStatus(`Load status: failed ${label}`, 'error');
+                updateCanvasModelTitle('');
             }
-            const loadedModel = await loadAndRenderScene(modelPath, getModelContext(), { allowedBasePath: 'models/' });
-            updateCanvasModelTitle();
-            if (!hasFitMetadata(loadedModel)) {
-                fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-            }
-            localDraftDirty = false;
-            setLoadStatus(`Load status: loaded ${modelPath}`, 'ok');
-        } catch (error) {
-            setLoadStatus(`Load status: failed ${label}`, 'error');
-            updateCanvasModelTitle('');
-        }
+        }, { modelPath });
     }
 
     async function saveCurrentModel(options = {}) {
-        try {
-            const select = document.getElementById('model-select');
-            const selectedModelValue = select.value;
-            const fileName = modelFileNameFromValue(selectedModelValue, 'hbds_saved_model.json');
+        return trackClientFunction('models.saveCurrentModel', async () => {
+            try {
+                const select = document.getElementById('model-select');
+                const selectedModelValue = select.value;
+                const fileName = modelFileNameFromValue(selectedModelValue, 'hbds_saved_model.json');
 
-            setSceneSettings(lightingState, { applyContext: false });
-            if (!serverConnected) await refreshServerConnection();
-            if (serverConnected) {
-                if (getBlockingRemoteDraftList().length > 0 && !options.forceCollaborationSave) {
-                    setCollaborationWarning(true, 'Another user is editing this model. Choose Merge, Apply Right, or Apply Left before saving.');
-                    updateCollaborationPanel();
-                    setLoadStatus('Load status: resolve collaboration choice before saving', 'warn');
-                    return;
-                }
-                setLoadStatus(`Load status: saving ${fileName} to server`, 'warn');
-                const snapshot = prepareSceneSnapshot(getModelContext());
-                const result = await saveServerModel(fileName, snapshot, { timeoutMs: 8000 });
-                if (!result.ok) {
-                    if (result.status === 409) {
-                        setLoadStatus(`Load status: save conflict - ${result.error?.message || 'reload the model before saving'}`, 'error');
-                    } else {
-                        serverConnected = false;
-                        setLoadStatus(`Load status: server save failed - ${result.error?.message || 'request failed'}`, 'error');
+                setSceneSettings(lightingState, { applyContext: false });
+                if (!serverConnected) await refreshServerConnection();
+                if (serverConnected) {
+                    if (getBlockingRemoteDraftList().length > 0 && !options.forceCollaborationSave) {
+                        setCollaborationWarning(true, 'Another user is editing this model. Choose Merge, Apply Right, or Apply Left before saving.');
+                        updateCollaborationPanel();
+                        setLoadStatus('Load status: resolve collaboration choice before saving', 'warn');
+                        return;
                     }
+                    setLoadStatus(`Load status: saving ${fileName} to server`, 'warn');
+                    const snapshot = prepareSceneSnapshot(getModelContext());
+                    const result = await saveServerModel(fileName, snapshot, { timeoutMs: 8000 });
+                    if (!result.ok) {
+                        if (result.status === 409) {
+                            setLoadStatus(`Load status: save conflict - ${result.error?.message || 'reload the model before saving'}`, 'error');
+                        } else {
+                            serverConnected = false;
+                            setLoadStatus(`Load status: server save failed - ${result.error?.message || 'request failed'}`, 'error');
+                        }
+                        return;
+                    }
+                    setLoadStatus(`Load status: saved ${result.data.saved} to server`, 'ok');
+                    await populateModelSelect();
+                    const savedValue = serverModelValue(result.data.saved);
+                    if ([...select.options].some(option => option.value === savedValue)) {
+                        select.value = savedValue;
+                        updateCanvasModelTitle(result.data.metadata?.label || result.data.saved);
+                    }
+                    localDraftDirty = false;
+                    setCollaborationWarning(false);
+                    await clearLocalServerDraft(result.data.saved);
+                    await publishLocalPresenceDraft('Viewing saved model');
                     return;
                 }
-                setLoadStatus(`Load status: saved ${result.data.saved} to server`, 'ok');
-                await populateModelSelect();
-                const savedValue = serverModelValue(result.data.saved);
-                if ([...select.options].some(option => option.value === savedValue)) {
-                    select.value = savedValue;
-                    updateCanvasModelTitle(result.data.metadata?.label || result.data.saved);
-                }
-                localDraftDirty = false;
-                setCollaborationWarning(false);
-                await clearLocalServerDraft(result.data.saved);
-                await publishLocalPresenceDraft('Viewing saved model');
-                return;
-            }
 
-            saveScene(getModelContext(), { fileName });
-            setLoadStatus(`Load status: downloaded ${fileName}`, 'ok');
-        } catch (error) {
-            setLoadStatus(`Load status: save failed - ${error?.message || String(error)}`, 'error');
-        }
+                saveScene(getModelContext(), { fileName });
+                setLoadStatus(`Load status: downloaded ${fileName}`, 'ok');
+            } catch (error) {
+                setLoadStatus(`Load status: save failed - ${error?.message || String(error)}`, 'error');
+            }
+        }, { forceCollaborationSave: Boolean(options.forceCollaborationSave) });
     }
 
     async function refreshServerConnection() {
-        const result = await checkServerConnection({ timeoutMs: 1200 });
-        serverConnected = Boolean(result.ok);
-        return serverConnected;
+        return trackClientFunction('models.refreshServerConnection', async () => {
+            const result = await checkServerConnection({ timeoutMs: 1200 });
+            serverConnected = Boolean(result.ok);
+            return serverConnected;
+        });
     }
 
     function startServerEventSubscription() {

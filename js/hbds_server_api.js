@@ -6,6 +6,8 @@ const CLIENT_ID_STORAGE_KEY = 'hbds.server.clientId';
 const PAGE_CLIENT_SUFFIX = createClientId('tab');
 let discoveredApiBase = null;
 let fallbackClientId = null;
+let clientDebugEnabled = false;
+let clientDebugUiName = '';
 
 export function getOpenApiUrl(apiBase = DEFAULT_API_BASE) {
   return `${normalizeApiBase(apiBase)}/api/openapi.json`;
@@ -39,6 +41,93 @@ export function modelFileNameFromValue(value, fallback = 'hbds_model.json') {
 
 export async function checkServerConnection(options = {}) {
   return apiRequest('/api/health', options);
+}
+
+export async function configureClientDebug(enabled, options = {}) {
+  const previousEnabled = clientDebugEnabled;
+  const previousUiName = clientDebugUiName;
+  const nextEnabled = Boolean(enabled);
+  const nextUiName = String(options.uiName || clientDebugUiName || 'hbds-ui');
+  clientDebugUiName = nextUiName;
+  const payload = {
+    enabled: nextEnabled,
+    clientId: getServerClientId(),
+    uiName: nextUiName
+  };
+  const result = await apiRequest('/api/debug', {
+    ...options,
+    method: 'POST',
+    body: payload,
+    skipDebugLog: true,
+    timeoutMs: options.timeoutMs ?? 2500
+  });
+  if (result.ok) {
+    clientDebugEnabled = nextEnabled;
+    recordClientDebugEvent('client.debug-toggle', { enabled: clientDebugEnabled }, { force: clientDebugEnabled });
+  } else {
+    clientDebugEnabled = previousEnabled;
+    clientDebugUiName = previousUiName;
+  }
+  return result;
+}
+
+export function isClientDebugEnabled() {
+  return clientDebugEnabled;
+}
+
+export function getClientDebugSession() {
+  return {
+    enabled: clientDebugEnabled,
+    clientId: getServerClientId(),
+    uiName: clientDebugUiName
+  };
+}
+
+export function recordClientDebugEvent(eventType, details = {}, options = {}) {
+  if (!clientDebugEnabled && !options.force) return;
+  const entry = {
+    ...details,
+    timestamp: debugTimestamp(),
+    type: eventType,
+    source: 'client',
+    clientId: getServerClientId(),
+    uiName: clientDebugUiName,
+    url: typeof window !== 'undefined' ? window.location.href : ''
+  };
+  try {
+    console.debug('[HBDS debug]', entry);
+  } catch {}
+  postClientDebugEntry(entry);
+}
+
+export function recordClientUserAction(action, details = {}) {
+  recordClientDebugEvent('client.user-action', {
+    action,
+    ...details
+  });
+}
+
+export async function trackClientFunction(functionName, callback, details = {}) {
+  if (!clientDebugEnabled) return callback();
+  const startMs = performanceNow();
+  const startTime = debugTimestamp();
+  let status = 'ok';
+  try {
+    return await callback();
+  } catch (error) {
+    status = 'error';
+    details = { ...details, error: error?.message || String(error) };
+    throw error;
+  } finally {
+    recordClientDebugEvent('client.function-timing', {
+      functionName,
+      startTime,
+      endTime: debugTimestamp(),
+      durationMs: roundDuration(performanceNow() - startMs),
+      status,
+      ...details
+    });
+  }
 }
 
 export async function listServerModels(options = {}) {
@@ -219,7 +308,7 @@ function clientHeaders(options = {}, payload = {}) {
   if (!hasHeader(headers, 'X-Client-Id')) {
     headers['X-Client-Id'] = String(options.clientId || payload?.clientId || getServerClientId());
   }
-  const clientName = options.clientName || payload?.clientName;
+  const clientName = options.clientName || payload?.clientName || clientDebugUiName;
   if (clientName && !hasHeader(headers, 'X-Client-Name')) {
     headers['X-Client-Name'] = String(clientName);
   }
@@ -235,6 +324,45 @@ function draftEndpoint(modelName, options = {}, clientId = '') {
   }
   const base = `/api/models/${name}/drafts`;
   return clientId ? `${base}/${encodeURIComponent(clientId)}` : base;
+}
+
+function postClientDebugEntry(entry) {
+  const body = JSON.stringify(entry);
+  try {
+    const endpoint = `${getApiBaseCandidates(DEFAULT_API_BASE)[0] || ''}/api/debug/logs`;
+    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+      const blob = new Blob([body], { type: 'application/json' });
+      if (navigator.sendBeacon(endpoint, blob)) {
+        return;
+      }
+    }
+    fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Client-Id': getServerClientId(),
+        'X-Client-Name': clientDebugUiName
+      },
+      body,
+      keepalive: true
+    }).catch(() => {});
+  } catch {}
+}
+
+function debugTimestamp() {
+  return new Date().toISOString();
+}
+
+function performanceNow() {
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    return performance.now();
+  }
+  return Date.now();
+}
+
+function roundDuration(value) {
+  return Math.round(Number(value || 0) * 1000) / 1000;
 }
 
 function normalizeDraftScope(value) {
@@ -274,11 +402,12 @@ async function apiRequest(path, options = {}) {
 async function attemptApiRequest(apiBase, path, options, timeoutMs) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const headers = clientHeaders(options);
   const requestOptions = {
     method: options.method || 'GET',
     headers: {
       Accept: 'application/json',
-      ...(options.headers || {})
+      ...headers
     },
     signal: controller.signal
   };
@@ -288,13 +417,20 @@ async function attemptApiRequest(apiBase, path, options, timeoutMs) {
     requestOptions.body = JSON.stringify(options.body);
   }
 
+  const startMs = performanceNow();
+  const startTime = debugTimestamp();
+  let status = 0;
+  let ok = false;
+  let errorCode = '';
   try {
     const response = await fetch(`${apiBase}${path}`, requestOptions);
+    status = response.status;
     const text = await response.text();
     let data = {};
     try {
       data = text ? JSON.parse(text) : {};
     } catch {
+      errorCode = 'invalid_api_response';
       return {
         retryable: true,
         payload: {
@@ -305,6 +441,7 @@ async function attemptApiRequest(apiBase, path, options, timeoutMs) {
       };
     }
     if (!response.ok || data?.ok === false) {
+      errorCode = normalizeError(data?.error, response.status).code;
       return {
         retryable: false,
         payload: {
@@ -314,9 +451,11 @@ async function attemptApiRequest(apiBase, path, options, timeoutMs) {
         }
       };
     }
+    ok = true;
     return { retryable: false, payload: { ok: true, status: response.status, data } };
   } catch (error) {
     if (error?.name === 'AbortError') {
+      errorCode = 'timeout';
       return {
         retryable: true,
         payload: {
@@ -326,6 +465,7 @@ async function attemptApiRequest(apiBase, path, options, timeoutMs) {
         }
       };
     }
+    errorCode = 'network_error';
     return {
       retryable: true,
       payload: {
@@ -336,6 +476,20 @@ async function attemptApiRequest(apiBase, path, options, timeoutMs) {
     };
   } finally {
     clearTimeout(timeoutId);
+    if (clientDebugEnabled && !options.skipDebugLog && path !== '/api/debug/logs') {
+      recordClientDebugEvent('client.function-timing', {
+        functionName: `apiRequest ${requestOptions.method} ${path}`,
+        apiBase,
+        path,
+        method: requestOptions.method,
+        statusCode: status,
+        ok,
+        errorCode,
+        startTime,
+        endTime: debugTimestamp(),
+        durationMs: roundDuration(performanceNow() - startMs)
+      });
+    }
   }
 }
 

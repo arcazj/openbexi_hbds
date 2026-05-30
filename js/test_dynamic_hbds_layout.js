@@ -44,18 +44,22 @@ import {
   applyServerModelOperations,
   checkServerConnection,
   clearServerDraft,
+  configureClientDebug,
+  getServerClientId,
   listServerDrafts,
   listServerModels,
   loadServerModel,
   publishServerDraft,
+  recordClientUserAction,
   saveServerModel,
   saveScopedModel,
   subscribeServerEvents,
+  trackClientFunction,
   isServerModelValue,
   modelFileNameFromValue,
   modelNameFromValue,
   serverModelValue
-} from './hbds_server_api.js?v=server-api-20260524f';
+} from './hbds_server_api.js?v=server-api-20260530a';
 import {
   collaborationWorkStatusDecision,
   coalesceDraftOperations,
@@ -165,6 +169,7 @@ let nextAttributeNumber = 1;
 let nextLinkNumber = 1;
 let toastTimer = null;
 const activityLog = [];
+let lastValidationIssueSummary = '';
 const LIGHT_CIRCLE_RADIUS = 16;
 const LIGHT_CIRCLE_ELEVATION = 7;
 const DEFAULT_HORIZONTAL_LIGHT_INTENSITY = 1;
@@ -209,6 +214,7 @@ const DEFAULT_TEST_MODEL_HIDDEN_VALUES = [
   'test_models/transportation_links.json'
 ];
 const MODEL_TREE_COLLAPSED_STORAGE_KEY = 'hbds.dynamic.modelTreeCollapsed.v2';
+const VALIDATION_STATUS_BASE_CLASS = 'status-chip validation-status';
 const MODEL_SOURCE_CONFIG = getModelSourceConfig();
 const TEST_MODEL_ROOT = MODEL_SOURCE_CONFIG.root;
 const TEST_MODEL_MANIFEST = MODEL_SOURCE_CONFIG.manifest;
@@ -217,6 +223,9 @@ const HIDE_SCENARIO_SUITE = TEST_MODEL_ROOT === 'models/';
 const SERVER_MODELS_ENABLED = TEST_MODEL_ROOT === 'models/';
 const COLLABORATION_DRAFT_SCOPE = TEST_MODEL_ROOT === 'test_models/' ? 'test_models' : '';
 const COLLABORATION_ENABLED = SERVER_MODELS_ENABLED || Boolean(COLLABORATION_DRAFT_SCOPE);
+const DEBUG_UI_NAME = TEST_MODEL_ROOT === 'models/' ? 'edit-ui' : 'tests-ui';
+const DEBUG_STORAGE_KEY = `hbds.debug.enabled.${DEBUG_UI_NAME}`;
+let debugModeEnabled = readStoredDebugMode();
 const EMBEDDED_SHELL_MENU = new URLSearchParams(window.location.search).get('embeddedShell') === '1';
 if (EMBEDDED_SHELL_MENU) document.body.classList.add('embedded-shell-menu');
 const STRUCTURAL_PROPERTY_KEYS = new Set([
@@ -1050,6 +1059,132 @@ function updateActivityLog() {
   status.textContent = activityLog.length ? activityLog.join('\n') : 'Ready.';
 }
 
+function readStoredDebugMode() {
+  try {
+    return window.localStorage?.getItem(DEBUG_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function storeDebugMode(enabled) {
+  try {
+    window.localStorage?.setItem(DEBUG_STORAGE_KEY, enabled ? '1' : '0');
+  } catch {}
+}
+
+function ensureDebugControls() {
+  const section = document.querySelector('.control-group[data-section="settings"]');
+  if (!section) return;
+  const body = section.querySelector(':scope > .details-body') || section;
+  let title = [...body.querySelectorAll(':scope > .settings-subtitle')]
+    .find(element => element.textContent.trim().toLowerCase() === 'debug');
+  if (!title) {
+    title = document.createElement('div');
+    title.className = 'settings-subtitle';
+    title.textContent = 'Debug';
+  }
+  let input = $('debug-mode-toggle');
+  let label = input?.closest('label') || null;
+  if (!label) {
+    label = document.createElement('label');
+    label.className = 'checkbox-wrapper';
+    label.setAttribute('for', 'debug-mode-toggle');
+    input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = 'debug-mode-toggle';
+    const text = document.createElement('span');
+    text.textContent = 'Debug Logging';
+    label.append(input, text);
+  }
+  let session = $('debug-session-id');
+  if (!session) {
+    session = document.createElement('div');
+    session.id = 'debug-session-id';
+    session.className = 'section-meta';
+    session.setAttribute('aria-live', 'polite');
+  }
+  body.prepend(title, label, session);
+}
+
+function syncDebugControls() {
+  ensureDebugControls();
+  const input = $('debug-mode-toggle');
+  const label = $('debug-session-id');
+  if (input) input.checked = debugModeEnabled;
+  if (label) label.textContent = `Session: ${getServerClientId()}`;
+}
+
+async function setDebugMode(enabled, options = {}) {
+  const previousEnabled = debugModeEnabled;
+  const requestedEnabled = Boolean(enabled);
+  debugModeEnabled = requestedEnabled;
+  storeDebugMode(debugModeEnabled);
+  syncDebugControls();
+  const result = await configureClientDebug(debugModeEnabled, {
+    uiName: DEBUG_UI_NAME,
+    timeoutMs: 2500
+  });
+  if (!result.ok) {
+    debugModeEnabled = previousEnabled;
+    storeDebugMode(debugModeEnabled);
+    syncDebugControls();
+    addLog(`Debug ${requestedEnabled ? 'enable' : 'disable'} failed: ${result.error?.message || 'server unavailable'}`);
+    if (!options.silent) showToast(result.error?.message || 'Debug server request failed');
+    return false;
+  }
+  if (!options.silent) {
+    addLog(`Debug ${debugModeEnabled ? 'enabled' : 'disabled'} for ${DEBUG_UI_NAME}`);
+    showToast(`Debug ${debugModeEnabled ? 'on' : 'off'}`);
+  }
+  return true;
+}
+
+function describeDebugTarget(target) {
+  const element = target instanceof Element ? target : null;
+  if (!element) return {};
+  const label = element.getAttribute('aria-label')
+    || element.getAttribute('title')
+    || element.textContent?.trim()
+    || element.value
+    || '';
+  return {
+    tag: element.tagName.toLowerCase(),
+    id: element.id || '',
+    name: element.getAttribute('name') || '',
+    inputType: element.getAttribute('type') || '',
+    value: element.matches('input, select, textarea') ? String(element.value || '').slice(0, 160) : '',
+    label: label.slice(0, 160)
+  };
+}
+
+function installDebugUserActionTracking() {
+  document.addEventListener('click', event => {
+    recordClientUserAction('click', describeDebugTarget(event.target));
+  }, true);
+  document.addEventListener('change', event => {
+    recordClientUserAction('change', describeDebugTarget(event.target));
+  }, true);
+  document.addEventListener('input', event => {
+    const target = event.target;
+    if (target?.matches?.('input[type="range"], input[type="color"], select, textarea')) {
+      recordClientUserAction('input', describeDebugTarget(target));
+    }
+  }, true);
+  document.addEventListener('keydown', event => {
+    if (event.ctrlKey || event.metaKey || event.altKey || ['Escape', 'Enter', 'Delete', 'Backspace'].includes(event.key)) {
+      recordClientUserAction('keydown', {
+        key: event.key,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        altKey: event.altKey,
+        shiftKey: event.shiftKey,
+        ...describeDebugTarget(event.target)
+      });
+    }
+  }, true);
+}
+
 function showToast(message) {
   const toast = $('toast');
   if (!toast || !message) return;
@@ -1266,99 +1401,54 @@ async function triggerCollaborationStatusForTest(kind = 'sync', durationMs = 100
   };
 }
 
-function validationIssueTargetId(message) {
-  const text = String(message || '');
-  const patterns = [
-    /\b(?:class|hyperclass)\s+([A-Za-z0-9_.:-]+)/i,
-    /\bfor\s+([A-Za-z0-9_.:-]+)\s*$/i,
-    /\bsource\s+([A-Za-z0-9_.:-]+)/i,
-    /\btarget\s+([A-Za-z0-9_.:-]+)/i,
-    /\bid\s+([A-Za-z0-9_.:-]+)/i
-  ];
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    const candidate = match?.[1]?.replace(/[.,;:)]$/, '');
-    if (candidate && nodeById(candidate)) return candidate;
-  }
-  return '';
-}
-
-function renderValidationIssueList(result, nodeCount) {
-  const list = $('validation-issues');
-  if (!list) return;
-  list.innerHTML = '';
-
-  if (!nodeCount) {
-    list.textContent = 'No model loaded';
-    return;
-  }
-
-  const issues = [
-    ...(result.errors || []).map(message => ({ tone: 'error', label: 'Error', message })),
-    ...(result.warnings || []).map(message => ({ tone: 'warn', label: 'Warning', message }))
-  ];
-
-  if (!issues.length) {
-    const empty = document.createElement('div');
-    empty.className = 'validation-empty';
-    empty.textContent = 'No validation issues';
-    list.appendChild(empty);
-    return;
-  }
-
-  for (const issue of issues) {
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.className = `validation-issue ${issue.tone}`;
-    const targetId = validationIssueTargetId(issue.message);
-    if (targetId) {
-      item.dataset.validationTarget = targetId;
-      item.title = `Select ${targetId}`;
-    } else {
-      item.disabled = true;
-      item.title = 'No matching canvas element';
-    }
-
-    const kind = document.createElement('span');
-    kind.className = 'validation-issue-kind';
-    kind.textContent = issue.label;
-
-    const text = document.createElement('span');
-    text.className = 'validation-issue-text';
-    text.textContent = String(issue.message);
-
-    item.append(kind, text);
-    list.appendChild(item);
-  }
-}
-
 function updateValidationStatus() {
   const status = $('validation-status');
   const nodeCount = nodes().length;
   const result = validateData(getData());
   if (!status) return;
-  status.className = 'status-chip';
-  renderValidationIssueList(result, nodeCount);
+  status.className = VALIDATION_STATUS_BASE_CLASS;
+  status.hidden = true;
+  status.textContent = '';
 
   if (!nodeCount) {
-    status.textContent = 'No model loaded';
+    lastValidationIssueSummary = '';
     return;
   }
 
+  const errorCount = result.errors?.length || 0;
+  const warningCount = result.warnings?.length || 0;
+  if (!errorCount && !warningCount) {
+    lastValidationIssueSummary = '';
+    return;
+  }
+
+  const issueSummary = [
+    errorCount ? `${errorCount} validation error${errorCount === 1 ? '' : 's'}` : '',
+    warningCount ? `${warningCount} warning${warningCount === 1 ? '' : 's'}` : ''
+  ].filter(Boolean).join(', ');
+  const issueDetails = [
+    ...(result.errors || []),
+    ...(result.warnings || [])
+  ].join('; ');
+  const logSummary = issueDetails ? `${issueSummary}: ${issueDetails}` : issueSummary;
+
+  status.hidden = false;
   if (!result.valid) {
-    status.textContent = `${result.errors.length} validation error${result.errors.length === 1 ? '' : 's'}`;
+    status.textContent = issueSummary;
     status.classList.add('error');
+    if (logSummary !== lastValidationIssueSummary) {
+      addLog(`Validation issue - ${logSummary}`);
+      lastValidationIssueSummary = logSummary;
+    }
     return;
   }
 
-  if (result.warnings?.length) {
-    status.textContent = `Valid with ${result.warnings.length} warning${result.warnings.length === 1 ? '' : 's'}`;
-    status.classList.add('warn');
-    return;
+  status.textContent = issueSummary;
+  status.classList.add('warn');
+  if (logSummary !== lastValidationIssueSummary) {
+    addLog(`Validation issue - ${logSummary}`);
+    lastValidationIssueSummary = logSummary;
   }
-
-  status.textContent = 'Valid model';
-  status.classList.add('ok');
 }
 
 function setSelectOptions(id, items, selectedId, placeholder) {
@@ -1612,7 +1702,7 @@ function renderModelTree() {
   const allNodes = nodes();
   const allLinks = links();
   if (!allNodes.length && !allLinks.length) {
-    host.innerHTML = '<div class="model-tree-empty">No model loaded</div>';
+    host.innerHTML = '<div class="model-tree-empty">Empty workspace</div>';
     return;
   }
 
@@ -2786,7 +2876,6 @@ function commandPaletteCommands() {
     { id: 'export-vector-svg', label: 'Export SVG Vector', keywords: 'editable approximate preview', enabled: () => nodes().length > 0, run: handleExportVectorSvg },
     { id: 'export-json', label: 'Export JSON', keywords: 'model data download', run: handleExportJson },
     { id: 'run-scenarios', label: 'Run Scenario Suite', keywords: 'test regression', enabled: () => !HIDE_SCENARIO_SUITE, run: runScenarioSuite },
-    { id: 'open-validation', label: 'Open Validation', keywords: 'errors warnings issues', run: () => openControlSection('validation') },
     { id: 'open-builder', label: 'Open Model Builder', keywords: 'inspector properties edit', run: () => openControlSection('model-builder') },
     { id: 'open-productivity', label: 'Open Productivity', keywords: 'tree duplicate bulk attributes route subgraph', run: () => openControlSection('productivity') },
     { id: 'open-share', label: 'Open Share', keywords: 'social export link', run: () => openControlSection('share') },
@@ -7216,14 +7305,17 @@ async function refreshWorkspace(message, options = {}) {
 }
 
 async function runAction(action) {
-  try {
-    await action();
-  } catch (error) {
-    const message = error?.message || String(error);
-    addLog(`Error: ${message}`);
-    showToast(message);
-    updateInterface({ json: false });
-  }
+  const functionName = action?.name || 'anonymousUiAction';
+  return trackClientFunction(`dynamic.${functionName}`, async () => {
+    try {
+      await action();
+    } catch (error) {
+      const message = error?.message || String(error);
+      addLog(`Error: ${message}`);
+      showToast(message);
+      updateInterface({ json: false });
+    }
+  });
 }
 
 function selectElement(id, options = {}) {
@@ -8642,6 +8734,8 @@ function handleModelTreeClick(event) {
 function bindUi() {
   bindCanvasInteractionTracking();
   bindCollaborationControls();
+  ensureDebugControls();
+  installDebugUserActionTracking();
   restoreModelTreeState();
   $('model-tree-toggle')?.addEventListener('click', () => {
     setModelTreeCollapsed(!document.body.classList.contains('model-tree-collapsed'));
@@ -8680,12 +8774,6 @@ function bindUi() {
   $('reset-model-button').addEventListener('click', () => runAction(handleResetModel));
   $('run-scenario-suite-button')?.addEventListener('click', () => runAction(runScenarioSuite));
   $('cancel-link-button').addEventListener('click', cancelLinkCreation);
-  $('validation-issues')?.addEventListener('click', event => {
-    const target = event.target.closest?.('[data-validation-target]');
-    if (!target?.dataset?.validationTarget) return;
-    selectElement(target.dataset.validationTarget, { instant: true, log: false });
-    showToast(`Selected ${target.dataset.validationTarget}`);
-  });
   $('command-palette-input')?.addEventListener('input', () => {
     commandPaletteActiveIndex = 0;
     renderCommandPalette();
@@ -8744,6 +8832,9 @@ function bindUi() {
   });
   $('reset-scene-settings-button')?.addEventListener('click', handleResetSceneSettings);
   $('reset-model-font-settings-button')?.addEventListener('click', handleResetFontSettings);
+  $('debug-mode-toggle')?.addEventListener('change', event => {
+    runAction(() => setDebugMode(event.target.checked));
+  });
 
   [
     'scene-background-input',
@@ -8822,7 +8913,12 @@ async function init() {
   syncFontSettingsControls();
   removeEditOnlySections();
   compactControlSections();
+  ensureDebugControls();
   bindUi();
+  syncDebugControls();
+  if (debugModeEnabled) {
+    await setDebugMode(true, { silent: true });
+  }
   bindDiagramPicking();
   installDebugHooks();
   window.addEventListener('resize', resizeRenderers);
