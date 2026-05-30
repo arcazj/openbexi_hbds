@@ -88,6 +88,56 @@ body.has-model #canvas-model-title {
   display: inline-block;
 }
 
+.canvas-load-progress {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 25;
+  display: grid;
+  gap: 9px;
+  width: min(360px, calc(100% - 48px));
+  min-height: 58px;
+  border: 1px solid rgba(82, 113, 153, 0.3);
+  border-radius: 8px;
+  color: #172033;
+  background: rgba(255, 255, 255, 0.91);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+  padding: 12px 14px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(6px);
+}
+
+.canvas-load-progress[hidden] {
+  display: none;
+}
+
+.canvas-load-progress-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.canvas-load-progress-track {
+  display: block;
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dbe7f5;
+}
+
+.canvas-load-progress-bar {
+  display: block;
+  width: 8%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2563eb, #0f766e);
+  transition: width 180ms ease;
+}
+
 canvas {
   display: block;
 }

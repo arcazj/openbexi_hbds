@@ -96,12 +96,26 @@ Open:
 http://127.0.0.1:8010/index.html
 ```
 
+For regression runs, enable UI debug logging before exercising Models, Edit, or Tests. Either use the in-app Debug Logging toggle, or open dynamic views with `debug=1`, for example:
+
+```text
+http://127.0.0.1:8010/test_dynamic_hbds_layout.html?modelsPath=models/&debug=1
+http://127.0.0.1:8010/test_dynamic_hbds_layout.html?modelsPath=test_models/&debug=1
+```
+
+Expected debug output:
+
+* `.codex_server_access.log` records server requests.
+* `.codex_server_err.log` remains empty for passing runs.
+* `debug_logs/*.jsonl` contains client and server timing events for each active UI session.
+
 Validate:
 
 * The connection indicator turns green/connected.
 * Stopping the server turns the indicator red/not connected after polling catches up.
 * Restarting the server reconnects the UI.
 * `models/models_manifest.json` and `test_models/test_models_manifest.json` are refreshed at server startup.
+* Loading a large model such as `satellite_world_complete_structure.json` shows a centered non-blocking canvas progress bar instead of a blank or frozen canvas.
 
 ## 5. Port In Use Check
 
@@ -865,7 +879,20 @@ Run the browser-level collaboration regression:
 py scripts\collaboration_browser_regression.py
 ```
 
-This opens real headless Edge/Chrome clients, verifies second-page `human_and_car_links.json` model-selection latency during collaboration, then verifies a temporary server model for real draft publishing, sequential real-time `Remote operations` list updates, remote operation rendering for class, link, layout, font, scene, view, movement, rendering, parent, attribute, create, and delete updates, merge behavior, collaboration performance diagnostics, absence of normal-update wait/status dialogs, and the non-blocking long-work canvas progress indicator.
+This opens real headless Edge/Chrome clients with `debug=1`, verifies second-page `human_and_car_links.json` model-selection latency during collaboration, then verifies a temporary server model for real draft publishing, sequential real-time `Remote operations` list updates, remote operation rendering for class, link, layout, font, scene, view, movement, rendering, parent, attribute, create, and delete updates, merge behavior, collaboration performance diagnostics, absence of normal-update wait/status dialogs, and the non-blocking long-work canvas progress indicator.
+
+After automated browser regression, inspect the logs:
+
+```powershell
+Get-Item .codex_server_out.log,.codex_server_err.log,.codex_server_access.log
+Get-ChildItem debug_logs
+```
+
+Expected:
+
+* `.codex_server_err.log` is empty.
+* `.codex_server_access.log` has no unexpected `4xx` or `5xx` responses.
+* debug JSONL files include `client.function-timing`, `server.function-timing`, and stream events are logged as `server.stream-timing` rather than ordinary slow request timings.
 
 Run Java/Maven tests if Maven is installed:
 

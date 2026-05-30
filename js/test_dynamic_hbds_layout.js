@@ -59,7 +59,7 @@ import {
   modelFileNameFromValue,
   modelNameFromValue,
   serverModelValue
-} from './hbds_server_api.js?v=server-api-20260530a';
+} from './hbds_server_api.js?v=server-api-20260530b';
 import {
   collaborationWorkStatusDecision,
   coalesceDraftOperations,
@@ -117,6 +117,9 @@ let selectedRemoteClientId = '';
 let modelLoadRequestId = 0;
 let scheduledModelLoadTimer = null;
 let draftPublishTimer = null;
+let canvasLoadProgressTimer = null;
+let canvasLoadProgressInterval = null;
+let canvasLoadProgressToken = 0;
 let scheduledDraftPublish = null;
 let pendingDraftPublish = null;
 let draftPublishInFlight = false;
@@ -153,7 +156,8 @@ const COLLABORATION_DEFERRED_RENDER_TIMEOUT_MS = 220;
 const COLLABORATION_STATUS_SHOW_AFTER_MS = 900;
 const COLLABORATION_STATUS_MIN_VISIBLE_MS = 450;
 const COLLABORATION_CANVAS_INTERACTION_IDLE_MS = 360;
-const COLLABORATION_REMOTE_DRAFT_REFRESH_INTERVAL_MS = 2500;
+const COLLABORATION_REMOTE_DRAFT_REFRESH_INTERVAL_MS = 5000;
+const COLLABORATION_REMOTE_DRAFT_ACTIVE_INTERVAL_MS = 3500;
 const COLLABORATION_DRAFT_PUBLISH_DELAY_MS = 450;
 const COLLABORATION_DRAFT_PUBLISH_BACKOFF_MS = 120;
 const COLLABORATION_DRAFT_MAX_OPERATIONS = 80;
@@ -163,6 +167,9 @@ const COLLABORATION_PREVIEW_MAX_HEIGHT = 1024;
 const COLLABORATION_PREVIEW_MAX_DATA_URL_CHARS = 480000;
 const COLLABORATION_PREVIEW_MIN_INTERVAL_MS = 2500;
 const COLLABORATION_PREVIEW_JPEG_QUALITY = 0.74;
+const CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS = 700;
+const CANVAS_LOAD_PROGRESS_LARGE_SHOW_AFTER_MS = 120;
+const LARGE_MODEL_NAME_PATTERN = /satellite_world_complete_structure\.json$/i;
 let nextClassNumber = 1;
 let nextHyperclassNumber = 1;
 let nextAttributeNumber = 1;
@@ -1060,11 +1067,20 @@ function updateActivityLog() {
 }
 
 function readStoredDebugMode() {
+  if (urlRequestsDebugMode()) return true;
   try {
     return window.localStorage?.getItem(DEBUG_STORAGE_KEY) === '1';
   } catch {
     return false;
   }
+}
+
+function urlRequestsDebugMode() {
+  const params = new URLSearchParams(window.location.search);
+  return ['debug', 'debugMode', 'debugLogging'].some(name => {
+    const value = params.get(name);
+    return value === '1' || String(value || '').toLowerCase() === 'true';
+  });
 }
 
 function storeDebugMode(enabled) {
@@ -1371,6 +1387,90 @@ async function withCollaborationWorkStatus(kind, action, options = {}) {
   } finally {
     finish();
   }
+}
+
+function startCanvasLoadProgress(message = 'Loading model...', options = {}) {
+  const token = ++canvasLoadProgressToken;
+  window.clearTimeout(canvasLoadProgressTimer);
+  window.clearInterval(canvasLoadProgressInterval);
+  canvasLoadProgressTimer = null;
+  canvasLoadProgressInterval = null;
+  const showAfterMs = Number.isFinite(Number(options.showAfterMs))
+    ? Number(options.showAfterMs)
+    : CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS;
+  const progress = {
+    value: 8,
+    message,
+    visible: false
+  };
+  const show = () => {
+    if (token !== canvasLoadProgressToken) return;
+    progress.visible = true;
+    updateCanvasLoadProgress(token, progress.value, progress.message);
+    canvasLoadProgressInterval = window.setInterval(() => {
+      if (token !== canvasLoadProgressToken) return;
+      progress.value = Math.min(88, progress.value + Math.max(1.5, (90 - progress.value) * 0.08));
+      updateCanvasLoadProgress(token, progress.value, progress.message);
+    }, 420);
+  };
+  if (showAfterMs <= 0) show();
+  else canvasLoadProgressTimer = window.setTimeout(show, showAfterMs);
+  return {
+    update(value, nextMessage = progress.message) {
+      progress.value = Math.max(progress.value, Math.min(96, Number(value) || progress.value));
+      progress.message = nextMessage || progress.message;
+      if (progress.visible) updateCanvasLoadProgress(token, progress.value, progress.message);
+    },
+    finish() {
+      finishCanvasLoadProgress(token, progress.visible);
+    }
+  };
+}
+
+function updateCanvasLoadProgress(token, value, message) {
+  if (token !== canvasLoadProgressToken) return;
+  const element = $('canvas-load-progress');
+  if (!element) return;
+  const label = element.querySelector('[data-load-progress-text]');
+  const bar = element.querySelector('[data-load-progress-bar]');
+  if (label) label.textContent = message || 'Loading model...';
+  if (bar) bar.style.width = `${Math.max(8, Math.min(100, value))}%`;
+  element.hidden = false;
+}
+
+function finishCanvasLoadProgress(token, wasVisible) {
+  if (token !== canvasLoadProgressToken) return;
+  window.clearTimeout(canvasLoadProgressTimer);
+  window.clearInterval(canvasLoadProgressInterval);
+  canvasLoadProgressTimer = null;
+  canvasLoadProgressInterval = null;
+  const element = $('canvas-load-progress');
+  const bar = element?.querySelector('[data-load-progress-bar]');
+  if (!element) return;
+  if (wasVisible && bar) {
+    bar.style.width = '100%';
+    window.setTimeout(() => {
+      if (token === canvasLoadProgressToken) element.hidden = true;
+    }, 160);
+    return;
+  }
+  element.hidden = true;
+}
+
+async function withCanvasLoadProgress(message, action, options = {}) {
+  const progress = startCanvasLoadProgress(message, options);
+  if ((options.showAfterMs ?? CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS) <= 0) {
+    await yieldToBrowser({ timeoutMs: 16 });
+  }
+  try {
+    return await action(progress);
+  } finally {
+    progress.finish();
+  }
+}
+
+function isLargeModelValue(value) {
+  return LARGE_MODEL_NAME_PATTERN.test(modelFileNameFromValue(value, String(value || '')));
 }
 
 function getCollaborationStatusState() {
@@ -2960,7 +3060,7 @@ function executeCommandPaletteCommand(index = commandPaletteActiveIndex) {
     return;
   }
   closeCommandPalette();
-  runAction(command.run);
+  runAction(command.run, command.id || command.label || '');
 }
 
 function handleCommandPaletteKeydown(event) {
@@ -3006,9 +3106,9 @@ function bindCollaborationControls() {
     selectedRemoteClientId = event.target.value || '';
     updateCollaborationPanel();
   });
-  $('collaboration-apply-left-button')?.addEventListener('click', () => runAction(() => handleSaveModel({ forceCollaborationSave: true })));
-  $('collaboration-apply-right-button')?.addEventListener('click', () => runAction(applySelectedRemoteDraft));
-  $('collaboration-merge-button')?.addEventListener('click', () => runAction(mergeSelectedRemoteDraft));
+  $('collaboration-apply-left-button')?.addEventListener('click', () => runAction(() => handleSaveModel({ forceCollaborationSave: true }), 'collaboration.keepMine'));
+  $('collaboration-apply-right-button')?.addEventListener('click', () => runAction(applySelectedRemoteDraft, 'collaboration.useTheirs'));
+  $('collaboration-merge-button')?.addEventListener('click', () => runAction(mergeSelectedRemoteDraft, 'collaboration.mergeBoth'));
   $('collaboration-preview')?.addEventListener('click', event => {
     const liveButton = event.target.closest?.('[data-collaboration-live-preview-action]');
     if (liveButton) {
@@ -3061,11 +3161,26 @@ function scheduleRemoteDraftRefreshLoop() {
   window.clearTimeout(remoteDraftRefreshTimer);
   remoteDraftRefreshTimer = null;
   if (!COLLABORATION_ENABLED || !serverConnected || !getSelectedCollaborationModelName()) return;
+  if (document.hidden) return;
+  const refreshInterval = getRemoteDraftList().length > 0
+    ? COLLABORATION_REMOTE_DRAFT_ACTIVE_INTERVAL_MS
+    : COLLABORATION_REMOTE_DRAFT_REFRESH_INTERVAL_MS;
   remoteDraftRefreshTimer = window.setTimeout(async () => {
     remoteDraftRefreshTimer = null;
     await refreshRemoteDraftsForCurrentModel({ immediate: false });
     scheduleRemoteDraftRefreshLoop();
-  }, COLLABORATION_REMOTE_DRAFT_REFRESH_INTERVAL_MS);
+  }, refreshInterval);
+}
+
+function handleCollaborationVisibilityChange() {
+  if (document.hidden) {
+    window.clearTimeout(remoteDraftRefreshTimer);
+    remoteDraftRefreshTimer = null;
+    return;
+  }
+  if (!COLLABORATION_ENABLED || !serverConnected || !getSelectedCollaborationModelName()) return;
+  void refreshRemoteDraftsForCurrentModel({ immediate: true });
+  scheduleRemoteDraftRefreshLoop();
 }
 
 function scheduleCollaborationPanelUpdate(options = {}) {
@@ -6971,6 +7086,9 @@ function installDebugHooks() {
       editMode,
       serverConnected,
       serverClientId: serverEvents?.clientId || null,
+      saved: Boolean(savedSnapshotKey && modelSnapshotKey() === savedSnapshotKey),
+      dirty: Boolean(savedSnapshotKey && modelSnapshotKey() !== savedSnapshotKey),
+      localDraftDirty,
       collaborationModelName: getSelectedCollaborationModelName(),
       collaborationStatus: getCollaborationStatusState(),
       canvasInteractionActive: isCanvasInteractionActive(),
@@ -7304,8 +7422,8 @@ async function refreshWorkspace(message, options = {}) {
   }
 }
 
-async function runAction(action) {
-  const functionName = action?.name || 'anonymousUiAction';
+async function runAction(action, label = '') {
+  const functionName = label || action?.debugName || action?.name || 'uiAction';
   return trackClientFunction(`dynamic.${functionName}`, async () => {
     try {
       await action();
@@ -7471,12 +7589,22 @@ async function handleDeleteSelected() {
   const link = selectedLinkId ? links().find(item => sameId(item.id, selectedLinkId)) : null;
   if (link) {
     const label = link.rendering?.labelText || link.name || link.id;
-    await deleteLink(link.id, { context: ctx(), refresh: false });
+    await trackClientFunction('dynamic.deleteSelected.deleteLink', () => deleteLink(link.id, { context: ctx(), refresh: false }), {
+      linkId: link.id
+    });
     selectedLinkId = null;
     selectedLinkSourceId = null;
     selectedLinkTargetId = null;
-    const operationsTracked = recordLinkDraftDelete(link.id);
-    await refreshWorkspace(`Deleted link ${label}`, { refresh: true, operationTracked: operationsTracked });
+    const operationsTracked = await trackClientFunction('dynamic.deleteSelected.recordLinkDraftDelete', () => recordLinkDraftDelete(link.id), {
+      linkId: link.id
+    });
+    await trackClientFunction('dynamic.deleteSelected.refreshWorkspace', () => refreshWorkspace(`Deleted link ${label}`, {
+      refresh: true,
+      operationTracked: operationsTracked
+    }), {
+      targetType: 'link',
+      linkId: link.id
+    });
     return;
   }
 
@@ -7491,9 +7619,22 @@ async function handleDeleteSelected() {
   const deletedIds = new Set([String(selected.id), ...getDescendantIds(selected.id)]);
 
   if (selected.type === 'hyperclass') {
-    await deleteHyperclass(selected.id, { context: ctx(), refresh: false, cascade: true });
+    await trackClientFunction('dynamic.deleteSelected.deleteHyperclass', () => deleteHyperclass(selected.id, {
+      context: ctx(),
+      refresh: false,
+      cascade: true
+    }), {
+      classId: selected.id,
+      deletedCount: deletedIds.size
+    });
   } else {
-    await deleteClass(selected.id, { context: ctx(), refresh: false });
+    await trackClientFunction('dynamic.deleteSelected.deleteClass', () => deleteClass(selected.id, {
+      context: ctx(),
+      refresh: false
+    }), {
+      classId: selected.id,
+      deletedCount: deletedIds.size
+    });
   }
 
   selectedElementId = null;
@@ -7507,13 +7648,24 @@ async function handleDeleteSelected() {
     invalidateLocalDraftOperations('delete_created_class_dependency');
     operationsTracked = false;
   } else {
-    deletedIds.forEach(id => {
-      operationsTracked = recordClassDraftDelete(id) && operationsTracked;
+    operationsTracked = await trackClientFunction('dynamic.deleteSelected.recordClassDraftDeletes', () => {
+      let tracked = true;
+      deletedIds.forEach(id => {
+        tracked = recordClassDraftDelete(id) && tracked;
+      });
+      return tracked;
+    }, {
+      classId: selected.id,
+      deletedCount: deletedIds.size
     });
   }
-  await refreshWorkspace(`Deleted ${selected.name || selected.id}`, {
+  await trackClientFunction('dynamic.deleteSelected.refreshWorkspace', () => refreshWorkspace(`Deleted ${selected.name || selected.id}`, {
     refresh: true,
     operationTracked: operationsTracked
+  }), {
+    targetType: selected.type === 'hyperclass' ? 'hyperclass' : 'class',
+    classId: selected.id,
+    deletedCount: deletedIds.size
   });
 }
 
@@ -8094,7 +8246,7 @@ function scheduleSelectedModelLoad(value = $('test-model-select')?.value || '') 
   scheduledModelLoadTimer = window.setTimeout(() => {
     scheduledModelLoadTimer = null;
     if (!isCurrentModelLoad(requestId, requestValue)) return;
-    runAction(() => handleLoadModel({ value: requestValue, requestId }));
+    runAction(() => handleLoadModel({ value: requestValue, requestId }), 'model.loadSelected');
   }, 0);
 }
 
@@ -8119,7 +8271,7 @@ function handleServerModelUpdated(event) {
   }
   window.clearTimeout(remoteRefreshTimer);
   const delay = isCanvasInteractionActive() ? COLLABORATION_CANVAS_INTERACTION_IDLE_MS : 200;
-  remoteRefreshTimer = window.setTimeout(() => runAction(() => refreshCurrentServerModelFromEvent(event)), delay);
+  remoteRefreshTimer = window.setTimeout(() => runAction(() => refreshCurrentServerModelFromEvent(event), 'model.refreshFromServerEvent'), delay);
 }
 
 async function refreshCurrentServerModelFromEvent(event) {
@@ -8208,40 +8360,50 @@ async function handleLoadModel(options = {}) {
   }
 
   const selectedLabel = select?.selectedOptions?.[0]?.textContent || value;
-  let loadedModel;
-  if (isServerModelValue(value)) {
-    const result = await loadServerModel(modelNameFromValue(value), { timeoutMs: 6000 });
-    if (!isCurrentModelLoad(requestId, value)) return;
-    if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
-    loadedModel = setData(result.data.model, { context: ctx(), refresh: true });
-  } else {
-    loadedModel = await loadAndRenderScene(value, ctx(), {
-      allowedBasePath: TEST_MODEL_ROOT,
-      defaultBasePath: TEST_MODEL_ROOT,
-      isCurrent: () => isCurrentModelLoad(requestId, value)
+  const loadedModel = await withCanvasLoadProgress(`Loading ${selectedLabel}`, async progress => {
+    let model;
+    progress.update(18, `Fetching ${selectedLabel}`);
+    if (isServerModelValue(value)) {
+      const result = await loadServerModel(modelNameFromValue(value), { timeoutMs: 6000 });
+      if (!isCurrentModelLoad(requestId, value)) return null;
+      if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
+      progress.update(48, `Rendering ${selectedLabel}`);
+      await yieldToBrowser({ timeoutMs: 16 });
+      model = setData(result.data.model, { context: ctx(), refresh: true });
+    } else {
+      model = await loadAndRenderScene(value, ctx(), {
+        allowedBasePath: TEST_MODEL_ROOT,
+        defaultBasePath: TEST_MODEL_ROOT,
+        isCurrent: () => isCurrentModelLoad(requestId, value)
+      });
+      if (!model || !isCurrentModelLoad(requestId, value)) return null;
+    }
+    progress.update(72, `Preparing ${selectedLabel}`);
+    const preserveLayout = Boolean(model?.metadata?.preserveLayout || model?.hypergraph?.metadata?.preserveLayout);
+    const hasSavedFit = hasFitMetadata(model);
+    const optimize = !preserveLayout && !hasSavedFit && shouldOptimizeAfterCrud();
+    selectedElementId = null;
+    selectedParentHyperclassId = null;
+    selectedAttributeOwnerId = null;
+    selectedAttributeKey = null;
+    selectedLinkSourceId = null;
+    selectedLinkTargetId = null;
+    selectedLinkId = null;
+    linkPickActive = false;
+    syncCountersFromData();
+    collaborationBaseModel = cloneValue(model || getData());
+    await refreshWorkspace(`Loaded ${selectedLabel}${isServerModelValue(value) ? ' from server' : ''}`, {
+      refresh: false,
+      optimize,
+      fit: optimize || !hasSavedFit,
+      publishDraft: false
     });
-    if (!loadedModel || !isCurrentModelLoad(requestId, value)) return;
-  }
-  const preserveLayout = Boolean(loadedModel?.metadata?.preserveLayout || loadedModel?.hypergraph?.metadata?.preserveLayout);
-  const hasSavedFit = hasFitMetadata(loadedModel);
-  const optimize = !preserveLayout && !hasSavedFit && shouldOptimizeAfterCrud();
-  selectedElementId = null;
-  selectedParentHyperclassId = null;
-  selectedAttributeOwnerId = null;
-  selectedAttributeKey = null;
-  selectedLinkSourceId = null;
-  selectedLinkTargetId = null;
-  selectedLinkId = null;
-  linkPickActive = false;
-  syncCountersFromData();
-  collaborationBaseModel = cloneValue(loadedModel || getData());
-  await refreshWorkspace(`Loaded ${selectedLabel}${isServerModelValue(value) ? ' from server' : ''}`, {
-    refresh: false,
-    optimize,
-    fit: optimize || !hasSavedFit,
-    publishDraft: false
+    progress.update(94, `Finishing ${selectedLabel}`);
+    return model;
+  }, {
+    showAfterMs: isLargeModelValue(value) ? CANVAS_LOAD_PROGRESS_LARGE_SHOW_AFTER_MS : CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS
   });
-  if (!isCurrentModelLoad(requestId, value)) return;
+  if (!loadedModel || !isCurrentModelLoad(requestId, value)) return;
   localDraftDirty = false;
   markSavedState();
   runBackgroundTask('Collaboration model refresh', async () => {
@@ -8518,7 +8680,7 @@ function handleDiagramObjectClick(object, event = null) {
     selectedLinkTargetId = clicked.id;
     selectedElementId = clicked.id;
     updateInterface({ json: false });
-    runAction(handleAddLink);
+    runAction(handleAddLink, 'link.finishCreate');
     return;
   }
 
@@ -8736,43 +8898,44 @@ function bindUi() {
   bindCollaborationControls();
   ensureDebugControls();
   installDebugUserActionTracking();
+  document.addEventListener('visibilitychange', handleCollaborationVisibilityChange);
   restoreModelTreeState();
   $('model-tree-toggle')?.addEventListener('click', () => {
     setModelTreeCollapsed(!document.body.classList.contains('model-tree-collapsed'));
   });
   $('model-tree-search-input')?.addEventListener('input', renderModelTree);
   $('model-tree-list')?.addEventListener('click', handleModelTreeClick);
-  $('add-class-button').addEventListener('click', () => runAction(handleAddClass));
-  $('add-hyperclass-button').addEventListener('click', () => runAction(handleAddHyperclass));
-  $('add-attribute-button').addEventListener('click', () => runAction(handleAddAttribute));
+  $('add-class-button').addEventListener('click', () => runAction(handleAddClass, 'class.add'));
+  $('add-hyperclass-button').addEventListener('click', () => runAction(handleAddHyperclass, 'hyperclass.add'));
+  $('add-attribute-button').addEventListener('click', () => runAction(handleAddAttribute, 'attribute.add'));
   $('add-link-button').addEventListener('click', startLinkCreation);
-  $('delete-selected-button').addEventListener('click', () => runAction(handleDeleteSelected));
-  $('delete-attribute-button')?.addEventListener('click', () => runAction(handleDeleteAttribute));
-  $('duplicate-node-button')?.addEventListener('click', () => runAction(handleDuplicateSelectedNodes));
+  $('delete-selected-button').addEventListener('click', () => runAction(handleDeleteSelected, 'selection.delete'));
+  $('delete-attribute-button')?.addEventListener('click', () => runAction(handleDeleteAttribute, 'attribute.delete'));
+  $('duplicate-node-button')?.addEventListener('click', () => runAction(handleDuplicateSelectedNodes, 'selection.duplicate'));
   $('copy-node-button')?.addEventListener('click', handleCopySelectedNodes);
-  $('paste-node-button')?.addEventListener('click', () => runAction(handlePasteCopiedNodes));
+  $('paste-node-button')?.addEventListener('click', () => runAction(handlePasteCopiedNodes, 'selection.paste'));
   $('export-subgraph-button')?.addEventListener('click', handleExportSelectedSubgraph);
-  $('bulk-add-attributes-button')?.addEventListener('click', () => runAction(handleBulkAddAttributes));
-  $('attribute-move-up-button')?.addEventListener('click', () => runAction(() => handleMoveSelectedAttribute(-1)));
-  $('attribute-move-down-button')?.addEventListener('click', () => runAction(() => handleMoveSelectedAttribute(1)));
-  $('swap-link-endpoints-button')?.addEventListener('click', () => runAction(handleSwapSelectedLinkEndpoints));
-  $('link-route-preset-select')?.addEventListener('change', () => runAction(handleLinkRoutePresetChange));
-  $('optimize-layout-button').addEventListener('click', () => runAction(handleOptimizeLayout));
+  $('bulk-add-attributes-button')?.addEventListener('click', () => runAction(handleBulkAddAttributes, 'attributes.bulkAdd'));
+  $('attribute-move-up-button')?.addEventListener('click', () => runAction(() => handleMoveSelectedAttribute(-1), 'attribute.moveUp'));
+  $('attribute-move-down-button')?.addEventListener('click', () => runAction(() => handleMoveSelectedAttribute(1), 'attribute.moveDown'));
+  $('swap-link-endpoints-button')?.addEventListener('click', () => runAction(handleSwapSelectedLinkEndpoints, 'link.swapEndpoints'));
+  $('link-route-preset-select')?.addEventListener('change', () => runAction(handleLinkRoutePresetChange, 'link.routePreset'));
+  $('optimize-layout-button').addEventListener('click', () => runAction(handleOptimizeLayout, 'layout.optimize'));
   $('fit-model-button').addEventListener('click', handleFitModel);
-  $('save-model-button').addEventListener('click', () => runAction(handleSaveModel));
+  $('save-model-button').addEventListener('click', () => runAction(handleSaveModel, 'model.save'));
   $('export-json-button').addEventListener('click', handleExportJson);
-  $('export-png-button')?.addEventListener('click', () => runAction(handleExportPng));
-  $('export-svg-button')?.addEventListener('click', () => runAction(handleExportSvg));
-  $('export-vector-svg-button')?.addEventListener('click', () => runAction(handleExportVectorSvg));
-  $('copy-share-link-button')?.addEventListener('click', () => runAction(handleCopyShareLink));
-  $('share-native-button')?.addEventListener('click', () => runAction(handleNativeShare));
+  $('export-png-button')?.addEventListener('click', () => runAction(handleExportPng, 'export.png'));
+  $('export-svg-button')?.addEventListener('click', () => runAction(handleExportSvg, 'export.svg'));
+  $('export-vector-svg-button')?.addEventListener('click', () => runAction(handleExportVectorSvg, 'export.vectorSvg'));
+  $('copy-share-link-button')?.addEventListener('click', () => runAction(handleCopyShareLink, 'share.copyLink'));
+  $('share-native-button')?.addEventListener('click', () => runAction(handleNativeShare, 'share.native'));
   $('share-email-button')?.addEventListener('click', () => openExternalShare('email'));
   $('share-linkedin-button')?.addEventListener('click', () => openExternalShare('linkedin'));
   $('share-facebook-button')?.addEventListener('click', () => openExternalShare('facebook'));
   $('share-x-button')?.addEventListener('click', () => openExternalShare('x'));
-  $('apply-json-button').addEventListener('click', () => runAction(handleApplyJson));
-  $('reset-model-button').addEventListener('click', () => runAction(handleResetModel));
-  $('run-scenario-suite-button')?.addEventListener('click', () => runAction(runScenarioSuite));
+  $('apply-json-button').addEventListener('click', () => runAction(handleApplyJson, 'json.apply'));
+  $('reset-model-button').addEventListener('click', () => runAction(handleResetModel, 'model.reset'));
+  $('run-scenario-suite-button')?.addEventListener('click', () => runAction(runScenarioSuite, 'scenarioSuite.run'));
   $('cancel-link-button').addEventListener('click', cancelLinkCreation);
   $('command-palette-input')?.addEventListener('input', () => {
     commandPaletteActiveIndex = 0;
@@ -8788,18 +8951,18 @@ function bindUi() {
   });
   document.addEventListener('keydown', handleCommandPaletteKeydown);
   ['selected-color-input', 'selected-border-color-input', 'selected-opacity-input', 'selected-corner-radius-input', 'selected-text-color-input']
-    .forEach(id => $(id)?.addEventListener('input', () => runAction(handleSelectedRenderingChange)));
-  $('selected-name-input')?.addEventListener('change', () => runAction(handleSelectedNameChange));
+    .forEach(id => $(id)?.addEventListener('input', () => runAction(handleSelectedRenderingChange, 'selection.renderingChange')));
+  $('selected-name-input')?.addEventListener('change', () => runAction(handleSelectedNameChange, 'selection.nameChange'));
   $('selected-name-input')?.addEventListener('keydown', event => {
     if (event.key === 'Enter') {
       event.preventDefault();
       event.target.blur();
     }
   });
-  $('selected-attribute-name-input')?.addEventListener('change', () => runAction(handleSelectedAttributeRename));
-  $('selected-link-name-input')?.addEventListener('change', () => runAction(handleSelectedLinkUpdate));
-  $('selected-link-color-input')?.addEventListener('input', () => runAction(handleSelectedLinkUpdate));
-  $('selected-link-width-input')?.addEventListener('input', () => runAction(handleSelectedLinkUpdate));
+  $('selected-attribute-name-input')?.addEventListener('change', () => runAction(handleSelectedAttributeRename, 'attribute.rename'));
+  $('selected-link-name-input')?.addEventListener('change', () => runAction(handleSelectedLinkUpdate, 'link.nameUpdate'));
+  $('selected-link-color-input')?.addEventListener('input', () => runAction(handleSelectedLinkUpdate, 'link.colorUpdate'));
+  $('selected-link-width-input')?.addEventListener('input', () => runAction(handleSelectedLinkUpdate, 'link.widthUpdate'));
   $('property-panel')?.addEventListener('pointerdown', event => {
     const input = event.target.closest?.('[data-property-path]');
     if (input) beginLivePropertyEdit(input);
@@ -8809,19 +8972,19 @@ function bindUi() {
     if (input) beginLivePropertyEdit(input);
   });
   $('property-panel')?.addEventListener('click', event => {
-    runAction(() => handlePropertyPanelAction(event));
+    runAction(() => handlePropertyPanelAction(event), 'propertyPanel.action');
   });
   $('property-panel')?.addEventListener('input', event => {
-    if (event.target?.dataset?.live === 'true') runAction(() => handlePropertyPanelChange(event, { history: false }));
+    if (event.target?.dataset?.live === 'true') runAction(() => handlePropertyPanelChange(event, { history: false }), 'propertyPanel.liveInput');
   });
   $('property-panel')?.addEventListener('change', event => {
     if (event.target?.dataset?.live === 'true') {
       runAction(async () => {
         await handlePropertyPanelChange(event, { history: false });
         commitLivePropertyEdit();
-      });
+      }, 'propertyPanel.liveCommit');
     } else {
-      runAction(() => handlePropertyPanelChange(event));
+      runAction(() => handlePropertyPanelChange(event), 'propertyPanel.change');
     }
   });
   $('property-panel')?.addEventListener('keydown', event => {
@@ -8833,7 +8996,7 @@ function bindUi() {
   $('reset-scene-settings-button')?.addEventListener('click', handleResetSceneSettings);
   $('reset-model-font-settings-button')?.addEventListener('click', handleResetFontSettings);
   $('debug-mode-toggle')?.addEventListener('change', event => {
-    runAction(() => setDebugMode(event.target.checked));
+    runAction(() => setDebugMode(event.target.checked), 'debug.toggle');
   });
 
   [
@@ -8875,7 +9038,7 @@ function bindUi() {
   });
 
   ['selected-element-select', 'parent-hyperclass-select', 'selected-attribute-select', 'selected-link-select'].forEach(id => {
-    $(id)?.addEventListener('change', event => runAction(() => handleSelectChange(id, event.target.value)));
+    $(id)?.addEventListener('change', event => runAction(() => handleSelectChange(id, event.target.value), `selection.change.${id}`));
   });
 }
 

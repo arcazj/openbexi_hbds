@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Lab</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=collab-responsive-20260526a">
+  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=debug-20260530d">
   <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -14,6 +14,12 @@
     <div id="canvas-collaboration-status" class="canvas-collaboration-status" role="status" aria-live="polite" hidden>
       <span class="canvas-collaboration-status-spinner" aria-hidden="true"></span>
       <span data-collaboration-status-text>Syncing with server...</span>
+    </div>
+    <div id="canvas-load-progress" class="canvas-load-progress" role="status" aria-live="polite" hidden>
+      <span class="canvas-load-progress-label" data-load-progress-text>Loading model...</span>
+      <span class="canvas-load-progress-track" aria-hidden="true">
+        <span class="canvas-load-progress-bar" data-load-progress-bar></span>
+      </span>
     </div>
   </main>
 
@@ -253,6 +259,6 @@
     </div>
   </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=debug-20260530c"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=debug-20260530d"></script>
 </body>
 </html>

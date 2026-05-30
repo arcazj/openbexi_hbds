@@ -9,6 +9,12 @@
 <body>
 <div id="container">
     <div id="canvas-model-title" aria-live="polite"></div>
+    <div id="canvas-load-progress" class="canvas-load-progress" role="status" aria-live="polite" hidden>
+        <span class="canvas-load-progress-label" data-load-progress-text>Loading model...</span>
+        <span class="canvas-load-progress-track" aria-hidden="true">
+            <span class="canvas-load-progress-bar" data-load-progress-bar></span>
+        </span>
+    </div>
 </div>
 <div id="model-overview">
     <canvas id="model-overview-canvas"></canvas>
@@ -46,7 +52,7 @@
     import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=font-zoom-20260523a';
     import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=font-zoom-20260523a';
     import { setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings } from './js/hbds_model.js?v=material-surface-20260525a';
-    import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260530a';
+    import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260530b';
 
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {
         document.body.classList.add('embedded-shell-menu');
@@ -78,14 +84,29 @@
     let collaborationWarningVisible = false;
     const DEBUG_UI_NAME = 'models-ui';
     const DEBUG_STORAGE_KEY = `hbds.debug.enabled.${DEBUG_UI_NAME}`;
+    const CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS = 700;
+    const CANVAS_LOAD_PROGRESS_LARGE_SHOW_AFTER_MS = 120;
+    const LARGE_MODEL_NAME_PATTERN = /satellite_world_complete_structure\.json$/i;
     let debugModeEnabled = readStoredDebugMode();
+    let canvasLoadProgressTimer = null;
+    let canvasLoadProgressInterval = null;
+    let canvasLoadProgressToken = 0;
 
     function readStoredDebugMode() {
+        if (urlRequestsDebugMode()) return true;
         try {
             return window.localStorage?.getItem(DEBUG_STORAGE_KEY) === '1';
         } catch {
             return false;
         }
+    }
+
+    function urlRequestsDebugMode() {
+        const params = new URLSearchParams(window.location.search);
+        return ['debug', 'debugMode', 'debugLogging'].some(name => {
+            const value = params.get(name);
+            return value === '1' || String(value || '').toLowerCase() === 'true';
+        });
     }
 
     function storeDebugMode(enabled) {
@@ -239,6 +260,94 @@
         return Boolean(fit && (fit.distance > 0 || fit.fitHeightDistance > 0 || fit.fitWidthDistance > 0));
     }
 
+    function startCanvasLoadProgress(message = 'Loading model...', options = {}) {
+        const token = ++canvasLoadProgressToken;
+        window.clearTimeout(canvasLoadProgressTimer);
+        window.clearInterval(canvasLoadProgressInterval);
+        canvasLoadProgressTimer = null;
+        canvasLoadProgressInterval = null;
+        const showAfterMs = Number.isFinite(Number(options.showAfterMs))
+            ? Number(options.showAfterMs)
+            : CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS;
+        const progress = {
+            value: 8,
+            message,
+            visible: false
+        };
+        const show = () => {
+            if (token !== canvasLoadProgressToken) return;
+            progress.visible = true;
+            updateCanvasLoadProgress(token, progress.value, progress.message);
+            canvasLoadProgressInterval = window.setInterval(() => {
+                if (token !== canvasLoadProgressToken) return;
+                progress.value = Math.min(88, progress.value + Math.max(1.5, (90 - progress.value) * 0.08));
+                updateCanvasLoadProgress(token, progress.value, progress.message);
+            }, 420);
+        };
+        if (showAfterMs <= 0) show();
+        else canvasLoadProgressTimer = window.setTimeout(show, showAfterMs);
+        return {
+            update(value, nextMessage = progress.message) {
+                progress.value = Math.max(progress.value, Math.min(96, Number(value) || progress.value));
+                progress.message = nextMessage || progress.message;
+                if (progress.visible) updateCanvasLoadProgress(token, progress.value, progress.message);
+            },
+            finish() {
+                finishCanvasLoadProgress(token, progress.visible);
+            }
+        };
+    }
+
+    function updateCanvasLoadProgress(token, value, message) {
+        if (token !== canvasLoadProgressToken) return;
+        const element = document.getElementById('canvas-load-progress');
+        if (!element) return;
+        const label = element.querySelector('[data-load-progress-text]');
+        const bar = element.querySelector('[data-load-progress-bar]');
+        if (label) label.textContent = message || 'Loading model...';
+        if (bar) bar.style.width = `${Math.max(8, Math.min(100, value))}%`;
+        element.hidden = false;
+    }
+
+    function finishCanvasLoadProgress(token, wasVisible) {
+        if (token !== canvasLoadProgressToken) return;
+        window.clearTimeout(canvasLoadProgressTimer);
+        window.clearInterval(canvasLoadProgressInterval);
+        canvasLoadProgressTimer = null;
+        canvasLoadProgressInterval = null;
+        const element = document.getElementById('canvas-load-progress');
+        const bar = element?.querySelector('[data-load-progress-bar]');
+        if (!element) return;
+        if (wasVisible && bar) {
+            bar.style.width = '100%';
+            window.setTimeout(() => {
+                if (token === canvasLoadProgressToken) element.hidden = true;
+            }, 160);
+            return;
+        }
+        element.hidden = true;
+    }
+
+    async function withCanvasLoadProgress(message, action, options = {}) {
+        const progress = startCanvasLoadProgress(message, options);
+        if ((options.showAfterMs ?? CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS) <= 0) {
+            await yieldToBrowser();
+        }
+        try {
+            return await action(progress);
+        } finally {
+            progress.finish();
+        }
+    }
+
+    function yieldToBrowser() {
+        return new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+    }
+
+    function isLargeModelValue(value) {
+        return LARGE_MODEL_NAME_PATTERN.test(modelFileNameFromValue(value, String(value || '')));
+    }
+
     async function handleLayoutAlgorithmChange() {
         const algorithm = document.getElementById('layout-algorithm-select').value;
         setLayoutSettings({ ...getLayoutSettings(), algorithm }, { applyContext: false });
@@ -321,25 +430,32 @@
             const label = document.getElementById('model-select')?.selectedOptions?.[0]?.textContent?.trim() || modelPath;
             setLoadStatus(`Load status: loading ${label}`, 'warn');
             try {
-                if (isServerModelValue(modelPath)) {
-                    const result = await loadServerModel(modelNameFromValue(modelPath), { timeoutMs: 6000 });
-                    if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
-                    const loadedModel = setData(result.data.model, { context: getModelContext(), refresh: true });
-                    updateCanvasModelTitle(result.data.metadata?.label || label);
-                    if (!hasFitMetadata(loadedModel)) {
+                const loadedFromServer = isServerModelValue(modelPath);
+                const loadedModel = await withCanvasLoadProgress(`Loading ${label}`, async progress => {
+                    let model;
+                    progress.update(18, `Fetching ${label}`);
+                    if (loadedFromServer) {
+                        const result = await loadServerModel(modelNameFromValue(modelPath), { timeoutMs: 6000 });
+                        if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
+                        progress.update(48, `Rendering ${label}`);
+                        await yieldToBrowser();
+                        model = setData(result.data.model, { context: getModelContext(), refresh: true });
+                        updateCanvasModelTitle(result.data.metadata?.label || label);
+                    } else {
+                        model = await loadAndRenderScene(modelPath, getModelContext(), { allowedBasePath: 'models/' });
+                        updateCanvasModelTitle();
+                    }
+                    progress.update(78, `Fitting ${label}`);
+                    if (!hasFitMetadata(model)) {
                         fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
                     }
-                    localDraftDirty = false;
-                    setLoadStatus(`Load status: loaded ${label} from server`, 'ok');
-                    return;
-                }
-                const loadedModel = await loadAndRenderScene(modelPath, getModelContext(), { allowedBasePath: 'models/' });
-                updateCanvasModelTitle();
-                if (!hasFitMetadata(loadedModel)) {
-                    fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
-                }
+                    progress.update(94, `Finishing ${label}`);
+                    return model;
+                }, {
+                    showAfterMs: isLargeModelValue(modelPath) ? CANVAS_LOAD_PROGRESS_LARGE_SHOW_AFTER_MS : CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS
+                });
                 localDraftDirty = false;
-                setLoadStatus(`Load status: loaded ${modelPath}`, 'ok');
+                setLoadStatus(`Load status: loaded ${loadedFromServer ? `${label} from server` : modelPath}`, 'ok');
             } catch (error) {
                 setLoadStatus(`Load status: failed ${label}`, 'error');
                 updateCanvasModelTitle('');

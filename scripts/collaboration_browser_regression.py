@@ -598,7 +598,7 @@ return Boolean(
   document.querySelector('#test-model-select')?.value?.includes({json.dumps(model_name)}) &&
   window.__hbdsDynamicTest.getState().serverConnected === true &&
   window.__hbdsDynamicTest.getState().counts.nodes > 0 &&
-  document.querySelector('#save-status')?.textContent?.includes('Saved')
+  window.__hbdsDynamicTest.getState().saved === true
 );
 """,
             f"page {index} to load temporary server model",
@@ -607,7 +607,7 @@ return Boolean(
 
 
 def dynamic_layout_url(base_url: str, shared_model: str | None = None) -> str:
-    params = {"modelsPath": "models/"}
+    params = {"modelsPath": "models/", "debug": "1"}
     if shared_model:
         params["sharedModel"] = shared_model
     return f"{base_url}/test_dynamic_hbds_layout.html?{urllib.parse.urlencode(params)}"
@@ -660,7 +660,7 @@ const state = window.__hbdsDynamicTest?.getState?.();
 return Boolean(
   select?.value?.includes({json.dumps(model_name)}) &&
   state?.counts?.nodes > 0 &&
-  document.querySelector('#save-status')?.textContent?.includes('Saved')
+  state?.saved === true
 );
 """,
         label,
@@ -983,7 +983,7 @@ def assert_model_selection_controls_responsive(page: BrowserPage, model_name: st
 return Boolean(
   document.querySelector('#test-model-select')?.value?.includes({json.dumps(model_name)}) &&
   window.__hbdsDynamicTest?.getState?.().counts.nodes > 0 &&
-  document.querySelector('#save-status')?.textContent?.includes('Saved')
+  window.__hbdsDynamicTest?.getState?.().saved === true
 );
 """,
         "model selection to restore without stale load",

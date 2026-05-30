@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import copy
 import datetime as _dt
+import errno
 import hashlib
 import html
 import json
@@ -23,6 +24,13 @@ from typing import TextIO
 from urllib.parse import parse_qs, unquote, urlparse
 
 
+def env_int(name: str, default: int) -> int:
+    try:
+        return int(os.environ.get(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
 ROOT_DIR = Path(__file__).resolve().parent
 MODELS_DIR = (ROOT_DIR / "models").resolve()
 TEST_MODELS_DIR = (ROOT_DIR / "test_models").resolve()
@@ -32,11 +40,21 @@ BACKUP_DIR = MODELS_DIR / ".backups"
 DEBUG_LOG_DIR = ROOT_DIR / "debug_logs"
 SERVER_STDOUT_LOG_PATH = ROOT_DIR / ".codex_server_out.log"
 SERVER_STDERR_LOG_PATH = ROOT_DIR / ".codex_server_err.log"
+SERVER_ACCESS_LOG_PATH = ROOT_DIR / ".codex_server_access.log"
 MAX_JSON_BYTES = 5 * 1024 * 1024
+MAX_DEBUG_BATCH_EVENTS = 100
+SERVER_LOG_ROTATION_BYTES = env_int("HBDS_SERVER_LOG_MAX_BYTES", 1024 * 1024)
+SERVER_LOG_ROTATION_BACKUPS = env_int("HBDS_SERVER_LOG_BACKUPS", 3)
 EVENT_HEARTBEAT_SECONDS = 15
 MAX_REVISION_SNAPSHOTS_PER_MODEL = 20
 MAX_CLIENT_ID_LENGTH = 120
 MAX_CLIENT_NAME_LENGTH = 160
+CLIENT_DISCONNECT_ERRNOS = {
+    errno.EPIPE,
+    errno.ECONNRESET,
+    getattr(errno, "ECONNABORTED", 103),
+}
+CLIENT_DISCONNECT_WINERRORS = {10053, 10054, 10058}
 LOCAL_ORIGINS = {
     "http://127.0.0.1",
     "http://127.0.0.1:8010",
@@ -57,6 +75,8 @@ def reset_startup_logs() -> TextIO | None:
     visible_stdout = sys.stdout
     if os.environ.get("HBDS_KEEP_SERVER_LOGS") == "1":
         return visible_stdout
+    for log_path in (SERVER_STDOUT_LOG_PATH, SERVER_STDERR_LOG_PATH, SERVER_ACCESS_LOG_PATH):
+        rotate_log_file(log_path)
     if sys.stdout and not sys.stdout.isatty():
         sys.stdout = SERVER_STDOUT_LOG_PATH.open("w", encoding="utf-8", buffering=1)
     else:
@@ -65,6 +85,7 @@ def reset_startup_logs() -> TextIO | None:
         sys.stderr = SERVER_STDERR_LOG_PATH.open("w", encoding="utf-8", buffering=1)
     else:
         SERVER_STDERR_LOG_PATH.write_text("", encoding="utf-8")
+    SERVER_ACCESS_LOG_PATH.write_text("", encoding="utf-8")
     DEBUG_LOG_DIR.mkdir(parents=True, exist_ok=True)
     for log_path in DEBUG_LOG_DIR.glob("*.jsonl"):
         try:
@@ -81,6 +102,47 @@ def print_startup_message(message: str, visible_stdout: TextIO | None) -> None:
             print(message, file=visible_stdout, flush=True)
         except (OSError, ValueError):
             pass
+
+
+ACCESS_LOG_LOCK = threading.Lock()
+
+
+def rotated_log_path(path: Path, index: int) -> Path:
+    return path.with_name(f"{path.name}.{index}")
+
+
+def rotate_log_file(path: Path) -> None:
+    if SERVER_LOG_ROTATION_BYTES <= 0 or SERVER_LOG_ROTATION_BACKUPS <= 0:
+        return
+    try:
+        if not path.exists() or path.stat().st_size < SERVER_LOG_ROTATION_BYTES:
+            return
+        oldest = rotated_log_path(path, SERVER_LOG_ROTATION_BACKUPS)
+        if oldest.exists():
+            oldest.unlink()
+        for index in range(SERVER_LOG_ROTATION_BACKUPS - 1, 0, -1):
+            source = rotated_log_path(path, index)
+            if source.exists():
+                os.replace(source, rotated_log_path(path, index + 1))
+        os.replace(path, rotated_log_path(path, 1))
+    except OSError:
+        pass
+
+
+def is_client_disconnect(error: BaseException) -> bool:
+    if isinstance(error, (BrokenPipeError, ConnectionResetError, ConnectionAbortedError)):
+        return True
+    if not isinstance(error, OSError):
+        return False
+    return (
+        getattr(error, "errno", None) in CLIENT_DISCONNECT_ERRNOS
+        or getattr(error, "winerror", None) in CLIENT_DISCONNECT_WINERRORS
+    )
+
+
+class ClientDisconnected(ConnectionError):
+    """Raised internally when a browser closes the connection mid-response."""
+
 
 
 def label_from_model_name(name: str) -> str:
@@ -916,11 +978,16 @@ def openapi_spec(host: str) -> dict:
             "/api/debug/logs": {
                 "post": {
                     "tags": ["Debug"],
-                    "summary": "Record one client-side debug event",
-                    "description": "Writes a JSONL entry when debug is enabled for the supplied client id.",
+                    "summary": "Record one or more client-side debug events",
+                    "description": "Writes JSONL entries when debug is enabled for the supplied client id.",
                     "requestBody": {
                         "required": True,
-                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DebugLogEntry"}}},
+                        "content": {"application/json": {"schema": {
+                            "oneOf": [
+                                {"$ref": "#/components/schemas/DebugLogEntry"},
+                                {"type": "array", "items": {"$ref": "#/components/schemas/DebugLogEntry"}},
+                            ]
+                        }}},
                     },
                     "responses": {
                         "200": {
@@ -1620,6 +1687,7 @@ class HBDSLocalServer(ThreadingHTTPServer):
         DEBUG_LOG_DIR.mkdir(parents=True, exist_ok=True)
         log_path = DEBUG_LOG_DIR / f"{clean_debug_log_token(client_id)}.jsonl"
         with self._debug_lock:
+            rotate_log_file(log_path)
             with log_path.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(entry, ensure_ascii=False, sort_keys=True))
                 handle.write("\n")
@@ -1630,6 +1698,17 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT_DIR), **kwargs)
+
+    def handle(self) -> None:
+        try:
+            super().handle()
+        except ClientDisconnected:
+            self.close_connection = True
+        except OSError as error:
+            if is_client_disconnect(error):
+                self.close_connection = True
+                return
+            raise
 
     def end_headers(self) -> None:
         origin = self.headers.get("Origin", "")
@@ -1649,15 +1728,36 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         self.send_response(HTTPStatus.NO_CONTENT)
         self.end_headers()
 
+    def serve_favicon(self, path: str) -> bool:
+        if path != "/favicon.ico":
+            return False
+        try:
+            self.send_response(HTTPStatus.NO_CONTENT)
+            self.send_header("Cache-Control", "public, max-age=86400")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+        except OSError as error:
+            if is_client_disconnect(error):
+                self.close_connection = True
+                return True
+            raise
+        return True
+
     def serve_missing_icon(self, path: str) -> bool:
         if not is_missing_svg_icon_request(path):
             return False
         body = missing_icon_svg(path)
-        self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", "image/svg+xml; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "image/svg+xml; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        except OSError as error:
+            if is_client_disconnect(error):
+                self.close_connection = True
+                return True
+            raise
         return True
 
     def do_GET(self) -> None:
@@ -1667,6 +1767,8 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             return
         if path == "/":
             self.path = "/index.html"
+        if self.serve_favicon(path):
+            return
         if self.serve_missing_icon(path):
             return
         super().do_GET()
@@ -1720,6 +1822,7 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         start_perf = time.perf_counter()
         start_iso = debug_now_iso()
         status = "ok"
+        is_stream = details.get("stream") is True
         try:
             return callback()
         except Exception as error:
@@ -1729,7 +1832,7 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         finally:
             if client_id and hasattr(self.server, "write_debug_log"):
                 self.server.write_debug_log(debug_event_payload(
-                    "server.function-timing",
+                    "server.stream-timing" if is_stream else "server.function-timing",
                     client_id,
                     ui_name,
                     functionName=function_name,
@@ -1743,14 +1846,16 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
                 ))
 
     def debug_request_timing(self, method: str, path: str, start_iso: str, start_perf: float, status: str) -> None:
+        is_stream = path == "/api/events"
         self.debug_log(
-            "server.request-timing",
+            "server.stream-timing" if is_stream else "server.request-timing",
             method=method,
             path=path,
             startTime=start_iso,
             endTime=debug_now_iso(),
             durationMs=round((time.perf_counter() - start_perf) * 1000, 3),
             status=status,
+            stream=is_stream,
         )
 
     def handle_api_get(self, path: str) -> None:
@@ -1765,7 +1870,7 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             elif path == "/api/models":
                 self.debug_timed_call("list_models", lambda: self.json_response({"ok": True, "models": list_models()}))
             elif path == "/api/events":
-                self.debug_timed_call("event_stream", self.event_stream)
+                self.debug_timed_call("event_stream", self.event_stream, stream=True)
             elif path == "/api/openapi.json":
                 self.debug_timed_call("openapi_spec", lambda: self.json_response(openapi_spec(self.headers.get("Host", ""))))
             elif path == "/api/docs":
@@ -1780,9 +1885,14 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
                 self.debug_timed_call("load_model", lambda: self.load_model(path.removeprefix("/api/models/")))
             else:
                 self.json_error(HTTPStatus.NOT_FOUND, "not_found", "API endpoint not found")
+        except ClientDisconnected:
+            request_status = "client_disconnected"
         except Exception:
             request_status = "error"
-            self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "server_error", "Server error")
+            try:
+                self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "server_error", "Server error")
+            except ClientDisconnected:
+                request_status = "client_disconnected"
         finally:
             self.debug_request_timing("GET", path, request_start_iso, request_start, request_status)
 
@@ -1807,9 +1917,14 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
                 self.debug_timed_call("save_model", lambda: self.save_model(path.removeprefix("/api/models/")))
             else:
                 self.json_error(HTTPStatus.NOT_FOUND, "not_found", "API endpoint not found")
+        except ClientDisconnected:
+            request_status = "client_disconnected"
         except Exception:
             request_status = "error"
-            self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "server_error", "Server error")
+            try:
+                self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "server_error", "Server error")
+            except ClientDisconnected:
+                request_status = "client_disconnected"
         finally:
             self.debug_request_timing("POST", path, request_start_iso, request_start, request_status)
 
@@ -1824,9 +1939,14 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
                 self.debug_timed_call("delete_model_draft", lambda: self.delete_model_draft(path.removeprefix("/api/models/")))
             else:
                 self.json_error(HTTPStatus.NOT_FOUND, "not_found", "API endpoint not found")
+        except ClientDisconnected:
+            request_status = "client_disconnected"
         except Exception:
             request_status = "error"
-            self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "server_error", "Server error")
+            try:
+                self.json_error(HTTPStatus.INTERNAL_SERVER_ERROR, "server_error", "Server error")
+            except ClientDisconnected:
+                request_status = "client_disconnected"
         finally:
             self.debug_request_timing("DELETE", path, request_start_iso, request_start, request_status)
 
@@ -1858,24 +1978,34 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         self.json_response({"ok": True, "debug": enabled, "session": session})
 
     def record_client_debug_log(self) -> None:
-        payload = self.read_json_request_payload()
+        payload = self.read_json_request_payload(allow_array=True)
         if payload is None:
             return
-        client_id = self.debug_client_id(payload)
-        if not client_id:
-            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_client_id", "Debug client id is required")
+        entries = payload if isinstance(payload, list) else [payload]
+        if len(entries) > MAX_DEBUG_BATCH_EVENTS:
+            self.json_error(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, "debug_batch_too_large", "Debug batch contains too many events")
             return
-        event = {
-            **payload,
-            "timestamp": payload.get("timestamp") or debug_now_iso(),
-            "clientId": client_id,
-            "uiName": self.debug_ui_name(payload),
-        }
+        if not all(isinstance(entry, dict) for entry in entries):
+            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_debug_event", "Debug log entries must be JSON objects")
+            return
+        recorded = 0
         if hasattr(self.server, "write_debug_log"):
-            self.server.write_debug_log(event)
-        self.json_response({"ok": True, "recorded": True})
+            for entry in entries:
+                client_id = self.debug_client_id(entry)
+                if not client_id:
+                    self.json_error(HTTPStatus.BAD_REQUEST, "invalid_client_id", "Debug client id is required")
+                    return
+                event = {
+                    **entry,
+                    "timestamp": entry.get("timestamp") or debug_now_iso(),
+                    "clientId": client_id,
+                    "uiName": self.debug_ui_name(entry),
+                }
+                self.server.write_debug_log(event)
+                recorded += 1
+        self.json_response({"ok": True, "recorded": recorded})
 
-    def read_json_request_payload(self) -> dict | None:
+    def read_json_request_payload(self, *, allow_array: bool = False) -> dict | list | None:
         length_header = self.headers.get("Content-Length")
         try:
             length = int(length_header or "0")
@@ -1893,8 +2023,9 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         except (UnicodeDecodeError, json.JSONDecodeError):
             self.json_error(HTTPStatus.BAD_REQUEST, "invalid_json", "Request body must be valid JSON")
             return None
-        if not isinstance(payload, dict):
-            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_json", "Request body must be a JSON object")
+        if not isinstance(payload, dict) and not (allow_array and isinstance(payload, list)):
+            expected = "a JSON object or array" if allow_array else "a JSON object"
+            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_json", f"Request body must be {expected}")
             return None
         return payload
 
@@ -2588,11 +2719,17 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
 
     def json_response(self, payload: dict, status: HTTPStatus = HTTPStatus.OK) -> None:
         body = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        except OSError as error:
+            if is_client_disconnect(error):
+                self.close_connection = True
+                raise ClientDisconnected() from error
+            raise
 
     def json_error(self, status: HTTPStatus, code: str, message: str, **details) -> None:
         self.json_response({"ok": False, "error": error_payload(code, message, **details)}, status)
@@ -2608,7 +2745,18 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
     def log_message(self, format: str, *args) -> None:
         if getattr(self.server, "quiet", False):
             return
-        super().log_message(format, *args)
+        try:
+            message = format % args
+        except (TypeError, ValueError):
+            message = format
+        line = f"{self.address_string()} - - [{self.log_date_time_string()}] {message}\n"
+        try:
+            with ACCESS_LOG_LOCK:
+                rotate_log_file(SERVER_ACCESS_LOG_PATH)
+                with SERVER_ACCESS_LOG_PATH.open("a", encoding="utf-8") as handle:
+                    handle.write(line)
+        except OSError:
+            pass
 
 
 def main() -> int:

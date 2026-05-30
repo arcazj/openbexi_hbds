@@ -367,7 +367,7 @@
     </header>
 
     <main class="frame-wrap">
-      <iframe id="view-frame" title="HBDS Models view" src="index_models.html?embeddedShell=1&appVersion=debug-20260530c"></iframe>
+      <iframe id="view-frame" title="HBDS Models view" src="index_models.html?embeddedShell=1&appVersion=debug-20260530d"></iframe>
     </main>
   </div>
 
@@ -431,15 +431,15 @@
     let serverConnectionPollTimer = null;
     const views = {
       models: {
-        src: 'index_models.html?embeddedShell=1&appVersion=debug-20260530c',
+        src: 'index_models.html?embeddedShell=1&appVersion=debug-20260530d',
         title: 'HBDS Models view'
       },
       edit: {
-        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=models/&manifestPath=models/models_manifest.json&appVersion=debug-20260530c',
+        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=models/&manifestPath=models/models_manifest.json&appVersion=debug-20260530d',
         title: 'HBDS Edit view'
       },
       tests: {
-        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=test_models/&manifestPath=test_models/test_models_manifest.json&appVersion=debug-20260530c',
+        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=test_models/&manifestPath=test_models/test_models_manifest.json&appVersion=debug-20260530d',
         title: 'HBDS Tests view'
       }
     };
@@ -472,7 +472,7 @@
     async function refreshServerConnectionState(options = {}) {
       if (options.showConnecting === true) setServerConnectionState('connecting');
       try {
-        const api = await import('./js/hbds_server_api.js?v=server-api-20260530a');
+        const api = await import('./js/hbds_server_api.js?v=server-api-20260530b');
         const result = await api.checkServerConnection({ timeoutMs: 1600 });
         setServerConnectionState(result.ok ? 'connected' : 'not_connected');
       } catch {

@@ -3,11 +3,15 @@ const DEFAULT_SERVER_PORT = '8010';
 const DEFAULT_TIMEOUT_MS = 3500;
 const SERVER_MODEL_PREFIX = 'server:';
 const CLIENT_ID_STORAGE_KEY = 'hbds.server.clientId';
+const DEBUG_LOG_BATCH_INTERVAL_MS = 500;
+const DEBUG_LOG_BATCH_MAX_EVENTS = 20;
 const PAGE_CLIENT_SUFFIX = createClientId('tab');
 let discoveredApiBase = null;
 let fallbackClientId = null;
 let clientDebugEnabled = false;
 let clientDebugUiName = '';
+let debugLogQueue = [];
+let debugLogFlushTimer = null;
 
 export function getOpenApiUrl(apiBase = DEFAULT_API_BASE) {
   return `${normalizeApiBase(apiBase)}/api/openapi.json`;
@@ -327,10 +331,38 @@ function draftEndpoint(modelName, options = {}, clientId = '') {
 }
 
 function postClientDebugEntry(entry) {
-  const body = JSON.stringify(entry);
+  debugLogQueue.push(entry);
+  if (debugLogQueue.length >= DEBUG_LOG_BATCH_MAX_EVENTS) {
+    flushClientDebugEntries();
+    return;
+  }
+  scheduleClientDebugFlush();
+}
+
+function scheduleClientDebugFlush() {
+  if (debugLogFlushTimer) return;
+  debugLogFlushTimer = setTimeout(() => {
+    debugLogFlushTimer = null;
+    flushClientDebugEntries();
+  }, DEBUG_LOG_BATCH_INTERVAL_MS);
+}
+
+function flushClientDebugEntries(options = {}) {
+  if (!debugLogQueue.length) return;
+  const entries = debugLogQueue;
+  debugLogQueue = [];
+  if (debugLogFlushTimer) {
+    clearTimeout(debugLogFlushTimer);
+    debugLogFlushTimer = null;
+  }
+  sendClientDebugPayload(entries.length === 1 ? entries[0] : entries, options);
+}
+
+function sendClientDebugPayload(payload, options = {}) {
+  const body = JSON.stringify(payload);
   try {
     const endpoint = `${getApiBaseCandidates(DEFAULT_API_BASE)[0] || ''}/api/debug/logs`;
-    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+    if ((options.useBeacon || Array.isArray(payload)) && typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
       const blob = new Blob([body], { type: 'application/json' });
       if (navigator.sendBeacon(endpoint, blob)) {
         return;
@@ -348,6 +380,13 @@ function postClientDebugEntry(entry) {
       keepalive: true
     }).catch(() => {});
   } catch {}
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', () => flushClientDebugEntries({ useBeacon: true }));
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushClientDebugEntries({ useBeacon: true });
+  });
 }
 
 function debugTimestamp() {
