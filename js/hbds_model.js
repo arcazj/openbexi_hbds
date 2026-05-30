@@ -27,6 +27,9 @@ export const DEFAULT_FONT_SETTINGS = {
   underline: false
 };
 const DEFAULT_FIT_PADDING = 1.08;
+const SMALL_MODEL_MAX_FIT_SUBJECTS = 2;
+const SMALL_MODEL_FIT_PADDING = 1.35;
+const SAVED_VIEW_FIT_MODE = 'userView';
 
 let data = { hypergraph: { class: [], link: [] } };
 const history=[];
@@ -287,7 +290,10 @@ function normalizeFitSettings(fit){
         z:toFiniteNumber(fit.center.z,0)
       }
     : { x:0, y:0, z:0 };
-  return {
+  const mode=String(fit.mode || fit.fitMode || '');
+  const savedView=fit.savedView===true || fit.preserveView===true || mode===SAVED_VIEW_FIT_MODE;
+  const subjectCount=Math.max(0,Math.round(toFiniteNumber(fit.subjectCount,0)));
+  const normalized={
     padding:toFiniteNumber(fit.padding,DEFAULT_FIT_PADDING),
     fitHeightDistance:toFiniteNumber(fit.fitHeightDistance ?? fit.heightDistance,0),
     fitWidthDistance:toFiniteNumber(fit.fitWidthDistance ?? fit.widthDistance,0),
@@ -300,6 +306,10 @@ function normalizeFitSettings(fit){
     cameraAspect:toFiniteNumber(fit.cameraAspect ?? fit.aspect,1),
     cameraFov:toFiniteNumber(fit.cameraFov ?? fit.fov,50)
   };
+  if(mode) normalized.mode=mode;
+  if(savedView) normalized.savedView=true;
+  if(subjectCount) normalized.subjectCount=subjectCount;
+  return normalized;
 }
 function normalizeLayoutAlgorithm(value){
   const clean=String(value||'none').toLowerCase();
@@ -413,7 +423,7 @@ export function refreshDiagramBoundsAndCamera(context, options={}){
   context.diagramGroup.userData.boundingBox=box.clone();
   context.diagramGroup.userData.boundingSphere=sphere.clone();
   if(options.fitToView && context.camera){
-    const metrics=calculateFitMetrics(box,context.camera,{padding:options.padding??DEFAULT_FIT_PADDING});
+    const metrics=calculateFitMetrics(box,context.camera,{padding:options.padding??DEFAULT_FIT_PADDING,subjectCount:fitSubjectCount(context)});
     const dist=Math.max(metrics.distance,1);
     context.camera.position.set(sphere.center.x,sphere.center.y,sphere.center.z+dist);
     context.camera.lookAt(sphere.center);
@@ -430,7 +440,7 @@ export function fitModelToCanvas(context, options = {}) {
   if (!context?.diagramGroup || !context?.camera) return null;
   const box = fitBoxForContext(context);
   if (box.isEmpty()) return null;
-  const metrics = calculateFitMetrics(box, context.camera, options);
+  const metrics = calculateFitMetrics(box, context.camera, { ...options, subjectCount: options.subjectCount ?? fitSubjectCount(context) });
   const sphere = box.getBoundingSphere(new THREE.Sphere());
   const dist = Math.max(metrics.distance, 1);
   context.diagramGroup.userData.boundingBox = box.clone();
@@ -454,9 +464,9 @@ export function applyFitMetadataToContext(context, options = {}) {
   if (Number.isFinite(fit.cameraFov) && fit.cameraFov > 1 && options.applyFov !== false) {
     context.camera.fov = fit.cameraFov;
   }
-  const appliedFit = options.adaptToCurrentViewport === false
-    ? fit
-    : normalizedCurrentFitForContext(context, fit);
+  const preserveSavedView = fit.savedView === true || fit.mode === SAVED_VIEW_FIT_MODE;
+  const shouldAdapt = options.adaptToCurrentViewport === false ? false : !preserveSavedView;
+  const appliedFit = shouldAdapt ? normalizedCurrentFitForContext(context, fit) : fit;
   const center = new THREE.Vector3(appliedFit.center.x, appliedFit.center.y, appliedFit.center.z);
   const distance = appliedFit.distance > 0
     ? appliedFit.distance
@@ -477,7 +487,7 @@ function calculateFitMetrics(box, camera, options = {}) {
   const sphere = box.getBoundingSphere(new THREE.Sphere());
   const size = box.getSize(new THREE.Vector3());
   const previousFit = getLayoutSettings().fit || {};
-  const padding = Math.max(1.01, options.padding ?? previousFit.padding ?? DEFAULT_FIT_PADDING);
+  const padding = effectiveFitPadding(options.padding ?? previousFit.padding ?? DEFAULT_FIT_PADDING, options.subjectCount);
   const fovR = camera.fov * Math.PI / 180;
   const halfWidth = Math.max(size.x / 2, 0.05);
   const halfHeight = Math.max(size.y / 2, 0.05);
@@ -504,8 +514,17 @@ function calculateFitMetrics(box, camera, options = {}) {
       z: roundFitNumber(sphere.center.z)
     },
     cameraAspect: roundFitNumber(camera.aspect),
-    cameraFov: roundFitNumber(camera.fov)
+    cameraFov: roundFitNumber(camera.fov),
+    subjectCount: Math.max(0, Math.round(toFiniteNumber(options.subjectCount, 0)))
   };
+}
+
+function effectiveFitPadding(padding, subjectCount) {
+  const base = Math.max(1.01, toFiniteNumber(padding, DEFAULT_FIT_PADDING));
+  const count = Math.max(0, Math.round(toFiniteNumber(subjectCount, 0)));
+  return count > 0 && count <= SMALL_MODEL_MAX_FIT_SUBJECTS
+    ? Math.max(base, SMALL_MODEL_FIT_PADDING)
+    : base;
 }
 
 function fitBoxForContext(context) {
@@ -531,11 +550,23 @@ function fitBoxForContext(context) {
     : new THREE.Box3().setFromObject(context.diagramGroup);
 }
 
+function fitSubjectCount(context) {
+  let count = 0;
+  for (const object of modelRuntime.classById.values()) {
+    if (object && object.visible !== false) count += 1;
+  }
+  if (count > 0 || !context?.diagramGroup) return count;
+  context.diagramGroup.traverse(object => {
+    if ((object.userData?.isClassLike || object.userData?.isHbdsClass) && object.visible !== false) count += 1;
+  });
+  return count;
+}
+
 function normalizedCurrentFitForContext(context, storedFit) {
   if (!context?.diagramGroup || !context?.camera) return storedFit;
   const box = fitBoxForContext(context);
   if (box.isEmpty()) return storedFit;
-  return calculateFitMetrics(box, context.camera, { padding: storedFit.padding || DEFAULT_FIT_PADDING });
+  return calculateFitMetrics(box, context.camera, { padding: storedFit.padding || DEFAULT_FIT_PADDING, subjectCount: fitSubjectCount(context) });
 }
 
 export function getFitQualityMetrics(context) {
@@ -555,6 +586,7 @@ export function getFitQualityMetrics(context) {
     diagramDepth: roundFitNumber(size.z),
     visibleWidth: roundFitNumber(visibleWidth),
     visibleHeight: roundFitNumber(visibleHeight),
+    subjectCount: fitSubjectCount(context),
     occupancyX: roundFitNumber(size.x / Math.max(visibleWidth, 1e-6)),
     occupancyY: roundFitNumber(size.y / Math.max(visibleHeight, 1e-6)),
     occupancy: roundFitNumber(Math.max(size.x / Math.max(visibleWidth, 1e-6), size.y / Math.max(visibleHeight, 1e-6))),
@@ -578,7 +610,7 @@ function updateFitMetadataFromContext(context, options = {}) {
   if (!context?.diagramGroup || !context?.camera) return getLayoutSettings();
   const box = fitBoxForContext(context);
   if (box.isEmpty()) return getLayoutSettings();
-  const fit = calculateFitMetrics(box, context.camera, options);
+  const fit = calculateFitMetrics(box, context.camera, { ...options, subjectCount: options.subjectCount ?? fitSubjectCount(context) });
   const center = context.orbitControls?.target
     ? context.orbitControls.target.clone()
     : box.getCenter(new THREE.Vector3());
@@ -589,6 +621,8 @@ function updateFitMetadataFromContext(context, options = {}) {
     z: roundFitNumber(center.z)
   };
   fit.distance = roundFitNumber(cameraDistance);
+  fit.mode = SAVED_VIEW_FIT_MODE;
+  fit.savedView = true;
   return saveFitMetadata(fit).fit;
 }
 

@@ -169,7 +169,10 @@ Validate:
 * A blank workspace is available after reset.
 * Class and hyperclass name labels are visible immediately after loading a model, before moving, zooming, or pressing Fit.
 * Fit uses most of the available canvas without clipping the model or hiding labels.
-* Saved `metadata.layout.fit` values are normalized to the current model bounds and canvas aspect on load.
+* Legacy/generated `metadata.layout.fit` values are normalized to the current model bounds and canvas aspect on load.
+* Saving after pan, zoom, overview pan, or `Fit Model` stores the current user view in `metadata.layout.fit`.
+* Reloading a saved model restores the saved user view instead of recalculating it.
+* Models with one or two classes use a smart fit margin so the classes do not appear oversized after load or `Fit Model`.
 * The overview/minimap is visible, tracks zoom/pan/fit, and dragging the blue viewport square pans the main canvas.
 * Save writes to `./models/` in connected mode.
 * Existing model overwrite creates a backup under `models/.backups/`.
@@ -209,7 +212,10 @@ Validate:
 * The model selector reads from `test_models/test_models_manifest.json`.
 * Class and hyperclass name labels are visible immediately after loading a test model, before any canvas interaction.
 * Fit uses most of the available canvas without clipping the model or labels.
-* Saved `metadata.layout.fit` values are normalized to the current model bounds and canvas aspect on load.
+* Legacy/generated `metadata.layout.fit` values are normalized to the current model bounds and canvas aspect on load.
+* Saving after pan, zoom, overview pan, or `Fit Model` stores the current user view in `metadata.layout.fit`.
+* Reloading a saved test model restores the saved user view instead of recalculating it.
+* Test models with one or two classes use a smart fit margin so the classes do not appear oversized after load or `Fit Model`.
 * The overview/minimap is visible, tracks zoom/pan/fit, and dragging the blue viewport square pans the main canvas.
 * The collaboration panel is enabled for Tests when another client edits the same test model.
 * Saving a test model writes under `./test_models/`.
@@ -714,7 +720,9 @@ PASS human_and_car_links second-page selection dispatch=<number>ms value=<select
 
 * load simple, linked, hyperclass, and dense models
 * verify class and hyperclass names appear immediately after load in Edit and Tests before moving, zooming, or fitting
-* verify any saved `metadata.layout.fit` values adapt to the current canvas aspect and do not leave the loaded model tiny
+* verify legacy/generated `metadata.layout.fit` values adapt to the current canvas aspect and do not leave the loaded model tiny
+* save after pan, zoom, overview drag, and `Fit Model` in Edit and Tests, then reload and verify the same saved user view is restored
+* load and fit one-class and two-class models, then verify the smart margin keeps classes readable without making them oversized
 * pan with right-click drag or trackpad
 * zoom with mouse wheel or trackpad
 * fit the model and confirm the diagram uses most of the canvas while preserving a small margin

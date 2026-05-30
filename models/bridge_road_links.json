@@ -27,20 +27,23 @@
       "algorithm": "grid",
       "fit": {
         "padding": 1.18,
-        "fitHeightDistance": 15.3471,
-        "fitWidthDistance": 13.5683,
-        "distance": 11.4213,
-        "diagramWidth": 8.893,
-        "diagramHeight": 8.248,
+        "fitHeightDistance": 8.2242,
+        "fitWidthDistance": 7.512,
+        "distance": 11.2763,
+        "diagramWidth": 7.705,
+        "diagramHeight": 6.5,
         "diagramDepth": 0.11,
-        "radius": 6.0648,
+        "radius": 5.0406,
         "center": {
-          "x": 0.45,
-          "y": 0.834,
+          "x": -1.5188,
+          "y": 0.9435,
           "z": 0.055
         },
-        "cameraAspect": 1.1311,
-        "cameraFov": 50
+        "cameraAspect": 1.2978,
+        "cameraFov": 50,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 4
       }
     },
     "font": {

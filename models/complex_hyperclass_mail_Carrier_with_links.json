@@ -37,20 +37,23 @@
       "algorithm": "grid",
       "fit": {
         "padding": 1.18,
-        "fitHeightDistance": 54.2327,
-        "fitWidthDistance": 47.9469,
-        "distance": 37.8727,
-        "diagramWidth": 33.233,
-        "diagramHeight": 27.07,
-        "diagramDepth": 0.097,
-        "radius": 21.4314,
+        "fitHeightDistance": 34.0228,
+        "fitWidthDistance": 31.8371,
+        "distance": 34.07,
+        "diagramWidth": 32.655,
+        "diagramHeight": 26.89,
+        "diagramDepth": 0.08,
+        "radius": 21.1508,
         "center": {
-          "x": -3.1165,
-          "y": 2.342,
-          "z": 0.0485
+          "x": -3.9185,
+          "y": 2.1685,
+          "z": 0.04
         },
-        "cameraAspect": 1.1311,
-        "cameraFov": 50
+        "cameraAspect": 1.2978,
+        "cameraFov": 50,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 24
       }
     },
     "font": {
@@ -202,7 +205,8 @@
             "cornerRadius": 0.3,
             "opacity": 0.12,
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -448,7 +452,8 @@
             "cornerRadius": 0.3,
             "opacity": 0.12,
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -695,7 +700,8 @@
             "cornerRadius": 0.3,
             "opacity": 0.12,
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -892,7 +898,8 @@
             "cornerRadius": 0.3,
             "opacity": 0.12,
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
@@ -1090,7 +1097,8 @@
             "cornerRadius": 0.3,
             "opacity": 0.12,
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#FFFFFF",
