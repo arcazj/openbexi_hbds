@@ -248,9 +248,7 @@ export function createClass(classData) {
         iconSize: cfg.class.iconSize ?? 0.95,
         legacyPosition: new THREE.Vector3(0, sz.height / 2 - 0.48, Z_OVERLAY),
         iconPosition: new THREE.Vector3(0, sz.height / 2 - 0.54, Z_OVERLAY),
-        onIconLoaded: () => {
-            if (lastSizingCamera) updateLabelFontSizes(lastSizingCamera, lastSizingRenderer);
-        }
+        onIconLoaded: scheduleLabelFontSizeRefresh
     });
     titleObj.userData = {
         ...titleObj.userData,
@@ -1399,6 +1397,20 @@ function getAttributeFontSettings(attribute) {
 const labels = []; // Store all labels for easy access
 let lastSizingCamera = null;
 let lastSizingRenderer = null;
+let labelFontSizeRefreshScheduled = false;
+
+function scheduleLabelFontSizeRefresh() {
+    if (!lastSizingCamera || labelFontSizeRefreshScheduled) return;
+    labelFontSizeRefreshScheduled = true;
+    const schedule = typeof requestAnimationFrame === 'function'
+        ? requestAnimationFrame
+        : callback => setTimeout(callback, 0);
+    schedule(() => {
+        labelFontSizeRefreshScheduled = false;
+        if (lastSizingCamera) updateLabelFontSizes(lastSizingCamera, lastSizingRenderer);
+    });
+}
+
 export function updateLabelFontSizes(camera, renderer) {
     lastSizingCamera = camera ?? lastSizingCamera;
     lastSizingRenderer = renderer ?? lastSizingRenderer;

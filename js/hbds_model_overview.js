@@ -3,12 +3,15 @@ const FALLBACK_CANVAS_SIZE = { width: 224, height: 150 };
 
 let overviewInitialized = false;
 let latestData = null;
+let latestContext = null;
+let overviewDragState = null;
 
 export function initModelOverview(context, data) {
   const canvas = overviewCanvas();
   if (!canvas) return null;
+  latestContext = context;
   if (!overviewInitialized) {
-    canvas.addEventListener('click', event => handleOverviewClick(event, context));
+    bindOverviewPointerEvents(canvas);
     overviewInitialized = true;
   }
   return updateModelOverview(context, data);
@@ -16,6 +19,7 @@ export function initModelOverview(context, data) {
 
 export function updateModelOverview(context, data) {
   latestData = data;
+  latestContext = context || latestContext;
   const canvas = overviewCanvas();
   if (!canvas) return null;
 
@@ -98,6 +102,10 @@ export function updateOverviewViewport(bounds, transform, context) {
 
 function overviewCanvas() {
   return document.getElementById('model-overview-canvas');
+}
+
+function overviewHost() {
+  return document.getElementById('model-overview') || overviewCanvas();
 }
 
 function syncCanvasSize(canvas) {
@@ -219,7 +227,54 @@ function roundedRectPath(drawingContext, x, y, width, height, radius) {
   drawingContext.closePath();
 }
 
-function handleOverviewClick(event, context) {
+function bindOverviewPointerEvents(canvas) {
+  const host = overviewHost() || canvas;
+  host.addEventListener('pointerdown', handleOverviewPointerDown);
+  host.addEventListener('pointermove', handleOverviewPointerMove);
+  host.addEventListener('pointerup', handleOverviewPointerEnd);
+  host.addEventListener('pointercancel', handleOverviewPointerEnd);
+  host.addEventListener('lostpointercapture', handleOverviewPointerEnd);
+}
+
+function handleOverviewPointerDown(event) {
+  if (event.button !== undefined && event.button !== 0) return;
+  const context = latestContext;
+  if (!canPanOverview(context)) return;
+  overviewDragState = { pointerId: event.pointerId };
+  overviewHost()?.classList?.add('is-dragging');
+  try {
+    event.currentTarget?.setPointerCapture?.(event.pointerId);
+  } catch {
+    // Synthetic pointer events used by regression tests do not always own capture.
+  }
+  event.preventDefault();
+  panOverviewToEvent(event, context);
+}
+
+function handleOverviewPointerMove(event) {
+  if (!overviewDragState || event.pointerId !== overviewDragState.pointerId) return;
+  const context = latestContext;
+  if (!canPanOverview(context)) return;
+  event.preventDefault();
+  panOverviewToEvent(event, context);
+}
+
+function handleOverviewPointerEnd(event) {
+  if (!overviewDragState || event.pointerId !== overviewDragState.pointerId) return;
+  try {
+    event.currentTarget?.releasePointerCapture?.(event.pointerId);
+  } catch {
+    // Ignore capture release errors for synthetic events and interrupted drags.
+  }
+  overviewDragState = null;
+  overviewHost()?.classList?.remove('is-dragging');
+}
+
+function canPanOverview(context) {
+  return Boolean(context?.camera && context?.orbitControls);
+}
+
+function panOverviewToEvent(event, context) {
   const canvas = overviewCanvas();
   if (!canvas || !context?.camera || !context?.orbitControls) return;
   const data = latestData;

@@ -1,7 +1,7 @@
 {
   "metadata": {
     "name": "Fit 026 Saved View Metadata",
-    "purpose": "Verifies that metadata.layout.fit is applied on load instead of being immediately overwritten by a fresh fit.",
+    "purpose": "Verifies that metadata.layout.fit is normalized against current model bounds and canvas aspect on load.",
     "preserveLayout": true,
     "regressionTags": [
       "fit",

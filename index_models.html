@@ -47,12 +47,12 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {updateLabelFontSizes} from './js/hbds_class.js?v=material-surface-20260525a';
-    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=material-surface-20260525a';
-    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=font-zoom-20260523a';
-    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=font-zoom-20260523a';
-    import { setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings } from './js/hbds_model.js?v=material-surface-20260525a';
-    import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260530b';
+    import {updateLabelFontSizes} from './js/hbds_class.js?v=material-surface-20260530a';
+    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=material-surface-20260530a';
+    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=link-perf-20260530a';
+    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=link-perf-20260530a';
+    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=model-fit-quality-20260530b';
+    import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260530c';
 
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {
         document.body.classList.add('embedded-shell-menu');
@@ -226,6 +226,7 @@
 
         window.addEventListener('resize', onResize);
         installDebugUserActionTracking();
+        installModelDebugHooks();
         syncDebugControls();
         if (debugModeEnabled) await setDebugMode(true, { silent: true });
         const viewToggle = document.getElementById('view-toggle');
@@ -235,7 +236,7 @@
             await loadSelectedModel(e.target.value);
         });
         document.getElementById('fit-model-button').addEventListener('click', () => {
-            fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
+            fitModelToCanvas(getModelContext(), { padding: 1.08, updateOverview: true });
         });
         document.getElementById('help-shortcuts-button')?.addEventListener('click', () => toggleHelpOverlay(true));
         document.getElementById('close-help-button')?.addEventListener('click', () => toggleHelpOverlay(false));
@@ -357,7 +358,7 @@
             return;
         }
         await optimizeAndRefreshLayout(getModelContext(), { algorithm });
-        fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
+        fitModelToCanvas(getModelContext(), { padding: 1.08, updateOverview: true });
         scheduleLocalDraftPublish(`Optimized ${algorithm} layout`);
     }
 
@@ -447,7 +448,7 @@
                     }
                     progress.update(78, `Fitting ${label}`);
                     if (!hasFitMetadata(model)) {
-                        fitModelToCanvas(getModelContext(), { padding: 1.15, updateOverview: true });
+                        fitModelToCanvas(getModelContext(), { padding: 1.08, updateOverview: true });
                     }
                     progress.update(94, `Finishing ${label}`);
                     return model;
@@ -989,6 +990,44 @@
             applyModelLayoutSettings,
             applyModelFontSettings,
             renderOnce
+        };
+    }
+
+    function collectModelLabelMetrics() {
+        return [...document.querySelectorAll('.class-label, .attribute-label, .link-label')].map(element => {
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return {
+                text: element.textContent || '',
+                classes: [...element.classList],
+                left: Number(rect.left.toFixed(2)),
+                top: Number(rect.top.toFixed(2)),
+                right: Number(rect.right.toFixed(2)),
+                bottom: Number(rect.bottom.toFixed(2)),
+                width: Number(rect.width.toFixed(2)),
+                height: Number(rect.height.toFixed(2)),
+                fontSize: style.fontSize,
+                visible: rect.width > 0 && rect.height > 0
+            };
+        });
+    }
+
+    function installModelDebugHooks() {
+        window.__hbdsModelsTest = {
+            getData: () => JSON.parse(JSON.stringify(getData())),
+            getState: () => ({
+                selectedModel: document.getElementById('model-select')?.value || '',
+                canvasTitle: document.getElementById('canvas-model-title')?.textContent?.trim() || '',
+                camera: camera ? {
+                    position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+                    target: orbitControls ? { x: orbitControls.target.x, y: orbitControls.target.y, z: orbitControls.target.z } : null,
+                    fov: camera.fov,
+                    aspect: camera.aspect
+                } : null,
+                layout: getLayoutSettings()
+            }),
+            getLabelMetrics: collectModelLabelMetrics,
+            getFitQuality: () => getFitQualityMetrics(getModelContext())
         };
     }
 

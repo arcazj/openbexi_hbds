@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=material-surface-20260525a';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=material-surface-20260525a';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=font-zoom-20260523a';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=font-zoom-20260523a';
-import { initModelOverview as initModelOverviewPanel, updateModelOverview as updateModelOverviewPanel } from './hbds_model_overview.js?v=overview-module-20260529a';
-export { drawOverviewHyperclasses, drawOverviewClasses, drawOverviewLinks, updateOverviewViewport } from './hbds_model_overview.js?v=overview-module-20260529a';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=material-surface-20260530a';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=material-surface-20260530a';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=link-perf-20260530a';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=link-perf-20260530a';
+import { initModelOverview as initModelOverviewPanel, updateModelOverview as updateModelOverviewPanel } from './hbds_model_overview.js?v=overview-module-20260530a';
+export { drawOverviewHyperclasses, drawOverviewClasses, drawOverviewLinks, updateOverviewViewport } from './hbds_model_overview.js?v=overview-module-20260530a';
 
 export const DEFAULT_SCENE_SETTINGS = {
   background: '#eef2f6',
@@ -26,7 +26,7 @@ export const DEFAULT_FONT_SETTINGS = {
   italic: false,
   underline: false
 };
-const DEFAULT_FIT_PADDING = 1.15;
+const DEFAULT_FIT_PADDING = 1.08;
 
 let data = { hypergraph: { class: [], link: [] } };
 const history=[];
@@ -395,7 +395,7 @@ export function refreshSceneFromData(context){ if(!context) return; const {scene
     }
     node.position.set(p.x||0,p.y||0,p.z||0);
   }
-  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const renderLinkData={...ld,modelFont}; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,renderLinkData):createLinkBetweenClass(renderLinkData,modelRuntime.classById); if(!r) continue; r.linkGroup.visible=ld.visible!==false&&ld.rendering?.visible!==false; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(renderLinkData),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);}
+  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const renderLinkData={...ld,modelFont}; const linkOptions={recalculate:false}; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,renderLinkData,linkOptions):createLinkBetweenClass(renderLinkData,modelRuntime.classById,linkOptions); if(!r) continue; r.linkGroup.visible=ld.visible!==false&&ld.rendering?.visible!==false; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(renderLinkData),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);}
   draggableObjects.length=0; for(const cd of data.hypergraph.class){ const o=modelRuntime.classById.get(cd.id); if(o&&o.visible!==false&&!o.userData?.isLocked) draggableObjects.push(o); }
   modelRuntime.draggableObjects=draggableObjects;
   context.setupDragControls?.(); recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera, context.renderer); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
@@ -403,7 +403,7 @@ export function updateLayoutFromData(context){ recalculateAllLinks(); updateLabe
 export function updateSceneLabelScales(context){ if(!context?.camera) return; updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera, context.renderer); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
 export function refreshDiagramBoundsAndCamera(context, options={}){
   if(!context?.diagramGroup) return null;
-  const box=new THREE.Box3().setFromObject(context.diagramGroup);
+  const box=fitBoxForContext(context);
   if(box.isEmpty()){
     context.diagramGroup.userData.boundingBox=null;
     context.diagramGroup.userData.boundingSphere=null;
@@ -413,22 +413,22 @@ export function refreshDiagramBoundsAndCamera(context, options={}){
   context.diagramGroup.userData.boundingBox=box.clone();
   context.diagramGroup.userData.boundingSphere=sphere.clone();
   if(options.fitToView && context.camera){
-    const padding=options.padding??1.2;
-    const fovR=context.camera.fov*Math.PI/180;
-    const dist=Math.abs((sphere.radius*padding)/Math.sin(fovR/2));
+    const metrics=calculateFitMetrics(box,context.camera,{padding:options.padding??DEFAULT_FIT_PADDING});
+    const dist=Math.max(metrics.distance,1);
     context.camera.position.set(sphere.center.x,sphere.center.y,sphere.center.z+dist);
     context.camera.lookAt(sphere.center);
     context.orbitControls?.target.copy(sphere.center);
+    context.camera.updateProjectionMatrix();
     context.orbitControls?.update?.();
-    context.setCamera2D?.();
-    updateFitMetadataFromContext(context,{padding});
+    updateSceneLabelScales(context);
+    saveFitMetadata(metrics);
   }
   context.renderOnce?.();
   return {box,sphere};
 }
 export function fitModelToCanvas(context, options = {}) {
   if (!context?.diagramGroup || !context?.camera) return null;
-  const box = new THREE.Box3().setFromObject(context.diagramGroup);
+  const box = fitBoxForContext(context);
   if (box.isEmpty()) return null;
   const metrics = calculateFitMetrics(box, context.camera, options);
   const sphere = box.getBoundingSphere(new THREE.Sphere());
@@ -440,6 +440,7 @@ export function fitModelToCanvas(context, options = {}) {
   context.camera.lookAt(sphere.center);
   context.camera.updateProjectionMatrix();
   context.orbitControls?.update?.();
+  updateSceneLabelScales(context);
   context.renderOnce?.();
   if (options.updateOverview) updateModelOverview(context);
   saveFitMetadata(metrics);
@@ -450,22 +451,25 @@ export function applyFitMetadataToContext(context, options = {}) {
   if (!context?.camera) return false;
   const fit = normalizeFitSettings(options.fit ?? getLayoutSettings().fit);
   if (!hasUsableFitSettings(fit)) return false;
-  const center = new THREE.Vector3(fit.center.x, fit.center.y, fit.center.z);
-  const storedDistance = fit.distance > 0
-    ? fit.distance
-    : (fit.fitHeightDistance > 0 ? fit.fitHeightDistance : (fit.fitWidthDistance > 0 ? fit.fitWidthDistance : 1));
   if (Number.isFinite(fit.cameraFov) && fit.cameraFov > 1 && options.applyFov !== false) {
     context.camera.fov = fit.cameraFov;
   }
+  const appliedFit = options.adaptToCurrentViewport === false
+    ? fit
+    : normalizedCurrentFitForContext(context, fit);
+  const center = new THREE.Vector3(appliedFit.center.x, appliedFit.center.y, appliedFit.center.z);
+  const distance = appliedFit.distance > 0
+    ? appliedFit.distance
+    : (appliedFit.fitHeightDistance > 0 ? appliedFit.fitHeightDistance : (appliedFit.fitWidthDistance > 0 ? appliedFit.fitWidthDistance : 1));
   context.orbitControls?.target.copy(center);
-  context.camera.position.set(center.x, center.y, center.z + storedDistance);
+  context.camera.position.set(center.x, center.y, center.z + distance);
   context.camera.lookAt(center);
   context.camera.updateProjectionMatrix();
   context.orbitControls?.update?.();
   updateSceneLabelScales(context);
   context.renderOnce?.();
   if (options.updateOverview) updateModelOverview(context);
-  if (options.preserveMetadata !== true) saveFitMetadata(fit);
+  if (options.preserveMetadata !== true) saveFitMetadata(appliedFit);
   return true;
 }
 
@@ -473,11 +477,18 @@ function calculateFitMetrics(box, camera, options = {}) {
   const sphere = box.getBoundingSphere(new THREE.Sphere());
   const size = box.getSize(new THREE.Vector3());
   const previousFit = getLayoutSettings().fit || {};
-  const padding = options.padding ?? previousFit.padding ?? DEFAULT_FIT_PADDING;
+  const padding = Math.max(1.01, options.padding ?? previousFit.padding ?? DEFAULT_FIT_PADDING);
   const fovR = camera.fov * Math.PI / 180;
-  const fitHeightDistance = (sphere.radius * padding) / Math.tan(fovR / 2);
-  const fitWidthDistance = fitHeightDistance / Math.max(camera.aspect, 1e-6);
-  const distance = Math.max(fitHeightDistance, fitWidthDistance, 1);
+  const halfWidth = Math.max(size.x / 2, 0.05);
+  const halfHeight = Math.max(size.y / 2, 0.05);
+  const halfDepth = Math.max(size.z / 2, 0);
+  const verticalTan = Math.max(Math.tan(fovR / 2), 1e-6);
+  const horizontalTan = Math.max(verticalTan * Math.max(camera.aspect, 1e-6), 1e-6);
+  const fitHeightDistance = (halfHeight * padding) / verticalTan;
+  const fitWidthDistance = (halfWidth * padding) / horizontalTan;
+  const planarDistance = Math.max(fitHeightDistance, fitWidthDistance, 1);
+  const depthAllowance = Math.min(halfDepth * padding, planarDistance * 0.08);
+  const distance = planarDistance + depthAllowance;
   return {
     padding: roundFitNumber(padding),
     fitHeightDistance: roundFitNumber(fitHeightDistance),
@@ -497,6 +508,67 @@ function calculateFitMetrics(box, camera, options = {}) {
   };
 }
 
+function fitBoxForContext(context) {
+  if (!context?.diagramGroup) return new THREE.Box3();
+  const box = new THREE.Box3();
+  const seen = new Set();
+  let hasClassLikeBounds = false;
+  const includeObject = object => {
+    if (!object || seen.has(object.uuid) || object.visible === false) return;
+    seen.add(object.uuid);
+    object.updateWorldMatrix?.(true, true);
+    box.expandByObject(object);
+    hasClassLikeBounds = true;
+  };
+  for (const object of modelRuntime.classById.values()) includeObject(object);
+  if (!hasClassLikeBounds) {
+    context.diagramGroup.traverse(object => {
+      if (object.userData?.isClassLike || object.userData?.isHbdsClass) includeObject(object);
+    });
+  }
+  return hasClassLikeBounds && !box.isEmpty()
+    ? box
+    : new THREE.Box3().setFromObject(context.diagramGroup);
+}
+
+function normalizedCurrentFitForContext(context, storedFit) {
+  if (!context?.diagramGroup || !context?.camera) return storedFit;
+  const box = fitBoxForContext(context);
+  if (box.isEmpty()) return storedFit;
+  return calculateFitMetrics(box, context.camera, { padding: storedFit.padding || DEFAULT_FIT_PADDING });
+}
+
+export function getFitQualityMetrics(context) {
+  if (!context?.camera || !context?.diagramGroup) return null;
+  const box = fitBoxForContext(context);
+  if (box.isEmpty()) return null;
+  const size = box.getSize(new THREE.Vector3());
+  const sphere = box.getBoundingSphere(new THREE.Sphere());
+  const target = context.orbitControls?.target || sphere.center;
+  const distance = Math.max(1e-6, context.camera.position.distanceTo(target));
+  const fovR = context.camera.fov * Math.PI / 180;
+  const visibleHeight = 2 * Math.tan(fovR / 2) * distance;
+  const visibleWidth = visibleHeight * Math.max(context.camera.aspect || 1, 0.1);
+  return {
+    diagramWidth: roundFitNumber(size.x),
+    diagramHeight: roundFitNumber(size.y),
+    diagramDepth: roundFitNumber(size.z),
+    visibleWidth: roundFitNumber(visibleWidth),
+    visibleHeight: roundFitNumber(visibleHeight),
+    occupancyX: roundFitNumber(size.x / Math.max(visibleWidth, 1e-6)),
+    occupancyY: roundFitNumber(size.y / Math.max(visibleHeight, 1e-6)),
+    occupancy: roundFitNumber(Math.max(size.x / Math.max(visibleWidth, 1e-6), size.y / Math.max(visibleHeight, 1e-6))),
+    centerOffsetX: roundFitNumber(Math.abs((target.x || 0) - sphere.center.x) / Math.max(visibleWidth, 1e-6)),
+    centerOffsetY: roundFitNumber(Math.abs((target.y || 0) - sphere.center.y) / Math.max(visibleHeight, 1e-6)),
+    distance: roundFitNumber(distance),
+    center: {
+      x: roundFitNumber(sphere.center.x),
+      y: roundFitNumber(sphere.center.y),
+      z: roundFitNumber(sphere.center.z)
+    }
+  };
+}
+
 function saveFitMetadata(fit) {
   if (!fit) return getLayoutSettings();
   return setLayoutSettings({ ...getLayoutSettings(), fit }, { applyContext: false });
@@ -504,7 +576,7 @@ function saveFitMetadata(fit) {
 
 function updateFitMetadataFromContext(context, options = {}) {
   if (!context?.diagramGroup || !context?.camera) return getLayoutSettings();
-  const box = new THREE.Box3().setFromObject(context.diagramGroup);
+  const box = fitBoxForContext(context);
   if (box.isEmpty()) return getLayoutSettings();
   const fit = calculateFitMetrics(box, context.camera, options);
   const center = context.orbitControls?.target

@@ -504,6 +504,28 @@ def first_query_value(query: dict[str, list[str]], name: str) -> str:
     return str(values[0]) if values else ""
 
 
+def query_flag(query: dict[str, list[str]], name: str, default: bool = False) -> bool:
+    value = first_query_value(query, name).strip().lower()
+    if not value:
+        return default
+    return value in {"1", "true", "yes", "on"}
+
+
+def copy_draft_for_response(draft: dict, *, include_model: bool = True) -> dict:
+    response = copy.deepcopy(draft)
+    if include_model:
+        return response
+    response.pop("model", None)
+    response.pop("diagram", None)
+    preview = response.get("preview")
+    if isinstance(preview, dict) and isinstance(preview.get("dataUrl"), str):
+        compact_preview = copy.deepcopy(preview)
+        compact_preview.pop("dataUrl", None)
+        compact_preview["dataUrlOmitted"] = True
+        response["preview"] = compact_preview
+    return response
+
+
 def format_sse_event(event: dict) -> bytes:
     event_type = str(event.get("type") or "message")
     event_id = str(event.get("sequence") or "")
@@ -1623,10 +1645,23 @@ class HBDSLocalServer(ThreadingHTTPServer):
                     self._drafts.pop(model_name, None)
         return removed
 
-    def list_model_drafts(self, model_name: str) -> list[dict]:
+    def list_model_drafts(
+        self,
+        model_name: str,
+        *,
+        include_model: bool = True,
+        exclude_client_id: str = "",
+    ) -> list[dict]:
         with self._draft_lock:
-            drafts = list(self._drafts.get(model_name, {}).values())
-        return sorted((copy.deepcopy(draft) for draft in drafts), key=lambda item: item.get("updatedAt", ""))
+            drafts = [
+                draft
+                for draft in self._drafts.get(model_name, {}).values()
+                if not exclude_client_id or draft.get("clientId") != exclude_client_id
+            ]
+        return sorted(
+            (copy_draft_for_response(draft, include_model=include_model) for draft in drafts),
+            key=lambda item: item.get("updatedAt", ""),
+        )
 
     def set_debug_session(self, client_id: str, enabled: bool, ui_name: str = "") -> dict:
         clean_client_id = clean_client_text(client_id, max_length=MAX_CLIENT_ID_LENGTH)
@@ -2266,15 +2301,35 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         if not (MODELS_DIR / name).exists():
             self.json_error(HTTPStatus.NOT_FOUND, "model_not_found", "Model not found")
             return
-        drafts = self.server.list_model_drafts(name) if hasattr(self.server, "list_model_drafts") else []
+        include_model, exclude_client_id = self.draft_list_response_options()
+        drafts = self.server.list_model_drafts(
+            name,
+            include_model=include_model,
+            exclude_client_id=exclude_client_id,
+        ) if hasattr(self.server, "list_model_drafts") else []
         self.json_response({"ok": True, "modelName": name, "drafts": drafts})
 
     def list_scoped_model_drafts(self, raw_path: str) -> None:
         model_name = self.parse_scoped_draft_collection_path(raw_path)
         if not model_name:
             return
-        drafts = self.server.list_model_drafts(model_name) if hasattr(self.server, "list_model_drafts") else []
+        include_model, exclude_client_id = self.draft_list_response_options()
+        drafts = self.server.list_model_drafts(
+            model_name,
+            include_model=include_model,
+            exclude_client_id=exclude_client_id,
+        ) if hasattr(self.server, "list_model_drafts") else []
         self.json_response({"ok": True, "modelName": model_name, "drafts": drafts})
+
+    def draft_list_response_options(self) -> tuple[bool, str]:
+        query = parse_qs(urlparse(self.path).query)
+        compact = query_flag(query, "compact", False)
+        include_model = query_flag(query, "includeModel", not compact)
+        exclude_client_id = clean_client_text(
+            first_query_value(query, "excludeClientId"),
+            max_length=MAX_CLIENT_ID_LENGTH,
+        )
+        return include_model, exclude_client_id
 
     def save_model_draft(self, raw_path: str) -> None:
         name, client_id = self.parse_draft_path(raw_path)

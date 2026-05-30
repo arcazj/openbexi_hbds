@@ -654,12 +654,14 @@ select {
   overflow: hidden;
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
   backdrop-filter: blur(8px);
+  touch-action: none;
 }
 
 #model-overview-canvas {
   width: 100%;
   height: 100%;
   display: block;
+  cursor: grab;
 }
 
 #model-overview-viewport {
@@ -672,6 +674,11 @@ select {
     0 0 0 4px rgba(14, 165, 233, 0.08);
   pointer-events: auto;
   cursor: grab;
+}
+
+#model-overview.is-dragging #model-overview-canvas,
+#model-overview.is-dragging #model-overview-viewport {
+  cursor: grabbing;
 }
 
 .editor-tools button,

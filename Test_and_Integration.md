@@ -167,6 +167,10 @@ Validate:
 
 * The model selector reads from `models/models_manifest.json`.
 * A blank workspace is available after reset.
+* Class and hyperclass name labels are visible immediately after loading a model, before moving, zooming, or pressing Fit.
+* Fit uses most of the available canvas without clipping the model or hiding labels.
+* Saved `metadata.layout.fit` values are normalized to the current model bounds and canvas aspect on load.
+* The overview/minimap is visible, tracks zoom/pan/fit, and dragging the blue viewport square pans the main canvas.
 * Save writes to `./models/` in connected mode.
 * Existing model overwrite creates a backup under `models/.backups/`.
 * The JSON panel reflects the current model.
@@ -203,6 +207,10 @@ Select `Tests` from the shell.
 Validate:
 
 * The model selector reads from `test_models/test_models_manifest.json`.
+* Class and hyperclass name labels are visible immediately after loading a test model, before any canvas interaction.
+* Fit uses most of the available canvas without clipping the model or labels.
+* Saved `metadata.layout.fit` values are normalized to the current model bounds and canvas aspect on load.
+* The overview/minimap is visible, tracks zoom/pan/fit, and dragging the blue viewport square pans the main canvas.
 * The collaboration panel is enabled for Tests when another client edits the same test model.
 * Saving a test model writes under `./test_models/`.
 * Reset changes the selector summary back to `Blank workspace`.
@@ -705,10 +713,13 @@ PASS human_and_car_links second-page selection dispatch=<number>ms value=<select
 2-D checks:
 
 * load simple, linked, hyperclass, and dense models
+* verify class and hyperclass names appear immediately after load in Edit and Tests before moving, zooming, or fitting
+* verify any saved `metadata.layout.fit` values adapt to the current canvas aspect and do not leave the loaded model tiny
 * pan with right-click drag or trackpad
 * zoom with mouse wheel or trackpad
-* fit the model
-* verify overview viewport updates
+* fit the model and confirm the diagram uses most of the canvas while preserving a small margin
+* verify overview viewport updates after load, zoom, pan, and fit
+* drag the blue overview viewport square and confirm the main canvas pans in Models, Edit, and Tests
 * verify labels and attributes do not overlap badly in standard test models
 
 3-D checks:

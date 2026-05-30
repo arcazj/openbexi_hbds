@@ -1,9 +1,22 @@
 import * as THREE from 'three';
-import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings } from './hbds_class.js?v=material-surface-20260525a';
+import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings } from './hbds_class.js?v=material-surface-20260530a';
 
 const hyperclassLabels = [];
 let lastSizingCamera = null;
 let lastSizingRenderer = null;
+let labelFontSizeRefreshScheduled = false;
+
+function scheduleLabelFontSizeRefresh() {
+  if (!lastSizingCamera || labelFontSizeRefreshScheduled) return;
+  labelFontSizeRefreshScheduled = true;
+  const schedule = typeof requestAnimationFrame === 'function'
+    ? requestAnimationFrame
+    : callback => setTimeout(callback, 0);
+  schedule(() => {
+    labelFontSizeRefreshScheduled = false;
+    if (lastSizingCamera) updateLabelFontSizes(lastSizingCamera, lastSizingRenderer);
+  });
+}
 
 export const Loader = {
   async load(modelNameOrPath) {
@@ -68,9 +81,7 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
     iconSize: classCfg.iconSize ?? 1,
     legacyPosition: new THREE.Vector3(0, sz.height / 2 - 0.22, 0.08),
     iconPosition: new THREE.Vector3(0, sz.height / 2 - 0.4, 0.08),
-    onIconLoaded: () => {
-      if (lastSizingCamera) updateLabelFontSizes(lastSizingCamera, lastSizingRenderer);
-    }
+    onIconLoaded: scheduleLabelFontSizeRefresh
   });
   title.userData = {
     ...title.userData,

@@ -322,12 +322,25 @@ function clientHeaders(options = {}, payload = {}) {
 function draftEndpoint(modelName, options = {}, clientId = '') {
   const scope = normalizeDraftScope(options.draftScope || options.scope);
   const name = encodeURIComponent(modelFileNameFromValue(modelName));
+  const query = draftEndpointQuery(options, clientId);
   if (scope) {
     const base = `/api/drafts/${encodeURIComponent(scope)}/${name}`;
-    return clientId ? `${base}/clients/${encodeURIComponent(clientId)}` : base;
+    const path = clientId ? `${base}/clients/${encodeURIComponent(clientId)}` : base;
+    return `${path}${query}`;
   }
   const base = `/api/models/${name}/drafts`;
-  return clientId ? `${base}/${encodeURIComponent(clientId)}` : base;
+  const path = clientId ? `${base}/${encodeURIComponent(clientId)}` : base;
+  return `${path}${query}`;
+}
+
+function draftEndpointQuery(options = {}, clientId = '') {
+  if (clientId) return '';
+  const params = new URLSearchParams();
+  if (options.compact === true) params.set('compact', '1');
+  if (options.includeModel === false) params.set('includeModel', '0');
+  if (options.excludeClientId) params.set('excludeClientId', String(options.excludeClientId));
+  const text = params.toString();
+  return text ? `?${text}` : '';
 }
 
 function postClientDebugEntry(entry) {

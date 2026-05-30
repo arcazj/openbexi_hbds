@@ -73,7 +73,7 @@ function applyLinkLabelFontSettings(element, fontSettings = DEFAULT_LINK_FONT_SE
   element.style.borderRadius = `${Math.max(2, font.size * 1.2).toFixed(1)}px`;
 }
 
-export function createLinkBetweenClass(linkData, classById) {
+export function createLinkBetweenClass(linkData, classById, options = {}) {
   const sourceClass = classById.get(linkData.sourceClassId);
   const targetClass = classById.get(linkData.targetClassId);
   if (!sourceClass || !targetClass) return null;
@@ -137,7 +137,9 @@ export function createLinkBetweenClass(linkData, classById) {
 
   const handle = { linkData, sourceClass, targetClass, line, arrow, sourcePort, targetPort, labelObj, linkGroup };
   activeLinks.push(handle);
-  recalculateAllLinks();
+  if (options.recalculate !== false && options.deferRecalculate !== true) {
+    recalculateAllLinks();
+  }
   return handle;
 }
 
@@ -146,6 +148,7 @@ export function recalculateAllLinks() {
   const occupiedLanes = [];
   const occupiedLabels = [];
   const occupiedLabelParents = new WeakSet();
+  const obstacleBoxesByParent = new WeakMap();
   for (const link of activeLinks) {
     const key = [String(link.linkData.sourceClassId), String(link.linkData.targetClassId)].sort().join(':');
     if (!pairBuckets.has(key)) pairBuckets.set(key, []);
@@ -161,7 +164,7 @@ export function recalculateAllLinks() {
         occupiedLabels.push(...getStaticAttributeLabelBounds(parent));
         occupiedLabelParents.add(parent);
       }
-      const obstacleBoxes = getObstacleBoxes(parent, link.sourceClass, link.targetClass);
+      const obstacleBoxes = getCachedObstacleBoxes(obstacleBoxesByParent, parent, link.sourceClass, link.targetClass);
       const lane = laneDescriptors.get(link);
       const portPair = chooseRelationshipPortPair(link, parent, lane, obstacleBoxes);
       const route = buildOrthogonalRoute({
@@ -1110,6 +1113,24 @@ export function updateLinkFontSizes(camera, renderer) {
     const size = Math.max(minSize, Math.min(preferredSize, dynamicSize));
     applyLinkLabelFontSettings(label.element, { ...font, size });
   }
+}
+
+function getCachedObstacleBoxes(cache, parent, sourceClass, targetClass) {
+  if (!parent || !cache) return getObstacleBoxes(parent, sourceClass, targetClass);
+  let parentCache = cache.get(parent);
+  if (!parentCache) {
+    parentCache = new Map();
+    cache.set(parent, parentCache);
+  }
+  const key = obstaclePairKey(sourceClass, targetClass);
+  if (!parentCache.has(key)) {
+    parentCache.set(key, getObstacleBoxes(parent, sourceClass, targetClass));
+  }
+  return parentCache.get(key);
+}
+
+function obstaclePairKey(sourceClass, targetClass) {
+  return [sourceClass?.uuid || '', targetClass?.uuid || ''].sort().join(':');
 }
 
 export function createLinkData(input = {}, defaults = {}) {

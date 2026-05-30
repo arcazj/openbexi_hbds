@@ -37,9 +37,10 @@ import {
   setLayoutSettings,
   getFontSettings,
   setFontSettings,
-  normalizeFontSettings
-} from './hbds_model.js?v=material-surface-20260525a';
-import { recalculateAllLinks } from './hbds_class_link.js?v=font-zoom-20260523a';
+  normalizeFontSettings,
+  getFitQualityMetrics
+} from './hbds_model.js?v=model-fit-quality-20260530b';
+import { recalculateAllLinks } from './hbds_class_link.js?v=link-perf-20260530a';
 import {
   applyServerModelOperations,
   checkServerConnection,
@@ -59,7 +60,7 @@ import {
   modelFileNameFromValue,
   modelNameFromValue,
   serverModelValue
-} from './hbds_server_api.js?v=server-api-20260530b';
+} from './hbds_server_api.js?v=server-api-20260530c';
 import {
   collaborationWorkStatusDecision,
   coalesceDraftOperations,
@@ -127,6 +128,7 @@ let collaborationPanelRenderTimer = null;
 let collaborationPerformanceDiagnosticsTimer = null;
 let remoteDraftRefreshTimer = null;
 let remoteDraftRefreshInFlight = false;
+let deferredInterfaceRefreshTimer = null;
 let collaborationPreviewRenderToken = 0;
 let collaborationStatusTaskId = 0;
 let collaborationStatusHideTimer = null;
@@ -168,7 +170,7 @@ const COLLABORATION_PREVIEW_MAX_DATA_URL_CHARS = 480000;
 const COLLABORATION_PREVIEW_MIN_INTERVAL_MS = 2500;
 const COLLABORATION_PREVIEW_JPEG_QUALITY = 0.74;
 const CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS = 700;
-const CANVAS_LOAD_PROGRESS_LARGE_SHOW_AFTER_MS = 120;
+const CANVAS_LOAD_PROGRESS_LARGE_SHOW_AFTER_MS = 0;
 const LARGE_MODEL_NAME_PATTERN = /satellite_world_complete_structure\.json$/i;
 let nextClassNumber = 1;
 let nextHyperclassNumber = 1;
@@ -2032,6 +2034,17 @@ function updateModelSummary() {
   $('model-summary').textContent = option?.dataset?.summary || 'Blank workspace';
 }
 
+function scheduleDeferredInterfaceRefresh(options = {}) {
+  window.clearTimeout(deferredInterfaceRefreshTimer);
+  deferredInterfaceRefreshTimer = window.setTimeout(() => {
+    deferredInterfaceRefreshTimer = null;
+    renderModelTree();
+    renderPropertyPanel();
+    if (options.json !== false) updateJsonPreviewFromData();
+    updateRenderDiagnostics();
+  }, Number.isFinite(Number(options.delayMs)) ? Number(options.delayMs) : 160);
+}
+
 function ensureModelSelectOption(value, label, summary = '') {
   const select = $('test-model-select');
   if (!select || [...select.options].some(option => option.value === value)) return;
@@ -2053,6 +2066,7 @@ function labelFromModelFileName(fileName) {
 
 function updateInterface(options = {}) {
   syncSelectionIds();
+  const deferHeavyPanels = options.deferHeavyPanels === true;
   if (options.lightweight === true) {
     updateSelectedCard();
     updateLinkBuilderStatus();
@@ -2067,8 +2081,10 @@ function updateInterface(options = {}) {
   updateValidationStatus();
   updateSelectedCard();
   updateLinkBuilderStatus();
-  renderModelTree();
-  renderPropertyPanel();
+  if (!deferHeavyPanels) {
+    renderModelTree();
+    renderPropertyPanel();
+  }
   updateModeControls();
   repairAttributeLabels();
   enhanceIconTitleLabels();
@@ -2078,8 +2094,11 @@ function updateInterface(options = {}) {
   updateCanvasTitle();
   updateSharePanel();
   updateSaveStatus();
-  if (options.json !== false) updateJsonPreviewFromData();
+  if (options.json !== false && !deferHeavyPanels) updateJsonPreviewFromData();
   updateRenderDiagnostics();
+  if (deferHeavyPanels) {
+    scheduleDeferredInterfaceRefresh({ json: options.json });
+  }
 }
 
 function escapeHtml(value) {
@@ -3160,14 +3179,16 @@ function removeMissingRemoteDrafts(modelName, seenClientIds) {
 function scheduleRemoteDraftRefreshLoop() {
   window.clearTimeout(remoteDraftRefreshTimer);
   remoteDraftRefreshTimer = null;
-  if (!COLLABORATION_ENABLED || !serverConnected || !getSelectedCollaborationModelName()) return;
+  const scheduledModelName = getSelectedCollaborationModelName();
+  if (!COLLABORATION_ENABLED || !serverConnected || !scheduledModelName) return;
   if (document.hidden) return;
   const refreshInterval = getRemoteDraftList().length > 0
     ? COLLABORATION_REMOTE_DRAFT_ACTIVE_INTERVAL_MS
     : COLLABORATION_REMOTE_DRAFT_REFRESH_INTERVAL_MS;
   remoteDraftRefreshTimer = window.setTimeout(async () => {
     remoteDraftRefreshTimer = null;
-    await refreshRemoteDraftsForCurrentModel({ immediate: false });
+    if (getSelectedCollaborationModelName() !== scheduledModelName) return;
+    await refreshRemoteDraftsForCurrentModel({ immediate: false, modelName: scheduledModelName });
     scheduleRemoteDraftRefreshLoop();
   }, refreshInterval);
 }
@@ -4495,6 +4516,8 @@ async function refreshRemoteDraftsForCurrentModel(options = {}) {
   try {
     const result = await listServerDrafts(modelName, {
       draftScope: COLLABORATION_DRAFT_SCOPE,
+      compact: options.immediate !== true,
+      excludeClientId: serverEvents?.clientId || '',
       timeoutMs: 2500
     });
     if (getSelectedCollaborationModelName() !== modelName) {
@@ -7114,6 +7137,7 @@ function installDebugHooks() {
     triggerCollaborationStatusForTest,
     getLinkHubMetrics: collectLinkHubMetrics,
     getLabelMetrics: collectLabelMetrics,
+    getFitQuality: () => getFitQualityMetrics(ctx()),
     sampleRendererPixels
   };
 }
@@ -7409,9 +7433,9 @@ async function refreshWorkspace(message, options = {}) {
     refreshSceneFromData(ctx());
   }
 
-  if (fit) fitModelToCanvas(ctx(), { padding: 1.18, updateOverview: true });
+  if (fit) fitModelToCanvas(ctx(), { padding: 1.08, updateOverview: true });
   updateOverview();
-  updateInterface({ json: options.json });
+  updateInterface({ json: options.json, deferHeavyPanels: options.deferHeavyPanels === true });
 
   if (message) {
     addLog(message);
@@ -7888,7 +7912,7 @@ async function handleOptimizeLayout() {
 }
 
 function handleFitModel() {
-  fitModelToCanvas(ctx(), { padding: 1.18, updateOverview: true });
+  fitModelToCanvas(ctx(), { padding: 1.08, updateOverview: true });
   updateOverview();
   renderOnce();
   updateJsonPreviewFromData();
@@ -8360,6 +8384,7 @@ async function handleLoadModel(options = {}) {
   }
 
   const selectedLabel = select?.selectedOptions?.[0]?.textContent || value;
+  const largeModelLoad = isLargeModelValue(value);
   const loadedModel = await withCanvasLoadProgress(`Loading ${selectedLabel}`, async progress => {
     let model;
     progress.update(18, `Fetching ${selectedLabel}`);
@@ -8396,12 +8421,13 @@ async function handleLoadModel(options = {}) {
       refresh: false,
       optimize,
       fit: optimize || !hasSavedFit,
-      publishDraft: false
+      publishDraft: false,
+      deferHeavyPanels: largeModelLoad
     });
     progress.update(94, `Finishing ${selectedLabel}`);
     return model;
   }, {
-    showAfterMs: isLargeModelValue(value) ? CANVAS_LOAD_PROGRESS_LARGE_SHOW_AFTER_MS : CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS
+    showAfterMs: largeModelLoad ? CANVAS_LOAD_PROGRESS_LARGE_SHOW_AFTER_MS : CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS
   });
   if (!loadedModel || !isCurrentModelLoad(requestId, value)) return;
   localDraftDirty = false;
@@ -8458,7 +8484,7 @@ async function runScenarioSuite() {
         if (algorithm !== 'none' && !hasSavedFit) {
           await optimizeAndRefreshLayout(ctx(), { algorithm });
         }
-        if (!hasSavedFit) fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
+        if (!hasSavedFit) fitModelToCanvas(ctx(), { padding: 1.08, updateOverview: true });
         const fontErrors = validateRenderedFontMetrics();
         if (fontErrors.length) {
           failures.push(`${label}: ${fontErrors.join('; ')}`);
@@ -8540,7 +8566,7 @@ async function runSatelliteFontZoomRegression() {
     allowedBasePath: 'models/',
     defaultBasePath: 'models/'
   });
-  fitModelToCanvas(ctx(), { padding: 1.15, updateOverview: true });
+  fitModelToCanvas(ctx(), { padding: 1.08, updateOverview: true });
   const target = orbitControls?.target?.clone?.() || new THREE.Vector3();
   const baseDistance = Math.max(1, camera.position.distanceTo(target));
   const samples = [
