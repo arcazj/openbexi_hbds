@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings } from './hbds_class.js?v=material-surface-20260530a';
+import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings } from './hbds_class.js?v=label-readability-20260531c';
 
 const hyperclassLabels = [];
+const MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE = 6;
 let lastSizingCamera = null;
 let lastSizingRenderer = null;
 let labelFontSizeRefreshScheduled = false;
@@ -16,6 +17,11 @@ function scheduleLabelFontSizeRefresh() {
     labelFontSizeRefreshScheduled = false;
     if (lastSizingCamera) updateLabelFontSizes(lastSizingCamera, lastSizingRenderer);
   });
+}
+
+export function clearHyperclassLabelRegistry() {
+  hyperclassLabels.length = 0;
+  labelFontSizeRefreshScheduled = false;
 }
 
 export const Loader = {
@@ -169,9 +175,12 @@ export function updateLabelFontSizes(camera, renderer, options = {}) {
     const fitSize = availableWidthPx / Math.max(1, String(text).length * 0.62 + (label.element.classList.contains('hbds-icon-title') ? 1.25 : 0));
     const configuredSize = Number(label.userData?.fontSettings?.size);
     const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), 1.5, 22);
+    const minSize = Number.isFinite(configuredSize)
+      ? Math.min(configuredSize, MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE)
+      : MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE;
     const size = Number.isFinite(configuredSize)
-      ? Math.max(1.5, Math.min(configuredSize, dynamicSize))
-      : dynamicSize;
+      ? THREE.MathUtils.clamp(Math.min(configuredSize, dynamicSize), minSize, configuredSize)
+      : Math.max(minSize, dynamicSize);
     applyHyperclassTitleSizing(label.element, availableWidthPx, size);
   });
 }

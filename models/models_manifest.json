@@ -46,6 +46,11 @@
       "description": "satellite world complete structure"
     },
     {
+      "value": "models/satellite_world_complete_structure2.json",
+      "label": "satellite world complete structure2",
+      "description": "satellite world complete structure2"
+    },
+    {
       "value": "models/satellite_world_simple_structure.json",
       "label": "satellite world simple structure",
       "description": "satellite world simple structure"

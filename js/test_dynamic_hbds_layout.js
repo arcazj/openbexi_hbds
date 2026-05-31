@@ -39,8 +39,8 @@ import {
   setFontSettings,
   normalizeFontSettings,
   getFitQualityMetrics
-} from './hbds_model.js?v=model-fit-quality-20260530b';
-import { recalculateAllLinks } from './hbds_class_link.js?v=link-perf-20260530a';
+} from './hbds_model.js?v=label-readability-20260531c';
+import { recalculateAllLinks } from './hbds_class_link.js?v=label-readability-20260531c';
 import {
   applyServerModelOperations,
   checkServerConnection,
@@ -2867,6 +2867,7 @@ function buildShareUrl() {
   const url = new URL(window.location.href);
   url.searchParams.delete('runScenarioSuite');
   url.searchParams.delete('runSatelliteFontRegression');
+  url.searchParams.delete('runImmediateLabelRegression');
   const selected = $('test-model-select')?.value || '';
   if (selected) {
     url.searchParams.set('sharedModel', selected);
@@ -2995,6 +2996,7 @@ function commandPaletteCommands() {
     { id: 'export-vector-svg', label: 'Export SVG Vector', keywords: 'editable approximate preview', enabled: () => nodes().length > 0, run: handleExportVectorSvg },
     { id: 'export-json', label: 'Export JSON', keywords: 'model data download', run: handleExportJson },
     { id: 'run-scenarios', label: 'Run Scenario Suite', keywords: 'test regression', enabled: () => !HIDE_SCENARIO_SUITE, run: runScenarioSuite },
+    { id: 'run-label-regression', label: 'Run Label Load Regression', keywords: 'test regression labels immediate load', run: runImmediateLabelLoadRegression },
     { id: 'open-builder', label: 'Open Model Builder', keywords: 'inspector properties edit', run: () => openControlSection('model-builder') },
     { id: 'open-productivity', label: 'Open Productivity', keywords: 'tree duplicate bulk attributes route subgraph', run: () => openControlSection('productivity') },
     { id: 'open-share', label: 'Open Share', keywords: 'social export link', run: () => openControlSection('share') },
@@ -6705,13 +6707,14 @@ function installIconOnLabel(label, labelObject, model) {
     label.style.background = 'transparent';
     label.style.boxShadow = 'none';
     const currentFontSize = label.style.fontSize || getComputedStyle(label).fontSize;
+    const activeFontSize = Number.parseFloat(currentFontSize);
     const fontSettings = labelObject.userData?.fontSettings;
     if (fontSettings) {
       label.style.fontWeight = fontSettings.bold ? '700' : '400';
       label.style.fontFamily = fontSettings.family || 'Arial, sans-serif';
       label.style.fontStyle = fontSettings.italic ? 'italic' : 'normal';
       label.style.textDecoration = fontSettings.underline ? 'underline' : 'none';
-      label.style.fontSize = `${fontSettings.size}px`;
+      label.style.fontSize = `${Number.isFinite(activeFontSize) ? activeFontSize : fontSettings.size}px`;
     } else {
       label.style.fontWeight = '700';
       label.style.fontFamily = 'Arial, sans-serif';
@@ -6760,19 +6763,14 @@ function installIconOnLabel(label, labelObject, model) {
     renderOnce();
   };
   image.onerror = () => {
-    if (image.dataset.fallbackAttempted === 'true') {
-      label.dataset.iconState = 'missing';
-      return;
-    }
-    image.dataset.fallbackAttempted = 'true';
-    if (isSameIconPath(image.src, DEFAULT_EMPTY_ICON_PATH)) {
-      label.dataset.iconState = 'missing';
-      return;
-    }
-    image.src = DEFAULT_EMPTY_ICON_PATH;
+    label.dataset.iconState = 'missing';
   };
   resolveIconPathForModel(model).then((resolvedPath) => {
-    image.src = resolvedPath ?? DEFAULT_EMPTY_ICON_PATH;
+    if (!resolvedPath || isSameIconPath(resolvedPath, DEFAULT_EMPTY_ICON_PATH)) {
+      label.dataset.iconState = 'missing';
+      return;
+    }
+    image.src = resolvedPath;
   });
 }
 
@@ -7217,6 +7215,8 @@ function collectLabelMetrics() {
       fontWeight: style.fontWeight,
       fontStyle: style.fontStyle,
       textDecorationLine: style.textDecorationLine,
+      transform: element.style.transform || style.transform || '',
+      hyperclass: element.getAttribute('data-hyperclass') === 'true',
       visible: rect.width > 0 && rect.height > 0
     };
   });
@@ -7233,6 +7233,56 @@ function validateRenderedFontMetrics() {
     if (!String(metric.fontFamily || '').trim()) errors.push(`label ${index + 1} has no font family`);
   });
   return errors;
+}
+
+function labelMetricHasVisibleText(metric) {
+  return Boolean(metric?.visible && String(metric.text || '').trim() && metric.width > 0 && metric.height > 0);
+}
+
+function labelMetricIsPlaced(metric) {
+  if (!labelMetricHasVisibleText(metric)) return false;
+  return Math.abs(Number(metric.left) || 0) > 0.5 || Math.abs(Number(metric.top) || 0) > 0.5;
+}
+
+function summarizeLabelMetrics(metrics, predicate) {
+  const matching = metrics.filter(predicate);
+  const visible = matching.filter(labelMetricHasVisibleText);
+  const placed = visible.filter(labelMetricIsPlaced);
+  return {
+    count: matching.length,
+    visible: visible.length,
+    placed: placed.length,
+    sample: visible[0]?.text || matching.find(metric => metric.text)?.text || ''
+  };
+}
+
+function immediateLoadLabelSummary(metrics = collectLabelMetrics()) {
+  return {
+    hyperclass: summarizeLabelMetrics(metrics, metric => metric.classes.includes('class-label') && metric.hyperclass),
+    class: summarizeLabelMetrics(metrics, metric => metric.classes.includes('class-label') && !metric.hyperclass),
+    attribute: summarizeLabelMetrics(metrics, metric => metric.classes.includes('attribute-label'))
+  };
+}
+
+function validateImmediateLoadLabels(stats = getCurrentStats(), metrics = collectLabelMetrics()) {
+  const summary = immediateLoadLabelSummary(metrics);
+  const errors = [];
+  if (stats.hyperclasses > 0 && summary.hyperclass.visible <= 0) errors.push('hyperclass names are not visible immediately after load');
+  if (stats.classes > 0 && summary.class.visible <= 0) errors.push('class names are not visible immediately after load');
+  if (stats.attributes > 0 && summary.attribute.visible <= 0) errors.push('attribute names are not visible immediately after load');
+  if (stats.hyperclasses > 0 && summary.hyperclass.placed <= 0) errors.push('hyperclass names are not positioned immediately after load');
+  if (stats.classes > 0 && summary.class.placed <= 0) errors.push('class names are not positioned immediately after load');
+  if (stats.attributes > 0 && summary.attribute.placed <= 0) errors.push('attribute names are not positioned immediately after load');
+  if (stats.hyperclasses > 0 && summary.hyperclass.count < stats.hyperclasses) {
+    errors.push(`expected ${stats.hyperclasses} hyperclass labels, found ${summary.hyperclass.count}`);
+  }
+  if (stats.classes > 0 && summary.class.count < stats.classes) {
+    errors.push(`expected ${stats.classes} class labels, found ${summary.class.count}`);
+  }
+  if (stats.attributes > 0 && summary.attribute.count < stats.attributes) {
+    errors.push(`expected ${stats.attributes} attribute labels, found ${summary.attribute.count}`);
+  }
+  return { valid: errors.length === 0, errors, summary };
 }
 
 function getLabelOverlapSummary(metrics, ratioThreshold = 0.55) {
@@ -8479,6 +8529,12 @@ async function runScenarioSuite() {
           failures.push(`${label}: rendered no class-like elements`);
           continue;
         }
+        await nextAnimationFrame();
+        const immediateLabelCheck = validateImmediateLoadLabels(stats);
+        if (!immediateLabelCheck.valid) {
+          failures.push(`${label}: ${immediateLabelCheck.errors.join('; ')}`);
+          continue;
+        }
         const algorithm = getLayoutAlgorithm();
         const hasSavedFit = hasFitMetadata(loadedModel);
         if (algorithm !== 'none' && !hasSavedFit) {
@@ -8558,6 +8614,48 @@ async function sampleSatelliteFontZoomState(label, distanceFactor, baseDistance,
     overlap: getLabelOverlapSummary(metrics),
     metrics
   };
+}
+
+function findModelOptionByFileName(fileName) {
+  const select = $('test-model-select');
+  if (!select) return null;
+  const expected = modelFileNameFromValue(fileName, fileName);
+  return [...select.options].find(option => modelFileNameFromValue(option.value, option.value) === expected) || null;
+}
+
+async function runImmediateLabelLoadRegression() {
+  const targetFile = 'satellite_world_simple_structure.json';
+  const modelOption = findModelOptionByFileName(targetFile);
+  if (!modelOption) {
+    const message = `Immediate label load regression failed: missing ${targetFile}`;
+    addLog(message);
+    setStatus(message, 'error');
+    return { valid: false, errors: [message], summary: immediateLoadLabelSummary() };
+  }
+
+  const select = $('test-model-select');
+  if (select) select.value = modelOption.value;
+  const loadedModel = await handleLoadModel({ value: modelOption.value, publishDraft: false });
+  await nextAnimationFrame();
+  const stats = getCurrentStats();
+  const result = validateImmediateLoadLabels(stats);
+  const validation = validateData(loadedModel || getData());
+  if (!validation.valid) result.errors.push(`model invalid: ${validation.errors.join('; ')}`);
+  result.valid = result.errors.length === 0;
+
+  const summaryText = `hyperclass ${result.summary.hyperclass.visible}/${result.summary.hyperclass.count} visible, ${result.summary.hyperclass.placed} placed; `
+    + `class ${result.summary.class.visible}/${result.summary.class.count} visible, ${result.summary.class.placed} placed; `
+    + `attribute ${result.summary.attribute.visible}/${result.summary.attribute.count} visible, ${result.summary.attribute.placed} placed`;
+  if (result.valid) {
+    addLog(`Immediate label load regression passed (${summaryText})`);
+    setStatus('Immediate label load regression passed', 'ok');
+  } else {
+    addLog(`Immediate label load regression failed (${summaryText})`);
+    result.errors.forEach(error => addLog(`Immediate label failure: ${error}`));
+    setStatus(`Immediate label load regression failed: ${result.errors.length}`, 'warn');
+  }
+  updateRenderDiagnostics();
+  return { ...result, stats };
 }
 
 async function runSatelliteFontZoomRegression() {
@@ -9133,6 +9231,9 @@ async function init() {
   }
   if (params.has('runSatelliteFontRegression')) {
     setTimeout(() => runAction(runSatelliteFontZoomRegression), 0);
+  }
+  if (params.has('runImmediateLabelRegression')) {
+    setTimeout(() => runAction(runImmediateLabelLoadRegression), 0);
   }
 
   if (!params.has('sharedModel')) {

@@ -52,6 +52,8 @@ export const DEFAULT_LABEL_FONT_SETTINGS = Object.freeze({
     italic: false,
     underline: false
 });
+const MIN_READABLE_TITLE_FONT_SIZE = 6;
+const MIN_READABLE_ATTRIBUTE_FONT_SIZE = 5;
 
 export function normalizeLabelFontSettings(font = {}, fallback = DEFAULT_LABEL_FONT_SETTINGS) {
     const source = font && typeof font === 'object' ? font : {};
@@ -1023,8 +1025,12 @@ function installOptionalIcon(label, labelObj, classData, options) {
         label.style.background = 'transparent';
         label.style.boxShadow = 'none';
         const currentFontSize = label.style.fontSize || globalThis.getComputedStyle?.(label)?.fontSize;
+        const activeFontSize = Number.parseFloat(currentFontSize);
         if (labelObj.userData?.fontSettings) {
-            applyLabelFontSettings(label, labelObj.userData.fontSettings);
+            applyLabelFontSettings(label, {
+                ...labelObj.userData.fontSettings,
+                ...(Number.isFinite(activeFontSize) ? {size: activeFontSize} : {})
+            });
         } else {
             label.style.fontWeight = '700';
             label.style.fontFamily = 'Arial, sans-serif';
@@ -1072,13 +1078,10 @@ function installOptionalIcon(label, labelObj, classData, options) {
         if (options.iconPosition) labelObj.position.copy(options.iconPosition);
         options.onIconLoaded?.(labelObj, label);
     };
-    img.onerror = () => {
-        if (img.dataset.fallbackAttempted === 'true') return;
-        img.dataset.fallbackAttempted = 'true';
-        if (!isSameIconPath(img.src, DEFAULT_EMPTY_ICON_PATH)) img.src = DEFAULT_EMPTY_ICON_PATH;
-    };
+    img.onerror = () => {};
     resolveIconPathForClass(classData).then((resolvedPath) => {
-        img.src = resolvedPath ?? DEFAULT_EMPTY_ICON_PATH;
+        if (!resolvedPath || isSameIconPath(resolvedPath, DEFAULT_EMPTY_ICON_PATH)) return;
+        img.src = resolvedPath;
     });
 }
 
@@ -1399,6 +1402,11 @@ let lastSizingCamera = null;
 let lastSizingRenderer = null;
 let labelFontSizeRefreshScheduled = false;
 
+export function clearLabelRegistry() {
+    labels.length = 0;
+    labelFontSizeRefreshScheduled = false;
+}
+
 function scheduleLabelFontSizeRefresh() {
     if (!lastSizingCamera || labelFontSizeRefreshScheduled) return;
     labelFontSizeRefreshScheduled = true;
@@ -1435,9 +1443,12 @@ export function updateLabelFontSizes(camera, renderer) {
             const fitSize = getFontSizeForTextWidth(text, availableWidthPx, label.element.classList.contains('hbds-icon-title') ? 1.25 : 0);
             const configuredSize = Number(label.userData?.fontSettings?.size);
             const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), 1.4, 19);
+            const minSize = Number.isFinite(configuredSize)
+                ? Math.min(configuredSize, MIN_READABLE_TITLE_FONT_SIZE)
+                : MIN_READABLE_TITLE_FONT_SIZE;
             const fontSize = Number.isFinite(configuredSize)
-                ? Math.max(1.4, Math.min(configuredSize, dynamicSize))
-                : dynamicSize;
+                ? THREE.MathUtils.clamp(Math.min(configuredSize, dynamicSize), minSize, configuredSize)
+                : Math.max(minSize, dynamicSize);
             applyTitleLabelSizing(label.element, availableWidthPx, fontSize);
         } else {
             const maxWorldWidth = label.userData?.maxWorldWidth ?? 1.75;
@@ -1447,12 +1458,14 @@ export function updateLabelFontSizes(camera, renderer) {
             const distanceSize = THREE.MathUtils.clamp(110 / Math.max(distance, 1e-6), 1.1, 11.2);
             const configuredSize = Number(label.userData?.fontSettings?.size);
             const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, verticalCap), 1.1, 11.2);
+            const minSize = Number.isFinite(configuredSize)
+                ? Math.min(configuredSize, MIN_READABLE_ATTRIBUTE_FONT_SIZE)
+                : MIN_READABLE_ATTRIBUTE_FONT_SIZE;
             const fontSize = Number.isFinite(configuredSize)
-                ? Math.max(1.1, Math.min(configuredSize, dynamicSize))
-                : dynamicSize;
+                ? THREE.MathUtils.clamp(Math.min(configuredSize, dynamicSize), minSize, configuredSize)
+                : Math.max(minSize, dynamicSize);
             applyAttributeLabelSizing(label.element, availableWidthPx, fontSize);
         }
-        label.element.style.transform = 'translateZ(0)';
     });
 }
 

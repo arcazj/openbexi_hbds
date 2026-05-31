@@ -18,6 +18,7 @@ const DEFAULT_LINK_FONT_SETTINGS = {
   italic: false,
   underline: false
 };
+const MIN_READABLE_LINK_FONT_SIZE = 5;
 
 export const Loader = {
   async load(modelName) {
@@ -1106,7 +1107,7 @@ export function updateLinkFontSizes(camera, renderer) {
     const rendering = label.parent?.userData?.linkData?.rendering || {};
     const collisionWidthWorld = rendering.labelCollisionWidth ?? Math.max(0.85, String(label.userData?.text || label.element.textContent || '').length * 0.12);
     const availableWidthPx = Math.max(42, collisionWidthWorld * pixelsPerWorldUnit);
-    const minSize = 1;
+    const minSize = Math.min(preferredSize, MIN_READABLE_LINK_FONT_SIZE);
     const distanceSize = THREE.MathUtils.clamp(120 / d, minSize, Math.max(18, preferredSize));
     const fitSize = getFontSizeForTextWidth(label.userData?.text || label.element.textContent || '', availableWidthPx, 2);
     const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize), minSize, Math.max(18, preferredSize));

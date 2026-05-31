@@ -1,0 +1,787 @@
+{
+  "metadata": {
+    "name": "OpenShift Cloud Network",
+    "purpose": "Reference HBDS model for an OpenShift cluster running in a cloud network.",
+    "preserveLayout": true,
+    "regressionTags": [
+      "model",
+      "openshift",
+      "cloud",
+      "network"
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "grid",
+      "fit": {
+        "padding": 1.18,
+        "fitHeightDistance": 30.8253,
+        "fitWidthDistance": 23.7526,
+        "distance": 21.5265,
+        "diagramWidth": 20.855,
+        "diagramHeight": 12.594,
+        "diagramDepth": 0.08,
+        "radius": 12.1814,
+        "center": {
+          "x": -0.72,
+          "y": -0.027,
+          "z": 0.04
+        },
+        "cameraAspect": 1.2978,
+        "cameraFov": 50
+      }
+    },
+    "font": {
+      "size": 12,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "openshift_cloud_network_cloud",
+        "name": "Cloud Network",
+        "type": "hyperclass",
+        "attributes": [
+          "Region",
+          "Availability zones",
+          "CIDR block",
+          "Security policy"
+        ],
+        "children": [
+          "openshift_cloud_network_vpc",
+          "openshift_cloud_network_external_dns",
+          "openshift_cloud_network_registry",
+          "openshift_cloud_network_observability"
+        ],
+        "position": {
+          "x": 0.2955,
+          "y": -1.5943,
+          "z": 0
+        },
+        "size": {
+          "width": 20.514999999999997,
+          "height": 12.540000000000001
+        },
+        "rendering": {
+          "class": {
+            "color": "#dbeafe",
+            "metallicColor": "#93c5fd",
+            "material": "metallic",
+            "borderColor": "#1d4ed8",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.3,
+            "opacity": 0.18,
+            "metalness": 0.42,
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#1d4ed8",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#1d4ed8",
+            "lineWidth": 0.01
+          },
+          "textColor": "#0f172a"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_vpc",
+        "name": "Private VPC",
+        "type": "hyperclass",
+        "attributes": [
+          "Private subnets",
+          "Route tables",
+          "Network ACLs",
+          "Firewall rules"
+        ],
+        "parentClassId": "openshift_cloud_network_cloud",
+        "children": [
+          "openshift_cloud_network_load_balancer",
+          "openshift_cloud_network_ingress",
+          "openshift_cloud_network_service_mesh",
+          "openshift_cloud_network_worker_pool",
+          "openshift_cloud_network_database",
+          "openshift_cloud_network_storage"
+        ],
+        "position": {
+          "x": 2.198,
+          "y": -3.0343,
+          "z": 0
+        },
+        "size": {
+          "width": 11.98,
+          "height": 8.56
+        },
+        "rendering": {
+          "class": {
+            "color": "#dcfce7",
+            "metallicColor": "#86efac",
+            "material": "metallic",
+            "borderColor": "#15803d",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.3,
+            "opacity": 0.18,
+            "metalness": 0.38,
+            "roughness": 0.3,
+            "emissiveIntensity": 0.035
+          },
+          "attributes": {
+            "checkboxColor": "#15803d",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#15803d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_external_dns",
+        "name": "External DNS",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Public zone",
+          "Wildcard record",
+          "TLS policy"
+        ],
+        "parentClassId": "openshift_cloud_network_cloud",
+        "position": {
+          "x": 2.198,
+          "y": 2.9007,
+          "z": 0
+        },
+        "size": {
+          "width": 1.9000000000000001,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "metallicColor": "#7dd3fc",
+            "material": "metallic",
+            "borderColor": "#0369a1",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "bodyType": "shape",
+            "shapeType": "offPageConnector"
+          },
+          "attributes": {
+            "checkboxColor": "#0369a1",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#0369a1",
+            "lineWidth": 0.01
+          },
+          "textColor": "#082f49"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_load_balancer",
+        "name": "Cloud Load Balancer",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Public VIP",
+          "Health checks",
+          "Forwarding rules"
+        ],
+        "parentClassId": "openshift_cloud_network_vpc",
+        "position": {
+          "x": -1.447,
+          "y": -0.5293,
+          "z": 0
+        },
+        "size": {
+          "width": 2.705,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "metallicColor": "#fde68a",
+            "material": "metallic",
+            "borderColor": "#d97706",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "bodyType": "shape",
+            "shapeType": "hexagon"
+          },
+          "attributes": {
+            "checkboxColor": "#d97706",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#d97706",
+            "lineWidth": 0.01
+          },
+          "textColor": "#451a03"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_ingress",
+        "name": "OpenShift Ingress Router",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Routes",
+          "Ingress controller",
+          "Certificates"
+        ],
+        "parentClassId": "openshift_cloud_network_vpc",
+        "position": {
+          "x": -1.502,
+          "y": -3.0593,
+          "z": 0
+        },
+        "size": {
+          "width": 3.2800000000000002,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#fee2e2",
+            "metallicColor": "#fca5a5",
+            "material": "metallic",
+            "borderColor": "#b91c1c",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "bodyType": "shape",
+            "shapeType": "trapezoid"
+          },
+          "attributes": {
+            "checkboxColor": "#b91c1c",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#b91c1c",
+            "lineWidth": 0.01
+          },
+          "textColor": "#450a0a"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_service_mesh",
+        "name": "Service Mesh",
+        "type": "roundedRectangle",
+        "attributes": [
+          "mTLS",
+          "Traffic policy",
+          "Sidecars"
+        ],
+        "parentClassId": "openshift_cloud_network_vpc",
+        "position": {
+          "x": -1.392,
+          "y": -5.7393,
+          "z": 0
+        },
+        "size": {
+          "width": 1.9000000000000001,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#f3e8ff",
+            "metallicColor": "#d8b4fe",
+            "material": "metallic",
+            "borderColor": "#7e22ce",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "bodyType": "shape",
+            "shapeType": "circlePlus"
+          },
+          "attributes": {
+            "checkboxColor": "#7e22ce",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#7e22ce",
+            "lineWidth": 0.01
+          },
+          "textColor": "#3b0764"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_worker_pool",
+        "name": "Worker Node Pool",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Pods",
+          "Services",
+          "Node labels",
+          "Security context"
+        ],
+        "parentClassId": "openshift_cloud_network_vpc",
+        "position": {
+          "x": 4.418,
+          "y": -5.7393,
+          "z": 0
+        },
+        "size": {
+          "width": 2.3600000000000003,
+          "height": 2.05
+        },
+        "rendering": {
+          "class": {
+            "color": "#dcfce7",
+            "metallicColor": "#bbf7d0",
+            "material": "metallic",
+            "borderColor": "#166534",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "bodyType": "shape",
+            "shapeType": "predefinedProcess"
+          },
+          "attributes": {
+            "checkboxColor": "#166534",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#166534",
+            "lineWidth": 0.01
+          },
+          "textColor": "#052e16"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_database",
+        "name": "Managed Database",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Private endpoint",
+          "Backup policy",
+          "Secrets"
+        ],
+        "parentClassId": "openshift_cloud_network_vpc",
+        "position": {
+          "x": 4.418,
+          "y": -0.5293,
+          "z": 0
+        },
+        "size": {
+          "width": 2.3600000000000003,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#ede9fe",
+            "metallicColor": "#c4b5fd",
+            "material": "metallic",
+            "borderColor": "#6d28d9",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "bodyType": "shape",
+            "shapeType": "database"
+          },
+          "attributes": {
+            "checkboxColor": "#6d28d9",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#6d28d9",
+            "lineWidth": 0.01
+          },
+          "textColor": "#2e1065"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_storage",
+        "name": "Persistent Storage",
+        "type": "roundedRectangle",
+        "attributes": [
+          "StorageClass",
+          "Persistent volumes",
+          "Encryption"
+        ],
+        "parentClassId": "openshift_cloud_network_vpc",
+        "position": {
+          "x": 4.363,
+          "y": -3.0593,
+          "z": 0
+        },
+        "size": {
+          "width": 2.5900000000000003,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#ccfbf1",
+            "metallicColor": "#5eead4",
+            "material": "metallic",
+            "borderColor": "#0f766e",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "bodyType": "shape",
+            "shapeType": "directAccessStorage"
+          },
+          "attributes": {
+            "checkboxColor": "#0f766e",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#0f766e",
+            "lineWidth": 0.01
+          },
+          "textColor": "#042f2e"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_registry",
+        "name": "Container Registry",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Image repository",
+          "Pull secret",
+          "Vulnerability scan"
+        ],
+        "parentClassId": "openshift_cloud_network_cloud",
+        "position": {
+          "x": -8.017,
+          "y": 2.9007,
+          "z": 0
+        },
+        "size": {
+          "width": 2.5900000000000003,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#fef9c3",
+            "metallicColor": "#fde047",
+            "material": "metallic",
+            "borderColor": "#a16207",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "bodyType": "shape",
+            "shapeType": "storedData"
+          },
+          "attributes": {
+            "checkboxColor": "#a16207",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#a16207",
+            "lineWidth": 0.01
+          },
+          "textColor": "#422006"
+        }
+      },
+      {
+        "id": "openshift_cloud_network_observability",
+        "name": "Observability",
+        "type": "roundedRectangle",
+        "attributes": [
+          "Metrics",
+          "Logs",
+          "Alerts"
+        ],
+        "parentClassId": "openshift_cloud_network_cloud",
+        "position": {
+          "x": -7.752,
+          "y": -3.0343,
+          "z": 0
+        },
+        "size": {
+          "width": 2.015,
+          "height": 1.75
+        },
+        "rendering": {
+          "class": {
+            "color": "#fce7f3",
+            "metallicColor": "#f9a8d4",
+            "material": "metallic",
+            "borderColor": "#be185d",
+            "borderWidth": 0.02,
+            "cornerRadius": 0.1,
+            "bodyType": "shape",
+            "shapeType": "display"
+          },
+          "attributes": {
+            "checkboxColor": "#be185d",
+            "checkboxMaterial": "metallic",
+            "shape": "circle",
+            "size": {
+              "width": 0.12,
+              "height": 0.12
+            }
+          },
+          "connections": {
+            "lineColor": "#be185d",
+            "lineWidth": 0.01
+          },
+          "textColor": "#500724"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "openshift_cloud_network_link_dns_to_lb",
+        "sourceClassId": "openshift_cloud_network_external_dns",
+        "targetClassId": "openshift_cloud_network_load_balancer",
+        "rendering": {
+          "labelText": "resolves",
+          "orthogonalStyle": "auto",
+          "lineColor": "#0369a1",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.35,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#082f49",
+          "labelBackgroundColor": "rgba(224,242,254,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "openshift_cloud_network_link_lb_to_ingress",
+        "sourceClassId": "openshift_cloud_network_load_balancer",
+        "targetClassId": "openshift_cloud_network_ingress",
+        "rendering": {
+          "labelText": "forwards",
+          "orthogonalStyle": "auto",
+          "lineColor": "#d97706",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.3,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#451a03",
+          "labelBackgroundColor": "rgba(254,243,199,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "openshift_cloud_network_link_ingress_to_mesh",
+        "sourceClassId": "openshift_cloud_network_ingress",
+        "targetClassId": "openshift_cloud_network_service_mesh",
+        "rendering": {
+          "labelText": "routes",
+          "orthogonalStyle": "auto",
+          "lineColor": "#b91c1c",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.3,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#450a0a",
+          "labelBackgroundColor": "rgba(254,226,226,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "openshift_cloud_network_link_mesh_to_workers",
+        "sourceClassId": "openshift_cloud_network_service_mesh",
+        "targetClassId": "openshift_cloud_network_worker_pool",
+        "rendering": {
+          "labelText": "balances",
+          "orthogonalStyle": "auto",
+          "lineColor": "#7e22ce",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.35,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#3b0764",
+          "labelBackgroundColor": "rgba(243,232,255,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "openshift_cloud_network_link_workers_to_db",
+        "sourceClassId": "openshift_cloud_network_worker_pool",
+        "targetClassId": "openshift_cloud_network_database",
+        "rendering": {
+          "labelText": "reads/writes",
+          "orthogonalStyle": "auto",
+          "lineColor": "#6d28d9",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": 0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#2e1065",
+          "labelBackgroundColor": "rgba(237,233,254,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "openshift_cloud_network_link_workers_to_storage",
+        "sourceClassId": "openshift_cloud_network_worker_pool",
+        "targetClassId": "openshift_cloud_network_storage",
+        "rendering": {
+          "labelText": "mounts",
+          "orthogonalStyle": "auto",
+          "lineColor": "#0f766e",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "curveOffset": -0.45,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#042f2e",
+          "labelBackgroundColor": "rgba(204,251,241,0.95)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "openshift_cloud_network_link_registry_to_workers",
+        "sourceClassId": "openshift_cloud_network_registry",
+        "targetClassId": "openshift_cloud_network_worker_pool",
+        "rendering": {
+          "labelText": "pulls images",
+          "orthogonalStyle": "auto",
+          "lineColor": "#a16207",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "curveOffset": -0.5,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#422006",
+          "labelBackgroundColor": "rgba(254,249,195,0.95)",
+          "labelPositionAlongPath": 0.48,
+          "labelOffsetFromPath": -0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "openshift_cloud_network_link_workers_to_observability",
+        "sourceClassId": "openshift_cloud_network_worker_pool",
+        "targetClassId": "openshift_cloud_network_observability",
+        "rendering": {
+          "labelText": "exports telemetry",
+          "orthogonalStyle": "auto",
+          "lineColor": "#be185d",
+          "lineWidth": 2,
+          "lineStyle": "dashed",
+          "curveOffset": 0.55,
+          "arrowheadVisibility": true,
+          "arrowheadType": "triangle",
+          "arrowheadSize": 0.22,
+          "labelFontSize": 13,
+          "labelColor": "#500724",
+          "labelBackgroundColor": "rgba(252,231,243,0.95)",
+          "labelPositionAlongPath": 0.52,
+          "labelOffsetFromPath": 0.2,
+          "labelRotationBehavior": "follow",
+          "zIndex": 8
+        },
+        "allowSelfLink": true
+      }
+    ]
+  }
+}
