@@ -27,28 +27,35 @@
       "algorithm": "hierarchy",
       "fit": {
         "padding": 1.18,
-        "fitHeightDistance": 20.648,
-        "fitWidthDistance": 14.1204,
-        "distance": 13.0134,
+        "fitHeightDistance": 7.2499,
+        "fitWidthDistance": 13.3566,
+        "distance": 14.3526,
         "diagramWidth": 14.7725,
-        "diagramHeight": 6.934,
-        "diagramDepth": 0.097,
-        "radius": 8.1596,
+        "diagramHeight": 5.73,
+        "diagramDepth": 0.08,
+        "radius": 7.9225,
         "center": {
           "x": -0.2862,
           "y": 0,
-          "z": 0.0485
+          "z": 0.04
         },
-        "cameraAspect": 1.4623,
-        "cameraFov": 50
+        "cameraAspect": 1.3994,
+        "cameraFov": 50,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 5
       }
     },
     "font": {
-      "size": 12,
+      "size": 17,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
-      "underline": false
+      "underline": false,
+      "classSize": 37,
+      "hyperclassSize": 47,
+      "attributeSize": 23,
+      "linkSize": 24
     },
     "name": "Hyperclass Mail Carrier With Links",
     "purpose": "Reference HBDS model for Hyperclass Mail Carrier With Links.",
@@ -197,7 +204,8 @@
             "cornerRadius": 0.3,
             "opacity": 0.24,
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#d97706",
@@ -333,13 +341,14 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
           "labelColor": "#1e3a8a",
           "labelBackgroundColor": "rgba(219,234,254,0.95)",
           "labelPositionAlongPath": 0.42,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true,
         "id": "hyperclass_mail_carrier_with_links_link_1_to_3_001"
@@ -357,13 +366,14 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
           "labelColor": "#14532d",
           "labelBackgroundColor": "rgba(220,252,231,0.95)",
           "labelPositionAlongPath": 0.42,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true,
         "id": "hyperclass_mail_carrier_with_links_link_3_to_2_002"

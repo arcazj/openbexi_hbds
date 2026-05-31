@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+﻿import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DragControls } from 'three/addons/controls/DragControls.js';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
@@ -36,31 +36,38 @@ import {
   getLayoutSettings,
   setLayoutSettings,
   getFontSettings,
-  setFontSettings,
   normalizeFontSettings,
+  getFontSettingsForTextType,
   getFitQualityMetrics
-} from './hbds_model.js?v=label-readability-20260531c';
-import { recalculateAllLinks } from './hbds_class_link.js?v=label-readability-20260531c';
+} from './hbds_model.js?v=font-types-20260531a';
+import { recalculateAllLinks } from './hbds_class_link.js?v=font-types-20260531a';
 import {
+  applyAiModel,
   applyServerModelOperations,
   checkServerConnection,
   clearServerDraft,
   configureClientDebug,
+  deleteScopedModel,
+  deleteServerModel,
   getServerClientId,
   listServerDrafts,
   listServerModels,
+  listAiProviders,
   loadServerModel,
+  prepareAiPrompt,
   publishServerDraft,
   recordClientUserAction,
+  rollbackAiModel,
   saveServerModel,
   saveScopedModel,
   subscribeServerEvents,
   trackClientFunction,
+  validateAiConnection,
   isServerModelValue,
   modelFileNameFromValue,
   modelNameFromValue,
   serverModelValue
-} from './hbds_server_api.js?v=server-api-20260530c';
+} from './hbds_server_api.js?v=server-api-20260531d';
 import {
   collaborationWorkStatusDecision,
   coalesceDraftOperations,
@@ -87,6 +94,26 @@ import {
   routePresetFromRendering,
   routePresetPatch
 } from './hbds_model_productivity.js?v=productivity-20260525a';
+import {
+  AI_CUSTOM_MODEL_VALUE,
+  AI_OPERATION_MODES,
+  AI_PROVIDER_DEFINITIONS,
+  buildAiPromptRequestPayload,
+  credentialStateForProvider,
+  defaultModelForProvider,
+  defaultReasoningEffortForModel,
+  hasApplyableAiModelResponse,
+  isManualWorkflowProvider,
+  mergeProviderCapabilities,
+  modelOptionsForProvider,
+  normalizeAiHbdsModelResponse,
+  parseManualAiResponseText,
+  providerById,
+  providerSupportsReasoningEffort,
+  sanitizeAiConfigForDiagnostics,
+  validateAiRequestConfig,
+  validateManualHbdsModelResponse
+} from './hbds_ai_support.js?v=ai-support-20260531i';
 
 let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
 const draggableObjects = [];
@@ -187,7 +214,7 @@ const DEFAULT_VERTICAL_LIGHT_ANGLE = 45;
 let lightingState = normalizeSimplifiedSceneSettings();
 const defaultLightingState = normalizeSimplifiedSceneSettings();
 let fontState = normalizeFontSettings();
-const defaultFontState = normalizeFontSettings();
+const MODEL_FONT_SIZE_MAX = 72;
 let sceneLights = {};
 let propertyPanelTargetKey = null;
 let propertyPanelOpenSection = null;
@@ -195,6 +222,17 @@ let nextInspectorListId = 1;
 let commandPaletteOpen = false;
 let commandPaletteActiveIndex = 0;
 let commandPaletteVisibleCommands = [];
+let aiProviders = AI_PROVIDER_DEFINITIONS;
+let aiServerCapabilities = { enabled: false, promptTemplateVersion: 'hbds-ai-prompt-v1' };
+let aiRequestController = null;
+let aiResultModel = null;
+let aiConnectionState = 'disconnected';
+let aiConnectionValidationTimer = null;
+let aiConnectionValidationController = null;
+let aiConnectionValidationSequence = 0;
+let aiConnectionValidationSignature = '';
+let aiRollbackSnapshot = null;
+let aiDiffSaveMode = 'new';
 
 const CLASS_COLORS = [
   { fill: '#ffd166', border: '#7a4f00' },
@@ -230,6 +268,7 @@ const TEST_MODEL_MANIFEST = MODEL_SOURCE_CONFIG.manifest;
 const TEST_MODEL_HIDDEN_VALUES = MODEL_SOURCE_CONFIG.hiddenValues;
 const HIDE_SCENARIO_SUITE = TEST_MODEL_ROOT === 'models/';
 const SERVER_MODELS_ENABLED = TEST_MODEL_ROOT === 'models/';
+const DEFAULT_MODEL_FILE_NAME = 'hyperclass_mail_Carrier_with_links.json';
 const COLLABORATION_DRAFT_SCOPE = TEST_MODEL_ROOT === 'test_models/' ? 'test_models' : '';
 const COLLABORATION_ENABLED = SERVER_MODELS_ENABLED || Boolean(COLLABORATION_DRAFT_SCOPE);
 const DEBUG_UI_NAME = TEST_MODEL_ROOT === 'models/' ? 'edit-ui' : 'tests-ui';
@@ -249,7 +288,7 @@ const STRUCTURAL_PROPERTY_KEYS = new Set([
 ]);
 const KNOWN_ENUMS = {
   orthogonalStyle: ['auto', 'horizontal', 'vertical'],
-  lineStyle: ['solid', 'dashed', 'dotted'],
+  lineStyle: ['solid', 'dashed', 'dotted', 'thick', 'thin'],
   routeSide: ['top', 'right', 'bottom', 'left'],
   sourcePortSide: ['top', 'right', 'bottom', 'left'],
   targetPortSide: ['top', 'right', 'bottom', 'left'],
@@ -258,7 +297,9 @@ const KNOWN_ENUMS = {
   labelRotationBehavior: ['fixed', 'follow'],
   labelPlacement: ['best-segment', 'path'],
   labelStrategy: ['best-segment', 'path'],
-  arrowheadType: ['triangle', 'cone', 'diamond', 'none'],
+  arrowType: ['triangle', 'outline', 'chevron', 'double-chevron', 'triple-chevron', 'filled-triangle', 'hollow-triangle', 'dotted', 'bar-arrow', 'double-bar-arrow', 'cone', 'diamond', 'none'],
+  arrowDirection: ['source-to-target', 'target-to-source', 'bidirectional', 'none'],
+  arrowheadType: ['triangle', 'outline', 'chevron', 'double-chevron', 'triple-chevron', 'filled-triangle', 'hollow-triangle', 'dotted', 'bar-arrow', 'double-bar-arrow', 'cone', 'diamond', 'none'],
   bodyType: ['rectangle', 'image', 'shape'],
   imageFit: ['contain', 'cover'],
   classShapeType: [
@@ -436,6 +477,9 @@ const LINK_2D_DEFAULTS = {
   zIndex: 5,
   renderingVisible: true,
   arrowheadVisibility: true,
+  arrowType: 'triangle',
+  arrowDirection: 'source-to-target',
+  arrowColor: '#334155',
   arrowheadType: 'triangle',
   arrowheadSize: 0.1,
   arrowheadScale: 0.6,
@@ -474,6 +518,13 @@ const LINK_2D_DEFAULTS = {
   relationshipPortOpacity: 0.98,
   visible: true
 };
+const TYPE_FONT_SIZE_CONTROLS = [
+  { key: 'classSize', type: 'class', inputId: 'model-class-font-size-input', outputId: 'model-class-font-size-value', label: 'Class' },
+  { key: 'hyperclassSize', type: 'hyperclass', inputId: 'model-hyperclass-font-size-input', outputId: 'model-hyperclass-font-size-value', label: 'Hyperclass' },
+  { key: 'attributeSize', type: 'attribute', inputId: 'model-attribute-font-size-input', outputId: 'model-attribute-font-size-value', label: 'Attribute' },
+  { key: 'linkSize', type: 'link', inputId: 'model-link-font-size-input', outputId: 'model-link-font-size-value', label: 'Link' }
+];
+const FONT_SIZE_OVERRIDE_KEYS = ['size', 'fontSize', 'labelFontSize'];
 
 const $ = id => document.getElementById(id);
 const sameId = (a, b) => a != null && b != null && String(a) === String(b);
@@ -939,52 +990,180 @@ function syncFontSettingsControls() {
   bind('model-font-bold-input', fontState.bold);
   bind('model-font-italic-input', fontState.italic);
   bind('model-font-underline-input', fontState.underline);
-  updateFontSizeValue();
+  TYPE_FONT_SIZE_CONTROLS.forEach(control => syncTypeFontSizeControl(control));
+  updateFontSizeValues();
 }
 
-function readFontSettingsControls() {
+function syncTypeFontSizeControl(control) {
+  const input = $(control.inputId);
+  const output = $(control.outputId);
+  const explicitSize = fontState[control.key];
+  const inherited = explicitSize == null;
+  const value = inherited ? fontState.size : explicitSize;
+  if (input) {
+    input.value = String(value);
+    input.dataset.inherited = inherited ? 'true' : 'false';
+  }
+  if (output) {
+    const rounded = Math.round(value);
+    output.value = inherited ? `Overall (${rounded}px)` : `${rounded}px`;
+    output.textContent = output.value;
+  }
+}
+
+function readFontSettingsControls(options = {}) {
   const numberValue = (id, fallback) => {
     const value = Number($(id)?.value);
     return Number.isFinite(value) ? value : fallback;
   };
-  fontState = normalizeFontSettings({
+  const next = {
     size: numberValue('model-font-size-input', fontState.size),
     family: $('model-font-family-input')?.value || fontState.family,
     bold: $('model-font-bold-input')?.checked === true,
     italic: $('model-font-italic-input')?.checked === true,
     underline: $('model-font-underline-input')?.checked === true
+  };
+  TYPE_FONT_SIZE_CONTROLS.forEach(control => {
+    const input = $(control.inputId);
+    if (!input) return;
+    if (options.changedId === control.inputId) input.dataset.inherited = 'false';
+    next[control.key] = input.dataset.inherited === 'true'
+      ? null
+      : numberValue(control.inputId, fontState[control.key] ?? fontState.size);
   });
-  updateFontSizeValue();
+  fontState = normalizeFontSettings(next);
+  updateFontSizeValues();
 }
 
-function updateFontSizeValue() {
+function updateFontSizeValues() {
   const output = $('model-font-size-value');
-  if (!output) return;
-  const label = `${Math.round(fontState.size)}px`;
-  output.value = label;
-  output.textContent = label;
+  if (output) {
+    const label = `${Math.round(fontState.size)}px`;
+    output.value = label;
+    output.textContent = label;
+  }
+  TYPE_FONT_SIZE_CONTROLS.forEach(control => syncTypeFontSizeControl(control));
 }
 
-function handleFontSettingInput() {
-  readFontSettingsControls();
-  setFontSettings(fontState, { context: ctx(), applyContext: false, refresh: true });
+function fontTypeControlFromInputId(inputId) {
+  return TYPE_FONT_SIZE_CONTROLS.find(control => control.inputId === inputId) || null;
+}
+
+function getTypeFontFallback(textType) {
+  return getFontSettingsForTextType(getFontSettings(), textType);
+}
+
+function getMultiNodeFontFallback(selectedNodes = []) {
+  const nodesForFallback = Array.isArray(selectedNodes) ? selectedNodes : [];
+  if (nodesForFallback.length && nodesForFallback.every(node => node?.type === 'hyperclass')) return getTypeFontFallback('hyperclass');
+  if (nodesForFallback.length && nodesForFallback.every(node => node?.type !== 'hyperclass')) return getTypeFontFallback('class');
+  return getFontSettings();
+}
+
+function clearFontSizeFields(font) {
+  if (!font || typeof font !== 'object') return;
+  FONT_SIZE_OVERRIDE_KEYS.forEach(key => delete font[key]);
+}
+
+function pruneEmptyFontObject(parent, key = 'font') {
+  if (!parent || typeof parent !== 'object') return;
+  const font = parent[key];
+  if (font && typeof font === 'object' && Object.keys(font).length === 0) delete parent[key];
+}
+
+function clearNodeTitleFontSizeOverride(node) {
+  if (!node || typeof node !== 'object') return;
+  clearFontSizeFields(node.rendering?.font);
+  pruneEmptyFontObject(node.rendering);
+}
+
+function clearAttributeFontSizeOverride(attribute) {
+  if (!attribute || typeof attribute !== 'object') return;
+  clearFontSizeFields(attribute.font);
+  pruneEmptyFontObject(attribute);
+  clearFontSizeFields(attribute.rendering?.font);
+  pruneEmptyFontObject(attribute.rendering);
+}
+
+function clearAttributeGroupFontSizeOverride(node) {
+  const attributesRendering = node?.rendering?.attributes;
+  if (!attributesRendering || typeof attributesRendering !== 'object') return;
+  delete attributesRendering.fontSize;
+  delete attributesRendering.labelFontSize;
+  clearFontSizeFields(attributesRendering.font);
+  pruneEmptyFontObject(attributesRendering);
+}
+
+function clearLinkFontSizeOverride(link) {
+  if (!link || typeof link !== 'object') return;
+  const rendering = link.rendering;
+  if (!rendering || typeof rendering !== 'object') return;
+  delete rendering.labelFontSize;
+  clearFontSizeFields(rendering.font);
+  pruneEmptyFontObject(rendering);
+}
+
+function clearElementFontSizeOverrides(model, category = 'all') {
+  const classes = Array.isArray(model?.hypergraph?.class) ? model.hypergraph.class : [];
+  const modelLinks = Array.isArray(model?.hypergraph?.link) ? model.hypergraph.link : [];
+  if (category === 'all' || category === 'class') {
+    classes.filter(node => node?.type !== 'hyperclass').forEach(clearNodeTitleFontSizeOverride);
+  }
+  if (category === 'all' || category === 'hyperclass') {
+    classes.filter(node => node?.type === 'hyperclass').forEach(clearNodeTitleFontSizeOverride);
+  }
+  if (category === 'all' || category === 'attribute') {
+    classes.forEach(node => {
+      clearAttributeGroupFontSizeOverride(node);
+      (Array.isArray(node?.attributes) ? node.attributes : []).forEach(clearAttributeFontSizeOverride);
+    });
+  }
+  if (category === 'all' || category === 'link') {
+    modelLinks.forEach(clearLinkFontSizeOverride);
+  }
+}
+
+function applyFontPolicyMutation(nextFontState, options = {}) {
+  const nextModel = cloneValue(getData());
+  nextModel.metadata = nextModel.metadata || {};
+  nextModel.metadata.font = normalizeFontSettings(nextFontState);
+  if (options.resetAllOverrides) {
+    nextModel.metadata.font = normalizeFontSettings({
+      ...nextModel.metadata.font,
+      classSize: null,
+      hyperclassSize: null,
+      attributeSize: null,
+      linkSize: null
+    });
+    clearElementFontSizeOverrides(nextModel, 'all');
+  } else if (options.category) {
+    clearElementFontSizeOverrides(nextModel, options.category);
+  }
+  setData(nextModel, { context: ctx(), refresh: true });
+  fontState = getFontSettings();
+  syncFontSettingsControls();
+}
+
+function handleFontSettingInput(event) {
+  const changedId = event?.target?.id || '';
+  readFontSettingsControls({ changedId });
+  const typeControl = fontTypeControlFromInputId(changedId);
+  applyFontPolicyMutation(fontState, { category: typeControl?.type || null });
   updateOverview();
   renderPropertyPanel();
   updateJsonPreviewFromData();
   updateRenderDiagnostics();
-  scheduleLocalDraftPublish('Updated font settings');
+  scheduleLocalDraftPublish(typeControl ? `Updated ${typeControl.label.toLowerCase()} font size` : 'Updated font settings');
 }
 
 function handleResetFontSettings() {
-  fontState = normalizeFontSettings(defaultFontState);
-  setFontSettings(fontState, { context: ctx(), applyContext: false, refresh: true });
-  syncFontSettingsControls();
+  applyFontPolicyMutation(fontState, { resetAllOverrides: true });
   updateOverview();
   renderPropertyPanel();
   updateJsonPreviewFromData();
   updateRenderDiagnostics();
-  addLog('Reset model font settings');
-  scheduleLocalDraftPublish('Reset font settings');
+  addLog(`Applied overall font size ${Math.round(fontState.size)}px to all text`);
+  scheduleLocalDraftPublish('Applied overall font size to all text');
 }
 
 function applyModelFontSettings(settings) {
@@ -1035,6 +1214,872 @@ function revealModelBuilderProperties(options = {}) {
       behavior: options.instant ? 'auto' : 'smooth'
     });
   });
+}
+
+function populateAiProviderSelect() {
+  const select = $('ai-provider-select');
+  if (!select) return;
+  const current = select.value || aiProviders[0]?.id || '';
+  select.innerHTML = '';
+  aiProviders.forEach(provider => {
+    const option = document.createElement('option');
+    option.value = provider.id;
+    option.textContent = provider.label;
+    select.appendChild(option);
+  });
+  select.value = aiProviders.some(provider => provider.id === current) ? current : (aiProviders[0]?.id || '');
+}
+
+function populateAiModelSelect(provider, options = {}) {
+  const select = $('ai-model-select');
+  const customInput = $('ai-model-input');
+  if (!select) return;
+  const modelOptions = modelOptionsForProvider(provider);
+  const requestedModel = String(options.modelName || '').trim();
+  const currentModel = requestedModel || getSelectedAiModelName(provider) || defaultModelForProvider(provider);
+  select.innerHTML = '';
+  modelOptions.forEach(model => {
+    const option = document.createElement('option');
+    option.value = model.id;
+    option.textContent = model.label || model.id;
+    select.appendChild(option);
+  });
+  const customOption = document.createElement('option');
+  customOption.value = AI_CUSTOM_MODEL_VALUE;
+  customOption.textContent = 'Custom model...';
+  select.appendChild(customOption);
+
+  const hasPreset = modelOptions.some(model => model.id === currentModel);
+  if (hasPreset) {
+    select.value = currentModel;
+    if (customInput && options.resetCustom !== false) customInput.value = '';
+  } else if (currentModel) {
+    select.value = AI_CUSTOM_MODEL_VALUE;
+    if (customInput) customInput.value = currentModel;
+  } else {
+    select.value = modelOptions[0]?.id || AI_CUSTOM_MODEL_VALUE;
+    if (customInput && options.resetCustom !== false) customInput.value = '';
+  }
+}
+
+function getSelectedAiProvider() {
+  return providerById($('ai-provider-select')?.value, aiProviders);
+}
+
+function getSelectedAiModelName(provider = getSelectedAiProvider()) {
+  const selected = $('ai-model-select')?.value || '';
+  if (selected === AI_CUSTOM_MODEL_VALUE) {
+    return String($('ai-model-input')?.value || '').trim();
+  }
+  return selected || defaultModelForProvider(provider);
+}
+
+function getAiOperationMode() {
+  const selected = $('ai-operation-select')?.value || AI_OPERATION_MODES[0].id;
+  return AI_OPERATION_MODES.find(mode => mode.id === selected) || AI_OPERATION_MODES[0];
+}
+
+function getAiSupportConfig() {
+  const provider = getSelectedAiProvider();
+  return {
+    providerId: provider?.id || '',
+    apiKey: $('ai-api-key-input')?.value || '',
+    baseUrl: $('ai-base-url-input')?.value || '',
+    modelName: getSelectedAiModelName(provider),
+    reasoningEffort: $('ai-reasoning-select')?.value || '',
+    operationMode: getAiOperationMode().id,
+    requestText: $('ai-request-input')?.value || ''
+  };
+}
+
+function getAiConnectionPayload(config = getAiSupportConfig()) {
+  const payload = {
+    providerId: String(config.providerId || ''),
+    modelName: String(config.modelName || ''),
+    baseUrl: String(config.baseUrl || ''),
+    reasoningEffort: String(config.reasoningEffort || '')
+  };
+  const apiKey = String(config.apiKey || '').trim();
+  if (apiKey) payload.apiKey = apiKey;
+  return payload;
+}
+
+function aiConnectionSignature(config = getAiSupportConfig()) {
+  return [
+    String(config.providerId || ''),
+    String(config.modelName || ''),
+    String(config.baseUrl || ''),
+    String(config.reasoningEffort || ''),
+    String(config.apiKey || '')
+  ].join('\n');
+}
+
+function aiConnectionErrorMessage(error = {}) {
+  const providerMessage = String(error.providerErrorMessage || '').trim();
+  const message = String(error.message || '').trim();
+  return providerMessage || message || 'AI provider connection failed';
+}
+
+function setAiStatus(message, tone = '', state = aiConnectionState) {
+  aiConnectionState = state || aiConnectionState || 'disconnected';
+  const status = $('ai-credential-status');
+  if (status) {
+    status.className = 'status-chip';
+    if (tone === 'ok' || tone === 'warn' || tone === 'error') status.classList.add(tone);
+    status.textContent = message;
+    status.title = message;
+  }
+  const detail = $('ai-status-message');
+  if (detail) {
+    detail.textContent = message;
+    detail.title = message;
+  }
+}
+
+function updateAiSupportUi(options = {}) {
+  const provider = getSelectedAiProvider();
+  if (!provider) return;
+  const manualMode = isManualWorkflowProvider(provider);
+  const credential = credentialStateForProvider(provider, Boolean(aiServerCapabilities.enabled));
+  const keyField = $('ai-api-key-field');
+  const baseUrlField = $('ai-base-url-field');
+  if (keyField) keyField.hidden = !credential.showKeyField;
+  if (baseUrlField) baseUrlField.hidden = manualMode || !(provider.requiresBaseUrl || provider.supportsCustomBaseUrl);
+
+  if (options.resetProviderFields) {
+    const baseUrlInput = $('ai-base-url-input');
+    if (baseUrlInput) baseUrlInput.value = provider.defaultBaseUrl || '';
+    populateAiModelSelect(provider, { modelName: defaultModelForProvider(provider), resetCustom: true });
+  } else if ($('ai-model-select') && !$('ai-model-select').options.length) {
+    populateAiModelSelect(provider, { modelName: defaultModelForProvider(provider), resetCustom: true });
+  }
+
+  const modelName = getSelectedAiModelName(provider);
+  const modelSelect = $('ai-model-select');
+  const modelSelectField = $('ai-model-select-field');
+  const customModelField = $('ai-custom-model-field');
+  if (modelSelectField) modelSelectField.hidden = manualMode;
+  if (customModelField) customModelField.hidden = manualMode || modelSelect?.value !== AI_CUSTOM_MODEL_VALUE;
+  const reasoningField = $('ai-reasoning-field');
+  const reasoningSelect = $('ai-reasoning-select');
+  const showReasoning = !manualMode && providerSupportsReasoningEffort(provider, modelName);
+  if (reasoningField) reasoningField.hidden = !showReasoning;
+  if (showReasoning && reasoningSelect && (options.resetProviderFields || !reasoningSelect.value)) {
+    reasoningSelect.value = defaultReasoningEffortForModel(provider, modelName);
+  }
+
+  const manualActions = $('ai-manual-actions');
+  const manualResponseField = $('ai-manual-response-field');
+  const manualResponseActions = $('ai-manual-response-actions');
+  if (manualActions) manualActions.hidden = !manualMode;
+  if (manualResponseField) manualResponseField.hidden = !manualMode;
+  if (manualResponseActions) manualResponseActions.hidden = !manualMode;
+  const testButton = $('ai-test-connection-button');
+  if (testButton) testButton.hidden = manualMode;
+  const sendButton = $('ai-send-request-button');
+  if (sendButton) sendButton.textContent = manualMode ? 'Generate Prompt' : 'Send Request';
+  const copyPromptButton = $('ai-copy-prompt-button');
+  if (copyPromptButton) copyPromptButton.disabled = !manualMode || !String($('ai-result-preview')?.value || '').trim();
+
+  const summary = $('ai-feature-summary');
+  if (summary) {
+    const scope = manualMode
+      ? 'ChatGPT Pro manual mode. The app prepares an HBDS prompt; you copy it to ChatGPT and paste JSON back here.'
+      : (aiServerCapabilities.enabled
+      ? 'AI backend enabled. Requests are HBDS-scoped and server-enhanced before provider use.'
+      : (credential.showKeyField
+        ? 'Enter a provider key to validate and use a transient server-side AI connection. Keys stay in memory.'
+        : 'AI backend disabled. This UI prepares HBDS-scoped prompts only; no AI provider call is made.'));
+    summary.textContent = `${scope} Template: ${aiServerCapabilities.promptTemplateVersion || 'hbds-ai-prompt-v1'}.`;
+  }
+
+  const hasResult = Boolean(($('ai-result-preview')?.value || '').trim()) || Boolean(($('ai-manual-response-input')?.value || '').trim()) || Boolean(aiResultModel);
+  const applyButton = $('ai-apply-result-button');
+  if (applyButton) applyButton.disabled = !hasApplyableAiModelResponse(aiResultModel);
+  const rollbackButton = $('ai-rollback-result-button');
+  if (rollbackButton) rollbackButton.disabled = !aiRollbackSnapshot?.model;
+  const discardButton = $('ai-discard-result-button');
+  if (discardButton) discardButton.disabled = !hasResult;
+  const cancelButton = $('ai-cancel-request-button');
+  if (cancelButton) cancelButton.disabled = !aiRequestController;
+
+  if (!options.keepStatus) {
+    const config = getAiSupportConfig();
+    const hasTransientKey = Boolean(String(config.apiKey || '').trim());
+    const tone = hasTransientKey && credential.status === 'required'
+      ? 'warn'
+      : (credential.status === 'configured' || credential.status === 'none' ? 'ok' : 'warn');
+    const message = hasTransientKey && credential.status === 'required'
+      ? 'API key entered; validating provider connection...'
+      : credential.message;
+    setAiStatus(message, tone, hasTransientKey ? 'testing' : (credential.status === 'required' ? 'disconnected' : 'configured'));
+  }
+}
+
+async function refreshAiProviderCapabilities(options = {}) {
+  const result = await listAiProviders({ timeoutMs: 2500, skipDebugLog: true });
+  if (!result.ok) {
+    aiServerCapabilities = { enabled: false, promptTemplateVersion: 'hbds-ai-prompt-v1' };
+    aiProviders = AI_PROVIDER_DEFINITIONS;
+    populateAiProviderSelect();
+    updateAiSupportUi({ keepStatus: true });
+    setAiStatus('AI backend capability endpoint unavailable', 'warn', 'disconnected');
+    if (!options.silent) addLog('AI support capability check unavailable');
+    return;
+  }
+  const data = result.data || {};
+  aiServerCapabilities = {
+    enabled: Boolean(data.enabled),
+    promptTemplateVersion: data.promptTemplateVersion || 'hbds-ai-prompt-v1',
+    requestMaxBytes: Number(data.requestMaxBytes || 0)
+  };
+  aiProviders = mergeProviderCapabilities(data.providers, AI_PROVIDER_DEFINITIONS);
+  populateAiProviderSelect();
+  updateAiSupportUi();
+}
+
+function shouldAutoValidateAiConnection(provider, config = getAiSupportConfig()) {
+  if (!provider || isManualWorkflowProvider(provider)) return false;
+  if (provider.requiresBaseUrl && !String(config.baseUrl || '').trim()) return false;
+  if (provider.requiresKey && !provider.configuredOnServer && provider.allowsUserKey !== false && !String(config.apiKey || '').trim()) {
+    return false;
+  }
+  return Boolean(aiServerCapabilities.enabled || String(config.apiKey || '').trim());
+}
+
+function cancelAiConnectionValidation() {
+  if (aiConnectionValidationTimer) {
+    clearTimeout(aiConnectionValidationTimer);
+    aiConnectionValidationTimer = null;
+  }
+  aiConnectionValidationController?.abort?.();
+  aiConnectionValidationController = null;
+}
+
+function scheduleAiConnectionValidation(options = {}) {
+  const provider = getSelectedAiProvider();
+  const config = getAiSupportConfig();
+  if (!shouldAutoValidateAiConnection(provider, config)) {
+    aiConnectionValidationSignature = '';
+    cancelAiConnectionValidation();
+    if (!options.silent) updateAiSupportUi();
+    return;
+  }
+  const signature = aiConnectionSignature(config);
+  if (!options.force && signature === aiConnectionValidationSignature && aiConnectionState === 'connected') return;
+  if (aiConnectionValidationTimer) clearTimeout(aiConnectionValidationTimer);
+  aiConnectionValidationSequence += 1;
+  aiConnectionValidationController?.abort?.();
+  aiConnectionValidationController = null;
+  if (!options.silent) setAiStatus('Validating AI connection...', 'warn', 'testing');
+  aiConnectionValidationTimer = setTimeout(() => {
+    aiConnectionValidationTimer = null;
+    runAction(() => validateCurrentAiConnection({ signature }), 'ai.autoValidateConnection');
+  }, Number.isFinite(Number(options.delayMs)) ? Number(options.delayMs) : 700);
+}
+
+async function validateCurrentAiConnection(options = {}) {
+  const provider = getSelectedAiProvider();
+  if (isManualWorkflowProvider(provider)) {
+    setAiStatus('Manual ChatGPT mode is ready; no provider connection is required', 'ok', 'configured');
+    return true;
+  }
+  const config = getAiSupportConfig();
+  if (!shouldAutoValidateAiConnection(provider, config)) {
+    updateAiSupportUi();
+    return false;
+  }
+  const signature = options.signature || aiConnectionSignature(config);
+  const sequence = ++aiConnectionValidationSequence;
+  aiConnectionValidationController?.abort?.();
+  aiConnectionValidationController = new AbortController();
+  setAiStatus('Validating AI connection...', 'warn', 'testing');
+  try {
+    await refreshAiProviderCapabilities({ silent: true });
+    const refreshedProvider = getSelectedAiProvider();
+    const refreshedConfig = getAiSupportConfig();
+    const result = await validateAiConnection(getAiConnectionPayload(refreshedConfig), {
+      timeoutMs: 20000,
+      signal: aiConnectionValidationController.signal,
+      skipDebugLog: true
+    });
+    if (sequence !== aiConnectionValidationSequence) return false;
+    if (!result.ok) {
+      const message = aiConnectionErrorMessage(result.error);
+      aiConnectionValidationSignature = '';
+      setAiStatus(message, 'error', 'error');
+      return false;
+    }
+    const data = result.data || {};
+    const modelName = data.modelName || refreshedConfig.modelName || defaultModelForProvider(refreshedProvider);
+    const message = data.message || `${refreshedProvider?.label || 'AI provider'} connected${modelName ? `: ${modelName}` : ''}`;
+    aiConnectionValidationSignature = signature;
+    setAiStatus(message, 'ok', 'connected');
+    return true;
+  } catch (error) {
+    const aborted = error?.name === 'AbortError' || /aborted|abort/i.test(error?.message || '');
+    if (!aborted) {
+      aiConnectionValidationSignature = '';
+      setAiStatus(error?.message || 'AI provider connection failed', 'error', 'error');
+    }
+    return false;
+  } finally {
+    if (sequence === aiConnectionValidationSequence) aiConnectionValidationController = null;
+  }
+}
+
+async function initializeAiSupport() {
+  populateAiProviderSelect();
+  updateAiSupportUi({ resetProviderFields: true });
+  await refreshAiProviderCapabilities({ silent: true });
+  scheduleAiConnectionValidation({ silent: true, delayMs: 0 });
+}
+
+function handleAiProviderChange() {
+  aiResultModel = null;
+  aiConnectionValidationSignature = '';
+  cancelAiConnectionValidation();
+  const preview = $('ai-result-preview');
+  if (preview) preview.value = '';
+  const manualResponse = $('ai-manual-response-input');
+  if (manualResponse) manualResponse.value = '';
+  updateAiSupportUi({ resetProviderFields: true });
+  scheduleAiConnectionValidation({ delayMs: 300 });
+}
+
+function handleAiModelChange() {
+  const provider = getSelectedAiProvider();
+  const reasoningSelect = $('ai-reasoning-select');
+  if (reasoningSelect) {
+    reasoningSelect.value = defaultReasoningEffortForModel(provider, getSelectedAiModelName(provider));
+  }
+  updateAiSupportUi({ keepStatus: true });
+  scheduleAiConnectionValidation({ delayMs: 300 });
+}
+
+function handleAiConnectionInput() {
+  updateAiSupportUi({ keepStatus: true });
+  scheduleAiConnectionValidation();
+}
+
+function handleAiKeyToggle() {
+  const input = $('ai-api-key-input');
+  const button = $('ai-api-key-toggle');
+  if (!input || !button) return;
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  button.textContent = show ? 'Hide' : 'Show';
+}
+
+async function handleAiTestConnection() {
+  await validateCurrentAiConnection({ force: true });
+}
+
+function aiRequestCurrentModelForMode() {
+  return getAiOperationMode().requiresCurrentModel ? cloneValue(getData()) : null;
+}
+
+async function handleAiSendRequest() {
+  const provider = getSelectedAiProvider();
+  const manualMode = isManualWorkflowProvider(provider);
+  const config = getAiSupportConfig();
+  const validation = validateAiRequestConfig(config, provider, { serverEnabled: Boolean(aiServerCapabilities.enabled) });
+  if (!validation.valid) {
+    setAiStatus(validation.errors[0], 'error', 'error');
+    showToast(validation.errors[0]);
+    return;
+  }
+  aiRequestController = new AbortController();
+  aiResultModel = null;
+  if (manualMode) {
+    const manualResponse = $('ai-manual-response-input');
+    if (manualResponse) manualResponse.value = '';
+  }
+  updateAiSupportUi({ keepStatus: true });
+  setAiStatus(manualMode ? 'Preparing manual ChatGPT prompt...' : 'Preparing HBDS AI prompt...', 'warn', 'testing');
+  try {
+    const payload = buildAiPromptRequestPayload(config, aiRequestCurrentModelForMode());
+    const providerCallExpected = !manualMode && shouldAutoValidateAiConnection(provider, config);
+    const result = await prepareAiPrompt(payload, {
+      timeoutMs: providerCallExpected ? 70000 : 12000,
+      signal: aiRequestController.signal,
+      skipDebugLog: true
+    });
+    if (!result.ok) {
+      throw new Error(result.error?.message || 'AI prompt request failed');
+    }
+    const data = result.data || {};
+    const preview = $('ai-result-preview');
+    if (preview) preview.value = data.providerResponse || data.enhancedPrompt || data.message || '';
+    const normalizedModel = normalizeAiHbdsModelResponse(data.model);
+    aiResultModel = hasApplyableAiModelResponse(normalizedModel) ? normalizedModel : null;
+    const message = manualMode
+      ? 'Manual prompt prepared. Copy it to ChatGPT, then paste JSON back for validation.'
+      : (data.message || (data.aiCallEnabled
+      ? 'AI provider response received'
+      : (data.enabled
+        ? 'HBDS prompt prepared; provider call is not implemented in this build'
+        : 'HBDS prompt prepared; AI backend disabled so no provider call was made')));
+    setAiStatus(message, (manualMode || data.aiCallEnabled) ? 'ok' : 'warn', data.aiCallEnabled ? 'connected' : 'configured');
+    addLog(`AI support: ${message}`);
+  } catch (error) {
+    const aborted = error?.name === 'AbortError' || /aborted|abort/i.test(error?.message || '');
+    setAiStatus(aborted ? 'AI request canceled' : (error?.message || 'AI request failed'), aborted ? 'warn' : 'error', aborted ? 'configured' : 'error');
+  } finally {
+    aiRequestController = null;
+    updateAiSupportUi({ keepStatus: true });
+  }
+}
+
+async function handleAiCopyPrompt() {
+  const prompt = String($('ai-result-preview')?.value || '').trim();
+  if (!prompt) {
+    setAiStatus('Generate the manual prompt before copying it', 'warn', 'configured');
+    return;
+  }
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(prompt);
+    } else {
+      const preview = $('ai-result-preview');
+      preview?.focus();
+      preview?.select?.();
+      document.execCommand?.('copy');
+    }
+    setAiStatus('Manual prompt copied', 'ok', 'configured');
+    showToast('Prompt copied');
+  } catch (error) {
+    setAiStatus(error?.message || 'Could not copy prompt', 'error', 'error');
+  }
+}
+
+function handleAiOpenChatGpt() {
+  window.open('https://chatgpt.com/', '_blank', 'noopener,noreferrer');
+  setAiStatus('ChatGPT opened in a new tab. Paste the copied HBDS prompt there.', 'ok', 'configured');
+}
+
+async function handleAiPasteResponse() {
+  const textarea = $('ai-manual-response-input');
+  if (!textarea) return;
+  try {
+    const text = await navigator.clipboard?.readText?.();
+    if (!text) throw new Error('Clipboard is empty or unavailable');
+    textarea.value = text;
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    setAiStatus('AI response pasted. Validate it before applying.', 'warn', 'configured');
+  } catch (error) {
+    textarea.focus();
+    setAiStatus(error?.message || 'Paste the AI response manually, then validate it', 'warn', 'configured');
+  }
+  updateAiSupportUi({ keepStatus: true });
+}
+
+function handleAiValidateManualResponse() {
+  const text = $('ai-manual-response-input')?.value || '';
+  const parsed = parseManualAiResponseText(text);
+  if (!parsed.valid) {
+    aiResultModel = null;
+    setAiStatus(parsed.errors[0], 'error', 'error');
+    updateAiSupportUi({ keepStatus: true });
+    return;
+  }
+  const normalizedModel = normalizeAiHbdsModelResponse(parsed.model);
+  const structuralValidation = validateManualHbdsModelResponse(normalizedModel);
+  if (!structuralValidation.valid) {
+    aiResultModel = null;
+    setAiStatus(`AI response validation failed: ${structuralValidation.errors[0]}`, 'error', 'error');
+    updateAiSupportUi({ keepStatus: true });
+    return;
+  }
+  const validation = validateData(normalizedModel);
+  if (!validation.valid) {
+    aiResultModel = null;
+    setAiStatus(`AI model validation failed: ${validation.errors[0]}`, 'error', 'error');
+    updateAiSupportUi({ keepStatus: true });
+    return;
+  }
+  aiResultModel = normalizedModel;
+  setAiStatus('Valid HBDS JSON response. Apply is now available.', 'ok', 'configured');
+  updateAiSupportUi({ keepStatus: true });
+}
+
+function aiTargetScope() {
+  return SERVER_MODELS_ENABLED ? 'models' : 'test_models';
+}
+
+function activeModelFileName() {
+  const value = $('test-model-select')?.value || '';
+  return value ? modelFileNameFromValue(value) : '';
+}
+
+function savedModelValue(scope, savedName) {
+  return scope === 'models' ? serverModelValue(savedName) : `${TEST_MODEL_ROOT}${savedName}`;
+}
+
+function aiSuggestedModelName(model = aiResultModel) {
+  const metadata = model?.metadata || {};
+  return metadata.name || metadata.id || 'AI Model';
+}
+
+function mapById(items = []) {
+  return new Map((Array.isArray(items) ? items : [])
+    .filter(item => item && typeof item === 'object' && item.id != null)
+    .map(item => [String(item.id), item]));
+}
+
+function summarizeEntityDiff(beforeItems = [], afterItems = [], label = 'item') {
+  const before = mapById(beforeItems);
+  const after = mapById(afterItems);
+  const added = [];
+  const removed = [];
+  const renamed = [];
+  const modified = [];
+  after.forEach((item, id) => {
+    const previous = before.get(id);
+    if (!previous) {
+      added.push(`${label} ${item.name || id}`);
+      return;
+    }
+    if (String(previous.name || '') !== String(item.name || '')) {
+      renamed.push(`${label} ${previous.name || id} -> ${item.name || id}`);
+    } else if (!valuesEqual(previous, item)) {
+      modified.push(`${label} ${item.name || id}`);
+    }
+  });
+  before.forEach((item, id) => {
+    if (!after.has(id)) removed.push(`${label} ${item.name || id}`);
+  });
+  return { added, removed, renamed, modified };
+}
+
+function attributesForDiff(model = {}) {
+  const result = [];
+  (model.hypergraph?.class || []).forEach(node => {
+    (node.attributes || []).forEach((attribute, index) => {
+      if (!attribute || typeof attribute !== 'object') return;
+      result.push({
+        ...attribute,
+        id: `${node.id}::${attribute.id || attribute.name || index}`,
+        name: `${node.name || node.id}.${attribute.name || attribute.id || index}`
+      });
+    });
+  });
+  return result;
+}
+
+function buildAiModelDiff(beforeModel = {}, afterModel = {}) {
+  const classDiff = summarizeEntityDiff(beforeModel.hypergraph?.class || [], afterModel.hypergraph?.class || [], 'class');
+  const attributeDiff = summarizeEntityDiff(attributesForDiff(beforeModel), attributesForDiff(afterModel), 'attribute');
+  const linkDiff = summarizeEntityDiff(beforeModel.hypergraph?.link || [], afterModel.hypergraph?.link || [], 'link');
+  const metadataChanged = !valuesEqual(beforeModel.metadata || {}, afterModel.metadata || {});
+  const sections = { classes: classDiff, attributes: attributeDiff, links: linkDiff };
+  const totals = Object.values(sections).reduce((acc, diff) => {
+    acc.added += diff.added.length;
+    acc.removed += diff.removed.length;
+    acc.renamed += diff.renamed.length;
+    acc.modified += diff.modified.length;
+    return acc;
+  }, { added: 0, removed: 0, renamed: 0, modified: metadataChanged ? 1 : 0 });
+  return {
+    ...sections,
+    metadataChanged,
+    totals,
+    destructive: totals.removed > 0 || totals.renamed > 0
+  };
+}
+
+function renderDiffList(title, items, options = {}) {
+  const section = document.createElement('section');
+  section.className = `ai-diff-section${options.warning ? ' ai-diff-warning' : ''}`;
+  const heading = document.createElement('h3');
+  heading.textContent = title;
+  section.appendChild(heading);
+  const list = document.createElement('ul');
+  const visibleItems = items.length ? items.slice(0, 12) : ['None'];
+  visibleItems.forEach(item => {
+    const entry = document.createElement('li');
+    entry.textContent = item;
+    list.appendChild(entry);
+  });
+  if (items.length > visibleItems.length) {
+    const entry = document.createElement('li');
+    entry.textContent = `... ${items.length - visibleItems.length} more`;
+    list.appendChild(entry);
+  }
+  section.appendChild(list);
+  return section;
+}
+
+function openAiDiffModal() {
+  if (!hasApplyableAiModelResponse(aiResultModel)) {
+    setAiStatus('No valid HBDS model response is available to apply', 'error', 'error');
+    return;
+  }
+  const beforeModel = cloneValue(getData());
+  const afterModel = cloneValue(aiResultModel);
+  const diff = buildAiModelDiff(beforeModel, afterModel);
+  const operationMode = getAiOperationMode().id;
+  aiDiffSaveMode = operationMode === 'generate' || !activeModelFileName() ? 'new' : 'same';
+
+  const summary = $('ai-diff-summary');
+  if (summary) {
+    summary.innerHTML = '';
+    [
+      ['Added', diff.totals.added],
+      ['Removed', diff.totals.removed],
+      ['Renamed', diff.totals.renamed],
+      ['Modified', diff.totals.modified]
+    ].forEach(([label, count]) => {
+      const card = document.createElement('div');
+      card.textContent = `${label}: ${count}`;
+      summary.appendChild(card);
+    });
+  }
+  const content = $('ai-diff-content');
+  if (content) {
+    content.innerHTML = '';
+    if (operationMode === 'validate') {
+      content.appendChild(renderDiffList('Validation Result', ['Review the AI response preview for detailed validation findings before saving.']));
+    }
+    content.append(
+      renderDiffList('Classes Added', diff.classes.added),
+      renderDiffList('Classes Removed', diff.classes.removed, { warning: true }),
+      renderDiffList('Classes Renamed', diff.classes.renamed, { warning: true }),
+      renderDiffList('Classes Modified', diff.classes.modified),
+      renderDiffList('Attributes Changed', [...diff.attributes.added, ...diff.attributes.removed, ...diff.attributes.renamed, ...diff.attributes.modified]),
+      renderDiffList('Links Changed', [...diff.links.added, ...diff.links.removed, ...diff.links.renamed, ...diff.links.modified]),
+      renderDiffList('Metadata', diff.metadataChanged ? ['Metadata changed'] : [])
+    );
+  }
+  const destructiveConfirm = $('ai-destructive-confirm');
+  if (destructiveConfirm) {
+    destructiveConfirm.checked = !diff.destructive;
+    destructiveConfirm.closest('label').hidden = !diff.destructive;
+  }
+  const applySaveButton = $('ai-diff-apply-save-button');
+  if (applySaveButton) applySaveButton.textContent = aiDiffSaveMode === 'same' ? 'Apply and Save' : 'Apply and Save New';
+  const modal = $('ai-diff-modal');
+  if (modal) modal.hidden = false;
+}
+
+function closeAiDiffModal() {
+  const modal = $('ai-diff-modal');
+  if (modal) modal.hidden = true;
+}
+
+async function previewAiResultOnCanvas() {
+  if (!hasApplyableAiModelResponse(aiResultModel)) return;
+  const previewModel = cloneValue(aiResultModel);
+  aiRollbackSnapshot = {
+    model: cloneValue(getData()),
+    scope: aiTargetScope(),
+    modelName: activeModelFileName(),
+    selectValue: $('test-model-select')?.value || '',
+    previewOnly: true
+  };
+  await setData(previewModel, { context: ctx(), refresh: false });
+  syncCountersFromData();
+  const previewLayout = cloneValue(getLayoutSettings());
+  await optimizeAndRefreshLayout(ctx(), { algorithm: 'grid' });
+  setLayoutSettings({
+    ...getLayoutSettings(),
+    ...previewLayout,
+    algorithm: previewLayout.algorithm || 'none'
+  }, { applyContext: false });
+  applyModelLayoutSettings({ algorithm: previewLayout.algorithm || 'none' });
+  await refreshWorkspace('Previewed AI model on canvas with grid layout', {
+    refresh: true,
+    optimize: false,
+    fit: true,
+    publishDraft: false
+  });
+  updateAiSupportUi({ keepStatus: true });
+  setAiStatus('Preview only, displayed with grid layout. Use Apply and Save to persist or Rollback AI Apply to restore.', 'warn', 'configured');
+  closeAiDiffModal();
+}
+
+function handleAiCancelRequest() {
+  aiRequestController?.abort?.();
+  aiRequestController = null;
+  updateAiSupportUi({ keepStatus: true });
+  setAiStatus('AI request canceled', 'warn', 'configured');
+}
+
+function handleAiDiscardResult() {
+  aiResultModel = null;
+  const preview = $('ai-result-preview');
+  if (preview) preview.value = '';
+  const manualResponse = $('ai-manual-response-input');
+  if (manualResponse) manualResponse.value = '';
+  updateAiSupportUi();
+}
+
+async function handleAiApplyResult() {
+  openAiDiffModal();
+}
+
+async function applyAiResultFromDiff(saveMode = aiDiffSaveMode) {
+  if (!hasApplyableAiModelResponse(aiResultModel)) {
+    setAiStatus('No valid HBDS model response is available to apply', 'error', 'error');
+    return;
+  }
+  const validation = validateData(aiResultModel);
+  if (!validation.valid) {
+    setAiStatus(`AI model validation failed: ${validation.errors[0]}`, 'error', 'error');
+    return;
+  }
+  const destructiveConfirm = $('ai-destructive-confirm');
+  if (destructiveConfirm && !destructiveConfirm.closest('label')?.hidden && !destructiveConfirm.checked) {
+    setAiStatus('Confirm destructive AI changes before applying', 'warn', 'configured');
+    return;
+  }
+  if (!serverConnected) await refreshServerConnection();
+  if (!serverConnected) {
+    setAiStatus('Server is required to apply and save AI results', 'error', 'error');
+    return;
+  }
+
+  const previousModel = aiRollbackSnapshot?.previewOnly ? cloneValue(aiRollbackSnapshot.model) : cloneValue(getData());
+  const previousFileName = aiRollbackSnapshot?.previewOnly ? (aiRollbackSnapshot.modelName || '') : activeModelFileName();
+  const previousValue = aiRollbackSnapshot?.previewOnly ? (aiRollbackSnapshot.selectValue || '') : ($('test-model-select')?.value || '');
+  const scope = aiTargetScope();
+  const operationMode = getAiOperationMode().id;
+  const sameFile = saveMode === 'same' && previousFileName;
+  const expectedRevision = previousModel?.metadata?.revision || previousModel?.metadata?.contentHash || '';
+  const payload = {
+    scope,
+    operationMode,
+    saveMode: sameFile ? 'same' : 'new',
+    modelName: sameFile ? previousFileName : '',
+    requestedName: aiSuggestedModelName(aiResultModel),
+    expectedRevision: sameFile ? expectedRevision : '',
+    clientId: getServerClientId(),
+    model: aiResultModel
+  };
+  const result = await applyAiModel(payload, { timeoutMs: 15000, skipDebugLog: true });
+  if (!result.ok) {
+    const message = result.error?.message || 'AI apply failed';
+    setAiStatus(message, 'error', 'error');
+    showToast(message);
+    return;
+  }
+
+  const saved = result.data || {};
+  const savedName = saved.saved || payload.modelName;
+  const savedValue = savedModelValue(scope, savedName);
+  aiRollbackSnapshot = {
+    model: previousModel,
+    scope,
+    saveMode: sameFile ? 'same' : 'new',
+    modelName: sameFile ? savedName : previousFileName,
+    selectValue: previousValue,
+    appliedModelName: savedName,
+    appliedSelectValue: savedValue
+  };
+  await setData(saved.model || aiResultModel, { context: ctx(), refresh: false });
+  aiResultModel = null;
+  await populateModelSelect();
+  ensureModelSelectOption(savedValue, labelFromModelFileName(savedName), `AI saved model: ${savedName}`);
+  const select = $('test-model-select');
+  if (select) select.value = savedValue;
+  syncCountersFromData();
+  collaborationBaseModel = cloneValue(getData());
+  localDraftDirty = false;
+  markSavedState();
+  await refreshWorkspace(`Applied AI model ${savedName}`, { refresh: true, optimize: false, fit: true, publishDraft: false });
+  await clearLocalServerDraft(saved.modelName || (scope === 'models' ? savedName : `${scope}/${savedName}`));
+  await publishLocalPresenceDraft('Applied AI model');
+  updateJsonPreviewFromData();
+  updateAiSupportUi({ keepStatus: true });
+  closeAiDiffModal();
+  setAiStatus(`AI model applied and saved to ${scope}/${savedName}. Rollback available.`, 'ok', 'connected');
+  showToast(`Saved ${scope}/${savedName}`);
+}
+
+async function handleAiRollbackResult() {
+  if (!aiRollbackSnapshot?.model) {
+    setAiStatus('Rollback unavailable', 'warn', 'configured');
+    return;
+  }
+  const scope = aiRollbackSnapshot.scope || aiTargetScope();
+  const modelName = aiRollbackSnapshot.modelName || activeModelFileName();
+  let restoredModel = cloneValue(aiRollbackSnapshot.model);
+  const rollbackIsNewFile = aiRollbackSnapshot.saveMode === 'new' && aiRollbackSnapshot.appliedModelName;
+  const rollbackMessage = rollbackIsNewFile
+    ? 'AI apply rolled back; new AI model deleted'
+    : 'AI apply rolled back and saved';
+  if (rollbackIsNewFile && (serverConnected || await refreshServerConnection())) {
+    const deleteResult = scope === 'models'
+      ? await deleteServerModel(aiRollbackSnapshot.appliedModelName, {
+        body: { clientId: getServerClientId(), allowProtected: false },
+        timeoutMs: 10000,
+        skipDebugLog: true
+      })
+      : await deleteScopedModel(aiRollbackSnapshot.appliedModelName, {
+        scope,
+        body: { clientId: getServerClientId(), allowProtected: false },
+        timeoutMs: 10000,
+        skipDebugLog: true
+      });
+    if (!deleteResult.ok) {
+      const message = deleteResult.error?.message || 'AI rollback delete failed';
+      setAiStatus(message, 'error', 'error');
+      showToast(message);
+      return;
+    }
+    await populateModelSelect();
+    if (aiRollbackSnapshot.selectValue && $('test-model-select')) {
+      $('test-model-select').value = aiRollbackSnapshot.selectValue;
+    }
+    await clearLocalServerDraft(deleteResult.data?.modelName || (scope === 'models' ? aiRollbackSnapshot.appliedModelName : `${scope}/${aiRollbackSnapshot.appliedModelName}`));
+  } else if (modelName && (serverConnected || await refreshServerConnection())) {
+    const result = await rollbackAiModel({
+      scope,
+      modelName,
+      clientId: getServerClientId(),
+      model: restoredModel
+    }, { timeoutMs: 15000, skipDebugLog: true });
+    if (!result.ok) {
+      const message = result.error?.message || 'AI rollback failed';
+      setAiStatus(message, 'error', 'error');
+      showToast(message);
+      return;
+    }
+    restoredModel = result.data?.model || restoredModel;
+    await populateModelSelect();
+    const savedName = result.data?.saved || modelName;
+    const rollbackValue = savedModelValue(scope, savedName);
+    ensureModelSelectOption(rollbackValue, labelFromModelFileName(savedName), `Rolled back model: ${savedName}`);
+    const select = $('test-model-select');
+    if (select) select.value = rollbackValue;
+    await clearLocalServerDraft(result.data?.modelName || (scope === 'models' ? savedName : `${scope}/${savedName}`));
+  } else if (aiRollbackSnapshot.selectValue && $('test-model-select')) {
+    $('test-model-select').value = aiRollbackSnapshot.selectValue;
+  }
+  await setData(restoredModel, { context: ctx(), refresh: false });
+  syncCountersFromData();
+  collaborationBaseModel = cloneValue(getData());
+  localDraftDirty = false;
+  markSavedState();
+  await refreshWorkspace('Rolled back AI apply', { refresh: true, optimize: false, fit: true, publishDraft: false });
+  await publishLocalPresenceDraft('Rolled back AI apply');
+  aiRollbackSnapshot = null;
+  updateJsonPreviewFromData();
+  updateAiSupportUi({ keepStatus: true });
+  setAiStatus(rollbackMessage, 'ok', 'configured');
+}
+
+function getAiSupportStateForDebug() {
+  return {
+    serverEnabled: Boolean(aiServerCapabilities.enabled),
+    promptTemplateVersion: aiServerCapabilities.promptTemplateVersion || 'hbds-ai-prompt-v1',
+    providerCount: aiProviders.length,
+    connectionState: aiConnectionState,
+    config: sanitizeAiConfigForDiagnostics(getAiSupportConfig()),
+    resultReady: hasApplyableAiModelResponse(aiResultModel),
+    manualResponseReady: isManualWorkflowProvider(getSelectedAiProvider()) && hasApplyableAiModelResponse(aiResultModel),
+    rollbackReady: Boolean(aiRollbackSnapshot?.model)
+  };
 }
 
 function getSectionTitleText(title) {
@@ -1161,17 +2206,20 @@ async function setDebugMode(enabled, options = {}) {
 function describeDebugTarget(target) {
   const element = target instanceof Element ? target : null;
   if (!element) return {};
+  const id = element.id || '';
+  const inputType = element.getAttribute('type') || '';
+  const sensitive = inputType === 'password' || /api[-_]?key|secret|token/i.test(id) || /api[-_]?key|secret|token/i.test(element.getAttribute('name') || '');
   const label = element.getAttribute('aria-label')
     || element.getAttribute('title')
     || element.textContent?.trim()
-    || element.value
+    || (sensitive ? '[redacted]' : element.value)
     || '';
   return {
     tag: element.tagName.toLowerCase(),
-    id: element.id || '',
+    id,
     name: element.getAttribute('name') || '',
-    inputType: element.getAttribute('type') || '',
-    value: element.matches('input, select, textarea') ? String(element.value || '').slice(0, 160) : '',
+    inputType,
+    value: element.matches('input, select, textarea') ? (sensitive ? '[redacted]' : String(element.value || '').slice(0, 160)) : '',
     label: label.slice(0, 160)
   };
 }
@@ -1996,6 +3044,15 @@ function updateModeControls() {
   disable('selected-corner-radius-input', isReadOnly || !selected);
   disable('selected-text-color-input', isReadOnly || !selected);
   disable('selected-name-input', isReadOnly || !selected);
+  [
+    'model-font-size-input',
+    'model-font-family-input',
+    'model-font-bold-input',
+    'model-font-italic-input',
+    'model-font-underline-input',
+    'reset-model-font-settings-button',
+    ...TYPE_FONT_SIZE_CONTROLS.map(control => control.inputId)
+  ].forEach(id => disable(id, isReadOnly));
   disable('reset-model-button', isReadOnly);
   disable('apply-json-button', isReadOnly);
   disable('cancel-link-button', !linkPickActive);
@@ -2966,6 +4023,26 @@ function selectSharedModelFromUrl() {
   return true;
 }
 
+function preferredDefaultModelValue(items = []) {
+  const match = items.find(item => (
+    modelFileNameFromValue(item?.value || '', item?.value || '') === DEFAULT_MODEL_FILE_NAME
+  ));
+  return match?.value || items[0]?.value || '';
+}
+
+function selectPreferredModelDefault(select, selectedValue, items = []) {
+  if (!select) return;
+  const options = [...select.options];
+  if (selectedValue && options.some(option => option.value === selectedValue)) {
+    select.value = selectedValue;
+    return;
+  }
+  const preferredValue = preferredDefaultModelValue(items);
+  if (preferredValue && options.some(option => option.value === preferredValue)) {
+    select.value = preferredValue;
+  }
+}
+
 function openControlSection(sectionKey) {
   const section = document.querySelector(`.control-group[data-section="${sectionKey}"]`);
   if (section?.tagName?.toLowerCase() === 'details') section.open = true;
@@ -2986,6 +4063,8 @@ function commandPaletteCommands() {
     { id: 'export-subgraph', label: 'Export Selected Subgraph', keywords: 'json selected nodes links', enabled: () => selectedNodesForProductivity().length > 0, run: handleExportSelectedSubgraph },
     { id: 'swap-link', label: 'Swap Link Ends', keywords: 'source target route', enabled: () => canEdit && Boolean(selectedLinkId), run: handleSwapSelectedLinkEndpoints },
     { id: 'save-model', label: 'Save Model', keywords: 'persist store', run: handleSaveModel },
+    { id: 'delete-model', label: 'Delete Model', keywords: 'remove file model session', enabled: () => Boolean($('test-model-select')?.value), run: handleDeleteCurrentModel },
+    { id: 'rollback-ai', label: 'Rollback AI Apply', keywords: 'ai undo restore', enabled: () => Boolean(aiRollbackSnapshot?.model), run: handleAiRollbackResult },
     { id: 'fit-view', label: 'Fit View', keywords: 'zoom canvas camera', run: handleFitModel },
     { id: 'optimize-layout', label: 'Optimize Layout', keywords: 'arrange auto layout', run: handleOptimizeLayout },
     { id: 'toggle-3d', label: 'Toggle 3-D View', keywords: 'view mode perspective', run: () => { const toggle = $('view-toggle'); if (toggle) { toggle.checked = !toggle.checked; handleViewToggle(); } } },
@@ -2997,6 +4076,7 @@ function commandPaletteCommands() {
     { id: 'export-json', label: 'Export JSON', keywords: 'model data download', run: handleExportJson },
     { id: 'run-scenarios', label: 'Run Scenario Suite', keywords: 'test regression', enabled: () => !HIDE_SCENARIO_SUITE, run: runScenarioSuite },
     { id: 'run-label-regression', label: 'Run Label Load Regression', keywords: 'test regression labels immediate load', run: runImmediateLabelLoadRegression },
+    { id: 'open-ai-support', label: 'Open AI Support', keywords: 'provider prompt model validation improve', run: () => openControlSection('ai-support') },
     { id: 'open-builder', label: 'Open Model Builder', keywords: 'inspector properties edit', run: () => openControlSection('model-builder') },
     { id: 'open-productivity', label: 'Open Productivity', keywords: 'tree duplicate bulk attributes route subgraph', run: () => openControlSection('productivity') },
     { id: 'open-share', label: 'Open Share', keywords: 'social export link', run: () => openControlSection('share') },
@@ -4117,6 +5197,9 @@ function propertyPathLabel(path) {
     'rendering.globalRouteGap': 'global route gap',
     'rendering.obstacleRouteGap': 'obstacle route gap',
     'rendering.arrowheadVisibility': 'arrowhead visibility',
+    'rendering.arrowType': 'arrow type',
+    'rendering.arrowDirection': 'arrow direction',
+    'rendering.arrowColor': 'arrow color',
     'rendering.arrowheadType': 'arrowhead type',
     'rendering.arrowheadSize': 'arrowhead size',
     'rendering.arrowheadScale': 'arrowhead scale',
@@ -4148,6 +5231,15 @@ function propertyPathLabel(path) {
     'rendering.font.bold': 'font bold',
     'rendering.font.italic': 'font italic',
     'rendering.font.underline': 'font underline',
+    'font.size': 'font size',
+    'font.family': 'font family',
+    'font.bold': 'font bold',
+    'font.italic': 'font italic',
+    'font.underline': 'font underline',
+    'font.classSize': 'class font size',
+    'font.hyperclassSize': 'hyperclass font size',
+    'font.attributeSize': 'attribute font size',
+    'font.linkSize': 'link font size',
     'parentClassId': 'parent hyperclass'
   };
   if (labels[path]) return labels[path];
@@ -5081,7 +6173,7 @@ function renderClass2DInspector(panel, target) {
     labelPrefix: 'Name ',
     path: ['rendering', 'font'],
     font: node.rendering?.font,
-    fallback: getFontSettings()
+    fallback: getTypeFontFallback(isHyperclass ? 'hyperclass' : 'class')
   });
   appendCheckboxControl(appearance.body, {
     label: 'Visible',
@@ -5252,7 +6344,7 @@ function appendFontControls(container, config) {
     path: [...path, 'size'],
     value: font.size,
     min: 6,
-    max: 48,
+    max: MODEL_FONT_SIZE_MAX,
     step: 1,
     defaultValue: null
   });
@@ -5398,7 +6490,7 @@ function renderMultiClass2DInspector(panel, target) {
     labelPrefix: 'Name ',
     path: ['rendering', 'font'],
     font: getCommonFontValue(selectedNodes, ['rendering', 'font']),
-    fallback: getFontSettings()
+    fallback: getMultiNodeFontFallback(selectedNodes)
   });
   appendCheckboxControl(appearance.body, {
     label: 'Visible',
@@ -5589,10 +6681,23 @@ function renderLink2DInspector(panel, target) {
   });
   appendSelectControl(arrowhead.body, {
     label: 'Type',
-    path: ['rendering', 'arrowheadType'],
-    value: rendering.arrowheadType || LINK_2D_DEFAULTS.arrowheadType,
-    options: KNOWN_ENUMS.arrowheadType,
-    defaultValue: LINK_2D_DEFAULTS.arrowheadType
+    path: ['rendering', 'arrowType'],
+    value: rendering.arrowType || rendering.arrowheadType || LINK_2D_DEFAULTS.arrowType,
+    options: KNOWN_ENUMS.arrowType,
+    defaultValue: LINK_2D_DEFAULTS.arrowType
+  });
+  appendSelectControl(arrowhead.body, {
+    label: 'Direction',
+    path: ['rendering', 'arrowDirection'],
+    value: rendering.arrowDirection || LINK_2D_DEFAULTS.arrowDirection,
+    options: KNOWN_ENUMS.arrowDirection,
+    defaultValue: LINK_2D_DEFAULTS.arrowDirection
+  });
+  appendColorControl(arrowhead.body, {
+    label: 'Arrow Color',
+    path: ['rendering', 'arrowColor'],
+    value: rendering.arrowColor || rendering.lineColor || LINK_2D_DEFAULTS.arrowColor,
+    defaultValue: LINK_2D_DEFAULTS.arrowColor
   });
   appendSliderNumberControl(arrowhead.body, {
     label: 'Size',
@@ -5624,14 +6729,15 @@ function renderLink2DInspector(panel, target) {
   panel.appendChild(arrowhead.section);
 
   const label = createInspectorSection('Label', true);
+  const linkFontFallback = getTypeFontFallback('link');
   appendSliderNumberControl(label.body, {
     label: 'Font Size',
     path: ['rendering', 'labelFontSize'],
-    value: rendering.labelFontSize ?? LINK_2D_DEFAULTS.labelFontSize,
+    value: rendering.labelFontSize ?? rendering.font?.size ?? rendering.font?.fontSize ?? linkFontFallback.size,
     min: 6,
-    max: 24,
+    max: MODEL_FONT_SIZE_MAX,
     step: 1,
-    defaultValue: LINK_2D_DEFAULTS.labelFontSize
+    defaultValue: null
   });
   appendColorControl(label.body, {
     label: 'Label Color',
@@ -5910,7 +7016,7 @@ function renderAttribute2DInspector(panel, target) {
   appendFontControls(appearance.body, {
     path: ['font'],
     font: target.value.font,
-    fallback: getFontSettings()
+    fallback: getTypeFontFallback('attribute')
   });
   panel.appendChild(appearance.section);
 }
@@ -7114,6 +8220,7 @@ function installDebugHooks() {
       collaborationStatus: getCollaborationStatusState(),
       canvasInteractionActive: isCanvasInteractionActive(),
       validation: validateData(getData()),
+      aiSupport: getAiSupportStateForDebug(),
       canvas: renderer ? {
         width: renderer.domElement.width,
         height: renderer.domElement.height,
@@ -7157,12 +8264,17 @@ function collectLinkHubMetrics() {
     const sourceId = object.userData.sourceClassId ?? linkData.sourceClassId;
     const sourcePort = object.getObjectByName?.('relationship-port-source') || null;
     const targetPort = object.getObjectByName?.('relationship-port-target') || null;
-    let arrow = object.getObjectByName?.('link-arrowhead') || null;
+    const rendering = linkData.rendering || {};
+    const arrowDirection = rendering.arrowDirection || 'source-to-target';
+    const arrowType = rendering.arrowType || rendering.arrowheadType || 'triangle';
+    const arrowOptional = rendering.arrowheadVisibility === false || arrowDirection === 'none' || arrowType === 'none';
+    let arrow = object.getObjectByName?.('link-arrowhead-target') || object.getObjectByName?.('link-arrowhead-source') || object.getObjectByName?.('link-arrowhead') || null;
     object.traverse(child => {
+      if (!arrow && child.userData?.relationshipArrow && child.userData?.arrowEndpoint) arrow = child;
       if (!arrow && child.isMesh && child.geometry?.type === 'ConeGeometry') arrow = child;
     });
 
-    if (!sourcePort || !targetPort || !arrow) {
+    if (!sourcePort || !targetPort || (!arrow && !arrowOptional)) {
       metrics.push({
         id: linkData.id || object.uuid,
         sourceClassId: sourceId ?? null,
@@ -7174,9 +8286,11 @@ function collectLinkHubMetrics() {
     }
 
     const sourceWorld = sourcePort.getWorldPosition(new THREE.Vector3());
-    const portWorld = targetPort.getWorldPosition(new THREE.Vector3());
-    const arrowWorld = arrow.getWorldPosition(new THREE.Vector3());
-    const portRadius = getHubWorldRadius(targetPort);
+    const targetWorld = targetPort.getWorldPosition(new THREE.Vector3());
+    const endpoint = arrow?.userData?.arrowEndpoint === 'source' ? 'source' : 'target';
+    const portWorld = endpoint === 'source' ? sourceWorld : targetWorld;
+    const arrowWorld = arrow ? arrow.getWorldPosition(new THREE.Vector3()) : portWorld.clone();
+    const portRadius = getHubWorldRadius(endpoint === 'source' ? sourcePort : targetPort);
     const distance = portWorld.distanceTo(arrowWorld);
     metrics.push({
       id: linkData.id || object.uuid,
@@ -7185,7 +8299,10 @@ function collectLinkHubMetrics() {
       valid: true,
       sourcePortSide: sourcePort.userData?.side || null,
       targetPortSide: targetPort.userData?.side || null,
-      sourceTargetDistance: Number(sourceWorld.distanceTo(portWorld).toFixed(5)),
+      arrowEndpoint: arrow?.userData?.arrowEndpoint || null,
+      arrowType,
+      arrowDirection,
+      sourceTargetDistance: Number(sourceWorld.distanceTo(targetWorld).toFixed(5)),
       distance: Number(distance.toFixed(5)),
       hubRadius: Number(portRadius.toFixed(5)),
       delta: Number(distance.toFixed(5)),
@@ -8110,6 +9227,40 @@ async function handleSaveModel(options = {}) {
   showToast(`Saved model JSON (${fileName})`);
 }
 
+async function handleDeleteCurrentModel() {
+  const value = $('test-model-select')?.value || '';
+  if (!value) {
+    showToast('Select a saved model to delete');
+    return;
+  }
+  const scope = aiTargetScope();
+  const fileName = modelFileNameFromValue(value);
+  const label = $('test-model-select')?.selectedOptions?.[0]?.textContent || fileName;
+  if (!window.confirm(`Delete ${label} from ${scope}? A backup will be kept under .backups.`)) return;
+  if (!serverConnected) await refreshServerConnection();
+  if (!serverConnected) {
+    showToast('Server is required to delete models');
+    return;
+  }
+  const body = { clientId: getServerClientId(), allowProtected: false };
+  const result = scope === 'models'
+    ? await deleteServerModel(fileName, { body, timeoutMs: 10000, skipDebugLog: true })
+    : await deleteScopedModel(fileName, { scope, body, timeoutMs: 10000, skipDebugLog: true });
+  if (!result.ok) {
+    const message = result.error?.message || 'Model delete failed';
+    addLog(`Delete failed: ${message}`);
+    showToast(message);
+    return;
+  }
+  addLog(`Deleted ${scope}/${fileName}; backup ${result.data?.backup || 'created'}`);
+  showToast(`Deleted ${fileName}`);
+  await clearLocalServerDraft(result.data?.modelName || (scope === 'models' ? fileName : `${scope}/${fileName}`));
+  await populateModelSelect();
+  const fallback = $('test-model-select')?.value || preferredDefaultModelValue(availableModels) || '';
+  if ($('test-model-select')) $('test-model-select').value = fallback;
+  scheduleSelectedModelLoad(fallback);
+}
+
 function handleExportJson() {
   setSceneSettings(lightingState, { applyContext: false });
   saveScene(ctx(), { fileName: 'dynamic_hbds_export.json' });
@@ -8228,9 +9379,7 @@ async function populateModelSelect() {
         select.appendChild(option);
       });
 
-      if ([...select.options].some(option => option.value === selectedValue)) {
-        select.value = selectedValue;
-      }
+      selectPreferredModelDefault(select, selectedValue, availableModels);
       updateModelSummary();
       setStatus('Server model library connected', 'ok');
       return;
@@ -8263,6 +9412,7 @@ async function populateModelSelect() {
     select.appendChild(option);
   });
 
+  selectPreferredModelDefault(select, selectedValue, availableModels);
   updateModelSummary();
 }
 
@@ -8678,9 +9828,9 @@ async function runSatelliteFontZoomRegression() {
   if (near.classLabel.count <= 0) errors.push('missing class/hyperclass labels');
   if (near.attributeLabel.count <= 0) errors.push('missing attribute labels');
   if (near.linkLabel.count <= 0) errors.push('missing link labels');
-  if (near.classLabel.max > 14.15) errors.push(`class label font exceeded global 14px cap (${near.classLabel.max.toFixed(1)}px)`);
-  if (near.attributeLabel.max > 11.15) errors.push(`attribute font exceeded individual 11px cap (${near.attributeLabel.max.toFixed(1)}px)`);
-  if (near.linkLabel.max > 14.15) errors.push(`link label font exceeded 14px cap (${near.linkLabel.max.toFixed(1)}px)`);
+  if (near.classLabel.max > MODEL_FONT_SIZE_MAX + 0.15) errors.push(`class label font exceeded ${MODEL_FONT_SIZE_MAX}px cap (${near.classLabel.max.toFixed(1)}px)`);
+  if (near.attributeLabel.max > MODEL_FONT_SIZE_MAX + 0.15) errors.push(`attribute font exceeded ${MODEL_FONT_SIZE_MAX}px cap (${near.attributeLabel.max.toFixed(1)}px)`);
+  if (near.linkLabel.max > MODEL_FONT_SIZE_MAX + 0.15) errors.push(`link label font exceeded ${MODEL_FONT_SIZE_MAX}px cap (${near.linkLabel.max.toFixed(1)}px)`);
   if (far.classLabel.max >= near.classLabel.max - 0.25) errors.push('class labels did not shrink when zooming out');
   if (far.attributeLabel.max >= near.attributeLabel.max - 0.25) errors.push('attribute labels did not shrink when zooming out');
   if (far.linkLabel.max >= near.linkLabel.max - 0.25) errors.push('link labels did not shrink when zooming out');
@@ -9047,6 +10197,7 @@ function bindUi() {
   $('optimize-layout-button').addEventListener('click', () => runAction(handleOptimizeLayout, 'layout.optimize'));
   $('fit-model-button').addEventListener('click', handleFitModel);
   $('save-model-button').addEventListener('click', () => runAction(handleSaveModel, 'model.save'));
+  $('delete-model-button')?.addEventListener('click', () => runAction(handleDeleteCurrentModel, 'model.delete'));
   $('export-json-button').addEventListener('click', handleExportJson);
   $('export-png-button')?.addEventListener('click', () => runAction(handleExportPng, 'export.png'));
   $('export-svg-button')?.addEventListener('click', () => runAction(handleExportSvg, 'export.svg'));
@@ -9060,6 +10211,37 @@ function bindUi() {
   $('apply-json-button').addEventListener('click', () => runAction(handleApplyJson, 'json.apply'));
   $('reset-model-button').addEventListener('click', () => runAction(handleResetModel, 'model.reset'));
   $('run-scenario-suite-button')?.addEventListener('click', () => runAction(runScenarioSuite, 'scenarioSuite.run'));
+  $('ai-provider-select')?.addEventListener('change', () => runAction(handleAiProviderChange, 'ai.providerChange'));
+  $('ai-api-key-toggle')?.addEventListener('click', handleAiKeyToggle);
+  $('ai-api-key-input')?.addEventListener('input', handleAiConnectionInput);
+  $('ai-base-url-input')?.addEventListener('input', handleAiConnectionInput);
+  $('ai-model-select')?.addEventListener('change', handleAiModelChange);
+  $('ai-model-input')?.addEventListener('input', handleAiConnectionInput);
+  $('ai-reasoning-select')?.addEventListener('change', handleAiConnectionInput);
+  $('ai-operation-select')?.addEventListener('change', () => updateAiSupportUi({ keepStatus: true }));
+  $('ai-request-input')?.addEventListener('input', () => updateAiSupportUi({ keepStatus: true }));
+  $('ai-test-connection-button')?.addEventListener('click', () => runAction(handleAiTestConnection, 'ai.testConnection'));
+  $('ai-send-request-button')?.addEventListener('click', () => runAction(handleAiSendRequest, 'ai.sendRequest'));
+  $('ai-copy-prompt-button')?.addEventListener('click', () => runAction(handleAiCopyPrompt, 'ai.copyPrompt'));
+  $('ai-open-chatgpt-button')?.addEventListener('click', () => runAction(handleAiOpenChatGpt, 'ai.openChatGpt'));
+  $('ai-paste-response-button')?.addEventListener('click', () => runAction(handleAiPasteResponse, 'ai.pasteResponse'));
+  $('ai-validate-response-button')?.addEventListener('click', () => runAction(handleAiValidateManualResponse, 'ai.validateResponse'));
+  $('ai-manual-response-input')?.addEventListener('input', () => {
+    aiResultModel = null;
+    updateAiSupportUi({ keepStatus: true });
+  });
+  $('ai-cancel-request-button')?.addEventListener('click', handleAiCancelRequest);
+  $('ai-discard-result-button')?.addEventListener('click', handleAiDiscardResult);
+  $('ai-apply-result-button')?.addEventListener('click', () => runAction(handleAiApplyResult, 'ai.applyResult'));
+  $('ai-rollback-result-button')?.addEventListener('click', () => runAction(handleAiRollbackResult, 'ai.rollbackResult'));
+  $('ai-diff-close-button')?.addEventListener('click', closeAiDiffModal);
+  $('ai-diff-cancel-button')?.addEventListener('click', closeAiDiffModal);
+  $('ai-diff-preview-button')?.addEventListener('click', () => runAction(previewAiResultOnCanvas, 'ai.previewResult'));
+  $('ai-diff-apply-save-button')?.addEventListener('click', () => runAction(() => applyAiResultFromDiff(aiDiffSaveMode), 'ai.applySave'));
+  $('ai-diff-apply-new-button')?.addEventListener('click', () => runAction(() => applyAiResultFromDiff('new'), 'ai.applySaveNew'));
+  $('ai-diff-modal')?.addEventListener('pointerdown', event => {
+    if (event.target === $('ai-diff-modal')) closeAiDiffModal();
+  });
   $('cancel-link-button').addEventListener('click', cancelLinkCreation);
   $('command-palette-input')?.addEventListener('input', () => {
     commandPaletteActiveIndex = 0;
@@ -9136,7 +10318,8 @@ function bindUi() {
     'model-font-family-input',
     'model-font-bold-input',
     'model-font-italic-input',
-    'model-font-underline-input'
+    'model-font-underline-input',
+    ...TYPE_FONT_SIZE_CONTROLS.map(control => control.inputId)
   ].forEach(id => $(id)?.addEventListener('input', handleFontSettingInput));
 
   $('layout-algorithm-select')?.addEventListener('change', handleLayoutSettingChange);
@@ -9217,12 +10400,18 @@ async function init() {
   initModelOverview(ctx());
   clearOverview();
   await refreshServerConnection();
+  await initializeAiSupport();
   await populateModelSelect();
   if (selectSharedModelFromUrl()) {
     await handleLoadModel();
   } else {
-    updateInterface();
-    markSavedState();
+    const initialModel = $('test-model-select')?.value || '';
+    if (initialModel) {
+      await handleLoadModel({ value: initialModel });
+    } else {
+      updateInterface();
+      markSavedState();
+    }
   }
   addLog('Ready');
   const params = new URLSearchParams(window.location.search);

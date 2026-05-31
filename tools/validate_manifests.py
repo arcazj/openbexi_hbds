@@ -8,6 +8,23 @@ ROOT = Path(__file__).resolve().parents[1]
 CLASS_BODY_TYPES = {"rectangle", "image", "shape"}
 CLASS_IMAGE_FITS = {"contain", "cover"}
 CLASS_SURFACE_MATERIALS = {"metallic", "flat", "basic", "matte", "mat", "glossy", "shine", "shiny", "plastic", "glass", "transparent"}
+LINK_ARROW_TYPES = {
+    "triangle",
+    "outline",
+    "chevron",
+    "double-chevron",
+    "triple-chevron",
+    "filled-triangle",
+    "hollow-triangle",
+    "dotted",
+    "bar-arrow",
+    "double-bar-arrow",
+    "cone",
+    "diamond",
+    "none",
+}
+LINK_ARROW_DIRECTIONS = {"source-to-target", "target-to-source", "bidirectional", "none"}
+LINK_LINE_STYLES = {"solid", "dashed", "dotted", "thick", "thin"}
 CLASS_SHAPE_TYPES = {
     "roundedRectangle",
     "rectangle",
@@ -174,6 +191,28 @@ def validate_model_file(model_path: Path):
             errors.append(f"{model_path}: link {link_id or idx} missing source {source}")
         if target not in by_id:
             errors.append(f"{model_path}: link {link_id or idx} missing target {target}")
+        errors.extend(validate_link_rendering_fields(model_path, link, link_id or idx))
+    return errors
+
+
+def validate_link_rendering_fields(model_path: Path, link: dict, link_id):
+    errors = []
+    rendering = link.get("rendering") or {}
+    if not isinstance(rendering, dict):
+        return [f"{model_path}: link {link_id} rendering must be an object"]
+    arrow_type = rendering.get("arrowType", rendering.get("arrowheadType"))
+    if arrow_type is not None and str(arrow_type) not in LINK_ARROW_TYPES:
+        errors.append(f"{model_path}: link {link_id} unsupported arrowType {arrow_type}")
+    arrow_direction = rendering.get("arrowDirection")
+    if arrow_direction is not None and str(arrow_direction) not in LINK_ARROW_DIRECTIONS:
+        errors.append(f"{model_path}: link {link_id} unsupported arrowDirection {arrow_direction}")
+    line_style = rendering.get("lineStyle")
+    if line_style is not None and str(line_style) not in LINK_LINE_STYLES:
+        errors.append(f"{model_path}: link {link_id} unsupported lineStyle {line_style}")
+    for key in ("lineWidth", "arrowheadSize", "arrowheadScale", "maxArrowheadSize", "labelFontSize"):
+        value = rendering.get(key)
+        if value is not None and (not isinstance(value, (int, float)) or value <= 0):
+            errors.append(f"{model_path}: link {link_id} {key} must be a positive number")
     return errors
 
 
@@ -189,6 +228,10 @@ def validate_font_fields(model_path: Path, value, label: str):
     size = font.get("size", font.get("fontSize", font.get("labelFontSize")))
     if size is not None and (not isinstance(size, (int, float)) or size <= 0):
         errors.append(f"{model_path}: {label}.size must be a positive number")
+    for key in ("classSize", "hyperclassSize", "attributeSize", "linkSize"):
+        value = font.get(key)
+        if value is not None and (not isinstance(value, (int, float)) or value <= 0):
+            errors.append(f"{model_path}: {label}.{key} must be null or a positive number")
     family = font.get("family", font.get("fontFamily"))
     if family is not None and (not isinstance(family, str) or not family.strip()):
         errors.append(f"{model_path}: {label}.family must be a non-empty string")
@@ -364,6 +407,10 @@ def validate_font_regression_model():
     metadata_font = (data.get("metadata") or {}).get("font") or {}
     if metadata_font.get("size") != 13:
         errors.append(f"{model_path}: font regression model must define metadata.font.size 13")
+    expected_type_sizes = {"classSize": 17, "hyperclassSize": 19, "attributeSize": 14, "linkSize": 11}
+    for key, expected in expected_type_sizes.items():
+        if metadata_font.get(key) != expected:
+            errors.append(f"{model_path}: font regression model must define metadata.font.{key} {expected}")
     if not any(((node.get("rendering") or {}).get("font") or {}).get("size") for node in classes if node.get("type") != "hyperclass"):
         errors.append(f"{model_path}: font regression model missing regular class font override")
     if not any(((node.get("rendering") or {}).get("font") or {}).get("italic") for node in classes if node.get("type") == "hyperclass"):
@@ -378,6 +425,63 @@ def validate_font_regression_model():
         errors.append(f"{model_path}: font regression model missing individual attribute font override")
     if not any(isinstance(attribute, str) for node in classes for attribute in node.get("attributes", [])):
         errors.append(f"{model_path}: font regression model missing legacy string attribute fallback")
+    return errors
+
+
+def validate_link_arrow_regression_model():
+    model_path = ROOT / "test_models" / "links_034_extended_arrow_types.json"
+    if not model_path.exists():
+        return [f"missing link arrow regression model: {model_path}"]
+    data = load_json(model_path)
+    links = data.get("hypergraph", {}).get("link", [])
+    errors = []
+    observed_types = {
+        (link.get("rendering") or {}).get("arrowType", (link.get("rendering") or {}).get("arrowheadType"))
+        for link in links
+        if isinstance(link, dict)
+    }
+    required_types = {
+        "triangle",
+        "outline",
+        "chevron",
+        "double-chevron",
+        "triple-chevron",
+        "filled-triangle",
+        "hollow-triangle",
+        "dotted",
+        "bar-arrow",
+        "double-bar-arrow",
+        "cone",
+        "diamond",
+        "none",
+    }
+    missing_types = required_types - observed_types
+    if missing_types:
+        errors.append(f"{model_path}: link arrow regression model missing arrow types {sorted(missing_types)}")
+    observed_directions = {
+        (link.get("rendering") or {}).get("arrowDirection")
+        for link in links
+        if isinstance(link, dict)
+    }
+    missing_directions = LINK_ARROW_DIRECTIONS - observed_directions
+    if missing_directions:
+        errors.append(f"{model_path}: link arrow regression model missing arrow directions {sorted(missing_directions)}")
+    observed_styles = {
+        (link.get("rendering") or {}).get("lineStyle")
+        for link in links
+        if isinstance(link, dict)
+    }
+    missing_styles = LINK_LINE_STYLES - observed_styles
+    if missing_styles:
+        errors.append(f"{model_path}: link arrow regression model missing line styles {sorted(missing_styles)}")
+    if not any((link.get("rendering") or {}).get("arrowColor") for link in links if isinstance(link, dict)):
+        errors.append(f"{model_path}: link arrow regression model missing arrowColor coverage")
+    label_font_overrides = [
+        link for link in links
+        if isinstance(link, dict) and (link.get("rendering") or {}).get("labelFontSize") is not None
+    ]
+    if len(label_font_overrides) < 10:
+        errors.append(f"{model_path}: link arrow regression model must keep at least 10 labelFontSize overrides for font policy reset coverage")
     return errors
 
 
@@ -400,6 +504,7 @@ def main():
         all_errors.extend(validate_manifest(manifest_path, default_base))
     all_errors.extend(validate_image_shape_regression_model())
     all_errors.extend(validate_font_regression_model())
+    all_errors.extend(validate_link_arrow_regression_model())
     if all_errors:
         print("Manifest validation failed:")
         for err in all_errors:

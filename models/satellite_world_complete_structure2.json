@@ -1,10 +1,10 @@
 {
   "$schema": "https://openbexi.local/hbds/model/v1",
   "metadata": {
-    "id": "satellite_world_complete_structure",
-    "name": "Satellite World Complete Structure",
+    "id": "satellite_world_complete_structure2",
+    "name": "Satellite World Complete Structure 2",
     "version": "2026.05.30-validated",
-    "description": "Validated HBDS satellite-world domain model with grid layout, metallic colored classes, semantic hyperclasses, traceable relationships, and fit metadata.",
+    "description": "Second validated HBDS satellite-world domain model with grid layout, metallic colored classes, semantic hyperclasses, traceable relationships, and fit metadata.",
     "preserveLayout": true,
     "validatedAt": "2026-05-30",
     "sceneSettings": {
@@ -68,7 +68,7 @@
       "classPalette": "domain-colored",
       "hyperclassMaterial": "metallic"
     },
-    "purpose": "Validated HBDS satellite-world domain model with grid layout, metallic colored classes, semantic hyperclasses, traceable relationships, and fit metadata.",
+    "purpose": "Second validated HBDS satellite-world domain model with grid layout, metallic colored classes, semantic hyperclasses, traceable relationships, and fit metadata.",
     "regressionTags": [
       "model",
       "satellite",
@@ -80,7 +80,7 @@
       "fit-metadata-refresh"
     ],
     "font": {
-      "size": 12,
+      "size": 18,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
@@ -101,12 +101,13 @@
         "Added 15 explicit FK-traceability links for high-confidence reference attributes.",
         "Refreshed metadata.layout.fit from computed class bounds."
       ]
-    }
+    },
+    "duplicateIdResolution": "All entity ids use satellite_world_complete_structure2_* to avoid collisions with satellite_world_complete_structure.json."
   },
   "hypergraph": {
     "class": [
       {
-        "id": "satellite_world_complete_structure_hc_identity_governance",
+        "id": "satellite_world_complete_structure2_hc_identity_governance",
         "name": "Identity / Governance",
         "type": "hyperclass",
         "attributes": [
@@ -118,11 +119,11 @@
           "License scope"
         ],
         "children": [
-          "satellite_world_complete_structure_space_object",
-          "satellite_world_complete_structure_satellite",
-          "satellite_world_complete_structure_organization",
-          "satellite_world_complete_structure_registry_record",
-          "satellite_world_complete_structure_license_authorization"
+          "satellite_world_complete_structure2_space_object",
+          "satellite_world_complete_structure2_satellite",
+          "satellite_world_complete_structure2_organization",
+          "satellite_world_complete_structure2_registry_record",
+          "satellite_world_complete_structure2_license_authorization"
         ],
         "position": {
           "x": -27.75,
@@ -151,6 +152,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -160,10 +164,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_space_object",
+        "id": "satellite_world_complete_structure2_space_object",
         "name": "Space Object",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_identity_governance",
+        "parentClassId": "satellite_world_complete_structure2_hc_identity_governance",
         "attributes": [
           "objectId",
           "objectType",
@@ -198,6 +202,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -207,10 +214,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_satellite",
         "name": "Satellite",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_identity_governance",
+        "parentClassId": "satellite_world_complete_structure2_hc_identity_governance",
         "attributes": [
           "satelliteId",
           "spaceObjectId",
@@ -245,6 +252,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -254,10 +264,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_organization",
+        "id": "satellite_world_complete_structure2_organization",
         "name": "Organization",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_identity_governance",
+        "parentClassId": "satellite_world_complete_structure2_hc_identity_governance",
         "attributes": [
           "organizationId",
           "legalName",
@@ -291,6 +301,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -300,10 +313,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_registry_record",
+        "id": "satellite_world_complete_structure2_registry_record",
         "name": "Registry Record",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_identity_governance",
+        "parentClassId": "satellite_world_complete_structure2_hc_identity_governance",
         "attributes": [
           "registryRecordId",
           "spaceObjectId",
@@ -337,6 +350,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -346,10 +362,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_license_authorization",
+        "id": "satellite_world_complete_structure2_license_authorization",
         "name": "License / Authorization",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_identity_governance",
+        "parentClassId": "satellite_world_complete_structure2_hc_identity_governance",
         "attributes": [
           "authorizationId",
           "issuingAuthority",
@@ -383,6 +399,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -392,7 +411,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_launch_deployment",
+        "id": "satellite_world_complete_structure2_hc_launch_deployment",
         "name": "Launch / Deployment",
         "type": "hyperclass",
         "attributes": [
@@ -404,11 +423,11 @@
           "Mission outcome"
         ],
         "children": [
-          "satellite_world_complete_structure_launch_mission",
-          "satellite_world_complete_structure_launch_vehicle",
-          "satellite_world_complete_structure_launch_site",
-          "satellite_world_complete_structure_deployment_event",
-          "satellite_world_complete_structure_payload_adapter"
+          "satellite_world_complete_structure2_launch_mission",
+          "satellite_world_complete_structure2_launch_vehicle",
+          "satellite_world_complete_structure2_launch_site",
+          "satellite_world_complete_structure2_deployment_event",
+          "satellite_world_complete_structure2_payload_adapter"
         ],
         "position": {
           "x": -9.25,
@@ -437,6 +456,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -446,10 +468,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_launch_mission",
+        "id": "satellite_world_complete_structure2_launch_mission",
         "name": "Launch Mission",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_launch_deployment",
+        "parentClassId": "satellite_world_complete_structure2_hc_launch_deployment",
         "attributes": [
           "launchId",
           "missionName",
@@ -483,6 +505,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -492,10 +517,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_launch_vehicle",
+        "id": "satellite_world_complete_structure2_launch_vehicle",
         "name": "Launch Vehicle",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_launch_deployment",
+        "parentClassId": "satellite_world_complete_structure2_hc_launch_deployment",
         "attributes": [
           "launchVehicleId",
           "vehicleName",
@@ -529,6 +554,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -538,10 +566,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_launch_site",
+        "id": "satellite_world_complete_structure2_launch_site",
         "name": "Launch Site",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_launch_deployment",
+        "parentClassId": "satellite_world_complete_structure2_hc_launch_deployment",
         "attributes": [
           "launchSiteId",
           "siteName",
@@ -575,6 +603,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -584,10 +615,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_deployment_event",
+        "id": "satellite_world_complete_structure2_deployment_event",
         "name": "Deployment Event",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_launch_deployment",
+        "parentClassId": "satellite_world_complete_structure2_hc_launch_deployment",
         "attributes": [
           "deploymentEventId",
           "launchId",
@@ -621,6 +652,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -630,10 +664,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_payload_adapter",
+        "id": "satellite_world_complete_structure2_payload_adapter",
         "name": "Payload Adapter",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_launch_deployment",
+        "parentClassId": "satellite_world_complete_structure2_hc_launch_deployment",
         "attributes": [
           "adapterId",
           "launchVehicleId",
@@ -667,6 +701,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -676,7 +713,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_orbit_tracking",
+        "id": "satellite_world_complete_structure2_hc_orbit_tracking",
         "name": "Orbit / Tracking",
         "type": "hyperclass",
         "attributes": [
@@ -688,11 +725,11 @@
           "Conjunction inputs"
         ],
         "children": [
-          "satellite_world_complete_structure_orbit_state",
-          "satellite_world_complete_structure_tle_set",
-          "satellite_world_complete_structure_ephemeris_vector",
-          "satellite_world_complete_structure_tracking_sensor",
-          "satellite_world_complete_structure_tracking_observation"
+          "satellite_world_complete_structure2_orbit_state",
+          "satellite_world_complete_structure2_tle_set",
+          "satellite_world_complete_structure2_ephemeris_vector",
+          "satellite_world_complete_structure2_tracking_sensor",
+          "satellite_world_complete_structure2_tracking_observation"
         ],
         "position": {
           "x": 9.25,
@@ -721,6 +758,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -730,10 +770,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_orbit_state",
+        "id": "satellite_world_complete_structure2_orbit_state",
         "name": "Orbit State",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_orbit_tracking",
+        "parentClassId": "satellite_world_complete_structure2_hc_orbit_tracking",
         "attributes": [
           "orbitStateId",
           "spaceObjectId",
@@ -768,6 +808,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -777,10 +820,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_tle_set",
+        "id": "satellite_world_complete_structure2_tle_set",
         "name": "TLE Set",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_orbit_tracking",
+        "parentClassId": "satellite_world_complete_structure2_hc_orbit_tracking",
         "attributes": [
           "tleId",
           "noradCatalogId",
@@ -815,6 +858,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -824,10 +870,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_ephemeris_vector",
+        "id": "satellite_world_complete_structure2_ephemeris_vector",
         "name": "Ephemeris State Vector",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_orbit_tracking",
+        "parentClassId": "satellite_world_complete_structure2_hc_orbit_tracking",
         "attributes": [
           "ephemerisId",
           "spaceObjectId",
@@ -862,6 +908,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -871,10 +920,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_tracking_sensor",
+        "id": "satellite_world_complete_structure2_tracking_sensor",
         "name": "Tracking Sensor",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_orbit_tracking",
+        "parentClassId": "satellite_world_complete_structure2_hc_orbit_tracking",
         "attributes": [
           "sensorId",
           "sensorName",
@@ -909,6 +958,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -918,10 +970,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_tracking_observation",
+        "id": "satellite_world_complete_structure2_tracking_observation",
         "name": "Tracking Observation",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_orbit_tracking",
+        "parentClassId": "satellite_world_complete_structure2_hc_orbit_tracking",
         "attributes": [
           "observationId",
           "spaceObjectId",
@@ -955,6 +1007,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -964,7 +1019,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_mission_payload",
+        "id": "satellite_world_complete_structure2_hc_mission_payload",
         "name": "Mission / Payload",
         "type": "hyperclass",
         "attributes": [
@@ -976,11 +1031,11 @@
           "Mission phase"
         ],
         "children": [
-          "satellite_world_complete_structure_payload",
-          "satellite_world_complete_structure_instrument",
-          "satellite_world_complete_structure_communication_channel",
-          "satellite_world_complete_structure_ground_station",
-          "satellite_world_complete_structure_command_plan"
+          "satellite_world_complete_structure2_payload",
+          "satellite_world_complete_structure2_instrument",
+          "satellite_world_complete_structure2_communication_channel",
+          "satellite_world_complete_structure2_ground_station",
+          "satellite_world_complete_structure2_command_plan"
         ],
         "position": {
           "x": 27.75,
@@ -1009,6 +1064,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1018,10 +1076,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_payload",
+        "id": "satellite_world_complete_structure2_payload",
         "name": "Payload",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_mission_payload",
+        "parentClassId": "satellite_world_complete_structure2_hc_mission_payload",
         "attributes": [
           "payloadId",
           "satelliteId",
@@ -1056,6 +1114,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1065,10 +1126,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_instrument",
+        "id": "satellite_world_complete_structure2_instrument",
         "name": "Instrument",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_mission_payload",
+        "parentClassId": "satellite_world_complete_structure2_hc_mission_payload",
         "attributes": [
           "instrumentId",
           "payloadId",
@@ -1102,6 +1163,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1111,10 +1175,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_communication_channel",
+        "id": "satellite_world_complete_structure2_communication_channel",
         "name": "Communication Channel",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_mission_payload",
+        "parentClassId": "satellite_world_complete_structure2_hc_mission_payload",
         "attributes": [
           "channelId",
           "satelliteId",
@@ -1149,6 +1213,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1158,10 +1225,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_ground_station",
+        "id": "satellite_world_complete_structure2_ground_station",
         "name": "Ground Station",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_mission_payload",
+        "parentClassId": "satellite_world_complete_structure2_hc_mission_payload",
         "attributes": [
           "groundStationId",
           "name",
@@ -1195,6 +1262,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1204,10 +1274,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_command_plan",
+        "id": "satellite_world_complete_structure2_command_plan",
         "name": "Command Plan",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_mission_payload",
+        "parentClassId": "satellite_world_complete_structure2_hc_mission_payload",
         "attributes": [
           "commandPlanId",
           "satelliteId",
@@ -1241,6 +1311,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1250,7 +1323,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_bus_subsystems",
+        "id": "satellite_world_complete_structure2_hc_bus_subsystems",
         "name": "Spacecraft Bus / Subsystems",
         "type": "hyperclass",
         "attributes": [
@@ -1262,11 +1335,11 @@
           "Subsystem health"
         ],
         "children": [
-          "satellite_world_complete_structure_power_subsystem",
-          "satellite_world_complete_structure_adcs_subsystem",
-          "satellite_world_complete_structure_propulsion_subsystem",
-          "satellite_world_complete_structure_thermal_control",
-          "satellite_world_complete_structure_data_handling"
+          "satellite_world_complete_structure2_power_subsystem",
+          "satellite_world_complete_structure2_adcs_subsystem",
+          "satellite_world_complete_structure2_propulsion_subsystem",
+          "satellite_world_complete_structure2_thermal_control",
+          "satellite_world_complete_structure2_data_handling"
         ],
         "position": {
           "x": -27.75,
@@ -1295,6 +1368,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1304,10 +1380,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_power_subsystem",
+        "id": "satellite_world_complete_structure2_power_subsystem",
         "name": "Power Subsystem",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_bus_subsystems",
+        "parentClassId": "satellite_world_complete_structure2_hc_bus_subsystems",
         "attributes": [
           "powerSubsystemId",
           "satelliteId",
@@ -1341,6 +1417,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1350,10 +1429,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_adcs_subsystem",
+        "id": "satellite_world_complete_structure2_adcs_subsystem",
         "name": "ADCS Subsystem",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_bus_subsystems",
+        "parentClassId": "satellite_world_complete_structure2_hc_bus_subsystems",
         "attributes": [
           "adcsId",
           "satelliteId",
@@ -1387,6 +1466,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1396,10 +1478,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_propulsion_subsystem",
+        "id": "satellite_world_complete_structure2_propulsion_subsystem",
         "name": "Propulsion Subsystem",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_bus_subsystems",
+        "parentClassId": "satellite_world_complete_structure2_hc_bus_subsystems",
         "attributes": [
           "propulsionId",
           "satelliteId",
@@ -1433,6 +1515,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1442,10 +1527,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_thermal_control",
+        "id": "satellite_world_complete_structure2_thermal_control",
         "name": "Thermal Control",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_bus_subsystems",
+        "parentClassId": "satellite_world_complete_structure2_hc_bus_subsystems",
         "attributes": [
           "thermalId",
           "satelliteId",
@@ -1479,6 +1564,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1488,10 +1576,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_data_handling",
+        "id": "satellite_world_complete_structure2_data_handling",
         "name": "Onboard Data Handling",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_bus_subsystems",
+        "parentClassId": "satellite_world_complete_structure2_hc_bus_subsystems",
         "attributes": [
           "computerId",
           "satelliteId",
@@ -1525,6 +1613,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1534,7 +1625,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_environment_safety",
+        "id": "satellite_world_complete_structure2_hc_environment_safety",
         "name": "Space Environment / Safety",
         "type": "hyperclass",
         "attributes": [
@@ -1546,11 +1637,11 @@
           "Risk posture"
         ],
         "children": [
-          "satellite_world_complete_structure_space_weather_event",
-          "satellite_world_complete_structure_debris_object",
-          "satellite_world_complete_structure_conjunction_assessment",
-          "satellite_world_complete_structure_collision_avoidance",
-          "satellite_world_complete_structure_decay_prediction"
+          "satellite_world_complete_structure2_space_weather_event",
+          "satellite_world_complete_structure2_debris_object",
+          "satellite_world_complete_structure2_conjunction_assessment",
+          "satellite_world_complete_structure2_collision_avoidance",
+          "satellite_world_complete_structure2_decay_prediction"
         ],
         "position": {
           "x": -9.25,
@@ -1579,6 +1670,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1588,10 +1682,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_space_weather_event",
+        "id": "satellite_world_complete_structure2_space_weather_event",
         "name": "Space Weather Event",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_environment_safety",
+        "parentClassId": "satellite_world_complete_structure2_hc_environment_safety",
         "attributes": [
           "spaceWeatherEventId",
           "eventType",
@@ -1625,6 +1719,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1634,10 +1731,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_debris_object",
+        "id": "satellite_world_complete_structure2_debris_object",
         "name": "Debris Object",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_environment_safety",
+        "parentClassId": "satellite_world_complete_structure2_hc_environment_safety",
         "attributes": [
           "debrisId",
           "spaceObjectId",
@@ -1671,6 +1768,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1680,10 +1780,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_conjunction_assessment",
+        "id": "satellite_world_complete_structure2_conjunction_assessment",
         "name": "Conjunction Assessment",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_environment_safety",
+        "parentClassId": "satellite_world_complete_structure2_hc_environment_safety",
         "attributes": [
           "conjunctionId",
           "primaryObjectId",
@@ -1717,6 +1817,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1726,10 +1829,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_collision_avoidance",
+        "id": "satellite_world_complete_structure2_collision_avoidance",
         "name": "Collision Avoidance Action",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_environment_safety",
+        "parentClassId": "satellite_world_complete_structure2_hc_environment_safety",
         "attributes": [
           "avoidanceActionId",
           "conjunctionId",
@@ -1762,6 +1865,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1771,10 +1877,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_decay_prediction",
+        "id": "satellite_world_complete_structure2_decay_prediction",
         "name": "Decay Prediction",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_environment_safety",
+        "parentClassId": "satellite_world_complete_structure2_hc_environment_safety",
         "attributes": [
           "decayPredictionId",
           "spaceObjectId",
@@ -1808,6 +1914,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1817,7 +1926,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_data_services",
+        "id": "satellite_world_complete_structure2_hc_data_services",
         "name": "Data Products / Services",
         "type": "hyperclass",
         "attributes": [
@@ -1829,11 +1938,11 @@
           "Distribution policy"
         ],
         "children": [
-          "satellite_world_complete_structure_telemetry_snapshot",
-          "satellite_world_complete_structure_mission_data_product",
-          "satellite_world_complete_structure_image_product",
-          "satellite_world_complete_structure_service_level",
-          "satellite_world_complete_structure_user_terminal"
+          "satellite_world_complete_structure2_telemetry_snapshot",
+          "satellite_world_complete_structure2_mission_data_product",
+          "satellite_world_complete_structure2_image_product",
+          "satellite_world_complete_structure2_service_level",
+          "satellite_world_complete_structure2_user_terminal"
         ],
         "position": {
           "x": 9.25,
@@ -1862,6 +1971,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1871,10 +1983,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_telemetry_snapshot",
+        "id": "satellite_world_complete_structure2_telemetry_snapshot",
         "name": "Telemetry Snapshot",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_data_services",
+        "parentClassId": "satellite_world_complete_structure2_hc_data_services",
         "attributes": [
           "telemetryId",
           "satelliteId",
@@ -1909,6 +2021,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1918,10 +2033,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_mission_data_product",
+        "id": "satellite_world_complete_structure2_mission_data_product",
         "name": "Mission Data Product",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_data_services",
+        "parentClassId": "satellite_world_complete_structure2_hc_data_services",
         "attributes": [
           "dataProductId",
           "payloadId",
@@ -1956,6 +2071,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1965,10 +2083,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_image_product",
+        "id": "satellite_world_complete_structure2_image_product",
         "name": "Image Product",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_data_services",
+        "parentClassId": "satellite_world_complete_structure2_hc_data_services",
         "attributes": [
           "imageProductId",
           "dataProductId",
@@ -2002,6 +2120,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2011,10 +2132,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_service_level",
+        "id": "satellite_world_complete_structure2_service_level",
         "name": "Service Level",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_data_services",
+        "parentClassId": "satellite_world_complete_structure2_hc_data_services",
         "attributes": [
           "serviceLevelId",
           "serviceName",
@@ -2048,6 +2169,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2057,10 +2181,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_user_terminal",
+        "id": "satellite_world_complete_structure2_user_terminal",
         "name": "User Terminal",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_data_services",
+        "parentClassId": "satellite_world_complete_structure2_hc_data_services",
         "attributes": [
           "terminalId",
           "customerId",
@@ -2094,6 +2218,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2103,7 +2230,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_ground_network",
+        "id": "satellite_world_complete_structure2_hc_ground_network",
         "name": "Ground Segment / Network",
         "type": "hyperclass",
         "attributes": [
@@ -2115,11 +2242,11 @@
           "Data routing"
         ],
         "children": [
-          "satellite_world_complete_structure_ground_station_network",
-          "satellite_world_complete_structure_antenna",
-          "satellite_world_complete_structure_contact_window",
-          "satellite_world_complete_structure_network_schedule",
-          "satellite_world_complete_structure_data_downlink"
+          "satellite_world_complete_structure2_ground_station_network",
+          "satellite_world_complete_structure2_antenna",
+          "satellite_world_complete_structure2_contact_window",
+          "satellite_world_complete_structure2_network_schedule",
+          "satellite_world_complete_structure2_data_downlink"
         ],
         "position": {
           "x": 27.75,
@@ -2148,6 +2275,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2157,10 +2287,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_ground_station_network",
+        "id": "satellite_world_complete_structure2_ground_station_network",
         "name": "Ground Station Network",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_ground_network",
+        "parentClassId": "satellite_world_complete_structure2_hc_ground_network",
         "attributes": [
           "networkId",
           "networkName",
@@ -2194,6 +2324,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2203,10 +2336,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_antenna",
+        "id": "satellite_world_complete_structure2_antenna",
         "name": "Antenna",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_ground_network",
+        "parentClassId": "satellite_world_complete_structure2_hc_ground_network",
         "attributes": [
           "antennaId",
           "groundStationId",
@@ -2240,6 +2373,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2249,10 +2385,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_contact_window",
+        "id": "satellite_world_complete_structure2_contact_window",
         "name": "Contact Window",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_ground_network",
+        "parentClassId": "satellite_world_complete_structure2_hc_ground_network",
         "attributes": [
           "contactWindowId",
           "satelliteId",
@@ -2286,6 +2422,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2295,10 +2434,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_network_schedule",
+        "id": "satellite_world_complete_structure2_network_schedule",
         "name": "Network Schedule",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_ground_network",
+        "parentClassId": "satellite_world_complete_structure2_hc_ground_network",
         "attributes": [
           "scheduleId",
           "networkId",
@@ -2332,6 +2471,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2341,10 +2483,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_data_downlink",
+        "id": "satellite_world_complete_structure2_data_downlink",
         "name": "Data Downlink",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_ground_network",
+        "parentClassId": "satellite_world_complete_structure2_hc_ground_network",
         "attributes": [
           "downlinkId",
           "contactWindowId",
@@ -2378,6 +2520,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2387,7 +2532,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_supply_chain",
+        "id": "satellite_world_complete_structure2_hc_supply_chain",
         "name": "Procurement / Supply Chain",
         "type": "hyperclass",
         "attributes": [
@@ -2399,11 +2544,11 @@
           "Cost exposure"
         ],
         "children": [
-          "satellite_world_complete_structure_contract",
-          "satellite_world_complete_structure_supplier",
-          "satellite_world_complete_structure_component",
-          "satellite_world_complete_structure_maintenance_record",
-          "satellite_world_complete_structure_insurance_policy"
+          "satellite_world_complete_structure2_contract",
+          "satellite_world_complete_structure2_supplier",
+          "satellite_world_complete_structure2_component",
+          "satellite_world_complete_structure2_maintenance_record",
+          "satellite_world_complete_structure2_insurance_policy"
         ],
         "position": {
           "x": -27.75,
@@ -2432,6 +2577,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2441,10 +2589,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_contract",
+        "id": "satellite_world_complete_structure2_contract",
         "name": "Contract",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_supply_chain",
+        "parentClassId": "satellite_world_complete_structure2_hc_supply_chain",
         "attributes": [
           "contractId",
           "buyerOrganizationId",
@@ -2479,6 +2627,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2488,10 +2639,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_supplier",
+        "id": "satellite_world_complete_structure2_supplier",
         "name": "Supplier",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_supply_chain",
+        "parentClassId": "satellite_world_complete_structure2_hc_supply_chain",
         "attributes": [
           "supplierId",
           "organizationId",
@@ -2525,6 +2676,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2534,10 +2688,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_component",
+        "id": "satellite_world_complete_structure2_component",
         "name": "Component",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_supply_chain",
+        "parentClassId": "satellite_world_complete_structure2_hc_supply_chain",
         "attributes": [
           "componentId",
           "satelliteId",
@@ -2572,6 +2726,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2581,10 +2738,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_maintenance_record",
+        "id": "satellite_world_complete_structure2_maintenance_record",
         "name": "Maintenance Record",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_supply_chain",
+        "parentClassId": "satellite_world_complete_structure2_hc_supply_chain",
         "attributes": [
           "maintenanceRecordId",
           "componentId",
@@ -2618,6 +2775,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2627,10 +2787,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_insurance_policy",
+        "id": "satellite_world_complete_structure2_insurance_policy",
         "name": "Insurance Policy",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_supply_chain",
+        "parentClassId": "satellite_world_complete_structure2_hc_supply_chain",
         "attributes": [
           "policyId",
           "insuredAssetId",
@@ -2664,6 +2824,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2673,7 +2836,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_compliance_risk",
+        "id": "satellite_world_complete_structure2_hc_compliance_risk",
         "name": "Compliance / Risk",
         "type": "hyperclass",
         "attributes": [
@@ -2685,11 +2848,11 @@
           "Audit trail"
         ],
         "children": [
-          "satellite_world_complete_structure_frequency_filing",
-          "satellite_world_complete_structure_export_control",
-          "satellite_world_complete_structure_data_policy",
-          "satellite_world_complete_structure_incident",
-          "satellite_world_complete_structure_anomaly"
+          "satellite_world_complete_structure2_frequency_filing",
+          "satellite_world_complete_structure2_export_control",
+          "satellite_world_complete_structure2_data_policy",
+          "satellite_world_complete_structure2_incident",
+          "satellite_world_complete_structure2_anomaly"
         ],
         "position": {
           "x": -9.25,
@@ -2718,6 +2881,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2727,10 +2893,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_frequency_filing",
+        "id": "satellite_world_complete_structure2_frequency_filing",
         "name": "Frequency Filing",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_compliance_risk",
+        "parentClassId": "satellite_world_complete_structure2_hc_compliance_risk",
         "attributes": [
           "filingId",
           "satelliteId",
@@ -2764,6 +2930,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2773,10 +2942,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_export_control",
+        "id": "satellite_world_complete_structure2_export_control",
         "name": "Export Control",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_compliance_risk",
+        "parentClassId": "satellite_world_complete_structure2_hc_compliance_risk",
         "attributes": [
           "exportControlId",
           "assetId",
@@ -2810,6 +2979,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2819,10 +2991,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_data_policy",
+        "id": "satellite_world_complete_structure2_data_policy",
         "name": "Data Policy",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_compliance_risk",
+        "parentClassId": "satellite_world_complete_structure2_hc_compliance_risk",
         "attributes": [
           "dataPolicyId",
           "dataProductId",
@@ -2856,6 +3028,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2865,10 +3040,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_incident",
+        "id": "satellite_world_complete_structure2_incident",
         "name": "Incident",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_compliance_risk",
+        "parentClassId": "satellite_world_complete_structure2_hc_compliance_risk",
         "attributes": [
           "incidentId",
           "satelliteId",
@@ -2903,6 +3078,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2912,10 +3090,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_anomaly",
+        "id": "satellite_world_complete_structure2_anomaly",
         "name": "Anomaly",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_compliance_risk",
+        "parentClassId": "satellite_world_complete_structure2_hc_compliance_risk",
         "attributes": [
           "anomalyId",
           "satelliteId",
@@ -2950,6 +3128,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -2959,7 +3140,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_operations_lifecycle",
+        "id": "satellite_world_complete_structure2_hc_operations_lifecycle",
         "name": "Operations / Lifecycle",
         "type": "hyperclass",
         "attributes": [
@@ -2971,11 +3152,11 @@
           "Continuity state"
         ],
         "children": [
-          "satellite_world_complete_structure_operational_phase",
-          "satellite_world_complete_structure_maneuver",
-          "satellite_world_complete_structure_health_assessment",
-          "satellite_world_complete_structure_end_of_life_plan",
-          "satellite_world_complete_structure_disposal_event"
+          "satellite_world_complete_structure2_operational_phase",
+          "satellite_world_complete_structure2_maneuver",
+          "satellite_world_complete_structure2_health_assessment",
+          "satellite_world_complete_structure2_end_of_life_plan",
+          "satellite_world_complete_structure2_disposal_event"
         ],
         "position": {
           "x": 9.25,
@@ -3004,6 +3185,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3013,10 +3197,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_operational_phase",
+        "id": "satellite_world_complete_structure2_operational_phase",
         "name": "Operational Phase",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_operations_lifecycle",
+        "parentClassId": "satellite_world_complete_structure2_hc_operations_lifecycle",
         "attributes": [
           "phaseId",
           "satelliteId",
@@ -3051,6 +3235,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3060,10 +3247,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_maneuver",
+        "id": "satellite_world_complete_structure2_maneuver",
         "name": "Maneuver",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_operations_lifecycle",
+        "parentClassId": "satellite_world_complete_structure2_hc_operations_lifecycle",
         "attributes": [
           "maneuverId",
           "satelliteId",
@@ -3097,6 +3284,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3106,10 +3296,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_health_assessment",
+        "id": "satellite_world_complete_structure2_health_assessment",
         "name": "Health Assessment",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_operations_lifecycle",
+        "parentClassId": "satellite_world_complete_structure2_hc_operations_lifecycle",
         "attributes": [
           "healthAssessmentId",
           "satelliteId",
@@ -3143,6 +3333,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3152,10 +3345,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_end_of_life_plan",
+        "id": "satellite_world_complete_structure2_end_of_life_plan",
         "name": "End-of-Life Plan",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_operations_lifecycle",
+        "parentClassId": "satellite_world_complete_structure2_hc_operations_lifecycle",
         "attributes": [
           "eolPlanId",
           "satelliteId",
@@ -3189,6 +3382,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3198,10 +3394,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_disposal_event",
+        "id": "satellite_world_complete_structure2_disposal_event",
         "name": "Disposal Event",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_operations_lifecycle",
+        "parentClassId": "satellite_world_complete_structure2_hc_operations_lifecycle",
         "attributes": [
           "disposalEventId",
           "eolPlanId",
@@ -3235,6 +3431,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3244,7 +3443,7 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_hc_analytics_digital_twin",
+        "id": "satellite_world_complete_structure2_hc_analytics_digital_twin",
         "name": "Analytics / Digital Twin",
         "type": "hyperclass",
         "attributes": [
@@ -3256,11 +3455,11 @@
           "Decision support"
         ],
         "children": [
-          "satellite_world_complete_structure_digital_twin",
-          "satellite_world_complete_structure_simulation_scenario",
-          "satellite_world_complete_structure_propagator_run",
-          "satellite_world_complete_structure_alert_rule",
-          "satellite_world_complete_structure_kpi_metric"
+          "satellite_world_complete_structure2_digital_twin",
+          "satellite_world_complete_structure2_simulation_scenario",
+          "satellite_world_complete_structure2_propagator_run",
+          "satellite_world_complete_structure2_alert_rule",
+          "satellite_world_complete_structure2_kpi_metric"
         ],
         "position": {
           "x": 27.75,
@@ -3289,6 +3488,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3298,10 +3500,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_digital_twin",
+        "id": "satellite_world_complete_structure2_digital_twin",
         "name": "Digital Twin",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_analytics_digital_twin",
+        "parentClassId": "satellite_world_complete_structure2_hc_analytics_digital_twin",
         "attributes": [
           "digitalTwinId",
           "satelliteId",
@@ -3335,6 +3537,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3344,10 +3549,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_simulation_scenario",
+        "id": "satellite_world_complete_structure2_simulation_scenario",
         "name": "Simulation Scenario",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_analytics_digital_twin",
+        "parentClassId": "satellite_world_complete_structure2_hc_analytics_digital_twin",
         "attributes": [
           "scenarioId",
           "name",
@@ -3382,6 +3587,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3391,10 +3599,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_propagator_run",
+        "id": "satellite_world_complete_structure2_propagator_run",
         "name": "Propagator Run",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_analytics_digital_twin",
+        "parentClassId": "satellite_world_complete_structure2_hc_analytics_digital_twin",
         "attributes": [
           "propagatorRunId",
           "scenarioId",
@@ -3428,6 +3636,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3437,10 +3648,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_alert_rule",
+        "id": "satellite_world_complete_structure2_alert_rule",
         "name": "Alert Rule",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_analytics_digital_twin",
+        "parentClassId": "satellite_world_complete_structure2_hc_analytics_digital_twin",
         "attributes": [
           "alertRuleId",
           "ruleName",
@@ -3474,6 +3685,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3483,10 +3697,10 @@
         }
       },
       {
-        "id": "satellite_world_complete_structure_kpi_metric",
+        "id": "satellite_world_complete_structure2_kpi_metric",
         "name": "KPI Metric",
         "type": "roundedRectangle",
-        "parentClassId": "satellite_world_complete_structure_hc_analytics_digital_twin",
+        "parentClassId": "satellite_world_complete_structure2_hc_analytics_digital_twin",
         "attributes": [
           "kpiMetricId",
           "subjectId",
@@ -3521,6 +3735,9 @@
             "size": {
               "width": 0.11,
               "height": 0.11
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -3532,9 +3749,9 @@
     ],
     "link": [
       {
-        "id": "satellite_world_complete_structure_link_rel_001_space_object_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_space_object",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_001_space_object_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_space_object",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "specializes into",
         "allowSelfLink": false,
         "rendering": {
@@ -3551,17 +3768,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_002_satellite_to_registry_record",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_registry_record",
+        "id": "satellite_world_complete_structure2_link_rel_002_satellite_to_registry_record",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_registry_record",
         "name": "registered as",
         "allowSelfLink": false,
         "rendering": {
@@ -3578,17 +3798,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_003_satellite_to_organization",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_organization",
+        "id": "satellite_world_complete_structure2_link_rel_003_satellite_to_organization",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_organization",
         "name": "operated by",
         "allowSelfLink": false,
         "rendering": {
@@ -3605,17 +3828,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_004_registry_record_to_license_authorization",
-        "sourceClassId": "satellite_world_complete_structure_registry_record",
-        "targetClassId": "satellite_world_complete_structure_license_authorization",
+        "id": "satellite_world_complete_structure2_link_rel_004_registry_record_to_license_authorization",
+        "sourceClassId": "satellite_world_complete_structure2_registry_record",
+        "targetClassId": "satellite_world_complete_structure2_license_authorization",
         "name": "authorized by",
         "allowSelfLink": false,
         "rendering": {
@@ -3632,17 +3858,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_005_license_authorization_to_frequency_filing",
-        "sourceClassId": "satellite_world_complete_structure_license_authorization",
-        "targetClassId": "satellite_world_complete_structure_frequency_filing",
+        "id": "satellite_world_complete_structure2_link_rel_005_license_authorization_to_frequency_filing",
+        "sourceClassId": "satellite_world_complete_structure2_license_authorization",
+        "targetClassId": "satellite_world_complete_structure2_frequency_filing",
         "name": "requires filing",
         "allowSelfLink": false,
         "rendering": {
@@ -3659,17 +3888,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_006_organization_to_supplier",
-        "sourceClassId": "satellite_world_complete_structure_organization",
-        "targetClassId": "satellite_world_complete_structure_supplier",
+        "id": "satellite_world_complete_structure2_link_rel_006_organization_to_supplier",
+        "sourceClassId": "satellite_world_complete_structure2_organization",
+        "targetClassId": "satellite_world_complete_structure2_supplier",
         "name": "qualifies",
         "allowSelfLink": false,
         "rendering": {
@@ -3686,17 +3918,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_007_organization_to_contract",
-        "sourceClassId": "satellite_world_complete_structure_organization",
-        "targetClassId": "satellite_world_complete_structure_contract",
+        "id": "satellite_world_complete_structure2_link_rel_007_organization_to_contract",
+        "sourceClassId": "satellite_world_complete_structure2_organization",
+        "targetClassId": "satellite_world_complete_structure2_contract",
         "name": "signs",
         "allowSelfLink": false,
         "rendering": {
@@ -3713,17 +3948,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_008_launch_mission_to_launch_vehicle",
-        "sourceClassId": "satellite_world_complete_structure_launch_mission",
-        "targetClassId": "satellite_world_complete_structure_launch_vehicle",
+        "id": "satellite_world_complete_structure2_link_rel_008_launch_mission_to_launch_vehicle",
+        "sourceClassId": "satellite_world_complete_structure2_launch_mission",
+        "targetClassId": "satellite_world_complete_structure2_launch_vehicle",
         "name": "uses vehicle",
         "allowSelfLink": false,
         "rendering": {
@@ -3740,17 +3978,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_009_launch_mission_to_launch_site",
-        "sourceClassId": "satellite_world_complete_structure_launch_mission",
-        "targetClassId": "satellite_world_complete_structure_launch_site",
+        "id": "satellite_world_complete_structure2_link_rel_009_launch_mission_to_launch_site",
+        "sourceClassId": "satellite_world_complete_structure2_launch_mission",
+        "targetClassId": "satellite_world_complete_structure2_launch_site",
         "name": "launches from",
         "allowSelfLink": false,
         "rendering": {
@@ -3767,17 +4008,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_010_launch_mission_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_launch_mission",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_010_launch_mission_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_launch_mission",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "carries payload object",
         "allowSelfLink": false,
         "rendering": {
@@ -3794,17 +4038,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_011_payload_adapter_to_launch_vehicle",
-        "sourceClassId": "satellite_world_complete_structure_payload_adapter",
-        "targetClassId": "satellite_world_complete_structure_launch_vehicle",
+        "id": "satellite_world_complete_structure2_link_rel_011_payload_adapter_to_launch_vehicle",
+        "sourceClassId": "satellite_world_complete_structure2_payload_adapter",
+        "targetClassId": "satellite_world_complete_structure2_launch_vehicle",
         "name": "mounted on",
         "allowSelfLink": false,
         "rendering": {
@@ -3821,17 +4068,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_012_deployment_event_to_launch_mission",
-        "sourceClassId": "satellite_world_complete_structure_deployment_event",
-        "targetClassId": "satellite_world_complete_structure_launch_mission",
+        "id": "satellite_world_complete_structure2_link_rel_012_deployment_event_to_launch_mission",
+        "sourceClassId": "satellite_world_complete_structure2_deployment_event",
+        "targetClassId": "satellite_world_complete_structure2_launch_mission",
         "name": "part of launch",
         "allowSelfLink": false,
         "rendering": {
@@ -3848,17 +4098,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_013_deployment_event_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_deployment_event",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_013_deployment_event_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_deployment_event",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "deploys satellite",
         "allowSelfLink": false,
         "rendering": {
@@ -3875,17 +4128,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_014_deployment_event_to_orbit_state",
-        "sourceClassId": "satellite_world_complete_structure_deployment_event",
-        "targetClassId": "satellite_world_complete_structure_orbit_state",
+        "id": "satellite_world_complete_structure2_link_rel_014_deployment_event_to_orbit_state",
+        "sourceClassId": "satellite_world_complete_structure2_deployment_event",
+        "targetClassId": "satellite_world_complete_structure2_orbit_state",
         "name": "creates initial state",
         "allowSelfLink": false,
         "rendering": {
@@ -3902,17 +4158,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_015_satellite_to_orbit_state",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_orbit_state",
+        "id": "satellite_world_complete_structure2_link_rel_015_satellite_to_orbit_state",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_orbit_state",
         "name": "has orbit",
         "allowSelfLink": false,
         "rendering": {
@@ -3929,17 +4188,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_016_orbit_state_to_tle_set",
-        "sourceClassId": "satellite_world_complete_structure_orbit_state",
-        "targetClassId": "satellite_world_complete_structure_tle_set",
+        "id": "satellite_world_complete_structure2_link_rel_016_orbit_state_to_tle_set",
+        "sourceClassId": "satellite_world_complete_structure2_orbit_state",
+        "targetClassId": "satellite_world_complete_structure2_tle_set",
         "name": "summarized by",
         "allowSelfLink": false,
         "rendering": {
@@ -3956,17 +4218,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_017_orbit_state_to_ephemeris_vector",
-        "sourceClassId": "satellite_world_complete_structure_orbit_state",
-        "targetClassId": "satellite_world_complete_structure_ephemeris_vector",
+        "id": "satellite_world_complete_structure2_link_rel_017_orbit_state_to_ephemeris_vector",
+        "sourceClassId": "satellite_world_complete_structure2_orbit_state",
+        "targetClassId": "satellite_world_complete_structure2_ephemeris_vector",
         "name": "refined by",
         "allowSelfLink": false,
         "rendering": {
@@ -3983,17 +4248,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_018_tracking_sensor_to_tracking_observation",
-        "sourceClassId": "satellite_world_complete_structure_tracking_sensor",
-        "targetClassId": "satellite_world_complete_structure_tracking_observation",
+        "id": "satellite_world_complete_structure2_link_rel_018_tracking_sensor_to_tracking_observation",
+        "sourceClassId": "satellite_world_complete_structure2_tracking_sensor",
+        "targetClassId": "satellite_world_complete_structure2_tracking_observation",
         "name": "produces",
         "allowSelfLink": false,
         "rendering": {
@@ -4010,17 +4278,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_019_tracking_observation_to_space_object",
-        "sourceClassId": "satellite_world_complete_structure_tracking_observation",
-        "targetClassId": "satellite_world_complete_structure_space_object",
+        "id": "satellite_world_complete_structure2_link_rel_019_tracking_observation_to_space_object",
+        "sourceClassId": "satellite_world_complete_structure2_tracking_observation",
+        "targetClassId": "satellite_world_complete_structure2_space_object",
         "name": "observes",
         "allowSelfLink": false,
         "rendering": {
@@ -4037,17 +4308,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_020_tracking_observation_to_orbit_state",
-        "sourceClassId": "satellite_world_complete_structure_tracking_observation",
-        "targetClassId": "satellite_world_complete_structure_orbit_state",
+        "id": "satellite_world_complete_structure2_link_rel_020_tracking_observation_to_orbit_state",
+        "sourceClassId": "satellite_world_complete_structure2_tracking_observation",
+        "targetClassId": "satellite_world_complete_structure2_orbit_state",
         "name": "updates orbit",
         "allowSelfLink": false,
         "rendering": {
@@ -4064,17 +4338,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_021_satellite_to_payload",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_payload",
+        "id": "satellite_world_complete_structure2_link_rel_021_satellite_to_payload",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_payload",
         "name": "hosts",
         "allowSelfLink": false,
         "rendering": {
@@ -4091,17 +4368,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_022_payload_to_instrument",
-        "sourceClassId": "satellite_world_complete_structure_payload",
-        "targetClassId": "satellite_world_complete_structure_instrument",
+        "id": "satellite_world_complete_structure2_link_rel_022_payload_to_instrument",
+        "sourceClassId": "satellite_world_complete_structure2_payload",
+        "targetClassId": "satellite_world_complete_structure2_instrument",
         "name": "contains",
         "allowSelfLink": false,
         "rendering": {
@@ -4118,17 +4398,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_023_satellite_to_communication_channel",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_communication_channel",
+        "id": "satellite_world_complete_structure2_link_rel_023_satellite_to_communication_channel",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_communication_channel",
         "name": "uses channel",
         "allowSelfLink": false,
         "rendering": {
@@ -4145,17 +4428,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_024_communication_channel_to_ground_station",
-        "sourceClassId": "satellite_world_complete_structure_communication_channel",
-        "targetClassId": "satellite_world_complete_structure_ground_station",
+        "id": "satellite_world_complete_structure2_link_rel_024_communication_channel_to_ground_station",
+        "sourceClassId": "satellite_world_complete_structure2_communication_channel",
+        "targetClassId": "satellite_world_complete_structure2_ground_station",
         "name": "contacts",
         "allowSelfLink": false,
         "rendering": {
@@ -4172,17 +4458,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_025_command_plan_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_command_plan",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_025_command_plan_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_command_plan",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "commands",
         "allowSelfLink": false,
         "rendering": {
@@ -4199,17 +4488,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_026_command_plan_to_operational_phase",
-        "sourceClassId": "satellite_world_complete_structure_command_plan",
-        "targetClassId": "satellite_world_complete_structure_operational_phase",
+        "id": "satellite_world_complete_structure2_link_rel_026_command_plan_to_operational_phase",
+        "sourceClassId": "satellite_world_complete_structure2_command_plan",
+        "targetClassId": "satellite_world_complete_structure2_operational_phase",
         "name": "scheduled in",
         "allowSelfLink": false,
         "rendering": {
@@ -4226,17 +4518,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_027_satellite_to_power_subsystem",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_power_subsystem",
+        "id": "satellite_world_complete_structure2_link_rel_027_satellite_to_power_subsystem",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_power_subsystem",
         "name": "contains",
         "allowSelfLink": false,
         "rendering": {
@@ -4253,17 +4548,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_028_satellite_to_adcs_subsystem",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_adcs_subsystem",
+        "id": "satellite_world_complete_structure2_link_rel_028_satellite_to_adcs_subsystem",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_adcs_subsystem",
         "name": "contains",
         "allowSelfLink": false,
         "rendering": {
@@ -4280,17 +4578,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_029_satellite_to_propulsion_subsystem",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_propulsion_subsystem",
+        "id": "satellite_world_complete_structure2_link_rel_029_satellite_to_propulsion_subsystem",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_propulsion_subsystem",
         "name": "contains",
         "allowSelfLink": false,
         "rendering": {
@@ -4307,17 +4608,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_030_satellite_to_thermal_control",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_thermal_control",
+        "id": "satellite_world_complete_structure2_link_rel_030_satellite_to_thermal_control",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_thermal_control",
         "name": "contains",
         "allowSelfLink": false,
         "rendering": {
@@ -4334,17 +4638,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_031_satellite_to_data_handling",
-        "sourceClassId": "satellite_world_complete_structure_satellite",
-        "targetClassId": "satellite_world_complete_structure_data_handling",
+        "id": "satellite_world_complete_structure2_link_rel_031_satellite_to_data_handling",
+        "sourceClassId": "satellite_world_complete_structure2_satellite",
+        "targetClassId": "satellite_world_complete_structure2_data_handling",
         "name": "contains",
         "allowSelfLink": false,
         "rendering": {
@@ -4361,17 +4668,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_032_telemetry_snapshot_to_power_subsystem",
-        "sourceClassId": "satellite_world_complete_structure_telemetry_snapshot",
-        "targetClassId": "satellite_world_complete_structure_power_subsystem",
+        "id": "satellite_world_complete_structure2_link_rel_032_telemetry_snapshot_to_power_subsystem",
+        "sourceClassId": "satellite_world_complete_structure2_telemetry_snapshot",
+        "targetClassId": "satellite_world_complete_structure2_power_subsystem",
         "name": "monitors power",
         "allowSelfLink": false,
         "rendering": {
@@ -4388,17 +4698,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_033_telemetry_snapshot_to_adcs_subsystem",
-        "sourceClassId": "satellite_world_complete_structure_telemetry_snapshot",
-        "targetClassId": "satellite_world_complete_structure_adcs_subsystem",
+        "id": "satellite_world_complete_structure2_link_rel_033_telemetry_snapshot_to_adcs_subsystem",
+        "sourceClassId": "satellite_world_complete_structure2_telemetry_snapshot",
+        "targetClassId": "satellite_world_complete_structure2_adcs_subsystem",
         "name": "monitors attitude",
         "allowSelfLink": false,
         "rendering": {
@@ -4415,17 +4728,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_034_telemetry_snapshot_to_thermal_control",
-        "sourceClassId": "satellite_world_complete_structure_telemetry_snapshot",
-        "targetClassId": "satellite_world_complete_structure_thermal_control",
+        "id": "satellite_world_complete_structure2_link_rel_034_telemetry_snapshot_to_thermal_control",
+        "sourceClassId": "satellite_world_complete_structure2_telemetry_snapshot",
+        "targetClassId": "satellite_world_complete_structure2_thermal_control",
         "name": "monitors thermal",
         "allowSelfLink": false,
         "rendering": {
@@ -4442,17 +4758,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_035_space_weather_event_to_telemetry_snapshot",
-        "sourceClassId": "satellite_world_complete_structure_space_weather_event",
-        "targetClassId": "satellite_world_complete_structure_telemetry_snapshot",
+        "id": "satellite_world_complete_structure2_link_rel_035_space_weather_event_to_telemetry_snapshot",
+        "sourceClassId": "satellite_world_complete_structure2_space_weather_event",
+        "targetClassId": "satellite_world_complete_structure2_telemetry_snapshot",
         "name": "may affect",
         "allowSelfLink": false,
         "rendering": {
@@ -4469,17 +4788,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_036_space_weather_event_to_orbit_state",
-        "sourceClassId": "satellite_world_complete_structure_space_weather_event",
-        "targetClassId": "satellite_world_complete_structure_orbit_state",
+        "id": "satellite_world_complete_structure2_link_rel_036_space_weather_event_to_orbit_state",
+        "sourceClassId": "satellite_world_complete_structure2_space_weather_event",
+        "targetClassId": "satellite_world_complete_structure2_orbit_state",
         "name": "perturbs",
         "allowSelfLink": false,
         "rendering": {
@@ -4496,17 +4818,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_037_space_object_to_debris_object",
-        "sourceClassId": "satellite_world_complete_structure_space_object",
-        "targetClassId": "satellite_world_complete_structure_debris_object",
+        "id": "satellite_world_complete_structure2_link_rel_037_space_object_to_debris_object",
+        "sourceClassId": "satellite_world_complete_structure2_space_object",
+        "targetClassId": "satellite_world_complete_structure2_debris_object",
         "name": "may classify as",
         "allowSelfLink": false,
         "rendering": {
@@ -4523,17 +4848,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_038_conjunction_assessment_to_space_object",
-        "sourceClassId": "satellite_world_complete_structure_conjunction_assessment",
-        "targetClassId": "satellite_world_complete_structure_space_object",
+        "id": "satellite_world_complete_structure2_link_rel_038_conjunction_assessment_to_space_object",
+        "sourceClassId": "satellite_world_complete_structure2_conjunction_assessment",
+        "targetClassId": "satellite_world_complete_structure2_space_object",
         "name": "primary object",
         "allowSelfLink": false,
         "rendering": {
@@ -4550,17 +4878,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_039_conjunction_assessment_to_debris_object",
-        "sourceClassId": "satellite_world_complete_structure_conjunction_assessment",
-        "targetClassId": "satellite_world_complete_structure_debris_object",
+        "id": "satellite_world_complete_structure2_link_rel_039_conjunction_assessment_to_debris_object",
+        "sourceClassId": "satellite_world_complete_structure2_conjunction_assessment",
+        "targetClassId": "satellite_world_complete_structure2_debris_object",
         "name": "secondary object",
         "allowSelfLink": false,
         "rendering": {
@@ -4577,17 +4908,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_040_conjunction_assessment_to_collision_avoidance",
-        "sourceClassId": "satellite_world_complete_structure_conjunction_assessment",
-        "targetClassId": "satellite_world_complete_structure_collision_avoidance",
+        "id": "satellite_world_complete_structure2_link_rel_040_conjunction_assessment_to_collision_avoidance",
+        "sourceClassId": "satellite_world_complete_structure2_conjunction_assessment",
+        "targetClassId": "satellite_world_complete_structure2_collision_avoidance",
         "name": "drives",
         "allowSelfLink": false,
         "rendering": {
@@ -4604,17 +4938,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_041_collision_avoidance_to_maneuver",
-        "sourceClassId": "satellite_world_complete_structure_collision_avoidance",
-        "targetClassId": "satellite_world_complete_structure_maneuver",
+        "id": "satellite_world_complete_structure2_link_rel_041_collision_avoidance_to_maneuver",
+        "sourceClassId": "satellite_world_complete_structure2_collision_avoidance",
+        "targetClassId": "satellite_world_complete_structure2_maneuver",
         "name": "recommends",
         "allowSelfLink": false,
         "rendering": {
@@ -4631,17 +4968,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_042_decay_prediction_to_space_object",
-        "sourceClassId": "satellite_world_complete_structure_decay_prediction",
-        "targetClassId": "satellite_world_complete_structure_space_object",
+        "id": "satellite_world_complete_structure2_link_rel_042_decay_prediction_to_space_object",
+        "sourceClassId": "satellite_world_complete_structure2_decay_prediction",
+        "targetClassId": "satellite_world_complete_structure2_space_object",
         "name": "predicts reentry",
         "allowSelfLink": false,
         "rendering": {
@@ -4658,17 +4998,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_043_payload_to_mission_data_product",
-        "sourceClassId": "satellite_world_complete_structure_payload",
-        "targetClassId": "satellite_world_complete_structure_mission_data_product",
+        "id": "satellite_world_complete_structure2_link_rel_043_payload_to_mission_data_product",
+        "sourceClassId": "satellite_world_complete_structure2_payload",
+        "targetClassId": "satellite_world_complete_structure2_mission_data_product",
         "name": "generates",
         "allowSelfLink": false,
         "rendering": {
@@ -4685,17 +5028,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_044_instrument_to_image_product",
-        "sourceClassId": "satellite_world_complete_structure_instrument",
-        "targetClassId": "satellite_world_complete_structure_image_product",
+        "id": "satellite_world_complete_structure2_link_rel_044_instrument_to_image_product",
+        "sourceClassId": "satellite_world_complete_structure2_instrument",
+        "targetClassId": "satellite_world_complete_structure2_image_product",
         "name": "captures",
         "allowSelfLink": false,
         "rendering": {
@@ -4712,17 +5058,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_045_image_product_to_mission_data_product",
-        "sourceClassId": "satellite_world_complete_structure_image_product",
-        "targetClassId": "satellite_world_complete_structure_mission_data_product",
+        "id": "satellite_world_complete_structure2_link_rel_045_image_product_to_mission_data_product",
+        "sourceClassId": "satellite_world_complete_structure2_image_product",
+        "targetClassId": "satellite_world_complete_structure2_mission_data_product",
         "name": "is product subtype",
         "allowSelfLink": false,
         "rendering": {
@@ -4739,17 +5088,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_046_service_level_to_mission_data_product",
-        "sourceClassId": "satellite_world_complete_structure_service_level",
-        "targetClassId": "satellite_world_complete_structure_mission_data_product",
+        "id": "satellite_world_complete_structure2_link_rel_046_service_level_to_mission_data_product",
+        "sourceClassId": "satellite_world_complete_structure2_service_level",
+        "targetClassId": "satellite_world_complete_structure2_mission_data_product",
         "name": "publishes",
         "allowSelfLink": false,
         "rendering": {
@@ -4766,17 +5118,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_047_user_terminal_to_service_level",
-        "sourceClassId": "satellite_world_complete_structure_user_terminal",
-        "targetClassId": "satellite_world_complete_structure_service_level",
+        "id": "satellite_world_complete_structure2_link_rel_047_user_terminal_to_service_level",
+        "sourceClassId": "satellite_world_complete_structure2_user_terminal",
+        "targetClassId": "satellite_world_complete_structure2_service_level",
         "name": "consumes",
         "allowSelfLink": false,
         "rendering": {
@@ -4793,17 +5148,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_048_data_policy_to_mission_data_product",
-        "sourceClassId": "satellite_world_complete_structure_data_policy",
-        "targetClassId": "satellite_world_complete_structure_mission_data_product",
+        "id": "satellite_world_complete_structure2_link_rel_048_data_policy_to_mission_data_product",
+        "sourceClassId": "satellite_world_complete_structure2_data_policy",
+        "targetClassId": "satellite_world_complete_structure2_mission_data_product",
         "name": "governs access",
         "allowSelfLink": false,
         "rendering": {
@@ -4820,17 +5178,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_049_ground_station_network_to_ground_station",
-        "sourceClassId": "satellite_world_complete_structure_ground_station_network",
-        "targetClassId": "satellite_world_complete_structure_ground_station",
+        "id": "satellite_world_complete_structure2_link_rel_049_ground_station_network_to_ground_station",
+        "sourceClassId": "satellite_world_complete_structure2_ground_station_network",
+        "targetClassId": "satellite_world_complete_structure2_ground_station",
         "name": "includes",
         "allowSelfLink": false,
         "rendering": {
@@ -4847,17 +5208,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_050_ground_station_to_antenna",
-        "sourceClassId": "satellite_world_complete_structure_ground_station",
-        "targetClassId": "satellite_world_complete_structure_antenna",
+        "id": "satellite_world_complete_structure2_link_rel_050_ground_station_to_antenna",
+        "sourceClassId": "satellite_world_complete_structure2_ground_station",
+        "targetClassId": "satellite_world_complete_structure2_antenna",
         "name": "has antenna",
         "allowSelfLink": false,
         "rendering": {
@@ -4874,17 +5238,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_051_contact_window_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_contact_window",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_051_contact_window_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_contact_window",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "visible pass",
         "allowSelfLink": false,
         "rendering": {
@@ -4901,17 +5268,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_052_contact_window_to_ground_station",
-        "sourceClassId": "satellite_world_complete_structure_contact_window",
-        "targetClassId": "satellite_world_complete_structure_ground_station",
+        "id": "satellite_world_complete_structure2_link_rel_052_contact_window_to_ground_station",
+        "sourceClassId": "satellite_world_complete_structure2_contact_window",
+        "targetClassId": "satellite_world_complete_structure2_ground_station",
         "name": "uses station",
         "allowSelfLink": false,
         "rendering": {
@@ -4928,17 +5298,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_053_network_schedule_to_contact_window",
-        "sourceClassId": "satellite_world_complete_structure_network_schedule",
-        "targetClassId": "satellite_world_complete_structure_contact_window",
+        "id": "satellite_world_complete_structure2_link_rel_053_network_schedule_to_contact_window",
+        "sourceClassId": "satellite_world_complete_structure2_network_schedule",
+        "targetClassId": "satellite_world_complete_structure2_contact_window",
         "name": "allocates",
         "allowSelfLink": false,
         "rendering": {
@@ -4955,17 +5328,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_054_data_downlink_to_contact_window",
-        "sourceClassId": "satellite_world_complete_structure_data_downlink",
-        "targetClassId": "satellite_world_complete_structure_contact_window",
+        "id": "satellite_world_complete_structure2_link_rel_054_data_downlink_to_contact_window",
+        "sourceClassId": "satellite_world_complete_structure2_data_downlink",
+        "targetClassId": "satellite_world_complete_structure2_contact_window",
         "name": "uses window",
         "allowSelfLink": false,
         "rendering": {
@@ -4982,17 +5358,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_055_data_downlink_to_mission_data_product",
-        "sourceClassId": "satellite_world_complete_structure_data_downlink",
-        "targetClassId": "satellite_world_complete_structure_mission_data_product",
+        "id": "satellite_world_complete_structure2_link_rel_055_data_downlink_to_mission_data_product",
+        "sourceClassId": "satellite_world_complete_structure2_data_downlink",
+        "targetClassId": "satellite_world_complete_structure2_mission_data_product",
         "name": "delivers",
         "allowSelfLink": false,
         "rendering": {
@@ -5009,17 +5388,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_056_contract_to_launch_mission",
-        "sourceClassId": "satellite_world_complete_structure_contract",
-        "targetClassId": "satellite_world_complete_structure_launch_mission",
+        "id": "satellite_world_complete_structure2_link_rel_056_contract_to_launch_mission",
+        "sourceClassId": "satellite_world_complete_structure2_contract",
+        "targetClassId": "satellite_world_complete_structure2_launch_mission",
         "name": "covers launch",
         "allowSelfLink": false,
         "rendering": {
@@ -5036,17 +5418,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_057_contract_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_contract",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_057_contract_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_contract",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "covers asset",
         "allowSelfLink": false,
         "rendering": {
@@ -5063,17 +5448,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_058_supplier_to_component",
-        "sourceClassId": "satellite_world_complete_structure_supplier",
-        "targetClassId": "satellite_world_complete_structure_component",
+        "id": "satellite_world_complete_structure2_link_rel_058_supplier_to_component",
+        "sourceClassId": "satellite_world_complete_structure2_supplier",
+        "targetClassId": "satellite_world_complete_structure2_component",
         "name": "provides",
         "allowSelfLink": false,
         "rendering": {
@@ -5090,17 +5478,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_059_component_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_component",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_059_component_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_component",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "installed in",
         "allowSelfLink": false,
         "rendering": {
@@ -5117,17 +5508,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_060_maintenance_record_to_component",
-        "sourceClassId": "satellite_world_complete_structure_maintenance_record",
-        "targetClassId": "satellite_world_complete_structure_component",
+        "id": "satellite_world_complete_structure2_link_rel_060_maintenance_record_to_component",
+        "sourceClassId": "satellite_world_complete_structure2_maintenance_record",
+        "targetClassId": "satellite_world_complete_structure2_component",
         "name": "records service",
         "allowSelfLink": false,
         "rendering": {
@@ -5144,17 +5538,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_061_insurance_policy_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_insurance_policy",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_061_insurance_policy_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_insurance_policy",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "insures asset",
         "allowSelfLink": false,
         "rendering": {
@@ -5171,17 +5568,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_062_insurance_policy_to_launch_mission",
-        "sourceClassId": "satellite_world_complete_structure_insurance_policy",
-        "targetClassId": "satellite_world_complete_structure_launch_mission",
+        "id": "satellite_world_complete_structure2_link_rel_062_insurance_policy_to_launch_mission",
+        "sourceClassId": "satellite_world_complete_structure2_insurance_policy",
+        "targetClassId": "satellite_world_complete_structure2_launch_mission",
         "name": "covers launch risk",
         "allowSelfLink": false,
         "rendering": {
@@ -5198,17 +5598,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_063_frequency_filing_to_communication_channel",
-        "sourceClassId": "satellite_world_complete_structure_frequency_filing",
-        "targetClassId": "satellite_world_complete_structure_communication_channel",
+        "id": "satellite_world_complete_structure2_link_rel_063_frequency_filing_to_communication_channel",
+        "sourceClassId": "satellite_world_complete_structure2_frequency_filing",
+        "targetClassId": "satellite_world_complete_structure2_communication_channel",
         "name": "authorizes spectrum",
         "allowSelfLink": false,
         "rendering": {
@@ -5225,17 +5628,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_064_export_control_to_payload",
-        "sourceClassId": "satellite_world_complete_structure_export_control",
-        "targetClassId": "satellite_world_complete_structure_payload",
+        "id": "satellite_world_complete_structure2_link_rel_064_export_control_to_payload",
+        "sourceClassId": "satellite_world_complete_structure2_export_control",
+        "targetClassId": "satellite_world_complete_structure2_payload",
         "name": "controls payload",
         "allowSelfLink": false,
         "rendering": {
@@ -5252,17 +5658,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_065_export_control_to_instrument",
-        "sourceClassId": "satellite_world_complete_structure_export_control",
-        "targetClassId": "satellite_world_complete_structure_instrument",
+        "id": "satellite_world_complete_structure2_link_rel_065_export_control_to_instrument",
+        "sourceClassId": "satellite_world_complete_structure2_export_control",
+        "targetClassId": "satellite_world_complete_structure2_instrument",
         "name": "controls instrument",
         "allowSelfLink": false,
         "rendering": {
@@ -5279,17 +5688,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_066_incident_to_anomaly",
-        "sourceClassId": "satellite_world_complete_structure_incident",
-        "targetClassId": "satellite_world_complete_structure_anomaly",
+        "id": "satellite_world_complete_structure2_link_rel_066_incident_to_anomaly",
+        "sourceClassId": "satellite_world_complete_structure2_incident",
+        "targetClassId": "satellite_world_complete_structure2_anomaly",
         "name": "may contain",
         "allowSelfLink": false,
         "rendering": {
@@ -5306,17 +5718,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_067_anomaly_to_telemetry_snapshot",
-        "sourceClassId": "satellite_world_complete_structure_anomaly",
-        "targetClassId": "satellite_world_complete_structure_telemetry_snapshot",
+        "id": "satellite_world_complete_structure2_link_rel_067_anomaly_to_telemetry_snapshot",
+        "sourceClassId": "satellite_world_complete_structure2_anomaly",
+        "targetClassId": "satellite_world_complete_structure2_telemetry_snapshot",
         "name": "detected from",
         "allowSelfLink": false,
         "rendering": {
@@ -5333,17 +5748,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_068_incident_to_health_assessment",
-        "sourceClassId": "satellite_world_complete_structure_incident",
-        "targetClassId": "satellite_world_complete_structure_health_assessment",
+        "id": "satellite_world_complete_structure2_link_rel_068_incident_to_health_assessment",
+        "sourceClassId": "satellite_world_complete_structure2_incident",
+        "targetClassId": "satellite_world_complete_structure2_health_assessment",
         "name": "triggers assessment",
         "allowSelfLink": false,
         "rendering": {
@@ -5360,17 +5778,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_069_operational_phase_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_operational_phase",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_069_operational_phase_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_operational_phase",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "describes state",
         "allowSelfLink": false,
         "rendering": {
@@ -5387,17 +5808,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_070_maneuver_to_orbit_state",
-        "sourceClassId": "satellite_world_complete_structure_maneuver",
-        "targetClassId": "satellite_world_complete_structure_orbit_state",
+        "id": "satellite_world_complete_structure2_link_rel_070_maneuver_to_orbit_state",
+        "sourceClassId": "satellite_world_complete_structure2_maneuver",
+        "targetClassId": "satellite_world_complete_structure2_orbit_state",
         "name": "changes orbit",
         "allowSelfLink": false,
         "rendering": {
@@ -5414,17 +5838,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_071_maneuver_to_propulsion_subsystem",
-        "sourceClassId": "satellite_world_complete_structure_maneuver",
-        "targetClassId": "satellite_world_complete_structure_propulsion_subsystem",
+        "id": "satellite_world_complete_structure2_link_rel_071_maneuver_to_propulsion_subsystem",
+        "sourceClassId": "satellite_world_complete_structure2_maneuver",
+        "targetClassId": "satellite_world_complete_structure2_propulsion_subsystem",
         "name": "uses propulsion",
         "allowSelfLink": false,
         "rendering": {
@@ -5441,17 +5868,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_072_health_assessment_to_telemetry_snapshot",
-        "sourceClassId": "satellite_world_complete_structure_health_assessment",
-        "targetClassId": "satellite_world_complete_structure_telemetry_snapshot",
+        "id": "satellite_world_complete_structure2_link_rel_072_health_assessment_to_telemetry_snapshot",
+        "sourceClassId": "satellite_world_complete_structure2_health_assessment",
+        "targetClassId": "satellite_world_complete_structure2_telemetry_snapshot",
         "name": "uses telemetry",
         "allowSelfLink": false,
         "rendering": {
@@ -5468,17 +5898,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_073_health_assessment_to_anomaly",
-        "sourceClassId": "satellite_world_complete_structure_health_assessment",
-        "targetClassId": "satellite_world_complete_structure_anomaly",
+        "id": "satellite_world_complete_structure2_link_rel_073_health_assessment_to_anomaly",
+        "sourceClassId": "satellite_world_complete_structure2_health_assessment",
+        "targetClassId": "satellite_world_complete_structure2_anomaly",
         "name": "evaluates",
         "allowSelfLink": false,
         "rendering": {
@@ -5495,17 +5928,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_074_end_of_life_plan_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_end_of_life_plan",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_074_end_of_life_plan_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_end_of_life_plan",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "retires asset",
         "allowSelfLink": false,
         "rendering": {
@@ -5522,17 +5958,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_075_disposal_event_to_end_of_life_plan",
-        "sourceClassId": "satellite_world_complete_structure_disposal_event",
-        "targetClassId": "satellite_world_complete_structure_end_of_life_plan",
+        "id": "satellite_world_complete_structure2_link_rel_075_disposal_event_to_end_of_life_plan",
+        "sourceClassId": "satellite_world_complete_structure2_disposal_event",
+        "targetClassId": "satellite_world_complete_structure2_end_of_life_plan",
         "name": "executes",
         "allowSelfLink": false,
         "rendering": {
@@ -5549,17 +5988,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_076_disposal_event_to_orbit_state",
-        "sourceClassId": "satellite_world_complete_structure_disposal_event",
-        "targetClassId": "satellite_world_complete_structure_orbit_state",
+        "id": "satellite_world_complete_structure2_link_rel_076_disposal_event_to_orbit_state",
+        "sourceClassId": "satellite_world_complete_structure2_disposal_event",
+        "targetClassId": "satellite_world_complete_structure2_orbit_state",
         "name": "final state",
         "allowSelfLink": false,
         "rendering": {
@@ -5576,17 +6018,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_077_digital_twin_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_digital_twin",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_077_digital_twin_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_digital_twin",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "mirrors",
         "allowSelfLink": false,
         "rendering": {
@@ -5603,17 +6048,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_078_simulation_scenario_to_digital_twin",
-        "sourceClassId": "satellite_world_complete_structure_simulation_scenario",
-        "targetClassId": "satellite_world_complete_structure_digital_twin",
+        "id": "satellite_world_complete_structure2_link_rel_078_simulation_scenario_to_digital_twin",
+        "sourceClassId": "satellite_world_complete_structure2_simulation_scenario",
+        "targetClassId": "satellite_world_complete_structure2_digital_twin",
         "name": "uses model",
         "allowSelfLink": false,
         "rendering": {
@@ -5630,17 +6078,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_079_simulation_scenario_to_space_weather_event",
-        "sourceClassId": "satellite_world_complete_structure_simulation_scenario",
-        "targetClassId": "satellite_world_complete_structure_space_weather_event",
+        "id": "satellite_world_complete_structure2_link_rel_079_simulation_scenario_to_space_weather_event",
+        "sourceClassId": "satellite_world_complete_structure2_simulation_scenario",
+        "targetClassId": "satellite_world_complete_structure2_space_weather_event",
         "name": "injects event",
         "allowSelfLink": false,
         "rendering": {
@@ -5657,17 +6108,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_080_propagator_run_to_simulation_scenario",
-        "sourceClassId": "satellite_world_complete_structure_propagator_run",
-        "targetClassId": "satellite_world_complete_structure_simulation_scenario",
+        "id": "satellite_world_complete_structure2_link_rel_080_propagator_run_to_simulation_scenario",
+        "sourceClassId": "satellite_world_complete_structure2_propagator_run",
+        "targetClassId": "satellite_world_complete_structure2_simulation_scenario",
         "name": "runs scenario",
         "allowSelfLink": false,
         "rendering": {
@@ -5684,17 +6138,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_081_propagator_run_to_orbit_state",
-        "sourceClassId": "satellite_world_complete_structure_propagator_run",
-        "targetClassId": "satellite_world_complete_structure_orbit_state",
+        "id": "satellite_world_complete_structure2_link_rel_081_propagator_run_to_orbit_state",
+        "sourceClassId": "satellite_world_complete_structure2_propagator_run",
+        "targetClassId": "satellite_world_complete_structure2_orbit_state",
         "name": "predicts state",
         "allowSelfLink": false,
         "rendering": {
@@ -5711,17 +6168,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_082_alert_rule_to_conjunction_assessment",
-        "sourceClassId": "satellite_world_complete_structure_alert_rule",
-        "targetClassId": "satellite_world_complete_structure_conjunction_assessment",
+        "id": "satellite_world_complete_structure2_link_rel_082_alert_rule_to_conjunction_assessment",
+        "sourceClassId": "satellite_world_complete_structure2_alert_rule",
+        "targetClassId": "satellite_world_complete_structure2_conjunction_assessment",
         "name": "monitors conjunction",
         "allowSelfLink": false,
         "rendering": {
@@ -5738,17 +6198,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_083_alert_rule_to_telemetry_snapshot",
-        "sourceClassId": "satellite_world_complete_structure_alert_rule",
-        "targetClassId": "satellite_world_complete_structure_telemetry_snapshot",
+        "id": "satellite_world_complete_structure2_link_rel_083_alert_rule_to_telemetry_snapshot",
+        "sourceClassId": "satellite_world_complete_structure2_alert_rule",
+        "targetClassId": "satellite_world_complete_structure2_telemetry_snapshot",
         "name": "monitors telemetry",
         "allowSelfLink": false,
         "rendering": {
@@ -5765,17 +6228,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_084_kpi_metric_to_service_level",
-        "sourceClassId": "satellite_world_complete_structure_kpi_metric",
-        "targetClassId": "satellite_world_complete_structure_service_level",
+        "id": "satellite_world_complete_structure2_link_rel_084_kpi_metric_to_service_level",
+        "sourceClassId": "satellite_world_complete_structure2_kpi_metric",
+        "targetClassId": "satellite_world_complete_structure2_service_level",
         "name": "measures service",
         "allowSelfLink": false,
         "rendering": {
@@ -5792,17 +6258,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_085_kpi_metric_to_health_assessment",
-        "sourceClassId": "satellite_world_complete_structure_kpi_metric",
-        "targetClassId": "satellite_world_complete_structure_health_assessment",
+        "id": "satellite_world_complete_structure2_link_rel_085_kpi_metric_to_health_assessment",
+        "sourceClassId": "satellite_world_complete_structure2_kpi_metric",
+        "targetClassId": "satellite_world_complete_structure2_health_assessment",
         "name": "summarizes health",
         "allowSelfLink": false,
         "rendering": {
@@ -5819,17 +6288,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_086_hc_identity_governance_to_hc_launch_deployment",
-        "sourceClassId": "satellite_world_complete_structure_hc_identity_governance",
-        "targetClassId": "satellite_world_complete_structure_hc_launch_deployment",
+        "id": "satellite_world_complete_structure2_link_rel_086_hc_identity_governance_to_hc_launch_deployment",
+        "sourceClassId": "satellite_world_complete_structure2_hc_identity_governance",
+        "targetClassId": "satellite_world_complete_structure2_hc_launch_deployment",
         "name": "governs launch data",
         "allowSelfLink": false,
         "rendering": {
@@ -5846,17 +6318,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_087_hc_launch_deployment_to_hc_orbit_tracking",
-        "sourceClassId": "satellite_world_complete_structure_hc_launch_deployment",
-        "targetClassId": "satellite_world_complete_structure_hc_orbit_tracking",
+        "id": "satellite_world_complete_structure2_link_rel_087_hc_launch_deployment_to_hc_orbit_tracking",
+        "sourceClassId": "satellite_world_complete_structure2_hc_launch_deployment",
+        "targetClassId": "satellite_world_complete_structure2_hc_orbit_tracking",
         "name": "creates tracked object",
         "allowSelfLink": false,
         "rendering": {
@@ -5873,17 +6348,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_088_hc_orbit_tracking_to_hc_environment_safety",
-        "sourceClassId": "satellite_world_complete_structure_hc_orbit_tracking",
-        "targetClassId": "satellite_world_complete_structure_hc_environment_safety",
+        "id": "satellite_world_complete_structure2_link_rel_088_hc_orbit_tracking_to_hc_environment_safety",
+        "sourceClassId": "satellite_world_complete_structure2_hc_orbit_tracking",
+        "targetClassId": "satellite_world_complete_structure2_hc_environment_safety",
         "name": "feeds risk",
         "allowSelfLink": false,
         "rendering": {
@@ -5900,17 +6378,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_089_hc_mission_payload_to_hc_data_services",
-        "sourceClassId": "satellite_world_complete_structure_hc_mission_payload",
-        "targetClassId": "satellite_world_complete_structure_hc_data_services",
+        "id": "satellite_world_complete_structure2_link_rel_089_hc_mission_payload_to_hc_data_services",
+        "sourceClassId": "satellite_world_complete_structure2_hc_mission_payload",
+        "targetClassId": "satellite_world_complete_structure2_hc_data_services",
         "name": "produces products",
         "allowSelfLink": false,
         "rendering": {
@@ -5927,17 +6408,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_090_hc_ground_network_to_hc_mission_payload",
-        "sourceClassId": "satellite_world_complete_structure_hc_ground_network",
-        "targetClassId": "satellite_world_complete_structure_hc_mission_payload",
+        "id": "satellite_world_complete_structure2_link_rel_090_hc_ground_network_to_hc_mission_payload",
+        "sourceClassId": "satellite_world_complete_structure2_hc_ground_network",
+        "targetClassId": "satellite_world_complete_structure2_hc_mission_payload",
         "name": "supports communications",
         "allowSelfLink": false,
         "rendering": {
@@ -5954,17 +6438,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_091_hc_supply_chain_to_hc_bus_subsystems",
-        "sourceClassId": "satellite_world_complete_structure_hc_supply_chain",
-        "targetClassId": "satellite_world_complete_structure_hc_bus_subsystems",
+        "id": "satellite_world_complete_structure2_link_rel_091_hc_supply_chain_to_hc_bus_subsystems",
+        "sourceClassId": "satellite_world_complete_structure2_hc_supply_chain",
+        "targetClassId": "satellite_world_complete_structure2_hc_bus_subsystems",
         "name": "supplies components",
         "allowSelfLink": false,
         "rendering": {
@@ -5981,17 +6468,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_092_hc_compliance_risk_to_hc_data_services",
-        "sourceClassId": "satellite_world_complete_structure_hc_compliance_risk",
-        "targetClassId": "satellite_world_complete_structure_hc_data_services",
+        "id": "satellite_world_complete_structure2_link_rel_092_hc_compliance_risk_to_hc_data_services",
+        "sourceClassId": "satellite_world_complete_structure2_hc_compliance_risk",
+        "targetClassId": "satellite_world_complete_structure2_hc_data_services",
         "name": "controls distribution",
         "allowSelfLink": false,
         "rendering": {
@@ -6008,17 +6498,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_093_hc_operations_lifecycle_to_hc_analytics_digital_twin",
-        "sourceClassId": "satellite_world_complete_structure_hc_operations_lifecycle",
-        "targetClassId": "satellite_world_complete_structure_hc_analytics_digital_twin",
+        "id": "satellite_world_complete_structure2_link_rel_093_hc_operations_lifecycle_to_hc_analytics_digital_twin",
+        "sourceClassId": "satellite_world_complete_structure2_hc_operations_lifecycle",
+        "targetClassId": "satellite_world_complete_structure2_hc_analytics_digital_twin",
         "name": "feeds analytics",
         "allowSelfLink": false,
         "rendering": {
@@ -6035,17 +6528,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_094_registry_record_to_space_object",
-        "sourceClassId": "satellite_world_complete_structure_registry_record",
-        "targetClassId": "satellite_world_complete_structure_space_object",
+        "id": "satellite_world_complete_structure2_link_rel_094_registry_record_to_space_object",
+        "sourceClassId": "satellite_world_complete_structure2_registry_record",
+        "targetClassId": "satellite_world_complete_structure2_space_object",
         "name": "records object",
         "allowSelfLink": false,
         "rendering": {
@@ -6062,17 +6558,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_095_registry_record_to_organization",
-        "sourceClassId": "satellite_world_complete_structure_registry_record",
-        "targetClassId": "satellite_world_complete_structure_organization",
+        "id": "satellite_world_complete_structure2_link_rel_095_registry_record_to_organization",
+        "sourceClassId": "satellite_world_complete_structure2_registry_record",
+        "targetClassId": "satellite_world_complete_structure2_organization",
         "name": "legal owner",
         "allowSelfLink": false,
         "rendering": {
@@ -6089,17 +6588,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_096_launch_mission_to_organization",
-        "sourceClassId": "satellite_world_complete_structure_launch_mission",
-        "targetClassId": "satellite_world_complete_structure_organization",
+        "id": "satellite_world_complete_structure2_link_rel_096_launch_mission_to_organization",
+        "sourceClassId": "satellite_world_complete_structure2_launch_mission",
+        "targetClassId": "satellite_world_complete_structure2_organization",
         "name": "provided by",
         "allowSelfLink": false,
         "rendering": {
@@ -6116,17 +6618,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_097_tracking_sensor_to_organization",
-        "sourceClassId": "satellite_world_complete_structure_tracking_sensor",
-        "targetClassId": "satellite_world_complete_structure_organization",
+        "id": "satellite_world_complete_structure2_link_rel_097_tracking_sensor_to_organization",
+        "sourceClassId": "satellite_world_complete_structure2_tracking_sensor",
+        "targetClassId": "satellite_world_complete_structure2_organization",
         "name": "owned by",
         "allowSelfLink": false,
         "rendering": {
@@ -6143,17 +6648,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_098_telemetry_snapshot_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_telemetry_snapshot",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_098_telemetry_snapshot_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_telemetry_snapshot",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "reported by",
         "allowSelfLink": false,
         "rendering": {
@@ -6170,17 +6678,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_099_frequency_filing_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_frequency_filing",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_099_frequency_filing_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_frequency_filing",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "filed for",
         "allowSelfLink": false,
         "rendering": {
@@ -6197,17 +6708,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_100_incident_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_incident",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_100_incident_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_incident",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "affects satellite",
         "allowSelfLink": false,
         "rendering": {
@@ -6224,17 +6738,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_101_anomaly_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_anomaly",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_101_anomaly_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_anomaly",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "occurs on",
         "allowSelfLink": false,
         "rendering": {
@@ -6251,17 +6768,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_102_maneuver_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_maneuver",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_102_maneuver_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_maneuver",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "performed by",
         "allowSelfLink": false,
         "rendering": {
@@ -6278,17 +6798,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_103_health_assessment_to_satellite",
-        "sourceClassId": "satellite_world_complete_structure_health_assessment",
-        "targetClassId": "satellite_world_complete_structure_satellite",
+        "id": "satellite_world_complete_structure2_link_rel_103_health_assessment_to_satellite",
+        "sourceClassId": "satellite_world_complete_structure2_health_assessment",
+        "targetClassId": "satellite_world_complete_structure2_satellite",
         "name": "assesses satellite",
         "allowSelfLink": false,
         "rendering": {
@@ -6305,17 +6828,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_104_propagator_run_to_space_object",
-        "sourceClassId": "satellite_world_complete_structure_propagator_run",
-        "targetClassId": "satellite_world_complete_structure_space_object",
+        "id": "satellite_world_complete_structure2_link_rel_104_propagator_run_to_space_object",
+        "sourceClassId": "satellite_world_complete_structure2_propagator_run",
+        "targetClassId": "satellite_world_complete_structure2_space_object",
         "name": "propagates object",
         "allowSelfLink": false,
         "rendering": {
@@ -6332,17 +6858,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_105_network_schedule_to_ground_station_network",
-        "sourceClassId": "satellite_world_complete_structure_network_schedule",
-        "targetClassId": "satellite_world_complete_structure_ground_station_network",
+        "id": "satellite_world_complete_structure2_link_rel_105_network_schedule_to_ground_station_network",
+        "sourceClassId": "satellite_world_complete_structure2_network_schedule",
+        "targetClassId": "satellite_world_complete_structure2_ground_station_network",
         "name": "plans network",
         "allowSelfLink": false,
         "rendering": {
@@ -6359,17 +6888,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_106_ground_station_to_organization",
-        "sourceClassId": "satellite_world_complete_structure_ground_station",
-        "targetClassId": "satellite_world_complete_structure_organization",
+        "id": "satellite_world_complete_structure2_link_rel_106_ground_station_to_organization",
+        "sourceClassId": "satellite_world_complete_structure2_ground_station",
+        "targetClassId": "satellite_world_complete_structure2_organization",
         "name": "operated by",
         "allowSelfLink": false,
         "rendering": {
@@ -6386,17 +6918,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_107_ground_station_network_to_organization",
-        "sourceClassId": "satellite_world_complete_structure_ground_station_network",
-        "targetClassId": "satellite_world_complete_structure_organization",
+        "id": "satellite_world_complete_structure2_link_rel_107_ground_station_network_to_organization",
+        "sourceClassId": "satellite_world_complete_structure2_ground_station_network",
+        "targetClassId": "satellite_world_complete_structure2_organization",
         "name": "operated by",
         "allowSelfLink": false,
         "rendering": {
@@ -6413,17 +6948,20 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       },
       {
-        "id": "satellite_world_complete_structure_link_rel_108_tle_set_to_space_object",
-        "sourceClassId": "satellite_world_complete_structure_tle_set",
-        "targetClassId": "satellite_world_complete_structure_space_object",
+        "id": "satellite_world_complete_structure2_link_rel_108_tle_set_to_space_object",
+        "sourceClassId": "satellite_world_complete_structure2_tle_set",
+        "targetClassId": "satellite_world_complete_structure2_space_object",
         "name": "catalogs object",
         "allowSelfLink": false,
         "rendering": {
@@ -6440,11 +6978,14 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 11,
+          "labelFontSize": 8,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "font": {
+            "size": 8
+          }
         }
       }
     ]

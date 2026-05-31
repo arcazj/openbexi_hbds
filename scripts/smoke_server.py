@@ -309,8 +309,146 @@ def main() -> int:
         assert_ok("/api/model-files/{scope}/{modelName}" in spec.get("paths", {}), "Scoped model file path missing from OpenAPI spec")
         assert_ok("/api/drafts/{scope}/{modelName}" in spec.get("paths", {}), "Scoped drafts path missing from OpenAPI spec")
         assert_ok("/api/drafts/{scope}/{modelName}/clients/{clientId}" in spec.get("paths", {}), "Scoped draft client path missing from OpenAPI spec")
+        assert_ok("/api/ai/providers" in spec.get("paths", {}), "AI providers path missing from OpenAPI spec")
+        assert_ok("/api/ai/connection" in spec.get("paths", {}), "AI connection path missing from OpenAPI spec")
+        assert_ok("/api/ai/apply" in spec.get("paths", {}), "AI apply path missing from OpenAPI spec")
+        assert_ok("/api/ai/rollback" in spec.get("paths", {}), "AI rollback path missing from OpenAPI spec")
+        assert_ok("/api/ai/prompt" in spec.get("paths", {}), "AI prompt path missing from OpenAPI spec")
         assert_ok("/api/events" in spec.get("paths", {}), "Events path missing from OpenAPI spec")
         print("PASS openapi")
+
+        ai_providers = request_json(base_url, "/api/ai/providers")
+        assert_ok(ai_providers.get("ok") is True, "AI providers response was invalid")
+        assert_ok(ai_providers.get("enabled") is False, "AI backend should be disabled by default")
+        providers = ai_providers.get("providers", [])
+        assert_ok(any(provider.get("id") == "openai" for provider in providers), "OpenAI provider was missing")
+        openai_provider = next((provider for provider in providers if provider.get("id") == "openai"), {})
+        assert_ok(any(model.get("id") == "gpt-5.5" for model in openai_provider.get("models", [])), "OpenAI model presets missing GPT-5.5")
+        assert_ok(openai_provider.get("supportsReasoningEffort") is True, "OpenAI provider should advertise reasoning effort support")
+        manual_provider = next((provider for provider in providers if provider.get("id") == "chatgpt-manual"), {})
+        assert_ok(manual_provider.get("manualWorkflow") is True, "ChatGPT manual provider was missing")
+        assert_ok(manual_provider.get("requiresKey") is False, "ChatGPT manual provider should not require a key")
+        assert_ok(any(provider.get("id") == "ollama" and provider.get("requiresKey") is False for provider in providers), "Ollama no-key provider was missing")
+        assert_ok("OPENAI_API_KEY" not in json.dumps(ai_providers), "AI provider response leaked an environment key name")
+        ai_prompt = request_json(
+            base_url,
+            "/api/ai/prompt",
+            method="POST",
+            payload={
+                "providerId": "openai",
+                "modelName": "gpt-4.1",
+                "reasoningEffort": "xhigh",
+                "operationMode": "generate",
+                "requestText": "Generate a small HBDS model for a secure network.",
+            },
+        )
+        prompt_text = ai_prompt.get("enhancedPrompt", "")
+        assert_ok(ai_prompt.get("aiCallEnabled") is False, "AI prompt endpoint should not call providers by default")
+        assert_ok(ai_prompt.get("reasoningEffort") == "xhigh", "AI prompt response did not echo reasoning effort")
+        assert_ok("Reasoning effort: xhigh" in prompt_text, "AI prompt did not include reasoning effort")
+        assert_ok("Return JSON only" in prompt_text, "AI prompt did not require JSON-only output")
+        assert_ok("metadata.layout" in prompt_text and '"none"' in prompt_text, "AI prompt did not require layout none")
+        assert_ok("well-positioned" in prompt_text, "AI prompt did not require computed positions")
+        manual_prompt = request_json(
+            base_url,
+            "/api/ai/prompt",
+            method="POST",
+            payload={
+                "providerId": "chatgpt-manual",
+                "operationMode": "generate",
+                "requestText": "Generate a small HBDS model for manual ChatGPT use.",
+            },
+        )
+        assert_ok(manual_prompt.get("aiCallEnabled") is False, "Manual ChatGPT prompt should never call a provider")
+        assert_ok(manual_prompt.get("manualWorkflow") is True, "Manual ChatGPT prompt did not report manual workflow")
+        assert_ok("Return JSON only" in manual_prompt.get("enhancedPrompt", ""), "Manual ChatGPT prompt did not require JSON-only output")
+        missing_key_connection = request_json(
+            base_url,
+            "/api/ai/connection",
+            method="POST",
+            payload={"providerId": "openai", "modelName": "gpt-5.5"},
+            expected=(400,),
+        )
+        assert_ok(missing_key_connection.get("error", {}).get("code") == "ai_backend_disabled", "AI connection without server config or key should be blocked")
+        manual_connection = request_json(
+            base_url,
+            "/api/ai/connection",
+            method="POST",
+            payload={"providerId": "chatgpt-manual", "apiKey": "sk-smoke-secret"},
+        )
+        assert_ok(manual_connection.get("connected") is True and manual_connection.get("manualWorkflow") is True, "Manual AI connection should be ready without provider call")
+        assert_ok("sk-smoke-secret" not in json.dumps(manual_connection), "AI connection response leaked a transient API key")
+        bad_ai_prompt = request_json(
+            base_url,
+            "/api/ai/prompt",
+            method="POST",
+            payload={"providerId": "openai", "operationMode": "generate", "requestText": ""},
+            expected=(400,),
+        )
+        assert_ok(bad_ai_prompt.get("error", {}).get("code") == "invalid_ai_request", "Blank AI prompt was accepted")
+        ai_apply_model = {
+            "metadata": {"id": f"ai_apply_smoke_{os.getpid()}", "name": f"AI Apply Smoke {os.getpid()}", "layout": {"algorithm": "none"}},
+            "hypergraph": {
+                "class": [
+                    {"id": "hc_ai_smoke", "kind": "hyperclass", "name": "AI Smoke", "position": {"x": 0, "y": 0}, "attribute": [{"id": "attr_ai_smoke", "name": "source", "value": "ai"}]},
+                    {"id": "class_ai_smoke", "kind": "class", "name": "Smoke Class", "position": {"x": 2, "y": 0}, "attribute": []},
+                ],
+                "link": [{"id": "link_ai_smoke", "name": "contains", "source": "hc_ai_smoke", "target": "class_ai_smoke"}],
+            },
+        }
+        ai_applied = request_json(
+            base_url,
+            "/api/ai/apply",
+            method="POST",
+            payload={
+                "scope": "models",
+                "operationMode": "generate",
+                "saveMode": "new",
+                "requestedName": f"AI Apply Smoke {os.getpid()}",
+                "model": ai_apply_model,
+            },
+        )
+        ai_saved_name = ai_applied.get("saved", "")
+        assert_ok(ai_saved_name.endswith(".json"), "AI apply did not return saved filename")
+        assert_ok(ai_applied.get("model", {}).get("hypergraph", {}).get("class", [])[0].get("type") == "hyperclass", "AI apply did not normalize kind to type")
+        rollback_model = json.loads(json.dumps(ai_apply_model))
+        rollback_model["metadata"]["name"] = "AI Rollback Smoke"
+        rollback = request_json(
+            base_url,
+            "/api/ai/rollback",
+            method="POST",
+            payload={"scope": "models", "modelName": ai_saved_name, "model": rollback_model},
+        )
+        assert_ok(rollback.get("saved") == ai_saved_name, "AI rollback did not save the same model file")
+        delete_applied = request_json(
+            base_url,
+            f"/api/models/{urllib.parse.quote(ai_saved_name, safe='')}",
+            method="DELETE",
+            payload={"clientId": "smoke"},
+        )
+        assert_ok(delete_applied.get("deleted") == ai_saved_name, "AI-created model delete failed")
+        scoped_ai = request_json(
+            base_url,
+            "/api/ai/apply",
+            method="POST",
+            payload={
+                "scope": "test_models",
+                "operationMode": "generate",
+                "saveMode": "new",
+                "requestedName": f"AI Test Apply Smoke {os.getpid()}",
+                "model": ai_apply_model,
+            },
+        )
+        scoped_saved = scoped_ai.get("saved", "")
+        assert_ok(scoped_ai.get("scope") == "test_models" and scoped_saved.endswith(".json"), "AI scoped apply failed")
+        scoped_delete = request_json(
+            base_url,
+            f"/api/model-files/test_models/{urllib.parse.quote(scoped_saved, safe='')}",
+            method="DELETE",
+            payload={"clientId": "smoke"},
+        )
+        assert_ok(scoped_delete.get("deleted") == scoped_saved, "AI-created scoped model delete failed")
+        print("PASS ai support")
 
         model_list = request_json(base_url, "/api/models")
         models = model_list.get("models", [])

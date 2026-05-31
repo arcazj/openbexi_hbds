@@ -21,7 +21,9 @@ from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import TextIO
-from urllib.parse import parse_qs, unquote, urlparse
+from urllib import error as urlerror
+from urllib import request as urlrequest
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
 
 def env_int(name: str, default: int) -> int:
@@ -42,6 +44,9 @@ SERVER_STDOUT_LOG_PATH = ROOT_DIR / ".codex_server_out.log"
 SERVER_STDERR_LOG_PATH = ROOT_DIR / ".codex_server_err.log"
 SERVER_ACCESS_LOG_PATH = ROOT_DIR / ".codex_server_access.log"
 MAX_JSON_BYTES = 5 * 1024 * 1024
+MAX_AI_REQUEST_BYTES = env_int("HBDS_AI_REQUEST_MAX_BYTES", 512 * 1024)
+AI_PROVIDER_TIMEOUT_SECONDS = env_int("HBDS_AI_TIMEOUT_SECONDS", 60)
+HBDS_AI_PROMPT_TEMPLATE_VERSION = "hbds-ai-prompt-v1"
 MAX_DEBUG_BATCH_EVENTS = 100
 SERVER_LOG_ROTATION_BYTES = env_int("HBDS_SERVER_LOG_MAX_BYTES", 1024 * 1024)
 SERVER_LOG_ROTATION_BACKUPS = env_int("HBDS_SERVER_LOG_BACKUPS", 3)
@@ -61,6 +66,93 @@ LOCAL_ORIGINS = {
     "http://localhost",
     "http://localhost:8010",
 }
+PROTECTED_MODEL_FILE_NAMES = {
+    "hyperclass_mail_carrier_with_links.json",
+    "models.json",
+    "transportation_links.json",
+}
+
+AI_PROVIDER_DEFINITIONS = [
+    {
+        "id": "openai",
+        "label": "ChatGPT/OpenAI",
+        "defaultModel": "gpt-5.5",
+        "models": [
+            {"id": "gpt-5.5", "label": "GPT-5.5", "supportsReasoningEffort": True, "defaultReasoningEffort": "medium"},
+            {"id": "gpt-5.4", "label": "GPT-5.4", "supportsReasoningEffort": True, "defaultReasoningEffort": "medium"},
+            {"id": "gpt-5.4-mini", "label": "GPT-5.4 Mini", "supportsReasoningEffort": True, "defaultReasoningEffort": "low"},
+            {"id": "gpt-4.1", "label": "GPT-4.1", "supportsReasoningEffort": False},
+        ],
+        "requiresKey": True,
+        "allowsUserKey": True,
+        "requiresBaseUrl": False,
+        "supportsCustomBaseUrl": False,
+        "supportsJsonMode": True,
+        "supportsReasoningEffort": True,
+        "serverEnvKey": "OPENAI_API_KEY",
+    },
+    {
+        "id": "chatgpt-manual",
+        "label": "ChatGPT Pro / Manual",
+        "defaultModel": "",
+        "models": [],
+        "requiresKey": False,
+        "allowsUserKey": False,
+        "requiresBaseUrl": False,
+        "supportsCustomBaseUrl": False,
+        "supportsJsonMode": True,
+        "manualWorkflow": True,
+        "serverEnvKey": "",
+    },
+    {
+        "id": "anthropic",
+        "label": "Claude/Anthropic",
+        "defaultModel": "claude-3-5-sonnet-latest",
+        "models": [
+            {"id": "claude-3-5-sonnet-latest", "label": "Claude 3.5 Sonnet"},
+            {"id": "claude-3-5-haiku-latest", "label": "Claude 3.5 Haiku"},
+            {"id": "claude-3-opus-latest", "label": "Claude 3 Opus"},
+        ],
+        "requiresKey": True,
+        "allowsUserKey": True,
+        "requiresBaseUrl": False,
+        "supportsCustomBaseUrl": False,
+        "supportsJsonMode": True,
+        "serverEnvKey": "ANTHROPIC_API_KEY",
+    },
+    {
+        "id": "ollama",
+        "label": "Local/Ollama",
+        "defaultModel": "llama3.1",
+        "models": [
+            {"id": "llama3.1", "label": "Llama 3.1"},
+            {"id": "llama3.2", "label": "Llama 3.2"},
+            {"id": "qwen2.5", "label": "Qwen 2.5"},
+            {"id": "mistral", "label": "Mistral"},
+        ],
+        "requiresKey": False,
+        "allowsUserKey": False,
+        "requiresBaseUrl": True,
+        "defaultBaseUrl": "http://127.0.0.1:11434",
+        "supportsCustomBaseUrl": True,
+        "supportsJsonMode": False,
+        "serverEnvKey": "",
+    },
+    {
+        "id": "custom-openai",
+        "label": "Custom OpenAI-compatible",
+        "defaultModel": "",
+        "models": [],
+        "supportsReasoningEffort": True,
+        "requiresKey": False,
+        "allowsUserKey": True,
+        "requiresBaseUrl": True,
+        "defaultBaseUrl": "",
+        "supportsCustomBaseUrl": True,
+        "supportsJsonMode": True,
+        "serverEnvKey": "HBDS_AI_CUSTOM_API_KEY",
+    },
+]
 
 
 def utc_now_iso() -> str:
@@ -312,6 +404,98 @@ def validate_scoped_model_path(
     return scope, name, target, model_key, None
 
 
+def model_scope_dir(scope: str) -> Path:
+    return MODELS_DIR if scope == "models" else TEST_MODELS_DIR
+
+
+def normalize_model_scope(raw_scope: object) -> tuple[str | None, dict | None]:
+    scope = str(raw_scope or "models").strip().strip("/")
+    if scope in {"models", "test_models"}:
+        return scope, None
+    return None, error_payload("invalid_model_scope", "Model scope must be models or test_models")
+
+
+def model_key_for_scope(scope: str, name: str) -> str:
+    return name if scope == "models" else f"{scope}/{name}"
+
+
+def sanitize_model_file_name(seed: object, fallback: str = "ai_model") -> str:
+    text = str(seed or fallback).strip().lower()
+    stem = []
+    previous_separator = False
+    for char in text:
+        if char.isalnum():
+            stem.append(char)
+            previous_separator = False
+        elif not previous_separator:
+            stem.append("_")
+            previous_separator = True
+    clean = "".join(stem).strip("_") or fallback
+    if clean.endswith("_json"):
+        clean = clean[:-5]
+    return f"{clean[:80].strip('_') or fallback}.json"
+
+
+def unique_model_file_name(scope: str, requested_name: str) -> str:
+    base_name, error = validate_model_name(requested_name)
+    if error:
+        base_name = sanitize_model_file_name(requested_name)
+    base_dir = model_scope_dir(scope)
+    stem = Path(base_name).stem
+    suffix = Path(base_name).suffix or ".json"
+    candidate = f"{stem}{suffix}"
+    index = 1
+    while (base_dir / candidate).exists():
+        candidate = f"{stem}_{index}{suffix}"
+        index += 1
+    return candidate
+
+
+def requested_ai_model_file_name(model: dict, requested_name: object = "") -> str:
+    metadata = model.get("metadata") if isinstance(model.get("metadata"), dict) else {}
+    seed = requested_name or metadata.get("name") or metadata.get("id") or "ai_model"
+    return sanitize_model_file_name(seed)
+
+
+def is_protected_model_file(scope: str, name: str, model: dict | None = None) -> bool:
+    clean = name.lower()
+    if clean in PROTECTED_MODEL_FILE_NAMES:
+        return True
+    if model and isinstance(model.get("metadata"), dict):
+        source = str(model["metadata"].get("source") or "").strip().lower()
+        if source == "ai":
+            return False
+    return False
+
+
+def prepare_ai_model_for_save(model: dict, operation_mode: str, *, save_as_new: bool = False) -> dict:
+    prepared = normalize_ai_hbds_model_response(model)
+    metadata = prepared.setdefault("metadata", {})
+    if not isinstance(metadata, dict):
+        metadata = {}
+        prepared["metadata"] = metadata
+    now = utc_now_iso()
+    if not metadata.get("name"):
+        metadata["name"] = "AI Model"
+    if not metadata.get("id"):
+        metadata["id"] = Path(sanitize_model_file_name(metadata.get("name"))).stem
+    metadata["source"] = "ai"
+    metadata["aiOperationMode"] = operation_mode or "generate"
+    metadata.setdefault("createdAt", now)
+    metadata["modifiedAt"] = now
+    layout = metadata.setdefault("layout", {})
+    if isinstance(layout, dict):
+        layout.setdefault("algorithm", "none")
+    else:
+        metadata["layout"] = {"algorithm": "none"}
+    if save_as_new:
+        metadata.pop("revision", None)
+        metadata.pop("contentHash", None)
+        metadata.pop("modified", None)
+        metadata.pop("modifiedIso", None)
+    return prepared
+
+
 def validate_model_payload(payload: object) -> dict | None:
     if not isinstance(payload, dict):
         return error_payload("invalid_model", "Model JSON must be an object")
@@ -420,6 +604,558 @@ def error_payload(code: str, message: str, **details) -> dict:
     payload = {"code": code, "message": message}
     payload.update({key: value for key, value in details.items() if value is not None})
     return payload
+
+
+def ai_backend_enabled() -> bool:
+    return os.environ.get("HBDS_AI_ENABLED", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def ai_provider_capabilities() -> list[dict]:
+    providers = []
+    for provider in AI_PROVIDER_DEFINITIONS:
+        env_key = provider.get("serverEnvKey") or ""
+        configured = bool(env_key and os.environ.get(env_key))
+        public_provider = {
+            key: value
+            for key, value in provider.items()
+            if key != "serverEnvKey"
+        }
+        public_provider["configuredOnServer"] = configured
+        public_provider["credentialStatus"] = (
+            "configured_on_server"
+            if configured
+            else ("key_required" if provider.get("requiresKey") else "no_key_required")
+        )
+        providers.append(public_provider)
+    return providers
+
+
+def ai_provider_by_id(provider_id: object) -> dict | None:
+    clean = str(provider_id or "").strip()
+    return next((provider for provider in AI_PROVIDER_DEFINITIONS if provider["id"] == clean), None)
+
+
+def build_hbds_ai_prompt(payload: dict) -> str:
+    operation = str(payload.get("operationMode") or "generate").strip() or "generate"
+    request_text = str(payload.get("requestText") or "").strip()
+    provider_id = str(payload.get("providerId") or "").strip()
+    model_name = str(payload.get("modelName") or "").strip()
+    reasoning_effort = str(payload.get("reasoningEffort") or "").strip()
+    current_model = payload.get("currentModel")
+
+    lines = [
+        f"HBDS AI prompt template: {HBDS_AI_PROMPT_TEMPLATE_VERSION}",
+        "",
+        "You are assisting the HBDS Graphic Simulator.",
+        "The user request is limited to HBDS model generation, validation, improvement, or correction.",
+        "Return JSON only. Do not use Markdown fences, prose, comments, or explanations.",
+        "",
+        "Required HBDS output:",
+        "- Return one valid JSON object.",
+        "- The object must be an HBDS model with a top-level metadata object and hypergraph object.",
+        "- hypergraph.class must be an array. Hyperclasses and classes both belong in hypergraph.class.",
+        "- hypergraph.link must be an array.",
+        "- For each hypergraph.class item, use type = \"hyperclass\" or type = \"class\". Do not use kind.",
+        "- For each class or hyperclass, put attributes in an attributes array. Do not use attribute.",
+        "- For each link, use sourceClassId and targetClassId. Do not use source or target.",
+        "- Link rendering may include arrowType, arrowDirection, lineStyle, lineWidth, lineColor, arrowColor, and labelFontSize.",
+        "- Valid arrowType values are triangle, outline, chevron, double-chevron, triple-chevron, filled-triangle, hollow-triangle, dotted, bar-arrow, double-bar-arrow, cone, diamond, and none.",
+        "- Valid arrowDirection values are source-to-target, target-to-source, bidirectional, and none.",
+        "- Valid lineStyle values are solid, dashed, dotted, thick, and thin.",
+        "- Position objects must include numeric x, y, and z values.",
+        "- Every class, hyperclass, attribute, and link must have a stable unique id.",
+        "- Use metadata.layout.algorithm = \"none\" or metadata.layout.layout = \"none\".",
+        "- Optional metadata.font may include size, family, bold, italic, underline, classSize, hyperclassSize, attributeSize, and linkSize; per-type sizes override the overall size for that text category.",
+        "- Even with layout set to none, calculate explicit positions for every class and hyperclass so the model opens well-positioned in the HBDS renderer.",
+        "- Keep coordinates readable, non-overlapping, and centered around the origin when possible.",
+        "- Do not include scripts, HTML, event handlers, Markdown, or executable content in names, descriptions, attributes, or metadata.",
+        "- If validating a model, return a JSON object with validation findings and, when possible, a corrected HBDS model.",
+        "- If improving a model, preserve existing ids when entities still represent the same concept.",
+        "",
+        f"Operation mode: {operation}",
+        f"Provider id: {provider_id or 'unspecified'}",
+        f"Requested provider model: {model_name or 'unspecified'}",
+        f"Reasoning effort: {reasoning_effort or 'provider default'}",
+        "",
+        "User HBDS request:",
+        request_text,
+    ]
+    if isinstance(current_model, dict):
+        lines.extend([
+            "",
+            "Current HBDS model JSON:",
+            json.dumps(current_model, ensure_ascii=False, separators=(",", ":")),
+        ])
+    return "\n".join(lines)
+
+
+def validate_ai_prompt_payload(payload: object) -> dict | None:
+    if not isinstance(payload, dict):
+        return error_payload("invalid_ai_request", "AI request body must be a JSON object")
+    encoded = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    if len(encoded) > MAX_AI_REQUEST_BYTES:
+        return error_payload("ai_request_too_large", "AI request payload is too large", maxBytes=MAX_AI_REQUEST_BYTES)
+    request_text = str(payload.get("requestText") or "").strip()
+    if not request_text:
+        return error_payload("invalid_ai_request", "AI request text is required")
+    operation = str(payload.get("operationMode") or "").strip()
+    if operation not in {"generate", "validate", "improve", "repair"}:
+        return error_payload("invalid_ai_operation", "AI operation must be generate, validate, improve, or repair")
+    reasoning_effort = str(payload.get("reasoningEffort") or "").strip()
+    if reasoning_effort and reasoning_effort not in {"none", "low", "medium", "high", "xhigh"}:
+        return error_payload("invalid_ai_reasoning_effort", "AI reasoning effort must be none, low, medium, high, or xhigh")
+    provider = ai_provider_by_id(payload.get("providerId"))
+    if provider is None:
+        return error_payload("invalid_ai_provider", "AI provider is not supported")
+    if provider.get("requiresBaseUrl") and not str(payload.get("baseUrl") or provider.get("defaultBaseUrl") or "").strip():
+        return error_payload("invalid_ai_provider_config", "Base URL is required for this AI provider")
+    current_model = payload.get("currentModel")
+    if operation in {"validate", "improve"} and current_model is not None and not isinstance(current_model, dict):
+        return error_payload("invalid_ai_request", "Current model must be a JSON object")
+    return None
+
+
+def validate_ai_connection_payload(payload: object) -> dict | None:
+    if not isinstance(payload, dict):
+        return error_payload("invalid_ai_request", "AI connection request body must be a JSON object")
+    encoded = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    if len(encoded) > MAX_AI_REQUEST_BYTES:
+        return error_payload("ai_request_too_large", "AI connection request payload is too large", maxBytes=MAX_AI_REQUEST_BYTES)
+    reasoning_effort = str(payload.get("reasoningEffort") or "").strip()
+    if reasoning_effort and reasoning_effort not in {"none", "low", "medium", "high", "xhigh"}:
+        return error_payload("invalid_ai_reasoning_effort", "AI reasoning effort must be none, low, medium, high, or xhigh")
+    provider = ai_provider_by_id(payload.get("providerId"))
+    if provider is None:
+        return error_payload("invalid_ai_provider", "AI provider is not supported")
+    if provider.get("requiresBaseUrl") and not str(payload.get("baseUrl") or provider.get("defaultBaseUrl") or "").strip():
+        return error_payload("invalid_ai_provider_config", "Base URL is required for this AI provider")
+    return None
+
+
+def ai_provider_key(provider: dict, payload: dict) -> str:
+    env_key = str(provider.get("serverEnvKey") or "")
+    if env_key:
+        value = os.environ.get(env_key, "").strip()
+        if value:
+            return value
+    if provider.get("allowsUserKey"):
+        return str(payload.get("apiKey") or "").strip()
+    return ""
+
+
+def ai_provider_base_url(provider: dict, payload: dict) -> str:
+    if provider.get("supportsCustomBaseUrl") or provider.get("requiresBaseUrl"):
+        return str(payload.get("baseUrl") or provider.get("defaultBaseUrl") or "").strip().rstrip("/")
+    return str(provider.get("defaultBaseUrl") or "").strip().rstrip("/")
+
+
+def ai_provider_model(provider: dict, payload: dict) -> str:
+    return str(payload.get("modelName") or provider.get("defaultModel") or "").strip()
+
+
+def provider_model_option(provider: dict, model: str) -> dict | None:
+    clean = str(model or "").strip()
+    for option in provider.get("models", []) or []:
+        if isinstance(option, dict) and str(option.get("id") or "").strip() == clean:
+            return option
+    return None
+
+
+def provider_model_supports_reasoning_effort(provider: dict, model: str) -> bool:
+    option = provider_model_option(provider, model)
+    if option is not None and "supportsReasoningEffort" in option:
+        return bool(option.get("supportsReasoningEffort"))
+    return bool(provider.get("supportsReasoningEffort"))
+
+
+def ai_user_key_present(provider: dict, payload: dict) -> bool:
+    return bool(provider.get("allowsUserKey") and str(payload.get("apiKey") or "").strip())
+
+
+def ai_provider_call_enabled(provider: dict, payload: dict) -> bool:
+    if provider.get("manualWorkflow"):
+        return False
+    if ai_backend_enabled():
+        return True
+    return ai_user_key_present(provider, payload)
+
+
+def provider_http_error_message(exc: urlerror.HTTPError) -> tuple[str, dict]:
+    details = {"providerStatus": exc.code}
+    body = ""
+    try:
+        body = exc.read().decode("utf-8", errors="replace").strip()
+    except Exception:
+        body = ""
+
+    provider_message = ""
+    if body:
+        try:
+            parsed = json.loads(body)
+        except json.JSONDecodeError:
+            parsed = None
+        error_obj = parsed.get("error") if isinstance(parsed, dict) else None
+        if isinstance(error_obj, dict):
+            provider_message = str(error_obj.get("message") or "").strip()
+            details["providerErrorType"] = error_obj.get("type")
+            details["providerErrorCode"] = error_obj.get("code")
+            details["providerErrorParam"] = error_obj.get("param")
+        elif isinstance(parsed, dict):
+            provider_message = str(parsed.get("message") or parsed.get("error") or "").strip()
+        if not provider_message:
+            provider_message = body[:500]
+
+    message = f"AI provider returned HTTP {exc.code}"
+    if provider_message:
+        message = f"{message}: {provider_message}"
+        details["providerErrorMessage"] = provider_message[:500]
+    return message, details
+
+
+def json_post(url: str, payload: dict, headers: dict, timeout: int = AI_PROVIDER_TIMEOUT_SECONDS) -> dict:
+    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    request = urlrequest.Request(
+        url,
+        data=data,
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            **headers,
+        },
+        method="POST",
+    )
+    try:
+        with urlrequest.urlopen(request, timeout=timeout) as response:
+            body = response.read().decode("utf-8", errors="replace")
+    except urlerror.HTTPError as exc:
+        message, details = provider_http_error_message(exc)
+        raise OperationError("ai_provider_error", message, HTTPStatus.BAD_GATEWAY, **details) from exc
+    except urlerror.URLError as exc:
+        raise OperationError("ai_provider_unreachable", f"AI provider is unreachable: {exc.reason}", HTTPStatus.BAD_GATEWAY) from exc
+    except TimeoutError as exc:
+        raise OperationError("ai_provider_timeout", "AI provider request timed out", HTTPStatus.GATEWAY_TIMEOUT) from exc
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError as exc:
+        raise OperationError("ai_provider_invalid_response", "AI provider returned non-JSON response", HTTPStatus.BAD_GATEWAY) from exc
+
+
+def json_get(url: str, headers: dict, timeout: int = AI_PROVIDER_TIMEOUT_SECONDS) -> dict:
+    request = urlrequest.Request(
+        url,
+        headers={
+            "Accept": "application/json",
+            **headers,
+        },
+        method="GET",
+    )
+    try:
+        with urlrequest.urlopen(request, timeout=timeout) as response:
+            body = response.read().decode("utf-8", errors="replace")
+    except urlerror.HTTPError as exc:
+        message, details = provider_http_error_message(exc)
+        raise OperationError("ai_provider_error", message, HTTPStatus.BAD_GATEWAY, **details) from exc
+    except urlerror.URLError as exc:
+        raise OperationError("ai_provider_unreachable", f"AI provider is unreachable: {exc.reason}", HTTPStatus.BAD_GATEWAY) from exc
+    except TimeoutError as exc:
+        raise OperationError("ai_provider_timeout", "AI provider request timed out", HTTPStatus.GATEWAY_TIMEOUT) from exc
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError as exc:
+        raise OperationError("ai_provider_invalid_response", "AI provider returned non-JSON response", HTTPStatus.BAD_GATEWAY) from exc
+
+
+def parse_ai_json_response(text: str) -> dict | None:
+    clean = str(text or "").strip()
+    if clean.startswith("```"):
+        lines = clean.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        clean = "\n".join(lines).strip()
+    try:
+        parsed = json.loads(clean)
+    except json.JSONDecodeError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def normalize_ai_attribute_list(value: object) -> list:
+    if isinstance(value, list):
+        return [item for item in value if isinstance(item, dict)]
+    if isinstance(value, dict):
+        return [value]
+    return []
+
+
+def normalize_ai_position(value: object) -> dict:
+    position = dict(value) if isinstance(value, dict) else {}
+    for axis in ("x", "y", "z"):
+        raw = position.get(axis, 0)
+        try:
+            position[axis] = float(raw)
+        except (TypeError, ValueError):
+            position[axis] = 0
+    return position
+
+
+def normalize_ai_hbds_model_response(model: dict) -> dict:
+    normalized = copy.deepcopy(model)
+    hypergraph = normalized.get("hypergraph")
+    if not isinstance(hypergraph, dict):
+        return normalized
+
+    if "class" not in hypergraph and isinstance(hypergraph.get("classes"), list):
+        hypergraph["class"] = hypergraph.get("classes")
+    if "link" not in hypergraph and isinstance(hypergraph.get("links"), list):
+        hypergraph["link"] = hypergraph.get("links")
+
+    classes = hypergraph.get("class")
+    if isinstance(classes, list):
+        for node in classes:
+            if not isinstance(node, dict):
+                continue
+            if not node.get("type") and node.get("kind"):
+                node["type"] = node.get("kind")
+            if "attributes" not in node:
+                node["attributes"] = normalize_ai_attribute_list(node.get("attribute"))
+            elif not isinstance(node.get("attributes"), list):
+                node["attributes"] = normalize_ai_attribute_list(node.get("attributes"))
+            node["position"] = normalize_ai_position(node.get("position"))
+
+    links = hypergraph.get("link")
+    if isinstance(links, list):
+        for link in links:
+            if not isinstance(link, dict):
+                continue
+            if not link.get("sourceClassId") and link.get("source"):
+                link["sourceClassId"] = link.get("source")
+            if not link.get("targetClassId") and link.get("target"):
+                link["targetClassId"] = link.get("target")
+    return normalized
+
+
+def extract_ai_model_response(text: str) -> dict | None:
+    parsed = parse_ai_json_response(text)
+    if not parsed:
+        return None
+    if isinstance(parsed.get("hypergraph"), dict):
+        return normalize_ai_hbds_model_response(parsed)
+    nested = parsed.get("model")
+    if isinstance(nested, dict) and isinstance(nested.get("hypergraph"), dict):
+        return normalize_ai_hbds_model_response(nested)
+    corrected = parsed.get("correctedModel")
+    if isinstance(corrected, dict) and isinstance(corrected.get("hypergraph"), dict):
+        return normalize_ai_hbds_model_response(corrected)
+    return None
+
+
+def validate_openai_compatible_connection(provider: dict, payload: dict) -> dict:
+    api_key = ai_provider_key(provider, payload)
+    if provider.get("requiresKey") and not api_key:
+        raise OperationError("ai_provider_key_required", "API key is required for this provider", HTTPStatus.BAD_REQUEST)
+    base_url = ai_provider_base_url(provider, payload) or "https://api.openai.com"
+    model = ai_provider_model(provider, payload)
+    if not model:
+        raise OperationError("ai_provider_model_required", "AI provider model is required", HTTPStatus.BAD_REQUEST)
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    json_get(f"{base_url}/v1/models/{quote(model, safe='')}", headers, timeout=20)
+    return {
+        "providerId": provider.get("id"),
+        "modelName": model,
+        "connected": True,
+        "message": f"{provider.get('label') or 'AI provider'} connection is valid for {model}.",
+    }
+
+
+def validate_anthropic_connection(provider: dict, payload: dict) -> dict:
+    api_key = ai_provider_key(provider, payload)
+    if not api_key:
+        raise OperationError("ai_provider_key_required", "API key is required for this provider", HTTPStatus.BAD_REQUEST)
+    model = ai_provider_model(provider, payload)
+    if not model:
+        raise OperationError("ai_provider_model_required", "AI provider model is required", HTTPStatus.BAD_REQUEST)
+    json_post(
+        "https://api.anthropic.com/v1/messages",
+        {
+            "model": model,
+            "max_tokens": 1,
+            "system": "Connection validation only.",
+            "messages": [{"role": "user", "content": "Reply OK."}],
+        },
+        {
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+        },
+        timeout=20,
+    )
+    return {
+        "providerId": provider.get("id"),
+        "modelName": model,
+        "connected": True,
+        "message": f"{provider.get('label') or 'AI provider'} connection is valid for {model}.",
+    }
+
+
+def validate_ollama_connection(provider: dict, payload: dict) -> dict:
+    base_url = ai_provider_base_url(provider, payload)
+    model = ai_provider_model(provider, payload)
+    if not base_url:
+        raise OperationError("ai_provider_config_required", "Base URL is required for this AI provider", HTTPStatus.BAD_REQUEST)
+    if not model:
+        raise OperationError("ai_provider_model_required", "AI provider model is required", HTTPStatus.BAD_REQUEST)
+    data = json_get(f"{base_url}/api/tags", {}, timeout=8)
+    models = data.get("models") if isinstance(data, dict) else None
+    names = {
+        str(item.get("name") or "").split(":", 1)[0]
+        for item in models or []
+        if isinstance(item, dict)
+    }
+    if names and model.split(":", 1)[0] not in names:
+        raise OperationError("ai_provider_model_unavailable", f"Ollama model {model} was not found at {base_url}", HTTPStatus.BAD_GATEWAY)
+    return {
+        "providerId": provider.get("id"),
+        "modelName": model,
+        "connected": True,
+        "message": f"{provider.get('label') or 'AI provider'} connection is valid for {model}.",
+    }
+
+
+def validate_ai_provider_connection(provider: dict, payload: dict) -> dict:
+    if provider.get("manualWorkflow") or provider.get("id") == "chatgpt-manual":
+        return {
+            "providerId": provider.get("id"),
+            "modelName": "",
+            "connected": True,
+            "manualWorkflow": True,
+            "message": "Manual ChatGPT mode is ready; no provider connection is required.",
+        }
+    if not ai_provider_call_enabled(provider, payload):
+        raise OperationError(
+            "ai_backend_disabled",
+            "AI provider calls are disabled until the server is configured or a transient user key is supplied.",
+            HTTPStatus.BAD_REQUEST,
+        )
+    provider_id = provider.get("id")
+    if provider_id == "anthropic":
+        return validate_anthropic_connection(provider, payload)
+    if provider_id == "ollama":
+        return validate_ollama_connection(provider, payload)
+    if provider_id in {"openai", "custom-openai"}:
+        return validate_openai_compatible_connection(provider, payload)
+    raise OperationError("invalid_ai_provider", "AI provider is not supported", HTTPStatus.BAD_REQUEST)
+
+
+def call_openai_compatible_provider(provider: dict, payload: dict, prompt: str) -> str:
+    api_key = ai_provider_key(provider, payload)
+    if provider.get("requiresKey") and not api_key:
+        raise OperationError("ai_provider_key_required", "API key is required for this provider", HTTPStatus.BAD_REQUEST)
+    base_url = ai_provider_base_url(provider, payload) or "https://api.openai.com"
+    model = ai_provider_model(provider, payload)
+    if not model:
+        raise OperationError("ai_provider_model_required", "AI provider model is required", HTTPStatus.BAD_REQUEST)
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    is_openai_reasoning_model = provider.get("id") == "openai" and provider_model_supports_reasoning_effort(provider, model)
+    instruction_role = "developer" if is_openai_reasoning_model else "system"
+    body = {
+        "model": model,
+        "messages": [
+            {"role": instruction_role, "content": "Return only valid JSON for the HBDS Graphic Simulator."},
+            {"role": "user", "content": prompt},
+        ]
+    }
+    if provider.get("supportsJsonMode"):
+        body["response_format"] = {"type": "json_object"}
+    reasoning_effort = str(payload.get("reasoningEffort") or "").strip()
+    if reasoning_effort and provider.get("supportsReasoningEffort"):
+        body["reasoning_effort"] = reasoning_effort
+    if not is_openai_reasoning_model and not reasoning_effort:
+        body["temperature"] = 0.2
+    response = json_post(f"{base_url}/v1/chat/completions", body, headers)
+    choices = response.get("choices")
+    if not isinstance(choices, list) or not choices:
+        raise OperationError("ai_provider_invalid_response", "AI provider response did not include choices", HTTPStatus.BAD_GATEWAY)
+    message = choices[0].get("message") if isinstance(choices[0], dict) else None
+    content = message.get("content") if isinstance(message, dict) else None
+    if not isinstance(content, str) or not content.strip():
+        raise OperationError("ai_provider_invalid_response", "AI provider response did not include text content", HTTPStatus.BAD_GATEWAY)
+    return content
+
+
+def call_anthropic_provider(provider: dict, payload: dict, prompt: str) -> str:
+    api_key = ai_provider_key(provider, payload)
+    if not api_key:
+        raise OperationError("ai_provider_key_required", "API key is required for this provider", HTTPStatus.BAD_REQUEST)
+    model = ai_provider_model(provider, payload)
+    if not model:
+        raise OperationError("ai_provider_model_required", "AI provider model is required", HTTPStatus.BAD_REQUEST)
+    response = json_post(
+        "https://api.anthropic.com/v1/messages",
+        {
+            "model": model,
+            "max_tokens": env_int("HBDS_AI_MAX_TOKENS", 4096),
+            "system": "Return only valid JSON for the HBDS Graphic Simulator.",
+            "messages": [{"role": "user", "content": prompt}],
+        },
+        {
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+        },
+    )
+    content = response.get("content")
+    if not isinstance(content, list):
+        raise OperationError("ai_provider_invalid_response", "AI provider response did not include content", HTTPStatus.BAD_GATEWAY)
+    text_parts = [item.get("text") for item in content if isinstance(item, dict) and item.get("type") == "text"]
+    text = "\n".join(part for part in text_parts if isinstance(part, str)).strip()
+    if not text:
+        raise OperationError("ai_provider_invalid_response", "AI provider response did not include text content", HTTPStatus.BAD_GATEWAY)
+    return text
+
+
+def call_ollama_provider(provider: dict, payload: dict, prompt: str) -> str:
+    base_url = ai_provider_base_url(provider, payload)
+    model = ai_provider_model(provider, payload)
+    if not base_url:
+        raise OperationError("ai_provider_config_required", "Base URL is required for this AI provider", HTTPStatus.BAD_REQUEST)
+    if not model:
+        raise OperationError("ai_provider_model_required", "AI provider model is required", HTTPStatus.BAD_REQUEST)
+    response = json_post(
+        f"{base_url}/api/chat",
+        {
+            "model": model,
+            "stream": False,
+            "messages": [
+                {"role": "system", "content": "Return only valid JSON for the HBDS Graphic Simulator."},
+                {"role": "user", "content": prompt},
+            ],
+        },
+        {},
+    )
+    message = response.get("message")
+    content = message.get("content") if isinstance(message, dict) else response.get("response")
+    if not isinstance(content, str) or not content.strip():
+        raise OperationError("ai_provider_invalid_response", "AI provider response did not include text content", HTTPStatus.BAD_GATEWAY)
+    return content
+
+
+def call_ai_provider(provider: dict, payload: dict, prompt: str) -> dict:
+    provider_id = provider.get("id")
+    if provider.get("manualWorkflow") or provider_id == "chatgpt-manual":
+        raise OperationError("manual_ai_provider", "Manual ChatGPT mode does not call an AI provider", HTTPStatus.BAD_REQUEST)
+    if provider_id == "anthropic":
+        text = call_anthropic_provider(provider, payload, prompt)
+    elif provider_id == "ollama":
+        text = call_ollama_provider(provider, payload, prompt)
+    elif provider_id in {"openai", "custom-openai"}:
+        text = call_openai_compatible_provider(provider, payload, prompt)
+    else:
+        raise OperationError("invalid_ai_provider", "AI provider is not supported", HTTPStatus.BAD_REQUEST)
+    model = extract_ai_model_response(text)
+    return {
+        "text": text,
+        "model": model,
+    }
 
 
 def model_content_hash(path: Path) -> str:
@@ -887,11 +1623,15 @@ def ensure_link_create_can_merge(base_model: dict, current_model: dict, operatio
 def list_models() -> list[dict]:
     if not MODELS_DIR.exists():
         return []
-    return [
-        model_metadata(path)
-        for path in sorted(MODELS_DIR.glob("*.json"), key=lambda item: item.name.lower())
-        if not path.name.startswith(".") and not path.name.lower().endswith("manifest.json")
-    ]
+    models = []
+    for path in sorted(MODELS_DIR.glob("*.json"), key=lambda item: item.name.lower()):
+        if path.name.startswith(".") or path.name.lower().endswith("manifest.json"):
+            continue
+        try:
+            models.append(model_metadata(path))
+        except FileNotFoundError:
+            continue
+    return models
 
 
 def openapi_spec(host: str) -> dict:
@@ -930,6 +1670,7 @@ def openapi_spec(host: str) -> dict:
             {"name": "Server", "description": "Local server status and API documentation."},
             {"name": "Models", "description": "List, load, and save HBDS model JSON files."},
             {"name": "Collaboration", "description": "Presence and live draft state used by collaborative editing UI."},
+            {"name": "AI", "description": "HBDS-scoped AI provider capability discovery and prompt preparation."},
             {"name": "Debug", "description": "Per-UI debug logging and function timing controls."},
         ],
         "paths": {
@@ -1020,6 +1761,93 @@ def openapi_spec(host: str) -> dict:
                     },
                 }
             },
+            "/api/ai/providers": {
+                "get": {
+                    "tags": ["AI"],
+                    "summary": "List AI provider capabilities without exposing secrets",
+                    "responses": {
+                        "200": {
+                            "description": "AI provider capability list",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AiProviderListResponse"}}},
+                        }
+                    },
+                }
+            },
+            "/api/ai/connection": {
+                "post": {
+                    "tags": ["AI"],
+                    "summary": "Validate an AI provider credential and model",
+                    "description": "Checks the selected provider with a server environment key or a transient user key. Keys are never returned by the API.",
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AiConnectionRequest"}}},
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Provider connection validated",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AiConnectionResponse"}}},
+                        },
+                        "400": {"description": "Invalid AI connection request", "content": {"application/json": {"schema": error_schema}}},
+                        "502": {"description": "Provider rejected the credential, model, or connection", "content": {"application/json": {"schema": error_schema}}},
+                    },
+                }
+            },
+            "/api/ai/apply": {
+                "post": {
+                    "tags": ["AI"],
+                    "summary": "Apply and save an AI-generated HBDS model",
+                    "description": "Normalizes and validates an AI model, saves it into models or test_models, refreshes manifests, and returns the saved model. API keys are not part of this request.",
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AiApplyRequest"}}},
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "AI model applied and saved",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AiApplyResponse"}}},
+                        },
+                        "400": {"description": "Invalid AI model or save request", "content": {"application/json": {"schema": error_schema}}},
+                        "409": {"description": "Save conflict", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ConflictResponse"}}}},
+                    },
+                }
+            },
+            "/api/ai/rollback": {
+                "post": {
+                    "tags": ["AI"],
+                    "summary": "Rollback the last AI apply by saving a previous HBDS snapshot",
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AiRollbackRequest"}}},
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Rollback snapshot saved",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AiApplyResponse"}}},
+                        },
+                        "400": {"description": "Invalid rollback request", "content": {"application/json": {"schema": error_schema}}},
+                        "409": {"description": "Rollback conflict", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ConflictResponse"}}}},
+                    },
+                }
+            },
+            "/api/ai/prompt": {
+                "post": {
+                    "tags": ["AI"],
+                    "summary": "Prepare a deterministic HBDS AI prompt",
+                    "description": "Builds the server-side HBDS prompt. The server sends the prompt to the selected API provider when HBDS_AI_ENABLED is true or when a transient user key is supplied. Manual providers only prepare prompts and never call an external provider.",
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AiPromptRequest"}}},
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Prompt prepared",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AiPromptResponse"}}},
+                        },
+                        "400": {"description": "Invalid AI request", "content": {"application/json": {"schema": error_schema}}},
+                        "413": {"description": "AI request too large", "content": {"application/json": {"schema": error_schema}}},
+                    },
+                }
+            },
             "/api/models": {
                 "get": {
                     "tags": ["Models"],
@@ -1083,6 +1911,24 @@ def openapi_spec(host: str) -> dict:
                         },
                         "413": {"description": "Payload too large", "content": {"application/json": {"schema": error_schema}}},
                         "500": {"description": "Server error", "content": {"application/json": {"schema": error_schema}}},
+                    },
+                },
+                "delete": {
+                    "tags": ["Models"],
+                    "summary": "Delete one HBDS model from models after confirmation",
+                    "parameters": [model_name_param],
+                    "requestBody": {
+                        "required": False,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ModelDeleteRequest"}}},
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Model moved to .backups and manifests refreshed",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ModelDeleteResponse"}}},
+                        },
+                        "400": {"description": "Invalid model name", "content": {"application/json": {"schema": error_schema}}},
+                        "404": {"description": "Model not found", "content": {"application/json": {"schema": error_schema}}},
+                        "409": {"description": "Protected/default model", "content": {"application/json": {"schema": error_schema}}},
                     },
                 },
             },
@@ -1200,6 +2046,24 @@ def openapi_spec(host: str) -> dict:
                         },
                         "400": {"description": "Invalid input", "content": {"application/json": {"schema": error_schema}}},
                         "413": {"description": "Payload too large", "content": {"application/json": {"schema": error_schema}}},
+                    },
+                },
+                "delete": {
+                    "tags": ["Models"],
+                    "summary": "Delete one HBDS model from a named file scope after confirmation",
+                    "parameters": [draft_scope_param, model_name_param],
+                    "requestBody": {
+                        "required": False,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ModelDeleteRequest"}}},
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Scoped model moved to .backups and manifests refreshed",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ModelDeleteResponse"}}},
+                        },
+                        "400": {"description": "Invalid scope or model name", "content": {"application/json": {"schema": error_schema}}},
+                        "404": {"description": "Model not found", "content": {"application/json": {"schema": error_schema}}},
+                        "409": {"description": "Protected/default model", "content": {"application/json": {"schema": error_schema}}},
                     },
                 },
             },
@@ -1329,6 +2193,147 @@ def openapi_spec(host: str) -> dict:
                     },
                     "required": ["ok", "models"],
                 },
+                "AiProvider": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string", "example": "openai"},
+                        "label": {"type": "string", "example": "ChatGPT/OpenAI"},
+                        "defaultModel": {"type": "string", "example": "gpt-5.5"},
+                        "models": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "string"},
+                                    "label": {"type": "string"},
+                                    "supportsReasoningEffort": {"type": "boolean"},
+                                    "defaultReasoningEffort": {"type": "string", "enum": ["none", "low", "medium", "high", "xhigh"]},
+                                },
+                            },
+                        },
+                        "requiresKey": {"type": "boolean"},
+                        "allowsUserKey": {"type": "boolean"},
+                        "requiresBaseUrl": {"type": "boolean"},
+                        "defaultBaseUrl": {"type": "string"},
+                        "supportsCustomBaseUrl": {"type": "boolean"},
+                        "supportsJsonMode": {"type": "boolean"},
+                        "supportsReasoningEffort": {"type": "boolean"},
+                        "manualWorkflow": {"type": "boolean", "description": "True for copy/paste-only providers such as ChatGPT Pro / Manual."},
+                        "configuredOnServer": {"type": "boolean"},
+                        "credentialStatus": {"type": "string", "example": "key_required"},
+                    },
+                    "required": ["id", "label", "requiresKey", "requiresBaseUrl", "configuredOnServer"],
+                },
+                "AiProviderListResponse": {
+                    "type": "object",
+                    "properties": {
+                        "ok": {"type": "boolean", "example": True},
+                        "enabled": {"type": "boolean", "description": "True when real AI calls are enabled by server configuration."},
+                        "promptTemplateVersion": {"type": "string", "example": "hbds-ai-prompt-v1"},
+                        "requestMaxBytes": {"type": "integer"},
+                        "providers": {"type": "array", "items": {"$ref": "#/components/schemas/AiProvider"}},
+                    },
+                    "required": ["ok", "enabled", "providers"],
+                },
+                "AiPromptRequest": {
+                    "type": "object",
+                    "properties": {
+                        "providerId": {"type": "string", "example": "openai"},
+                        "modelName": {"type": "string", "example": "gpt-5.5"},
+                        "reasoningEffort": {"type": "string", "enum": ["none", "low", "medium", "high", "xhigh"]},
+                        "baseUrl": {"type": "string"},
+                        "apiKey": {"type": "string", "format": "password", "description": "Optional transient user key. It is never returned by the API."},
+                        "operationMode": {"type": "string", "enum": ["generate", "validate", "improve", "repair"]},
+                        "requestText": {"type": "string", "description": "HBDS-scoped user request."},
+                        "currentModel": {"type": "object", "description": "Optional current HBDS model supplied only for validate/improve operations."},
+                        "promptTemplateVersion": {"type": "string", "example": "hbds-ai-prompt-v1"},
+                    },
+                    "required": ["providerId", "operationMode", "requestText"],
+                },
+                "AiConnectionRequest": {
+                    "type": "object",
+                    "properties": {
+                        "providerId": {"type": "string", "example": "openai"},
+                        "modelName": {"type": "string", "example": "gpt-5.5"},
+                        "reasoningEffort": {"type": "string", "enum": ["none", "low", "medium", "high", "xhigh"]},
+                        "baseUrl": {"type": "string"},
+                        "apiKey": {"type": "string", "format": "password", "description": "Optional transient user key. It is never returned by the API."},
+                    },
+                    "required": ["providerId"],
+                },
+                "AiConnectionResponse": {
+                    "type": "object",
+                    "properties": {
+                        "ok": {"type": "boolean", "example": True},
+                        "enabled": {"type": "boolean"},
+                        "connected": {"type": "boolean"},
+                        "manualWorkflow": {"type": "boolean"},
+                        "providerId": {"type": "string"},
+                        "modelName": {"type": "string"},
+                        "message": {"type": "string"},
+                    },
+                    "required": ["ok", "connected", "providerId", "message"],
+                },
+                "AiApplyRequest": {
+                    "type": "object",
+                    "properties": {
+                        "scope": {"type": "string", "enum": ["models", "test_models"], "description": "Target model directory."},
+                        "modelName": {"type": "string", "example": "mushroom_model.json", "description": "Existing filename for same-file save, or preferred filename for save-as-new."},
+                        "requestedName": {"type": "string", "example": "Mushroom Model"},
+                        "operationMode": {"type": "string", "enum": ["generate", "validate", "improve", "repair"]},
+                        "saveMode": {"type": "string", "enum": ["same", "new"], "description": "same overwrites modelName with revision checks; new creates a unique filename."},
+                        "expectedRevision": {"type": "string", "description": "Optional current file revision for conflict protection."},
+                        "clientId": {"type": "string"},
+                        "model": {"type": "object", "description": "Normalized or AI-returned HBDS model. Common AI aliases are normalized before validation."},
+                    },
+                    "required": ["scope", "operationMode", "saveMode", "model"],
+                },
+                "AiRollbackRequest": {
+                    "type": "object",
+                    "properties": {
+                        "scope": {"type": "string", "enum": ["models", "test_models"]},
+                        "modelName": {"type": "string", "example": "bridge_road_links.json"},
+                        "expectedRevision": {"type": "string"},
+                        "clientId": {"type": "string"},
+                        "model": {"type": "object", "description": "Pre-AI HBDS snapshot to restore."},
+                    },
+                    "required": ["scope", "modelName", "model"],
+                },
+                "AiApplyResponse": {
+                    "type": "object",
+                    "properties": {
+                        "ok": {"type": "boolean", "example": True},
+                        "scope": {"type": "string"},
+                        "saveMode": {"type": "string"},
+                        "rollback": {"type": "boolean"},
+                        "saved": {"type": "string"},
+                        "modelName": {"type": "string"},
+                        "backup": {"type": "string", "nullable": True},
+                        "manifestRefreshed": {"type": "boolean"},
+                        "metadata": {"$ref": "#/components/schemas/ModelMetadata"},
+                        "model": {"type": "object"},
+                    },
+                    "required": ["ok", "scope", "saved", "modelName", "model"],
+                },
+                "AiPromptResponse": {
+                    "type": "object",
+                    "properties": {
+                        "ok": {"type": "boolean", "example": True},
+                        "enabled": {"type": "boolean"},
+                        "aiCallEnabled": {"type": "boolean", "description": "True when the backend attempted a provider call."},
+                        "manualWorkflow": {"type": "boolean"},
+                        "providerId": {"type": "string"},
+                        "modelName": {"type": "string"},
+                        "reasoningEffort": {"type": "string"},
+                        "operationMode": {"type": "string"},
+                        "promptTemplateVersion": {"type": "string"},
+                        "enhancedPrompt": {"type": "string"},
+                        "providerResponse": {"type": "string", "description": "Raw provider text when AI calls are enabled."},
+                        "model": {"type": "object", "description": "Parsed HBDS model when the provider returned an applyable model."},
+                        "message": {"type": "string"},
+                    },
+                    "required": ["ok", "aiCallEnabled", "enhancedPrompt"],
+                },
                 "ModelLoadResponse": {
                     "type": "object",
                     "properties": {
@@ -1348,6 +2353,98 @@ def openapi_spec(host: str) -> dict:
                     },
                     "required": ["ok", "saved"],
                 },
+                "ModelDeleteRequest": {
+                    "type": "object",
+                    "properties": {
+                        "clientId": {"type": "string"},
+                        "allowProtected": {"type": "boolean", "description": "Reserved for explicit admin-style deletion of protected/default models."},
+                    },
+                },
+                "ModelDeleteResponse": {
+                    "type": "object",
+                    "properties": {
+                        "ok": {"type": "boolean", "example": True},
+                        "scope": {"type": "string"},
+                        "deleted": {"type": "string", "example": "mushroom_model.json"},
+                        "modelName": {"type": "string"},
+                        "backup": {"type": "string", "description": "Backup filename under .backups."},
+                        "manifestRefreshed": {"type": "boolean"},
+                    },
+                    "required": ["ok", "scope", "deleted", "modelName", "backup"],
+                },
+                "HBDSFontSettings": {
+                    "type": "object",
+                    "description": "Model-level font settings. Per-type sizes override size for their own label class; null or omission falls back to the overall size. Element-level font-size fields can still override these values until the UI reset-all action clears them.",
+                    "properties": {
+                        "size": {"type": "number", "example": 13},
+                        "family": {"type": "string", "example": "Arial, sans-serif"},
+                        "bold": {"type": "boolean"},
+                        "italic": {"type": "boolean"},
+                        "underline": {"type": "boolean"},
+                        "classSize": {"type": "number", "nullable": True, "description": "Class title font size override."},
+                        "hyperclassSize": {"type": "number", "nullable": True, "description": "Hyperclass title font size override."},
+                        "attributeSize": {"type": "number", "nullable": True, "description": "Attribute label font size override."},
+                        "linkSize": {"type": "number", "nullable": True, "description": "Link label font size override."},
+                    },
+                },
+                "LinkRendering": {
+                    "type": "object",
+                    "description": "Optional visual rendering fields for HBDS links. Unknown fields are preserved for forward compatibility.",
+                    "properties": {
+                        "labelText": {"type": "string", "description": "Visible link label."},
+                        "lineColor": {"type": "string", "example": "#334155"},
+                        "lineWidth": {"type": "number", "example": 2},
+                        "lineStyle": {"type": "string", "enum": ["solid", "dashed", "dotted", "thick", "thin"]},
+                        "arrowType": {
+                            "type": "string",
+                            "enum": [
+                                "triangle",
+                                "outline",
+                                "chevron",
+                                "double-chevron",
+                                "triple-chevron",
+                                "filled-triangle",
+                                "hollow-triangle",
+                                "dotted",
+                                "bar-arrow",
+                                "double-bar-arrow",
+                                "cone",
+                                "diamond",
+                                "none",
+                            ],
+                            "description": "Preferred arrow head style. Legacy arrowheadType is still accepted.",
+                        },
+                        "arrowheadType": {"type": "string", "description": "Legacy alias for arrowType."},
+                        "arrowDirection": {"type": "string", "enum": ["source-to-target", "target-to-source", "bidirectional", "none"]},
+                        "arrowColor": {"type": "string", "example": "#334155"},
+                        "arrowheadVisibility": {"type": "boolean"},
+                        "arrowheadSize": {"type": "number"},
+                        "arrowheadScale": {"type": "number"},
+                        "maxArrowheadSize": {"type": "number"},
+                        "labelFontSize": {"type": "number"},
+                        "labelColor": {"type": "string"},
+                        "labelBackgroundColor": {"type": "string"},
+                        "labelPositionAlongPath": {"type": "number", "minimum": 0, "maximum": 1},
+                        "labelOffsetFromPath": {"type": "number"},
+                        "orthogonalStyle": {"type": "string", "enum": ["auto", "horizontal", "vertical"]},
+                        "sourcePortSide": {"type": "string", "enum": ["top", "right", "bottom", "left"]},
+                        "targetPortSide": {"type": "string", "enum": ["top", "right", "bottom", "left"]},
+                    },
+                },
+                "HBDSLink": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string"},
+                        "name": {"type": "string"},
+                        "sourceClassId": {"type": "string"},
+                        "targetClassId": {"type": "string"},
+                        "type": {"type": "string"},
+                        "allowSelfLink": {"type": "boolean"},
+                        "visible": {"type": "boolean"},
+                        "rendering": {"$ref": "#/components/schemas/LinkRendering"},
+                    },
+                    "required": ["id", "sourceClassId", "targetClassId"],
+                },
                 "ModelOperation": {
                     "type": "object",
                     "properties": {
@@ -1359,7 +2456,7 @@ def openapi_spec(host: str) -> dict:
                         "targetId": {"description": "Class or link id used by update/delete operations."},
                         "patch": {"type": "object", "description": "Object patch for update operations."},
                         "class": {"type": "object", "description": "Class payload for createClass."},
-                        "link": {"type": "object", "description": "Link payload for createLink."},
+                        "link": {"$ref": "#/components/schemas/HBDSLink"},
                     },
                     "required": ["type"],
                 },
@@ -1633,6 +2730,11 @@ class HBDSLocalServer(ThreadingHTTPServer):
                 self._drafts.pop(model_name, None)
             return copy.deepcopy(removed) if removed is not None else None
 
+    def clear_model_drafts(self, model_name: str) -> list[dict]:
+        with self._draft_lock:
+            model_drafts = self._drafts.pop(model_name, {})
+            return [copy.deepcopy(draft) for draft in model_drafts.values()]
+
     def delete_client_drafts(self, client_id: str) -> list[dict]:
         removed: list[dict] = []
         with self._draft_lock:
@@ -1902,6 +3004,8 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
                 self.debug_timed_call("health", lambda: self.json_response({"ok": True, "status": "connected", "time": utc_now_iso()}))
             elif path == "/api/debug":
                 self.debug_timed_call("debug_status", self.debug_status)
+            elif path == "/api/ai/providers":
+                self.debug_timed_call("ai_providers", self.list_ai_providers)
             elif path == "/api/models":
                 self.debug_timed_call("list_models", lambda: self.json_response({"ok": True, "models": list_models()}))
             elif path == "/api/events":
@@ -1940,6 +3044,14 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
                 self.debug_timed_call("configure_debug", self.configure_debug)
             elif path == "/api/debug/logs":
                 self.debug_timed_call("record_client_debug_log", self.record_client_debug_log)
+            elif path == "/api/ai/connection":
+                self.debug_timed_call("validate_ai_connection", self.validate_ai_connection)
+            elif path == "/api/ai/apply":
+                self.debug_timed_call("ai_apply_model", self.ai_apply_model)
+            elif path == "/api/ai/rollback":
+                self.debug_timed_call("ai_rollback_model", self.ai_rollback_model)
+            elif path == "/api/ai/prompt":
+                self.debug_timed_call("prepare_ai_prompt", self.prepare_ai_prompt)
             elif path.startswith("/api/model-files/"):
                 self.debug_timed_call("save_scoped_model", lambda: self.save_scoped_model(path.removeprefix("/api/model-files/")))
             elif path.startswith("/api/drafts/") and "/clients/" in path:
@@ -1954,6 +3066,17 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
                 self.json_error(HTTPStatus.NOT_FOUND, "not_found", "API endpoint not found")
         except ClientDisconnected:
             request_status = "client_disconnected"
+        except OperationError as operation_error:
+            request_status = "error"
+            try:
+                self.json_error(
+                    operation_error.status,
+                    operation_error.code,
+                    operation_error.message,
+                    **operation_error.details,
+                )
+            except ClientDisconnected:
+                request_status = "client_disconnected"
         except Exception:
             request_status = "error"
             try:
@@ -1968,7 +3091,16 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         request_start_iso = debug_now_iso()
         request_status = "ok"
         try:
-            if path.startswith("/api/drafts/") and "/clients/" in path:
+            if path.startswith("/api/model-files/"):
+                raw = path.removeprefix("/api/model-files/")
+                if "/" not in raw:
+                    self.json_error(HTTPStatus.NOT_FOUND, "not_found", "API endpoint not found")
+                else:
+                    scope, name = raw.split("/", 1)
+                    self.debug_timed_call("delete_model_file", lambda: self.delete_model_file(scope, name))
+            elif path.startswith("/api/models/") and "/drafts/" not in path:
+                self.debug_timed_call("delete_model_file", lambda: self.delete_model_file("models", path.removeprefix("/api/models/")))
+            elif path.startswith("/api/drafts/") and "/clients/" in path:
                 self.debug_timed_call("delete_scoped_model_draft", lambda: self.delete_scoped_model_draft(path.removeprefix("/api/drafts/")))
             elif path.startswith("/api/models/") and "/drafts/" in path:
                 self.debug_timed_call("delete_model_draft", lambda: self.delete_model_draft(path.removeprefix("/api/models/")))
@@ -1984,6 +3116,74 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
                 request_status = "client_disconnected"
         finally:
             self.debug_request_timing("DELETE", path, request_start_iso, request_start, request_status)
+
+    def list_ai_providers(self) -> None:
+        self.json_response({
+            "ok": True,
+            "enabled": ai_backend_enabled(),
+            "promptTemplateVersion": HBDS_AI_PROMPT_TEMPLATE_VERSION,
+            "requestMaxBytes": MAX_AI_REQUEST_BYTES,
+            "providers": ai_provider_capabilities(),
+        })
+
+    def prepare_ai_prompt(self) -> None:
+        payload = self.read_json_request_payload()
+        if payload is None:
+            return
+        validation_error = validate_ai_prompt_payload(payload)
+        if validation_error:
+            status = HTTPStatus.REQUEST_ENTITY_TOO_LARGE if validation_error["code"] == "ai_request_too_large" else HTTPStatus.BAD_REQUEST
+            self.json_error(status, validation_error["code"], validation_error["message"], **{
+                key: value for key, value in validation_error.items() if key not in {"code", "message"}
+            })
+            return
+        provider = ai_provider_by_id(payload.get("providerId")) or {}
+        enhanced_prompt = build_hbds_ai_prompt(payload)
+        enabled = ai_backend_enabled()
+        manual_workflow = bool(provider.get("manualWorkflow"))
+        ai_call_enabled = ai_provider_call_enabled(provider, payload)
+        response = {
+            "ok": True,
+            "enabled": enabled,
+            "aiCallEnabled": ai_call_enabled,
+            "manualWorkflow": manual_workflow,
+            "providerId": provider.get("id", ""),
+            "modelName": str(payload.get("modelName") or provider.get("defaultModel") or ""),
+            "reasoningEffort": str(payload.get("reasoningEffort") or ""),
+            "operationMode": str(payload.get("operationMode") or "generate"),
+            "promptTemplateVersion": HBDS_AI_PROMPT_TEMPLATE_VERSION,
+            "enhancedPrompt": enhanced_prompt,
+            "message": (
+                "Manual ChatGPT prompt prepared; copy it to ChatGPT and paste JSON back into HBDS."
+                if manual_workflow
+                else "HBDS prompt prepared; AI backend disabled so no provider call was made."
+            ),
+        }
+        if ai_call_enabled:
+            provider_result = call_ai_provider(provider, payload, enhanced_prompt)
+            response["providerResponse"] = provider_result["text"]
+            response["model"] = provider_result["model"]
+            response["message"] = "AI provider response received and parsed."
+        self.json_response(response)
+
+    def validate_ai_connection(self) -> None:
+        payload = self.read_json_request_payload()
+        if payload is None:
+            return
+        validation_error = validate_ai_connection_payload(payload)
+        if validation_error:
+            status = HTTPStatus.REQUEST_ENTITY_TOO_LARGE if validation_error["code"] == "ai_request_too_large" else HTTPStatus.BAD_REQUEST
+            self.json_error(status, validation_error["code"], validation_error["message"], **{
+                key: value for key, value in validation_error.items() if key not in {"code", "message"}
+            })
+            return
+        provider = ai_provider_by_id(payload.get("providerId")) or {}
+        result = validate_ai_provider_connection(provider, payload)
+        self.json_response({
+            "ok": True,
+            "enabled": ai_backend_enabled(),
+            **result,
+        })
 
     def debug_status(self) -> None:
         client_id = self.debug_client_id()
@@ -2064,6 +3264,18 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             return None
         return payload
 
+    def read_optional_json_request_payload(self) -> dict | None:
+        length_header = self.headers.get("Content-Length")
+        try:
+            length = int(length_header or "0")
+        except ValueError:
+            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_length", "Invalid Content-Length")
+            return None
+        if length <= 0:
+            return {}
+        payload = self.read_json_request_payload()
+        return payload if isinstance(payload, dict) else None
+
     def load_model(self, raw_name: str) -> None:
         name, error = validate_model_name(raw_name)
         if error:
@@ -2084,6 +3296,202 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             self.remember_model_revision(name, metadata["revision"], model)
             response = {"ok": True, "model": model_with_server_metadata(model, metadata), "metadata": metadata}
         self.json_response(response)
+
+    def save_model_to_scope(
+        self,
+        scope: str,
+        name: str,
+        payload: dict,
+        *,
+        expected_revision: object = None,
+        client_id: object = None,
+        enforce_revision: bool = False,
+    ) -> dict:
+        base_dir = model_scope_dir(scope)
+        target = (base_dir / name).resolve()
+        if target.parent != base_dir:
+            raise OperationError("invalid_model_name", "Model file must stay inside its model scope directory")
+        validation_error = validate_model_payload(payload)
+        if validation_error:
+            raise OperationError(validation_error["code"], validation_error["message"], HTTPStatus.BAD_REQUEST)
+        model_key = model_key_for_scope(scope, name)
+        with self.server.model_lock(model_key):
+            if target.exists() and enforce_revision:
+                current_metadata = model_metadata(target)
+                current_revision = current_metadata["revision"]
+                if not expected_revision:
+                    raise OperationError(
+                        "missing_revision",
+                        "Model already exists. Reload it before saving so the server can prevent overwrites.",
+                        HTTPStatus.CONFLICT,
+                        modelName=name,
+                        currentRevision=current_revision,
+                        metadata=current_metadata,
+                    )
+                if str(expected_revision) != str(current_revision):
+                    raise OperationError(
+                        "model_conflict",
+                        "Model has changed on the server. Reload before saving or use Save As New.",
+                        HTTPStatus.CONFLICT,
+                        modelName=name,
+                        attemptedRevision=expected_revision,
+                        currentRevision=current_revision,
+                        metadata=current_metadata,
+                    )
+            backup_name = write_model_payload(target, payload)
+            metadata = model_metadata(target)
+            self.remember_model_revision(model_key, metadata["revision"], payload)
+            refresh_model_manifests()
+        self.publish_model_updated(model_key, metadata, backup_name, client_id=client_id)
+        return {
+            "saved": name,
+            "modelName": model_key,
+            "backup": backup_name,
+            "metadata": metadata,
+            "model": model_with_server_metadata(payload, metadata),
+        }
+
+    def ai_apply_model(self) -> None:
+        payload = self.read_json_request_payload()
+        if payload is None:
+            return
+        scope, scope_error = normalize_model_scope(payload.get("scope"))
+        if scope_error:
+            self.json_error(HTTPStatus.BAD_REQUEST, scope_error["code"], scope_error["message"])
+            return
+        model = payload.get("model")
+        if not isinstance(model, dict):
+            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_ai_model", "AI apply requires a model object")
+            return
+        operation_mode = str(payload.get("operationMode") or "generate").strip() or "generate"
+        save_mode = str(payload.get("saveMode") or ("new" if operation_mode == "generate" else "same")).strip()
+        save_as_new = save_mode not in {"same", "overwrite"}
+        prepared_model = prepare_ai_model_for_save(model, operation_mode, save_as_new=save_as_new)
+        requested_name = str(payload.get("modelName") or "").strip()
+        if save_as_new or not requested_name:
+            requested_name = requested_ai_model_file_name(prepared_model, payload.get("requestedName"))
+            name = unique_model_file_name(scope, requested_name)
+            enforce_revision = False
+        else:
+            name, name_error = validate_model_name(requested_name)
+            if name_error:
+                self.json_error(HTTPStatus.BAD_REQUEST, name_error["code"], name_error["message"])
+                return
+            enforce_revision = bool(payload.get("expectedRevision"))
+        try:
+            saved = self.save_model_to_scope(
+                scope,
+                name,
+                prepared_model,
+                expected_revision=payload.get("expectedRevision"),
+                client_id=payload.get("clientId") or self.headers.get("X-Client-Id", ""),
+                enforce_revision=enforce_revision,
+            )
+        except OperationError as error:
+            self.json_error(error.status, error.code, error.message, **error.details)
+            return
+        self.json_response({
+            "ok": True,
+            "scope": scope,
+            "saveMode": "new" if save_as_new else "same",
+            "manifestRefreshed": True,
+            **saved,
+        })
+
+    def ai_rollback_model(self) -> None:
+        payload = self.read_json_request_payload()
+        if payload is None:
+            return
+        scope, scope_error = normalize_model_scope(payload.get("scope"))
+        if scope_error:
+            self.json_error(HTTPStatus.BAD_REQUEST, scope_error["code"], scope_error["message"])
+            return
+        name, name_error = validate_model_name(payload.get("modelName"))
+        if name_error:
+            self.json_error(HTTPStatus.BAD_REQUEST, name_error["code"], name_error["message"])
+            return
+        model = payload.get("model")
+        if not isinstance(model, dict):
+            self.json_error(HTTPStatus.BAD_REQUEST, "rollback_unavailable", "Rollback requires a model snapshot")
+            return
+        prepared_model = normalize_ai_hbds_model_response(model)
+        try:
+            saved = self.save_model_to_scope(
+                scope,
+                name,
+                prepared_model,
+                expected_revision=payload.get("expectedRevision"),
+                client_id=payload.get("clientId") or self.headers.get("X-Client-Id", ""),
+                enforce_revision=False,
+            )
+        except OperationError as error:
+            self.json_error(error.status, error.code, error.message, **error.details)
+            return
+        self.json_response({
+            "ok": True,
+            "scope": scope,
+            "rollback": True,
+            "manifestRefreshed": True,
+            **saved,
+        })
+
+    def delete_model_file(self, raw_scope: str, raw_name: str) -> None:
+        payload = self.read_optional_json_request_payload()
+        if payload is None:
+            return
+        scope, scope_error = normalize_model_scope(raw_scope)
+        if scope_error:
+            self.json_error(HTTPStatus.BAD_REQUEST, scope_error["code"], scope_error["message"])
+            return
+        name, name_error = validate_model_name(raw_name)
+        if name_error:
+            self.json_error(HTTPStatus.BAD_REQUEST, name_error["code"], name_error["message"])
+            return
+        base_dir = model_scope_dir(scope)
+        target = (base_dir / name).resolve()
+        if target.parent != base_dir:
+            self.json_error(HTTPStatus.BAD_REQUEST, "invalid_model_name", "Model file must stay inside its model scope directory")
+            return
+        if not target.exists():
+            self.json_error(HTTPStatus.NOT_FOUND, "model_not_found", "Model not found")
+            return
+        try:
+            stored_model = read_stored_model(target)
+        except json.JSONDecodeError:
+            stored_model = None
+        if is_protected_model_file(scope, name, stored_model) and not bool(payload.get("allowProtected")):
+            self.json_error(HTTPStatus.CONFLICT, "protected_model", "This protected/default model cannot be deleted from the UI", modelName=name, scope=scope)
+            return
+        model_key = model_key_for_scope(scope, name)
+        with self.server.model_lock(model_key):
+            backup_dir = target.parent / ".backups"
+            backup_dir.mkdir(parents=True, exist_ok=True)
+            timestamp = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            backup_path = backup_dir / f"{target.stem}.deleted.{timestamp}.bak.json"
+            shutil.move(str(target), str(backup_path))
+            refresh_model_manifests()
+            if hasattr(self.server, "clear_model_drafts"):
+                self.server.clear_model_drafts(model_key)
+        self.publish_model_updated(
+            model_key,
+            {
+                "name": name,
+                "label": label_from_model_name(name),
+                "revision": "",
+                "contentHash": "",
+                "deleted": True,
+            },
+            backup_path.name,
+            client_id=payload.get("clientId") or self.headers.get("X-Client-Id", ""),
+        )
+        self.json_response({
+            "ok": True,
+            "scope": scope,
+            "deleted": name,
+            "modelName": model_key,
+            "backup": backup_path.name,
+            "manifestRefreshed": True,
+        })
 
     def save_model(self, raw_name: str) -> None:
         name, error = validate_model_name(raw_name)
@@ -2130,6 +3538,7 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             backup_name = write_model_payload(target, payload)
             metadata = model_metadata(target)
             self.remember_model_revision(target.name, metadata["revision"], payload)
+            refresh_model_manifests()
             response = {
                 "ok": True,
                 "saved": target.name,
@@ -2185,6 +3594,7 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
             backup_name = write_model_payload(target, payload)
             metadata = model_metadata(target)
             self.remember_model_revision(model_key, metadata["revision"], payload)
+            refresh_model_manifests()
             response = {
                 "ok": True,
                 "saved": name,

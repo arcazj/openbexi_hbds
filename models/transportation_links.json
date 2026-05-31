@@ -51,7 +51,7 @@
       "links"
     ],
     "font": {
-      "size": 12,
+      "size": 18,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
@@ -105,6 +105,9 @@
             "size": {
               "width": 0.14,
               "height": 0.14
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -154,6 +157,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -199,6 +205,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -244,6 +253,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -296,6 +308,9 @@
             "size": {
               "width": 0.14,
               "height": 0.14
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -340,6 +355,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -382,6 +400,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -436,6 +457,9 @@
             "size": {
               "width": 0.14,
               "height": 0.14
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -480,6 +504,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -523,6 +550,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -565,6 +595,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -617,6 +650,9 @@
             "size": {
               "width": 0.14,
               "height": 0.14
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -661,6 +697,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -704,6 +743,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -756,6 +798,9 @@
             "size": {
               "width": 0.14,
               "height": 0.14
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -800,6 +845,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -843,6 +891,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -894,6 +945,9 @@
             "size": {
               "width": 0.14,
               "height": 0.14
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -937,6 +991,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -961,7 +1018,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#0d1321",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.45,
@@ -986,7 +1043,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#0d1321",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.55,
@@ -1022,7 +1079,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#0b3d02",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1047,7 +1104,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#0b3d02",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1072,7 +1129,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#3b0a57",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.48,
@@ -1097,7 +1154,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#3b0a57",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1133,7 +1190,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#3b0a57",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1158,7 +1215,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#0d1321",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1183,7 +1240,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.42,
@@ -1208,7 +1265,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.58,
@@ -1233,7 +1290,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#000000",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1258,7 +1315,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#004d56",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.45,
@@ -1283,7 +1340,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#004d56",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.55,
@@ -1308,7 +1365,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#004d56",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1333,7 +1390,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#004d56",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1358,7 +1415,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#4a2500",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.45,
@@ -1394,7 +1451,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#4a2500",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.55,
@@ -1419,7 +1476,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#5c0030",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1444,7 +1501,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#0d1321",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1469,7 +1526,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#0b3d02",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1505,7 +1562,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#0b3d02",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.52,
@@ -1541,7 +1598,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#004d56",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1577,7 +1634,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#004d56",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1613,7 +1670,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#5c0030",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1638,7 +1695,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#5c0030",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -1663,7 +1720,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#5c0030",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.5,

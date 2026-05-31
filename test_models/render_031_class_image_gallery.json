@@ -7,20 +7,23 @@
       "algorithm": "none",
       "fit": {
         "padding": 1.18,
-        "fitHeightDistance": 19.3938,
-        "fitWidthDistance": 17.146,
-        "distance": 12.0157,
+        "fitHeightDistance": 9.992,
+        "fitWidthDistance": 11.8773,
+        "distance": 11.954,
         "diagramWidth": 13.74,
         "diagramHeight": 8.26,
         "diagramDepth": 0.13,
         "radius": 8.0161,
         "center": {
-          "x": -1.9915,
-          "y": 0.0502,
+          "x": -3.3769,
+          "y": -0.2929,
           "z": 0.065
         },
-        "cameraAspect": 1.1311,
-        "cameraFov": 52
+        "cameraAspect": 1.3994,
+        "cameraFov": 52,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 9
       }
     },
     "regressionTags": [
@@ -53,11 +56,15 @@
       ]
     },
     "font": {
-      "size": 12,
+      "size": 21,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
-      "underline": false
+      "underline": false,
+      "classSize": null,
+      "hyperclassSize": null,
+      "attributeSize": 21,
+      "linkSize": 21
     }
   },
   "hypergraph": {
@@ -102,7 +109,8 @@
             "cornerRadius": 0.28,
             "metalness": 0.4,
             "roughness": 0.3,
-            "material": "metallic"
+            "material": "metallic",
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#4338ca",
@@ -541,7 +549,14 @@
           "targetPortSide": "top",
           "routeSide": "top",
           "orthogonalClearance": 0.56,
-          "relationshipCornerRadius": 0.18
+          "relationshipCornerRadius": 0.18,
+          "arrowType": "bar-arrow",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#7c2d12",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.18,
+          "arrowheadScale": 0.9,
+          "maxArrowheadSize": 0.22
         },
         "allowSelfLink": true
       },
@@ -555,12 +570,19 @@
           "orthogonalStyle": "horizontal",
           "lineColor": "#694b7d",
           "lineWidth": 2,
-          "lineStyle": "dashed",
+          "lineStyle": "thick",
           "sourcePortSide": "bottom",
           "targetPortSide": "bottom",
           "routeSide": "bottom",
           "orthogonalClearance": 0.6,
-          "relationshipCornerRadius": 0.18
+          "relationshipCornerRadius": 0.18,
+          "arrowType": "double-bar-arrow",
+          "arrowDirection": "bidirectional",
+          "arrowColor": "#86198f",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.18,
+          "arrowheadScale": 0.9,
+          "maxArrowheadSize": 0.22
         },
         "allowSelfLink": true
       },
@@ -574,11 +596,18 @@
           "orthogonalStyle": "vertical",
           "lineColor": "#4338ca",
           "lineWidth": 2,
-          "lineStyle": "dotted",
+          "lineStyle": "dashed",
           "sourcePortSide": "right",
           "targetPortSide": "left",
           "orthogonalClearance": 0.62,
-          "relationshipCornerRadius": 0.18
+          "relationshipCornerRadius": 0.18,
+          "arrowType": "hollow-triangle",
+          "arrowDirection": "target-to-source",
+          "arrowColor": "#3730a3",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.18,
+          "arrowheadScale": 0.9,
+          "maxArrowheadSize": 0.22
         },
         "allowSelfLink": true
       }

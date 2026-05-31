@@ -52,14 +52,15 @@ export const DEFAULT_LABEL_FONT_SETTINGS = Object.freeze({
     italic: false,
     underline: false
 });
+export const MAX_LABEL_FONT_SIZE = 72;
 const MIN_READABLE_TITLE_FONT_SIZE = 6;
-const MIN_READABLE_ATTRIBUTE_FONT_SIZE = 5;
+const MIN_READABLE_ATTRIBUTE_FONT_SIZE = 9;
 
 export function normalizeLabelFontSettings(font = {}, fallback = DEFAULT_LABEL_FONT_SETTINGS) {
     const source = font && typeof font === 'object' ? font : {};
     const base = fallback && typeof fallback === 'object' ? fallback : DEFAULT_LABEL_FONT_SETTINGS;
     return {
-        size: toPositiveNumber(source.size ?? source.fontSize ?? source.labelFontSize, base.size ?? DEFAULT_LABEL_FONT_SETTINGS.size),
+        size: clampLabelFontSize(source.size ?? source.fontSize ?? source.labelFontSize, base.size ?? DEFAULT_LABEL_FONT_SETTINGS.size),
         family: normalizeFontFamily(source.family ?? source.fontFamily, base.family ?? DEFAULT_LABEL_FONT_SETTINGS.family),
         bold: toBooleanFontValue(source.bold ?? source.fontWeight, base.bold ?? DEFAULT_LABEL_FONT_SETTINGS.bold),
         italic: toBooleanFontValue(source.italic ?? source.fontStyle, base.italic ?? DEFAULT_LABEL_FONT_SETTINGS.italic),
@@ -244,7 +245,7 @@ export function createClass(classData) {
         isHyperclass: false,
         textColor: cfg.textColor,
         font: classData.rendering?.font,
-        modelFont: classData.modelFont,
+        modelFont: classData.modelTitleFont ?? classData.modelFont,
         legacyFont: 'bold 16px Arial',
         iconFont: 'bold 18px Arial',
         iconSize: cfg.class.iconSize ?? 0.95,
@@ -291,7 +292,7 @@ export function createClass(classData) {
         attributes: cfg.attributes,
         connections: cfg.connections,
         textColor: cfg.textColor,
-        modelFont: classData.modelFont,
+        modelFont: classData.modelAttributeFont ?? classData.modelFont,
         hubPosition: hubPos,
         z: Z_OVERLAY
     });
@@ -1435,35 +1436,29 @@ export function updateLabelFontSizes(camera, renderer) {
         const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, distance, viewportHeight);
 
         if (label.element.classList.contains('class-label')) {
-            const nodeWidth = label.userData?.nodeSize?.width ?? label.parent?.userData?.modelData?.size?.width ?? 1.2;
+            const nodeSize = label.userData?.nodeSize ?? label.parent?.userData?.modelData?.size ?? {};
+            const nodeWidth = nodeSize.width ?? 1.2;
+            const nodeHeight = nodeSize.height ?? 1.6;
             const availableWidthPx = Math.max(42, (nodeWidth - 0.22) * pixelsPerWorldUnit);
-            const distanceSize = THREE.MathUtils.clamp(132 / Math.max(distance, 1e-6), 3.2, 19);
-            const verticalCap = Math.max(1.4, 0.22 * pixelsPerWorldUnit);
             const text = label.userData?.text || label.element.textContent || '';
             const fitSize = getFontSizeForTextWidth(text, availableWidthPx, label.element.classList.contains('hbds-icon-title') ? 1.25 : 0);
-            const configuredSize = Number(label.userData?.fontSettings?.size);
-            const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), 1.4, 19);
-            const minSize = Number.isFinite(configuredSize)
-                ? Math.min(configuredSize, MIN_READABLE_TITLE_FONT_SIZE)
-                : MIN_READABLE_TITLE_FONT_SIZE;
-            const fontSize = Number.isFinite(configuredSize)
-                ? THREE.MathUtils.clamp(Math.min(configuredSize, dynamicSize), minSize, configuredSize)
-                : Math.max(minSize, dynamicSize);
+            const configuredSize = getConfiguredLabelSize(label, DEFAULT_LABEL_FONT_SETTINGS.size);
+            const minSize = Math.min(configuredSize, MIN_READABLE_TITLE_FONT_SIZE);
+            const distanceSize = getDistanceScaledFontSize(132, distance, configuredSize, minSize);
+            const verticalCap = Math.max(minSize, nodeHeight * pixelsPerWorldUnit * 0.38);
+            const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), minSize, configuredSize);
+            const fontSize = THREE.MathUtils.clamp(dynamicSize, minSize, configuredSize);
             applyTitleLabelSizing(label.element, availableWidthPx, fontSize);
         } else {
             const maxWorldWidth = label.userData?.maxWorldWidth ?? 1.75;
             const availableWidthPx = Math.max(34, maxWorldWidth * pixelsPerWorldUnit);
             const gapY = label.userData?.gapY ?? 0.17;
-            const verticalCap = Math.max(1.1, gapY * pixelsPerWorldUnit * 0.78);
-            const distanceSize = THREE.MathUtils.clamp(110 / Math.max(distance, 1e-6), 1.1, 11.2);
-            const configuredSize = Number(label.userData?.fontSettings?.size);
-            const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, verticalCap), 1.1, 11.2);
-            const minSize = Number.isFinite(configuredSize)
-                ? Math.min(configuredSize, MIN_READABLE_ATTRIBUTE_FONT_SIZE)
-                : MIN_READABLE_ATTRIBUTE_FONT_SIZE;
-            const fontSize = Number.isFinite(configuredSize)
-                ? THREE.MathUtils.clamp(Math.min(configuredSize, dynamicSize), minSize, configuredSize)
-                : Math.max(minSize, dynamicSize);
+            const configuredSize = getConfiguredLabelSize(label, DEFAULT_LABEL_FONT_SETTINGS.size);
+            const minSize = Math.min(configuredSize, MIN_READABLE_ATTRIBUTE_FONT_SIZE);
+            const distanceSize = getDistanceScaledFontSize(110, distance, configuredSize, minSize);
+            const verticalCap = Math.max(minSize, gapY * pixelsPerWorldUnit * 1.45, configuredSize * 0.62);
+            const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, verticalCap), minSize, configuredSize);
+            const fontSize = THREE.MathUtils.clamp(dynamicSize, minSize, configuredSize);
             applyAttributeLabelSizing(label.element, availableWidthPx, fontSize);
         }
     });
@@ -1483,6 +1478,19 @@ function getPixelsPerWorldUnit(camera, distance, viewportHeight) {
 function getFontSizeForTextWidth(text, availableWidthPx, extraEm = 0) {
     const estimatedEm = Math.max(1, String(text || '').length * 0.62 + extraEm);
     return availableWidthPx / estimatedEm;
+}
+
+function clampLabelFontSize(value, fallback = DEFAULT_LABEL_FONT_SETTINGS.size) {
+    return THREE.MathUtils.clamp(toPositiveNumber(value, fallback), 1, MAX_LABEL_FONT_SIZE);
+}
+
+function getConfiguredLabelSize(label, fallback = DEFAULT_LABEL_FONT_SETTINGS.size) {
+    return clampLabelFontSize(label.userData?.fontSettings?.size, fallback);
+}
+
+function getDistanceScaledFontSize(baseSize, distance, configuredSize, minSize) {
+    const configuredScale = Math.max(1, configuredSize / DEFAULT_LABEL_FONT_SETTINGS.size);
+    return THREE.MathUtils.clamp((baseSize * configuredScale) / Math.max(distance, 1e-6), minSize, configuredSize);
 }
 
 function applyTitleLabelSizing(element, availableWidthPx, fontSize) {

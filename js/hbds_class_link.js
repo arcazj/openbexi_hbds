@@ -18,7 +18,31 @@ const DEFAULT_LINK_FONT_SETTINGS = {
   italic: false,
   underline: false
 };
-const MIN_READABLE_LINK_FONT_SIZE = 5;
+const MAX_LINK_FONT_SIZE = 72;
+const MIN_READABLE_LINK_FONT_SIZE = 14;
+const DEFAULT_ARROW_TYPE = 'triangle';
+const DEFAULT_ARROW_DIRECTION = 'source-to-target';
+export const LINK_ARROW_TYPES = [
+  'triangle',
+  'outline',
+  'chevron',
+  'double-chevron',
+  'triple-chevron',
+  'filled-triangle',
+  'hollow-triangle',
+  'dotted',
+  'bar-arrow',
+  'double-bar-arrow',
+  'cone',
+  'diamond',
+  'none'
+];
+export const LINK_ARROW_DIRECTIONS = [
+  'source-to-target',
+  'target-to-source',
+  'bidirectional',
+  'none'
+];
 
 export const Loader = {
   async load(modelName) {
@@ -39,14 +63,14 @@ function resolveLinkLabelFontSettings(rendering = {}, modelFont = {}) {
   const fallback = {
     ...DEFAULT_LINK_FONT_SETTINGS,
     ...model,
-    size: toPositiveNumber(model.size ?? model.fontSize ?? model.labelFontSize, DEFAULT_LINK_FONT_SETTINGS.size),
+    size: clampLinkFontSize(model.linkSize ?? model.size ?? model.fontSize ?? model.labelFontSize, DEFAULT_LINK_FONT_SETTINGS.size),
     family: normalizeFontFamily(model.family ?? model.fontFamily, DEFAULT_LINK_FONT_SETTINGS.family),
     bold: toBooleanFontValue(model.bold ?? model.fontWeight, DEFAULT_LINK_FONT_SETTINGS.bold),
     italic: toBooleanFontValue(model.italic ?? model.fontStyle, DEFAULT_LINK_FONT_SETTINGS.italic),
     underline: toBooleanFontValue(model.underline ?? model.textDecoration ?? model.textDecorationLine, DEFAULT_LINK_FONT_SETTINGS.underline)
   };
   return {
-    size: toPositiveNumber(rendering.labelFontSize ?? individual.size ?? individual.fontSize, fallback.size),
+    size: clampLinkFontSize(rendering.labelFontSize ?? individual.size ?? individual.fontSize, fallback.size),
     family: normalizeFontFamily(individual.family ?? individual.fontFamily, fallback.family),
     bold: toBooleanFontValue(individual.bold ?? individual.fontWeight, fallback.bold),
     italic: toBooleanFontValue(individual.italic ?? individual.fontStyle, fallback.italic),
@@ -59,7 +83,7 @@ function applyLinkLabelFontSettings(element, fontSettings = DEFAULT_LINK_FONT_SE
   const font = {
     ...DEFAULT_LINK_FONT_SETTINGS,
     ...fontSettings,
-    size: toPositiveNumber(fontSettings.size, DEFAULT_LINK_FONT_SETTINGS.size),
+    size: clampLinkFontSize(fontSettings.size, DEFAULT_LINK_FONT_SETTINGS.size),
     family: normalizeFontFamily(fontSettings.family, DEFAULT_LINK_FONT_SETTINGS.family)
   };
   element.__hbdsFontSettings = font;
@@ -80,12 +104,13 @@ export function createLinkBetweenClass(linkData, classById, options = {}) {
   if (!sourceClass || !targetClass) return null;
 
   const rendering = linkData.rendering ?? {};
-  const lineStyle = rendering.lineStyle ?? 'solid';
+  const lineStyle = normalizeLineStyle(rendering.lineStyle);
   const isDashed = lineStyle === 'dashed' || lineStyle === 'dotted';
   const Material = isDashed ? THREE.LineDashedMaterial : THREE.LineBasicMaterial;
+  const resolvedLineWidth = resolveLineWidth(rendering.lineWidth, lineStyle);
   const materialOptions = {
     color: rendering.lineColor ?? '#333333',
-    linewidth: rendering.lineWidth ?? 2
+    linewidth: resolvedLineWidth
   };
   if (isDashed) {
     materialOptions.dashSize = lineStyle === 'dotted' ? 0.04 : 0.18;
@@ -98,18 +123,7 @@ export function createLinkBetweenClass(linkData, classById, options = {}) {
   line.name = 'link-route';
   line.renderOrder = rendering.zIndex ?? 5;
 
-  const arrowheadType = normalizeArrowheadType(rendering.arrowheadType);
-  const rawArrowheadSize = rendering.arrowheadSize ?? 0.1;
-  const arrowheadSize = Math.min(rawArrowheadSize * (rendering.arrowheadScale ?? 0.6), rendering.maxArrowheadSize ?? 0.12);
-  const arrowGeometry = createArrowheadGeometry(arrowheadType, arrowheadSize);
-  const arrow = new THREE.Mesh(
-    arrowGeometry,
-    new THREE.MeshBasicMaterial({ color: rendering.lineColor ?? '#333333' })
-  );
-  arrow.name = 'link-arrowhead';
-  arrow.visible = rendering.arrowheadVisibility !== false && arrowheadType !== 'none';
-  arrow.renderOrder = (rendering.zIndex ?? 5) + 1;
-  arrow.userData.relationshipArrow = true;
+  const arrow = createLinkArrowMarkerGroup(rendering);
 
   const sourcePort = createRelationshipPortMarker('source', rendering);
   const targetPort = createRelationshipPortMarker('target', rendering);
@@ -190,8 +204,7 @@ export function recalculateAllLinks() {
         targetSide: portPair.target.side
       };
       link.line.computeLineDistances?.();
-      link.arrow.position.copy(route.arrowPosition);
-      link.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), route.tangent);
+      updateLinkArrowMarkerGroup(link.arrow, route, link.linkData.rendering ?? {});
       updateRelationshipPort(link.sourcePort, portPair.source, route);
       updateRelationshipPort(link.targetPort, portPair.target, route);
       link.labelObj.position.copy(route.labelPosition);
@@ -214,9 +227,176 @@ function replaceLineGeometry(line, points) {
   line.geometry = nextGeometry;
 }
 
+function normalizeLineStyle(style) {
+  const clean = String(style || 'solid').trim().toLowerCase();
+  return ['solid', 'dashed', 'dotted', 'thick', 'thin'].includes(clean) ? clean : 'solid';
+}
+
+function resolveLineWidth(value, lineStyle = 'solid') {
+  const base = toPositiveNumber(value, 2);
+  if (lineStyle === 'thick') return base * 1.8;
+  if (lineStyle === 'thin') return Math.max(0.1, base * 0.55);
+  return base;
+}
+
+function normalizeArrowDirection(direction) {
+  const clean = String(direction || DEFAULT_ARROW_DIRECTION).trim().toLowerCase().replace(/[_\s]+/g, '-');
+  if (['source-to-target', 'forward', 'target', 'to-target'].includes(clean)) return 'source-to-target';
+  if (['target-to-source', 'reverse', 'source', 'to-source'].includes(clean)) return 'target-to-source';
+  if (['bidirectional', 'bi-directional', 'both', 'two-way', 'two-way-arrow'].includes(clean)) return 'bidirectional';
+  if (['none', 'no-arrow', 'plain'].includes(clean)) return 'none';
+  return DEFAULT_ARROW_DIRECTION;
+}
+
 function normalizeArrowheadType(type) {
-  const clean = String(type || 'triangle').toLowerCase();
-  return ['triangle', 'cone', 'diamond', 'none'].includes(clean) ? clean : 'triangle';
+  return normalizeArrowType(type);
+}
+
+function normalizeArrowType(type) {
+  const clean = String(type || DEFAULT_ARROW_TYPE).trim().toLowerCase().replace(/[_\s]+/g, '-');
+  const aliases = {
+    arrow: 'triangle',
+    filled: 'triangle',
+    'filled-arrow': 'triangle',
+    triangle: 'triangle',
+    'filled-triangle': 'filled-triangle',
+    outline: 'outline',
+    'outline-arrow': 'outline',
+    hollow: 'outline',
+    'hollow-arrow': 'outline',
+    'hollow-triangle': 'hollow-triangle',
+    'triangle-outline': 'outline',
+    chevron: 'chevron',
+    'single-chevron': 'chevron',
+    chevrons: 'double-chevron',
+    'double-chevron': 'double-chevron',
+    chevron2: 'double-chevron',
+    'chevron-2': 'double-chevron',
+    'triple-chevron': 'triple-chevron',
+    chevron3: 'triple-chevron',
+    'chevron-3': 'triple-chevron',
+    dotted: 'dotted',
+    'dotted-arrow': 'dotted',
+    'dotted-arrowhead': 'dotted',
+    dot: 'dotted',
+    'bar-arrow': 'bar-arrow',
+    'bar+arrow': 'bar-arrow',
+    bar: 'bar-arrow',
+    'double-bar-arrow': 'double-bar-arrow',
+    'double-bar+arrow': 'double-bar-arrow',
+    'double-bar': 'double-bar-arrow',
+    cone: 'cone',
+    diamond: 'diamond',
+    none: 'none',
+    plain: 'none',
+    association: 'none',
+    'no-arrow': 'none'
+  };
+  const normalized = aliases[clean] || clean;
+  return LINK_ARROW_TYPES.includes(normalized) ? normalized : DEFAULT_ARROW_TYPE;
+}
+
+function resolveLinkArrowStyle(rendering = {}) {
+  const lineStyle = normalizeLineStyle(rendering.lineStyle);
+  const lineWidth = resolveLineWidth(rendering.lineWidth, lineStyle);
+  const lineWidthScale = THREE.MathUtils.clamp(lineWidth / 2, 0.65, 1.8);
+  const rawArrowheadSize = toPositiveNumber(rendering.arrowheadSize, 0.1);
+  const arrowheadScale = toPositiveNumber(rendering.arrowheadScale, 0.6);
+  const maxArrowheadSize = toPositiveNumber(rendering.maxArrowheadSize, 0.12);
+  return {
+    type: normalizeArrowType(rendering.arrowType ?? rendering.arrowheadType),
+    direction: normalizeArrowDirection(rendering.arrowDirection),
+    size: Math.min(rawArrowheadSize * arrowheadScale * lineWidthScale, maxArrowheadSize),
+    color: rendering.arrowColor ?? rendering.lineColor ?? '#333333',
+    lineWidth,
+    renderOrder: (rendering.zIndex ?? 5) + 1,
+    visible: rendering.arrowheadVisibility !== false
+  };
+}
+
+function createLinkArrowMarkerGroup(rendering = {}) {
+  const style = resolveLinkArrowStyle(rendering);
+  const group = new THREE.Group();
+  group.name = 'link-arrowheads';
+  group.visible = style.visible && style.type !== 'none' && style.direction !== 'none';
+  group.renderOrder = style.renderOrder;
+  group.userData.relationshipArrow = true;
+  group.userData.arrowType = style.type;
+  group.userData.arrowDirection = style.direction;
+  if (!group.visible) return group;
+
+  if (style.direction === 'source-to-target' || style.direction === 'bidirectional') {
+    const targetMarker = createArrowMarker(style.type, style);
+    targetMarker.name = 'link-arrowhead-target';
+    targetMarker.userData.arrowEndpoint = 'target';
+    group.add(targetMarker);
+  }
+  if (style.direction === 'target-to-source' || style.direction === 'bidirectional') {
+    const sourceMarker = createArrowMarker(style.type, style);
+    sourceMarker.name = 'link-arrowhead-source';
+    sourceMarker.userData.arrowEndpoint = 'source';
+    group.add(sourceMarker);
+  }
+  return group;
+}
+
+function updateLinkArrowMarkerGroup(group, route, rendering = {}) {
+  if (!group) return;
+  const style = resolveLinkArrowStyle(rendering);
+  group.visible = style.visible && style.type !== 'none' && style.direction !== 'none';
+  if (!group.visible) return;
+  for (const marker of group.children) {
+    const endpoint = marker.userData?.arrowEndpoint === 'source' ? 'source' : 'target';
+    const position = endpoint === 'source' ? route.sourceArrowPosition : route.targetArrowPosition;
+    const tangent = endpoint === 'source'
+      ? route.sourceTangent.clone().multiplyScalar(-1)
+      : route.targetTangent;
+    marker.position.copy(position);
+    marker.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
+  }
+}
+
+function createArrowMarker(type, style) {
+  const marker = new THREE.Group();
+  marker.renderOrder = style.renderOrder;
+  marker.userData.relationshipArrow = true;
+  const normalized = normalizeArrowType(type);
+  if (normalized === 'chevron') addChevronMarkers(marker, 1, style);
+  else if (normalized === 'double-chevron') addChevronMarkers(marker, 2, style);
+  else if (normalized === 'triple-chevron') addChevronMarkers(marker, 3, style);
+  else if (normalized === 'outline' || normalized === 'hollow-triangle') addOutlineArrowMarker(marker, style);
+  else if (normalized === 'dotted') addDottedArrowMarker(marker, style);
+  else if (normalized === 'bar-arrow') addBarArrowMarker(marker, style, 1);
+  else if (normalized === 'double-bar-arrow') addBarArrowMarker(marker, style, 2);
+  else marker.add(createArrowheadMesh(normalized, style));
+  return marker;
+}
+
+function arrowMaterial(style, options = {}) {
+  return new THREE.MeshBasicMaterial({
+    color: style.color,
+    side: THREE.DoubleSide,
+    depthTest: false,
+    transparent: true,
+    opacity: options.opacity ?? 1
+  });
+}
+
+function arrowLineMaterial(style) {
+  return new THREE.LineBasicMaterial({
+    color: style.color,
+    linewidth: Math.max(1, style.lineWidth),
+    depthTest: false,
+    transparent: true,
+    opacity: 1
+  });
+}
+
+function createArrowheadMesh(type, style) {
+  const geometry = createArrowheadGeometry(type, style.size);
+  const mesh = new THREE.Mesh(geometry, arrowMaterial(style));
+  mesh.renderOrder = style.renderOrder;
+  return mesh;
 }
 
 function createArrowheadGeometry(type, size) {
@@ -243,6 +423,76 @@ function createArrowheadGeometry(type, size) {
   const geometry = new THREE.ShapeGeometry(shape);
   geometry.translate(0, 0, 0.002);
   return geometry;
+}
+
+function addOutlineArrowMarker(marker, style) {
+  const size = style.size;
+  const outer = new THREE.Shape();
+  outer.moveTo(0, 0);
+  outer.lineTo(-size * 0.55, -size);
+  outer.lineTo(size * 0.55, -size);
+  outer.lineTo(0, 0);
+  const inner = new THREE.Path();
+  inner.moveTo(0, -size * 0.24);
+  inner.lineTo(size * 0.28, -size * 0.82);
+  inner.lineTo(-size * 0.28, -size * 0.82);
+  inner.lineTo(0, -size * 0.24);
+  outer.holes.push(inner);
+  const mesh = new THREE.Mesh(new THREE.ShapeGeometry(outer), arrowMaterial(style));
+  mesh.renderOrder = style.renderOrder;
+  marker.add(mesh);
+}
+
+function addChevronMarkers(marker, count, style) {
+  const points = [];
+  const size = style.size;
+  const gap = size * 0.42;
+  const startOffset = -((count - 1) * gap) / 2;
+  for (let index = 0; index < count; index += 1) {
+    const yOffset = startOffset - index * gap;
+    const tip = new THREE.Vector3(0, yOffset, 0.002);
+    const left = new THREE.Vector3(-size * 0.45, yOffset - size * 0.72, 0.002);
+    const right = new THREE.Vector3(size * 0.45, yOffset - size * 0.72, 0.002);
+    points.push(left, tip, tip, right);
+  }
+  const line = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(points), arrowLineMaterial(style));
+  line.renderOrder = style.renderOrder;
+  marker.add(line);
+}
+
+function addDottedArrowMarker(marker, style) {
+  const size = style.size;
+  const dotRadius = THREE.MathUtils.clamp(size * 0.105, 0.006, 0.026);
+  const geometry = new THREE.CircleGeometry(dotRadius, 14);
+  const material = arrowMaterial(style);
+  const rows = [
+    { y: -size * 0.08, xs: [0] },
+    { y: -size * 0.3, xs: [-0.18, 0, 0.18] },
+    { y: -size * 0.52, xs: [-0.34, -0.12, 0.12, 0.34] },
+    { y: -size * 0.74, xs: [-0.5, -0.28, -0.06, 0.16, 0.38] }
+  ];
+  rows.forEach(row => {
+    row.xs.forEach(x => {
+      const dot = new THREE.Mesh(geometry, material);
+      dot.position.set(x * size, row.y, 0.003);
+      dot.renderOrder = style.renderOrder;
+      marker.add(dot);
+    });
+  });
+}
+
+function addBarArrowMarker(marker, style, barCount) {
+  marker.add(createArrowheadMesh('triangle', style));
+  const size = style.size;
+  for (let index = 0; index < barCount; index += 1) {
+    const bar = new THREE.Mesh(
+      new THREE.PlaneGeometry(size * 0.92, Math.max(size * 0.11, 0.008)),
+      arrowMaterial(style)
+    );
+    bar.position.set(0, -size * (0.82 + index * 0.22), 0.003);
+    bar.renderOrder = style.renderOrder;
+    marker.add(bar);
+  }
 }
 
 function createRelationshipPortMarker(kind, rendering = {}) {
@@ -427,6 +677,10 @@ function buildOrthogonalRoute({ link, p0, p1, parent, index, count, lane, occupi
   return {
     points: roundedPoints,
     basePoints,
+    sourceArrowPosition: roundedPoints[0].clone(),
+    sourceTangent: getInitialTangent(roundedPoints),
+    targetArrowPosition: roundedPoints[roundedPoints.length - 1].clone(),
+    targetTangent: getTerminalTangent(roundedPoints),
     arrowPosition: roundedPoints[roundedPoints.length - 1].clone(),
     tangent: getTerminalTangent(roundedPoints),
     labelPosition: label.position,
@@ -894,6 +1148,14 @@ function nudgeLaneSegment(points, lane, amount) {
   }
 }
 
+function getInitialTangent(points) {
+  for (let index = 1; index < points.length; index++) {
+    const tangent = points[index].clone().sub(points[index - 1]);
+    if (tangent.lengthSq() > 1e-8) return tangent.normalize();
+  }
+  return new THREE.Vector3(1, 0, 0);
+}
+
 function getTerminalTangent(points) {
   for (let index = points.length - 1; index > 0; index--) {
     const tangent = points[index].clone().sub(points[index - 1]);
@@ -1062,6 +1324,10 @@ function toPositiveNumber(value, fallback) {
   return number > 0 ? number : fallback;
 }
 
+function clampLinkFontSize(value, fallback = DEFAULT_LINK_FONT_SETTINGS.size) {
+  return THREE.MathUtils.clamp(toPositiveNumber(value, fallback), 1, MAX_LINK_FONT_SIZE);
+}
+
 function normalizeFontFamily(value, fallback) {
   const clean = String(value ?? '').trim();
   return clean || fallback || DEFAULT_LINK_FONT_SETTINGS.family;
@@ -1102,13 +1368,14 @@ export function updateLinkFontSizes(camera, renderer) {
     label.getWorldPosition(p);
     const d = Math.max(1, p.distanceTo(c));
     const font = label.userData?.fontSettings || DEFAULT_LINK_FONT_SETTINGS;
-    const preferredSize = toPositiveNumber(font.size, DEFAULT_LINK_FONT_SETTINGS.size);
+    const preferredSize = clampLinkFontSize(font.size, DEFAULT_LINK_FONT_SETTINGS.size);
     const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, d, viewportHeight);
     const rendering = label.parent?.userData?.linkData?.rendering || {};
     const collisionWidthWorld = rendering.labelCollisionWidth ?? Math.max(0.85, String(label.userData?.text || label.element.textContent || '').length * 0.12);
     const availableWidthPx = Math.max(42, collisionWidthWorld * pixelsPerWorldUnit);
-    const minSize = Math.min(preferredSize, MIN_READABLE_LINK_FONT_SIZE);
-    const distanceSize = THREE.MathUtils.clamp(120 / d, minSize, Math.max(18, preferredSize));
+    const minSize = Math.min(preferredSize, Math.max(MIN_READABLE_LINK_FONT_SIZE, preferredSize * 0.75));
+    const preferredScale = Math.max(1, preferredSize / DEFAULT_LINK_FONT_SETTINGS.size);
+    const distanceSize = THREE.MathUtils.clamp((120 * preferredScale) / d, minSize, Math.max(18, preferredSize));
     const fitSize = getFontSizeForTextWidth(label.userData?.text || label.element.textContent || '', availableWidthPx, 2);
     const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize), minSize, Math.max(18, preferredSize));
     const size = Math.max(minSize, Math.min(preferredSize, dynamicSize));
@@ -1143,13 +1410,18 @@ export function updateLinkData(linkData, patch = {}) {
 }
 
 export function normalizeLinkData(linkData = {}) {
+  const rendering = linkData.rendering || {};
+  const arrowType = normalizeArrowType(rendering.arrowType ?? rendering.arrowheadType);
+  const arrowDirection = normalizeArrowDirection(rendering.arrowDirection);
   return {
     ...linkData,
     allowSelfLink: linkData.allowSelfLink ?? true,
     rendering: {
-      labelText: linkData.rendering?.labelText ?? linkData.id ?? '',
-      orthogonalStyle: linkData.rendering?.orthogonalStyle ?? 'auto',
-      ...(linkData.rendering || {})
+      labelText: rendering.labelText ?? linkData.id ?? '',
+      orthogonalStyle: rendering.orthogonalStyle ?? 'auto',
+      ...rendering,
+      arrowType,
+      arrowDirection
     }
   };
 }

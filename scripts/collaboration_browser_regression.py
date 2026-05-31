@@ -436,7 +436,18 @@ class BrowserPage:
         })
 
     def close(self) -> None:
+        target_id = self.target.get("id")
+        websocket_url = self.target.get("webSocketDebuggerUrl") or ""
         self.cdp.close()
+        if not target_id:
+            return
+        try:
+            parsed = urllib.parse.urlparse(websocket_url)
+            close_url = f"http://{parsed.hostname}:{parsed.port}/json/close/{urllib.parse.quote(str(target_id), safe='')}"
+            with urllib.request.urlopen(close_url, timeout=2):
+                pass
+        except Exception:
+            pass
 
     def navigate(self, url: str) -> None:
         start_index = len(self.cdp.events)
@@ -606,8 +617,8 @@ return Boolean(
         )
 
 
-def dynamic_layout_url(base_url: str, shared_model: str | None = None) -> str:
-    params = {"modelsPath": "models/", "debug": "1"}
+def dynamic_layout_url(base_url: str, shared_model: str | None = None, models_path: str = "models/") -> str:
+    params = {"modelsPath": models_path, "debug": "1"}
     if shared_model:
         params["sharedModel"] = shared_model
     return f"{base_url}/test_dynamic_hbds_layout.html?{urllib.parse.urlencode(params)}"
@@ -626,6 +637,586 @@ return Boolean(
         label,
         timeout=timeout,
     )
+
+
+def run_font_policy_ui_regression(base_url: str, debug_port: int) -> None:
+    page = BrowserPage(create_target(debug_port))
+    try:
+        page.navigate(dynamic_layout_url(base_url, models_path="test_models/"))
+        wait_for_page_ready(page, "font policy regression page")
+        result = page.evaluate(
+            """
+(async () => {
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const waitUntil = async (predicate, label, timeoutMs = 20000) => {
+    const started = Date.now();
+    let lastValue = null;
+    while (Date.now() - started < timeoutMs) {
+      lastValue = await predicate();
+      if (lastValue) return lastValue;
+      await sleep(120);
+    }
+    throw new Error(`${label} timed out; last value ${JSON.stringify(lastValue)}`);
+  };
+  const data = () => window.__hbdsDynamicTest?.getData?.() || {};
+  const font = () => data().metadata?.font || {};
+  const hasFontSizeOverride = fontValue => Boolean(fontValue && ['size', 'fontSize', 'labelFontSize'].some(key => fontValue[key] != null));
+  const overrideCounts = model => {
+    const classes = model.hypergraph?.class || [];
+    const links = model.hypergraph?.link || [];
+    return {
+      classTitle: classes.filter(node => node.type !== 'hyperclass' && hasFontSizeOverride(node.rendering?.font)).length,
+      hyperTitle: classes.filter(node => node.type === 'hyperclass' && hasFontSizeOverride(node.rendering?.font)).length,
+      attributeGroups: classes.filter(node => hasFontSizeOverride(node.rendering?.attributes?.font) || node.rendering?.attributes?.fontSize != null || node.rendering?.attributes?.labelFontSize != null).length,
+      attributes: classes.flatMap(node => Array.isArray(node.attributes) ? node.attributes : []).filter(attribute => hasFontSizeOverride(attribute.font)).length,
+      links: links.filter(link => link.rendering?.labelFontSize != null || hasFontSizeOverride(link.rendering?.font)).length
+    };
+  };
+  const setInputValue = (selector, value) => {
+    const input = document.querySelector(selector);
+    if (!input) throw new Error(`Missing input ${selector}`);
+    input.value = String(value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  const loadExtendedLinks = async () => {
+    const select = document.querySelector('#test-model-select');
+    const option = [...(select?.options || [])].find(item => item.value.includes('links_034_extended_arrow_types.json'));
+    if (!option) throw new Error('links_034_extended_arrow_types.json not present in test model select');
+    select.value = option.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    return await waitUntil(() => {
+      const current = data();
+      const links = current.hypergraph?.link || [];
+      return links.length >= 10 && (document.querySelector('#test-model-select')?.value || '').includes('links_034_extended_arrow_types.json')
+        ? current
+        : false;
+    }, 'load extended arrow link model');
+  };
+  const applyJsonModel = async model => {
+    const preview = document.querySelector('#json-preview');
+    if (!preview) throw new Error('Missing JSON preview');
+    preview.value = JSON.stringify(model, null, 2);
+    document.querySelector('#apply-json-button')?.click();
+    return await waitUntil(() => {
+      const current = data();
+      return current.metadata?.name === model.metadata.name ? current : false;
+    }, `apply ${model.metadata.name}`);
+  };
+  const customModel = () => ({
+    metadata: {
+      name: `Font Policy Regression ${Date.now()}`,
+      purpose: 'Font inheritance regression',
+      layout: { algorithm: 'none' },
+      font: { size: 26, family: 'Arial, sans-serif', bold: false, italic: false, underline: false, classSize: null, hyperclassSize: null, attributeSize: null, linkSize: null }
+    },
+    hypergraph: {
+      class: [
+        {
+          id: 'font_policy_hyper',
+          type: 'hyperclass',
+          name: 'Font Policy Hyper',
+          position: { x: 0, y: -1, z: 0 },
+          size: { width: 4, height: 2.8 },
+          rendering: { font: { size: 31 }, attributes: { font: { size: 36 } } },
+          attributes: [{ id: 'font_policy_hyper_attr', name: 'hyper attribute', font: { size: 32 } }],
+          children: ['font_policy_class']
+        },
+        {
+          id: 'font_policy_class',
+          type: 'class',
+          name: 'Font Policy Class',
+          parentClassId: 'font_policy_hyper',
+          position: { x: 0, y: 1.5, z: 0 },
+          size: { width: 2.6, height: 1.8 },
+          rendering: { font: { size: 30 }, attributes: { font: { size: 37 } } },
+          attributes: [{ id: 'font_policy_attr', name: 'class attribute', font: { size: 33 } }]
+        }
+      ],
+      link: [
+        {
+          id: 'font_policy_link',
+          name: 'font policy link',
+          sourceClassId: 'font_policy_hyper',
+          targetClassId: 'font_policy_class',
+          rendering: { labelText: 'font policy link', labelFontSize: 34, font: { size: 35 } }
+        }
+      ]
+    }
+  });
+
+  const linksModel = await loadExtendedLinks();
+  const linkOverridesBefore = overrideCounts(linksModel).links;
+  if (linkOverridesBefore < 10) throw new Error(`Expected extended link model label overrides, found ${linkOverridesBefore}`);
+  setInputValue('#model-font-size-input', 24);
+  await waitUntil(() => font().size === 24 ? true : false, 'overall font size update');
+  const afterOverall = { font: font(), counts: overrideCounts(data()) };
+  if (afterOverall.counts.links !== linkOverridesBefore) {
+    throw new Error(`Overall slider cleared link overrides unexpectedly: ${JSON.stringify(afterOverall)}`);
+  }
+  setInputValue('#model-link-font-size-input', 18);
+  const afterExtendedLink = await waitUntil(() => {
+    const currentCounts = overrideCounts(data());
+    return font().linkSize === 18 && currentCounts.links === 0
+      ? { font: font(), counts: currentCounts, output: document.querySelector('#model-link-font-size-value')?.textContent || '' }
+      : false;
+  }, 'link category font override clears link element overrides');
+
+  const modelForCategory = customModel();
+  await applyJsonModel(modelForCategory);
+  const beforeCategory = overrideCounts(data());
+  setInputValue('#model-class-font-size-input', 22);
+  const afterClass = await waitUntil(() => {
+    const counts = overrideCounts(data());
+    return font().classSize === 22 && counts.classTitle === 0 && counts.hyperTitle === 1 ? { font: font(), counts } : false;
+  }, 'class category font clears class element overrides only');
+  setInputValue('#model-hyperclass-font-size-input', 23);
+  const afterHyperclass = await waitUntil(() => {
+    const counts = overrideCounts(data());
+    return font().hyperclassSize === 23 && counts.hyperTitle === 0 ? { font: font(), counts } : false;
+  }, 'hyperclass category font clears hyperclass element overrides');
+  setInputValue('#model-attribute-font-size-input', 16);
+  const afterAttribute = await waitUntil(() => {
+    const counts = overrideCounts(data());
+    return font().attributeSize === 16 && counts.attributes === 0 && counts.attributeGroups === 0 ? { font: font(), counts } : false;
+  }, 'attribute category font clears attribute element overrides');
+  setInputValue('#model-link-font-size-input', 15);
+  const afterLink = await waitUntil(() => {
+    const counts = overrideCounts(data());
+    return font().linkSize === 15 && counts.links === 0 ? { font: font(), counts } : false;
+  }, 'link category font clears link element overrides');
+
+  const modelForReset = customModel();
+  await applyJsonModel(modelForReset);
+  setInputValue('#model-font-size-input', 27);
+  await waitUntil(() => font().size === 27, 'overall font before reset all');
+  document.querySelector('#reset-model-font-settings-button')?.click();
+  const afterReset = await waitUntil(() => {
+    const currentFont = font();
+    const counts = overrideCounts(data());
+    const typeSizesCleared = ['classSize', 'hyperclassSize', 'attributeSize', 'linkSize'].every(key => currentFont[key] == null);
+    const elementsCleared = Object.values(counts).every(count => count === 0);
+    const classOutput = document.querySelector('#model-class-font-size-value')?.textContent || '';
+    return currentFont.size === 27 && typeSizesCleared && elementsCleared && classOutput.includes('Overall (27px)')
+      ? { font: currentFont, counts, classOutput }
+      : false;
+  }, 'apply overall font to all clears all font-size overrides');
+
+  return {
+    linkOverridesBefore,
+    afterOverall,
+    afterExtendedLink,
+    beforeCategory,
+    afterClass,
+    afterHyperclass,
+    afterAttribute,
+    afterLink,
+    afterReset,
+    resetButtonText: document.querySelector('#reset-model-font-settings-button')?.textContent || ''
+  };
+})()
+""",
+            timeout=45,
+        )
+        if not isinstance(result, dict):
+            raise BrowserRegressionError(f"Font policy regression did not return details: {result}")
+        if result.get("resetButtonText") != "Apply Overall Font To All":
+            raise BrowserRegressionError(f"Font policy reset button label invalid: {result}")
+        if result.get("afterReset", {}).get("font", {}).get("size") != 27:
+            raise BrowserRegressionError(f"Font policy reset did not preserve overall size: {result}")
+        print("PASS font policy UI regression")
+    finally:
+        page.close()
+
+
+def run_ai_support_ui_regression(base_url: str, debug_port: int) -> None:
+    page = BrowserPage(create_target(debug_port))
+    try:
+        page.navigate(dynamic_layout_url(base_url))
+        wait_for_page_ready(page, "AI support regression page")
+        initial = page.evaluate(
+            """
+(() => {
+  const section = document.querySelector('.control-group[data-section="ai-support"]');
+  const provider = document.querySelector('#ai-provider-select');
+  const model = document.querySelector('#ai-model-select');
+  const key = document.querySelector('#ai-api-key-input');
+  return {
+    exists: Boolean(section),
+    collapsed: section?.tagName?.toLowerCase() === 'details' && section.open === false,
+    providers: [...(provider?.options || [])].map(option => option.value),
+    models: [...(model?.options || [])].map(option => option.value),
+    accent: getComputedStyle(section).getPropertyValue('--group-accent').trim(),
+    keyType: key?.type || '',
+    applyDisabled: document.querySelector('#ai-apply-result-button')?.disabled === true
+  };
+})()
+""",
+            timeout=8,
+        )
+        if not isinstance(initial, dict) or not initial.get("exists"):
+            raise BrowserRegressionError(f"AI Support section missing: {initial}")
+        if initial.get("collapsed") is not True:
+            raise BrowserRegressionError(f"AI Support section was not collapsed by default: {initial}")
+        for provider_id in ("openai", "chatgpt-manual", "anthropic", "ollama", "custom-openai"):
+            if provider_id not in (initial.get("providers") or []):
+                raise BrowserRegressionError(f"AI provider {provider_id} missing from provider list: {initial}")
+        if "gpt-5.5" not in (initial.get("models") or []):
+            raise BrowserRegressionError(f"AI OpenAI model presets missing GPT-5.5: {initial}")
+        if str(initial.get("accent")).lower() != "#be185d":
+            raise BrowserRegressionError(f"AI Support section is not using the expected pink accent: {initial}")
+        if initial.get("keyType") != "password" or initial.get("applyDisabled") is not True:
+            raise BrowserRegressionError(f"AI Support initial key/apply state invalid: {initial}")
+
+        ollama_state = page.evaluate(
+            """
+(() => {
+  const section = document.querySelector('.control-group[data-section="ai-support"]');
+  section.open = true;
+  const provider = document.querySelector('#ai-provider-select');
+  provider.value = 'ollama';
+  provider.dispatchEvent(new Event('change', { bubbles: true }));
+  const keyField = document.querySelector('#ai-api-key-field');
+  const baseField = document.querySelector('#ai-base-url-field');
+  return {
+    open: section.open,
+    keyHidden: keyField?.hidden === true,
+    baseVisible: baseField?.hidden === false,
+    status: document.querySelector('#ai-credential-status')?.textContent || ''
+  };
+})()
+""",
+            timeout=8,
+        )
+        if not isinstance(ollama_state, dict) or ollama_state.get("keyHidden") is not True or ollama_state.get("baseVisible") is not True:
+            raise BrowserRegressionError(f"AI Ollama credential state invalid: {ollama_state}")
+        if "No key required" not in str(ollama_state.get("status")):
+            raise BrowserRegressionError(f"AI Ollama status did not report no-key mode: {ollama_state}")
+
+        manual_result = wait_for(
+            page,
+            """
+const provider = document.querySelector('#ai-provider-select');
+provider.value = 'chatgpt-manual';
+provider.dispatchEvent(new Event('change', { bubbles: true }));
+document.querySelector('#ai-request-input').value = 'Generate a tiny HBDS manual model.';
+document.querySelector('#ai-request-input').dispatchEvent(new Event('input', { bubbles: true }));
+document.querySelector('#ai-send-request-button').click();
+await new Promise(resolve => setTimeout(resolve, 500));
+const prompt = document.querySelector('#ai-result-preview')?.value || '';
+const invalidResponse = document.querySelector('#ai-manual-response-input');
+invalidResponse.value = '```json\\n{}\\n```';
+invalidResponse.dispatchEvent(new Event('input', { bubbles: true }));
+document.querySelector('#ai-validate-response-button').click();
+await new Promise(resolve => setTimeout(resolve, 100));
+const invalidStatus = document.querySelector('#ai-status-message')?.textContent || '';
+const validModel = {
+  metadata: {
+    name: 'Manual Test Model',
+    purpose: 'Manual response validation regression',
+    layout: { algorithm: 'none' }
+  },
+  hypergraph: {
+    class: [
+      { id: 'manual_hc', type: 'hyperclass', name: 'Manual Domain', position: { x: 0, y: 0, z: 0 }, attributes: [], children: ['manual_class'] },
+      { id: 'manual_class', type: 'class', name: 'Manual Class', parentClassId: 'manual_hc', position: { x: 1.5, y: 0, z: 0 }, attributes: [{ id: 'manual_attr', name: 'status', type: 'string' }] }
+    ],
+    link: []
+  }
+};
+invalidResponse.value = JSON.stringify(validModel);
+invalidResponse.dispatchEvent(new Event('input', { bubbles: true }));
+document.querySelector('#ai-validate-response-button').click();
+await new Promise(resolve => setTimeout(resolve, 100));
+const state = window.__hbdsDynamicTest?.getState?.().aiSupport || {};
+return prompt.includes('Return JSON only') &&
+  prompt.includes('well-positioned') &&
+  invalidStatus.includes('without Markdown fences') &&
+  document.querySelector('#ai-api-key-field')?.hidden === true &&
+  document.querySelector('#ai-manual-actions')?.hidden === false &&
+  document.querySelector('#ai-manual-response-field')?.hidden === false &&
+  document.querySelector('#ai-copy-prompt-button')?.disabled === false &&
+  document.querySelector('#ai-apply-result-button')?.disabled === false &&
+  state.config?.providerId === 'chatgpt-manual' &&
+  state.manualResponseReady === true ? {
+    prompt,
+    invalidStatus,
+    state
+  } : false;
+""",
+            "AI manual ChatGPT workflow",
+            timeout=20,
+            interval=0.3,
+        )
+        if not isinstance(manual_result, dict):
+            raise BrowserRegressionError(f"AI manual ChatGPT workflow failed: {manual_result}")
+
+        apply_flow = page.evaluate(
+            """
+(async () => {
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const waitUntil = async (predicate, label, timeoutMs = 20000) => {
+    const started = Date.now();
+    let lastValue = null;
+    while (Date.now() - started < timeoutMs) {
+      lastValue = await predicate();
+      if (lastValue) return lastValue;
+      await sleep(150);
+    }
+    throw new Error(`${label} timed out; last value ${JSON.stringify(lastValue)}`);
+  };
+  const selectedFileName = () => (document.querySelector('#test-model-select')?.value || '')
+    .replace(/^server:/, '')
+    .split('/')
+    .pop();
+  const validModel = name => ({
+    metadata: {
+      name,
+      purpose: 'AI apply save rollback delete browser regression',
+      layout: { algorithm: 'none' }
+    },
+    hypergraph: {
+      class: [
+        { id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_hc`, type: 'hyperclass', name: `${name} Domain`, position: { x: 0, y: 0, z: 0 }, attributes: [], children: [`${name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_class`] },
+        { id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_class`, type: 'class', name: `${name} Class`, parentClassId: `${name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_hc`, position: { x: 2, y: 0, z: 0 }, attributes: [{ id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_attr`, name: 'status', type: 'string' }] }
+      ],
+      link: []
+    }
+  });
+  const prepareManualResponse = async name => {
+    const provider = document.querySelector('#ai-provider-select');
+    provider.value = 'chatgpt-manual';
+    provider.dispatchEvent(new Event('change', { bubbles: true }));
+    document.querySelector('#ai-operation-select').value = 'generate';
+    document.querySelector('#ai-operation-select').dispatchEvent(new Event('change', { bubbles: true }));
+    document.querySelector('#ai-request-input').value = `Generate ${name} as HBDS JSON.`;
+    document.querySelector('#ai-request-input').dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#ai-send-request-button').click();
+    await waitUntil(() => (document.querySelector('#ai-result-preview')?.value || '').includes('Return JSON only'), `manual prompt ${name}`);
+    const response = document.querySelector('#ai-manual-response-input');
+    response.value = JSON.stringify(validModel(name));
+    response.dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#ai-validate-response-button').click();
+    await waitUntil(() => document.querySelector('#ai-apply-result-button')?.disabled === false, `valid manual response ${name}`);
+  };
+  const applyAsNew = async () => {
+    document.querySelector('#ai-apply-result-button').click();
+    const modal = await waitUntil(() => {
+      const element = document.querySelector('#ai-diff-modal');
+      return element && element.hidden === false ? element : null;
+    }, 'AI diff modal');
+    const summary = document.querySelector('#ai-diff-summary')?.innerText || '';
+    const actionButtons = [...document.querySelectorAll('.ai-diff-actions button')];
+    const actionTops = actionButtons.map(button => Math.round(button.getBoundingClientRect().top));
+    const modalCloseBottom = document.querySelector('#ai-diff-close-button')?.closest('.modal-actions') !== null;
+    const actionsAligned = actionTops.length === 5 && Math.max(...actionTops) - Math.min(...actionTops) <= 2;
+    const confirm = document.querySelector('#ai-destructive-confirm');
+    if (confirm && confirm.closest('label')?.hidden === false) {
+      confirm.checked = true;
+      confirm.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    document.querySelector('#ai-diff-apply-new-button').click();
+    const applied = await waitUntil(() => {
+      const state = window.__hbdsDynamicTest?.getState?.().aiSupport || {};
+      const value = document.querySelector('#test-model-select')?.value || '';
+      const fileName = selectedFileName();
+      return modal.hidden === true && state.rollbackReady && value.startsWith('server:') && fileName ? {
+        fileName,
+        value,
+        status: document.querySelector('#ai-status-message')?.textContent || '',
+        summary,
+        modalCloseBottom,
+        actionsAligned,
+        state
+      } : false;
+    }, 'AI apply as new');
+    return applied;
+  };
+  const previewAndRollback = async () => {
+    document.querySelector('#ai-apply-result-button').click();
+    const modal = await waitUntil(() => {
+      const element = document.querySelector('#ai-diff-modal');
+      return element && element.hidden === false ? element : null;
+    }, 'AI diff modal before preview');
+    document.querySelector('#ai-diff-preview-button').click();
+    const preview = await waitUntil(() => {
+      const state = window.__hbdsDynamicTest?.getState?.() || {};
+      const status = document.querySelector('#ai-status-message')?.textContent || '';
+      const layoutAlgorithm = state.layout?.algorithm || '';
+      return modal.hidden === true && state.aiSupport?.rollbackReady && status.includes('grid layout') && layoutAlgorithm === 'none' ? {
+        status,
+        layoutAlgorithm
+      } : false;
+    }, 'AI grid preview');
+    document.querySelector('#ai-rollback-result-button').click();
+    const rollback = await waitUntil(() => {
+      const state = window.__hbdsDynamicTest?.getState?.().aiSupport || {};
+      const status = document.querySelector('#ai-status-message')?.textContent || '';
+      return state.rollbackReady === false && status.includes('rolled back') ? { status } : false;
+    }, 'AI preview rollback');
+    return { preview, rollback };
+  };
+
+  const originalValue = document.querySelector('#test-model-select')?.value || '';
+  await prepareManualResponse(`Manual Apply Delete ${Date.now()}`);
+  const previewFlow = await previewAndRollback();
+  const deleteApply = await applyAsNew();
+  window.__hbdsOriginalConfirm = window.confirm;
+  window.confirm = () => true;
+  document.querySelector('#delete-model-button').click();
+  const modelMissing = async fileName => {
+    const response = await fetch('/api/models');
+    const payload = await response.json();
+    const models = Array.isArray(payload.models) ? payload.models : [];
+    return !models.some(model => model.name === fileName || model.saved === fileName || model.modelName === fileName);
+  };
+  const deleteStatus = await waitUntil(async () => {
+    const currentValue = document.querySelector('#test-model-select')?.value || '';
+    return await modelMissing(deleteApply.fileName) && currentValue !== deleteApply.value ? 'deleted' : false;
+  }, 'AI-created model delete');
+
+  await prepareManualResponse(`Manual Apply Rollback ${Date.now()}`);
+  const rollbackApply = await applyAsNew();
+  document.querySelector('#ai-rollback-result-button').click();
+  const rollback = await waitUntil(async () => {
+    const state = window.__hbdsDynamicTest?.getState?.().aiSupport || {};
+    const status = document.querySelector('#ai-status-message')?.textContent || '';
+    const currentValue = document.querySelector('#test-model-select')?.value || '';
+    const missing = await modelMissing(rollbackApply.fileName);
+    return missing && state.rollbackReady === false && status.includes('rolled back') ? {
+      status,
+      currentValue,
+      deletedStatus: 'deleted'
+    } : false;
+  }, 'AI apply rollback');
+  window.confirm = window.__hbdsOriginalConfirm || window.confirm;
+  return {
+    originalValue,
+    previewFlow,
+    deleteApply,
+    deleteStatus,
+    rollbackApply,
+    rollback,
+    deleteButtonVisible: Boolean(document.querySelector('#delete-model-button')),
+    rollbackButtonDisabled: document.querySelector('#ai-rollback-result-button')?.disabled === true
+  };
+})()
+""",
+            timeout=60,
+        )
+        if not isinstance(apply_flow, dict) or apply_flow.get("deleteStatus") != "deleted":
+            raise BrowserRegressionError(f"AI apply/delete/rollback browser flow failed: {apply_flow}")
+        if apply_flow.get("deleteButtonVisible") is not True or apply_flow.get("rollbackButtonDisabled") is not True:
+            raise BrowserRegressionError(f"AI apply/delete/rollback controls invalid: {apply_flow}")
+        if apply_flow.get("deleteApply", {}).get("modalCloseBottom") is not True or apply_flow.get("deleteApply", {}).get("actionsAligned") is not True:
+            raise BrowserRegressionError(f"AI diff modal button placement invalid: {apply_flow}")
+        if not isinstance(apply_flow.get("previewFlow"), dict) or apply_flow["previewFlow"].get("preview", {}).get("layoutAlgorithm") != "none":
+            raise BrowserRegressionError(f"AI grid preview/rollback flow failed: {apply_flow}")
+
+        prepared = wait_for(
+            page,
+            """
+const provider = document.querySelector('#ai-provider-select');
+provider.value = 'openai';
+provider.dispatchEvent(new Event('change', { bubbles: true }));
+document.querySelector('#ai-model-select').value = 'gpt-5.5';
+document.querySelector('#ai-model-select').dispatchEvent(new Event('change', { bubbles: true }));
+document.querySelector('#ai-reasoning-select').value = 'xhigh';
+document.querySelector('#ai-reasoning-select').dispatchEvent(new Event('change', { bubbles: true }));
+document.querySelector('#ai-api-key-input').value = '';
+document.querySelector('#ai-api-key-input').dispatchEvent(new Event('input', { bubbles: true }));
+document.querySelector('#ai-request-input').value = 'Generate a small HBDS model for a secure network.';
+document.querySelector('#ai-request-input').dispatchEvent(new Event('input', { bubbles: true }));
+document.querySelector('#ai-send-request-button').click();
+await new Promise(resolve => setTimeout(resolve, 500));
+const preview = document.querySelector('#ai-result-preview')?.value || '';
+const state = window.__hbdsDynamicTest?.getState?.().aiSupport || {};
+return preview.includes('Return JSON only') && preview.includes('metadata.layout') && preview.includes('Reasoning effort: xhigh') && state.config?.apiKey === '' && state.config?.modelName === 'gpt-5.5' && state.config?.reasoningEffort === 'xhigh' ? {
+  preview,
+  state,
+  applyDisabled: document.querySelector('#ai-apply-result-button')?.disabled === true
+} : false;
+""",
+            "AI prompt preparation",
+            timeout=20,
+            interval=0.3,
+        )
+        if not isinstance(prepared, dict) or prepared.get("applyDisabled") is not True:
+            raise BrowserRegressionError(f"AI prompt preparation did not keep apply disabled: {prepared}")
+        data_after = page.evaluate(
+            """
+(() => {
+  const modelHasKey = JSON.stringify(window.__hbdsDynamicTest?.getData?.() || {}).includes('sk-test-secret-value');
+  const jsonPreviewHasKey = (document.querySelector('#json-preview')?.value || '').includes('sk-test-secret-value');
+  return { modelHasKey, jsonPreviewHasKey };
+})()
+""",
+            timeout=5,
+        )
+        if not isinstance(data_after, dict) or data_after.get("modelHasKey") or data_after.get("jsonPreviewHasKey"):
+            raise BrowserRegressionError(f"AI key leaked into model data or JSON preview: {data_after}")
+        errors = page.significant_errors()
+        if errors:
+            raise BrowserRegressionError(f"AI Support browser errors:\n{chr(10).join(errors[:SIGNIFICANT_ERROR_LIMIT])}")
+        print("PASS AI support UI regression")
+    finally:
+        page.close()
+
+
+def run_shell_menu_version_regression(base_url: str, debug_port: int) -> None:
+    page = BrowserPage(create_target(debug_port))
+    try:
+        page.cdp.send("Page.navigate", {"url": f"{base_url}/index.html"}, timeout=10)
+        version_state = wait_for(
+            page,
+            """
+return (() => {
+  const version = document.querySelector('#app-version');
+  return version?.textContent?.trim() ? {
+    text: version.textContent.trim(),
+    visible: getComputedStyle(version).display !== 'none'
+  } : false;
+})()
+""",
+            "shell app version display",
+            timeout=10,
+            interval=0.25,
+        )
+        if not isinstance(version_state, dict) or version_state.get("text") != "v1.0" or version_state.get("visible") is not True:
+            raise BrowserRegressionError(f"Shell app version display invalid: {version_state}")
+        help_state = wait_for(
+            page,
+            """
+return (() => {
+  const helpButton = document.querySelector('[data-view="help"]');
+  helpButton?.click();
+  const panel = document.querySelector('#shell-help');
+  const userGuide = [...document.querySelectorAll('.help-section')]
+    .find(section => section.querySelector('summary')?.textContent?.trim() === 'User Guide');
+  if (userGuide) userGuide.open = true;
+  const text = userGuide?.innerText || '';
+  return panel?.hidden === false &&
+    text.includes('AI Support') &&
+    text.includes('Preview on Canvas') &&
+    text.includes('Rollback AI Apply') &&
+    text.includes('Delete Model') &&
+    text.includes('test_models') ? {
+      visible: true,
+      userGuideText: text.slice(0, 400)
+    } : false;
+})()
+""",
+            "shell help user guide",
+            timeout=10,
+            interval=0.25,
+        )
+        if not isinstance(help_state, dict) or help_state.get("visible") is not True:
+            raise BrowserRegressionError(f"Shell Help user guide invalid: {help_state}")
+        errors = page.significant_errors()
+        if errors:
+            raise BrowserRegressionError(f"Shell menu browser errors:\n{chr(10).join(errors[:SIGNIFICANT_ERROR_LIMIT])}")
+        print("PASS shell app version display and help user guide")
+    finally:
+        page.close()
 
 
 def set_page_edit_mode(page: BrowserPage, mode: str = "full") -> None:
@@ -1441,11 +2032,11 @@ def assert_remote_operations_update_realtime(page: BrowserPage, base_url: str, m
                 "opId": "browser-realtime-font",
                 "type": "updateFont",
                 "targetId": "model",
-                "patch": {"font": {"size": 18, "family": font_family, "bold": True, "italic": True}},
+                "patch": {"font": {"size": 18, "family": font_family, "bold": True, "italic": True, "classSize": 20, "hyperclassSize": 21, "attributeSize": 13, "linkSize": 10}},
                 "mergeable": False,
             }
         ],
-        ["remote operations", "update font", "font size", "18", "font family", font_family, "font bold", "true"],
+        ["remote operations", "update font", "font size", "18", "font family", font_family, "font bold", "true", "class font size", "20", "hyperclass font size", "21", "attribute font size", "13", "link font size", "10"],
         marker=font_family,
         merge_enabled=False,
         forbidden=previous_markers,
@@ -1500,7 +2091,9 @@ def assert_remote_operations_update_realtime(page: BrowserPage, base_url: str, m
                         "labelText": f"Realtime Link Label {os.getpid()}",
                         "lineColor": "#ff00aa",
                         "lineWidth": 0.07,
-                        "arrowheadType": "diamond",
+                        "arrowType": "double-chevron",
+                        "arrowDirection": "bidirectional",
+                        "arrowColor": "#0055ff",
                     },
                 },
             }
@@ -1512,8 +2105,12 @@ def assert_remote_operations_update_realtime(page: BrowserPage, base_url: str, m
             "realtime link label",
             "line color",
             "#ff00aa",
-            "arrowhead type",
-            "diamond",
+            "arrow type",
+            "double-chevron",
+            "arrow direction",
+            "bidirectional",
+            "arrow color",
+            "#0055ff",
         ],
         marker=f"Realtime Link Label {os.getpid()}",
         merge_enabled=True,
@@ -1809,6 +2406,9 @@ def main() -> int:
 
         browser_process = launch_browser(debug_port)
         wait_for_browser(debug_port, browser_process)
+        run_shell_menu_version_regression(base_url, debug_port)
+        run_ai_support_ui_regression(base_url, debug_port)
+        run_font_policy_ui_regression(base_url, debug_port)
         run_human_and_car_second_page_selection_regression(base_url, debug_port)
         run_regression(base_url, debug_port, loaded_model)
         return 0

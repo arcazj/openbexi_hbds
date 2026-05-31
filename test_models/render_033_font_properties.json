@@ -18,7 +18,11 @@
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
-      "underline": false
+      "underline": false,
+      "classSize": 17,
+      "hyperclassSize": 19,
+      "attributeSize": 14,
+      "linkSize": 11
     }
   },
   "hypergraph": {

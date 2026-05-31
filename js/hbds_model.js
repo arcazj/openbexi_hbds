@@ -1,8 +1,8 @@
-import * as THREE from 'three';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=label-readability-20260531c';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=label-readability-20260531c';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=label-readability-20260531c';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=label-readability-20260531c';
+﻿import * as THREE from 'three';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=font-types-20260531a';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=font-types-20260531a';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=font-types-20260531a';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=font-types-20260531a';
 import { initModelOverview as initModelOverviewPanel, updateModelOverview as updateModelOverviewPanel } from './hbds_model_overview.js?v=overview-module-20260530a';
 export { drawOverviewHyperclasses, drawOverviewClasses, drawOverviewLinks, updateOverviewViewport } from './hbds_model_overview.js?v=overview-module-20260530a';
 
@@ -24,8 +24,13 @@ export const DEFAULT_FONT_SETTINGS = {
   family: 'Arial, sans-serif',
   bold: false,
   italic: false,
-  underline: false
+  underline: false,
+  classSize: null,
+  hyperclassSize: null,
+  attributeSize: null,
+  linkSize: null
 };
+export const MAX_FONT_SIZE = 72;
 const DEFAULT_FIT_PADDING = 1.08;
 const SMALL_MODEL_MAX_FIT_SUBJECTS = 2;
 const SMALL_MODEL_FIT_PADDING = 1.35;
@@ -51,6 +56,9 @@ const HIDDEN_MODEL_VALUES = new Set([
 const CLASS_BODY_TYPES = new Set(['rectangle','image','shape']);
 const CLASS_IMAGE_FITS = new Set(['contain','cover']);
 const CLASS_SURFACE_MATERIALS = new Set(['metallic','flat','basic','matte','mat','glossy','shine','shiny','plastic','glass','transparent']);
+const LINK_ARROW_TYPES = new Set(['triangle','outline','chevron','double-chevron','triple-chevron','filled-triangle','hollow-triangle','dotted','bar-arrow','double-bar-arrow','cone','diamond','none']);
+const LINK_ARROW_DIRECTIONS = new Set(['source-to-target','target-to-source','bidirectional','none']);
+const LINK_LINE_STYLES = new Set(['solid','dashed','dotted','thick','thin']);
 const CLASS_SHAPE_TYPES = new Set([
   'roundedRectangle',
   'rectangle',
@@ -189,11 +197,29 @@ export function normalizeFontSettings(font={},fallback=DEFAULT_FONT_SETTINGS){
   const source=font&&typeof font==='object'?font:{};
   const base=fallback&&typeof fallback==='object'?fallback:DEFAULT_FONT_SETTINGS;
   return {
-    size:toPositiveNumber(source.size ?? source.fontSize ?? source.labelFontSize, base.size ?? DEFAULT_FONT_SETTINGS.size),
+    size:clampFontSize(source.size ?? source.fontSize ?? source.labelFontSize, base.size ?? DEFAULT_FONT_SETTINGS.size),
     family:normalizeFontFamily(source.family ?? source.fontFamily, base.family ?? DEFAULT_FONT_SETTINGS.family),
     bold:toBooleanFontValue(source.bold ?? source.fontWeight, base.bold ?? DEFAULT_FONT_SETTINGS.bold),
     italic:toBooleanFontValue(source.italic ?? source.fontStyle, base.italic ?? DEFAULT_FONT_SETTINGS.italic),
-    underline:toBooleanFontValue(source.underline ?? source.textDecoration ?? source.textDecorationLine, base.underline ?? DEFAULT_FONT_SETTINGS.underline)
+    underline:toBooleanFontValue(source.underline ?? source.textDecoration ?? source.textDecorationLine, base.underline ?? DEFAULT_FONT_SETTINGS.underline),
+    classSize:normalizeOptionalFontSize(source.classSize ?? source.classFontSize, base.classSize ?? null),
+    hyperclassSize:normalizeOptionalFontSize(source.hyperclassSize ?? source.hyperClassSize ?? source.hyperclassFontSize, base.hyperclassSize ?? null),
+    attributeSize:normalizeOptionalFontSize(source.attributeSize ?? source.attributeFontSize, base.attributeSize ?? null),
+    linkSize:normalizeOptionalFontSize(source.linkSize ?? source.linkFontSize ?? source.linkLabelSize, base.linkSize ?? null)
+  };
+}
+export function getFontSettingsForTextType(fontSettings={},textType='class'){
+  const base=normalizeFontSettings(fontSettings);
+  const key={
+    class:'classSize',
+    hyperclass:'hyperclassSize',
+    attribute:'attributeSize',
+    link:'linkSize'
+  }[textType] || 'classSize';
+  const typeSize=base[key];
+  return {
+    ...base,
+    size:typeSize ?? base.size
   };
 }
 export function getSceneSettings(currentData=data){
@@ -247,6 +273,15 @@ function toFiniteNumber(value,fallback){
 function toPositiveNumber(value,fallback){
   const number=toFiniteNumber(value,fallback);
   return number>0?number:fallback;
+}
+function clampFontSize(value,fallback=DEFAULT_FONT_SETTINGS.size){
+  return THREE.MathUtils.clamp(toPositiveNumber(value,fallback),1,MAX_FONT_SIZE);
+}
+function normalizeOptionalFontSize(value,fallback=null){
+  if(value===undefined||value===null||value===''){
+    return fallback===undefined||fallback===null||fallback==='' ? null : clampFontSize(fallback);
+  }
+  return clampFontSize(value);
 }
 function normalizeFontFamily(value,fallback){
   const clean=String(value??'').trim();
@@ -342,8 +377,22 @@ export function validateData(currentData=data){
     if(l.id) lids.add(l.id);
     if(!byId.has(l.sourceClassId)) e.push(`missing link source ${l.sourceClassId}`);
     if(!byId.has(l.targetClassId)) e.push(`missing link target ${l.targetClassId}`);
+    validateLinkRendering(l,w);
   }
   return {valid:e.length===0,errors:e,warnings:w};
+}
+function validateLinkRendering(link,warnings){
+  const rendering=link?.rendering||{};
+  const arrowType=rendering.arrowType ?? rendering.arrowheadType;
+  if(arrowType!==undefined&&!LINK_ARROW_TYPES.has(String(arrowType))){
+    warnings.push(`link ${link.id||'(unnamed)'} has unsupported arrowType ${arrowType}`);
+  }
+  if(rendering.arrowDirection!==undefined&&!LINK_ARROW_DIRECTIONS.has(String(rendering.arrowDirection))){
+    warnings.push(`link ${link.id||'(unnamed)'} has unsupported arrowDirection ${rendering.arrowDirection}`);
+  }
+  if(rendering.lineStyle!==undefined&&!LINK_LINE_STYLES.has(String(rendering.lineStyle))){
+    warnings.push(`link ${link.id||'(unnamed)'} has unsupported lineStyle ${rendering.lineStyle}`);
+  }
 }
 function validateClassBodyRendering(node,warnings){
   const renderingClass=node?.rendering?.class||{};
@@ -386,9 +435,9 @@ function isAllowedClassImageSource(value){
   const normalized=clean.replace(/\\/g,'/').replace(/^\.\//,'');
   return normalized.toLowerCase().startsWith('images/')&&/\.png(?:[?#].*)?$/i.test(normalized);
 }
-export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; const modelFont=getFontSettings(); clearClassLabelRegistry(); clearHyperclassLabelRegistry(); clearLinkRegistry(); if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
+export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; const modelFont=getFontSettings(); const classFont=getFontSettingsForTextType(modelFont,'class'); const hyperclassFont=getFontSettingsForTextType(modelFont,'hyperclass'); const attributeFont=getFontSettingsForTextType(modelFont,'attribute'); const linkFont=getFontSettingsForTextType(modelFont,'link'); clearClassLabelRegistry(); clearHyperclassLabelRegistry(); clearLinkRegistry(); if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
   if(dragControls){dragControls.dispose(); setDragControls?.(null);} const dg=new THREE.Group(); scene?.add(dg); setDiagramGroup?.(dg); modelRuntime.diagramGroup=dg; modelRuntime.classById.clear(); modelRuntime.linkGroups=[];
-  for(const cd of data.hypergraph.class){ const renderData={...cd,modelFont}; const r=cd.type==='hyperclass'?createHyperClass(null,renderData):createClassMesh(renderData); const m=r.classMesh; m.visible=cd.visible!==false&&cd.rendering?.visible!==false; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true,isLocked:cd.locked===true}; dg.add(m); modelRuntime.classById.set(cd.id,m);}
+  for(const cd of data.hypergraph.class){ const titleFont=cd.type==='hyperclass'?hyperclassFont:classFont; const renderData={...cd,modelFont:titleFont,modelTitleFont:titleFont,modelAttributeFont:attributeFont}; const r=cd.type==='hyperclass'?createHyperClass(null,renderData):createClassMesh(renderData); const m=r.classMesh; m.visible=cd.visible!==false&&cd.rendering?.visible!==false; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true,isLocked:cd.locked===true}; dg.add(m); modelRuntime.classById.set(cd.id,m);}
   for(const cd of data.hypergraph.class){
     const node=modelRuntime.classById.get(cd.id);
     if(!node) continue;
@@ -405,7 +454,7 @@ export function refreshSceneFromData(context){ if(!context) return; const {scene
     }
     node.position.set(p.x||0,p.y||0,p.z||0);
   }
-  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const renderLinkData={...ld,modelFont}; const linkOptions={recalculate:false}; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,renderLinkData,linkOptions):createLinkBetweenClass(renderLinkData,modelRuntime.classById,linkOptions); if(!r) continue; r.linkGroup.visible=ld.visible!==false&&ld.rendering?.visible!==false; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(renderLinkData),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);}
+  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const renderLinkData={...ld,modelFont:linkFont}; const linkOptions={recalculate:false}; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,renderLinkData,linkOptions):createLinkBetweenClass(renderLinkData,modelRuntime.classById,linkOptions); if(!r) continue; r.linkGroup.visible=ld.visible!==false&&ld.rendering?.visible!==false; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(renderLinkData),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);}
   draggableObjects.length=0; for(const cd of data.hypergraph.class){ const o=modelRuntime.classById.get(cd.id); if(o&&o.visible!==false&&!o.userData?.isLocked) draggableObjects.push(o); }
   modelRuntime.draggableObjects=draggableObjects;
   context.setupDragControls?.(); recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera, context.renderer); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }

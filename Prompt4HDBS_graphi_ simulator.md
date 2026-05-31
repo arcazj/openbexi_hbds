@@ -41,14 +41,14 @@ The HBDS Graphic Simulator is a browser-based visual simulator for hypergraph-ba
 The main runtime modes are:
 
 - Static browser mode, where HTML and JSON files can be opened directly for simple viewing.
-- Connected server mode, where `server.py` provides model listing, loading, saving, drafts, operations, OpenAPI documentation, and server-sent events.
+- Connected server mode, where `server.py` provides model listing, loading, saving, deletion, drafts, operations, AI support APIs, OpenAPI documentation, and server-sent events.
 
 The main user-facing workspaces are:
 
 - `Models`: browse and load standard examples from `models/`.
 - `Edit`: inspect, modify, build, save, and validate HBDS models.
 - `Tests`: browse regression fixtures from `test_models/`.
-- `Help`: read local usage and API guidance.
+- `Help`: read the comprehensive user guide, local usage guidance, and API links.
 
 ## Data Model Summary
 
@@ -115,6 +115,7 @@ Core responsibilities:
 - Track revisions and detect conflicts.
 - Expose OpenAPI documentation.
 - Broadcast collaboration and model events through server-sent events.
+- Discover AI provider capabilities, prepare deterministic HBDS prompts, validate transient provider keys, apply/save AI-generated models, roll back AI applies, and delete AI-created or user-selected model files with backups.
 
 Important endpoints:
 
@@ -122,16 +123,23 @@ Important endpoints:
 - `GET /api/models`
 - `GET /api/models/{modelName}`
 - `POST /api/models/{modelName}`
+- `DELETE /api/models/{modelName}`
 - `POST /api/models/{modelName}/ops`
 - `GET /api/models/{modelName}/drafts`
 - `POST /api/models/{modelName}/drafts`
 - `DELETE /api/models/{modelName}/drafts/{clientId}`
 - `GET /api/model-files/{scope}/{modelName}`
 - `POST /api/model-files/{scope}/{modelName}`
+- `DELETE /api/model-files/{scope}/{modelName}`
 - `GET /api/drafts/{scope}/{modelName}`
 - `POST /api/drafts/{scope}/{modelName}`
 - `DELETE /api/drafts/{scope}/{modelName}/{clientId}`
 - `GET /api/events`
+- `GET /api/ai/providers`
+- `POST /api/ai/connection`
+- `POST /api/ai/prompt`
+- `POST /api/ai/apply`
+- `POST /api/ai/rollback`
 - `GET /api/docs`
 - `GET /api/openapi.json`
 
@@ -154,7 +162,8 @@ Main JavaScript responsibilities:
 - `hbds_hyperclass_class.js`: hyperclass rendering and helper behavior.
 - `hbds_class_link.js`: link rendering, routing, arrowheads, labels, recalculation.
 - `hbds_hyperclass_link.js`: hyperclass link behavior.
-- `hbds_server_api.js`: HTTP and event API client wrapper.
+- `hbds_server_api.js`: HTTP, AI apply/rollback/delete, and event API client wrapper.
+- `hbds_ai_support.js`: AI provider definitions, model/reasoning selection helpers, prompt payload construction, manual response parsing, alias normalization, and safe diagnostics.
 - `hbds_collaboration_preview.js`: remote draft preview rendering.
 - `hbds_floating_panel.js`: draggable and resizable panels.
 - `hbds_model_productivity.js`: pure helpers for duplicate, paste, route preset, and selected subgraph export workflows.
@@ -187,10 +196,16 @@ The phased implementation must cover these capabilities:
 - Support exporting the selected subgraph without mutating the active model.
 - Support JSON editing and validation feedback.
 - Support save/load through the local server.
+- Support model deletion through the local server with backups and manifest refresh.
 - Support operation-based updates.
 - Support drafts.
 - Support collaboration event streams.
 - Support conflict detection and merge or conflict reporting.
+- Support AI-assisted HBDS generation, validation, and improvement workflows.
+- Support ChatGPT Pro manual copy/paste prompts without requiring an API key.
+- Support transient API keys without persisting or exposing secrets.
+- Support strict AI response validation and alias normalization.
+- Support AI diff preview, grid-based Preview on Canvas, Apply and Save, Apply as New Model, and rollback.
 - Support OpenAPI documentation.
 - Support smoke tests, validators, syntax checks, and model linting.
 
@@ -277,6 +292,8 @@ Tasks:
 
 - Review all API routes and align them with frontend callers.
 - Verify scoped model loading and saving for `models` and `test_models`.
+- Verify model deletion for `models` and `test_models`, including backups, protected-model refusal, manifest refresh, draft clearing, and model update events.
+- Verify AI support routes for providers, connection validation, prompt preparation, apply/save, and rollback.
 - Verify draft create/read/delete behavior.
 - Verify operation endpoint behavior.
 - Validate revision and conflict handling.
@@ -377,6 +394,7 @@ Tasks:
 - Verify test model selector behavior.
 - Verify embedded editor routing and query parameters.
 - Verify Help content matches current commands and APIs.
+- Verify Help includes the end-user guide for loading, editing, saving, deleting, collaboration, AI Support, AI preview, AI apply/save, and rollback.
 - Ensure empty, loading, error, and disconnected states are clear.
 
 Deliverables:
@@ -408,6 +426,7 @@ Tasks:
 - Verify duplicate, copy, and paste of selected class and hyperclass nodes.
 - Verify selected subgraph export includes only selected nodes, selected hyperclass descendants, and links whose endpoints are included.
 - Verify JSON editor validation and apply behavior.
+- Verify AI Support provider selection, transient key validation, ChatGPT Pro manual workflow, AI response validation, AI diff modal, grid preview, apply/save, save-as-new, delete, and rollback behavior.
 - Verify undo-like or draft recovery behavior if present.
 - Ensure deletes remove or repair dependent links safely.
 
@@ -538,21 +557,26 @@ py tools\validate_manifests.py
 py tools\validate_models.py
 py tools\validate_test_models.py
 py tools\lint_model_naming.py
+node scripts\ai_support_test.mjs
 node scripts\productivity_helpers_test.mjs
+node scripts\collaboration_drafts_test.mjs
+py scripts\collaboration_browser_regression.py
 Get-Content -Raw js\test_dynamic_hbds_layout.js | node --input-type=module --check
+Get-Content -Raw js\hbds_server_api.js | node --input-type=module --check
+Get-Content -Raw js\hbds_ai_support.js | node --input-type=module --check
 Get-Content -Raw js\hbds_model_productivity.js | node --input-type=module --check
 Get-Content -Raw js\hbds_collaboration_preview.js | node --input-type=module --check
 Get-Content -Raw js\hbds_floating_panel.js | node --input-type=module --check
 git diff --check
 ```
 
-Run Maven tests if Maven is installed:
+Run Maven tests through the repo-local wrapper:
 
 ```powershell
-mvn test
+.\mvn.cmd test
 ```
 
-If a command cannot run because a tool is missing, report that explicitly and do not claim it passed.
+Use `.\scripts\bootstrap_maven.ps1` or `.\scripts\bootstrap_ripgrep.ps1` if the repo-local Maven or ripgrep wrappers are missing. If a command still cannot run because a tool is missing, report that explicitly and do not claim it passed.
 
 ## Reporting Format for Each Phase
 
@@ -585,6 +609,9 @@ The implementation is complete only when:
 - Layout modes work and are covered by fixtures.
 - Editing workflows can create, update, delete, save, and reload models.
 - Server APIs match frontend usage and OpenAPI documentation.
+- AI Support workflows validate responses, preview with grid layout, save to the correct directory, and roll back correctly.
+- Model deletion keeps backups and refreshes manifests.
+- Help includes an up-to-date user guide.
 - Draft and collaboration behavior is validated.
 - `Test_and_Integration.md` is accurate.
 - Required tests pass, or any unavailable external tools are clearly reported.

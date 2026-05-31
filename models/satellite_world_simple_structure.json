@@ -10,20 +10,23 @@
       "mode": "Radial",
       "fit": {
         "padding": 1.18,
-        "fitHeightDistance": 24.4559,
-        "fitWidthDistance": 16.8539,
-        "distance": 24.4559,
+        "fitHeightDistance": 11.4632,
+        "fitWidthDistance": 15.1626,
+        "distance": 15.2393,
         "diagramWidth": 16.77,
-        "diagramHeight": 9.61,
+        "diagramHeight": 9.06,
         "diagramDepth": 0.13,
-        "radius": 9.6644,
+        "radius": 9.5307,
         "center": {
           "x": -0.6775,
-          "y": 0.275,
+          "y": 0,
           "z": 0.065
         },
-        "cameraAspect": 1.4511,
-        "cameraFov": 50
+        "cameraAspect": 1.3994,
+        "cameraFov": 50,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 7
       }
     },
     "style": {
@@ -32,11 +35,15 @@
       "hyperclassMaterial": "metallic"
     },
     "font": {
-      "size": 14,
+      "size": 28,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
-      "underline": false
+      "underline": false,
+      "classSize": 32,
+      "hyperclassSize": 37,
+      "attributeSize": 20,
+      "linkSize": 25
     },
     "sceneSettings": {
       "background": "#eef2f6",
@@ -79,23 +86,14 @@
         "attributes": [
           {
             "name": "Catalog authority",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_hc_satellite_catalog_attr_catalog_authority"
           },
           {
             "name": "Object identity",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_hc_satellite_catalog_attr_object_identity"
           },
           {
             "name": "Launch lineage",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_hc_satellite_catalog_attr_launch_lineage"
           }
         ],
@@ -123,7 +121,8 @@
             "metalness": 0.42,
             "roughness": 0.28,
             "emissiveIntensity": 0.035
-          }
+          },
+          "attributes": {}
         }
       },
       {
@@ -133,23 +132,14 @@
         "attributes": [
           {
             "name": "Orbital state",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_hc_orbit_payload_attr_orbital_state"
           },
           {
             "name": "Payload mission",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_hc_orbit_payload_attr_payload_mission"
           },
           {
             "name": "TLE traceability",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_hc_orbit_payload_attr_tle_traceability"
           }
         ],
@@ -176,7 +166,8 @@
             "metalness": 0.42,
             "roughness": 0.28,
             "emissiveIntensity": 0.035
-          }
+          },
+          "attributes": {}
         }
       },
       {
@@ -187,86 +178,50 @@
         "attributes": [
           {
             "name": "noradCatalogId",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_noradcatalogid"
           },
           {
             "name": "satelliteName",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_satellitename"
           },
           {
             "name": "internationalDesignator",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_internationaldesignator"
           },
           {
             "name": "cosparId",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_cosparid"
           },
           {
             "name": "satelliteStatus",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_satellitestatus"
           },
           {
             "name": "busType",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_bustype"
           },
           {
             "name": "dryMassKg",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_drymasskg"
           },
           {
             "name": "powerWatts",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_powerwatts"
           },
           {
             "name": "manufacturerOrgId",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_manufacturerorgid"
           },
           {
             "name": "operatorOrgId",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_operatororgid"
           },
           {
             "name": "launchDateUtc",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_launchdateutc"
           },
           {
             "name": "decayedDateUtc",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_satellite_attr_decayeddateutc"
           }
         ],
@@ -286,7 +241,8 @@
             "borderColor": "#1E293B",
             "borderWidth": 0.025,
             "cornerRadius": 0.12
-          }
+          },
+          "attributes": {}
         }
       },
       {
@@ -297,58 +253,34 @@
         "attributes": [
           {
             "name": "rocketName",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_launch_vehicle_attr_rocketname"
           },
           {
             "name": "rocketFamily",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_launch_vehicle_attr_rocketfamily"
           },
           {
             "name": "launchSite",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_launch_vehicle_attr_launchsite"
           },
           {
             "name": "launchProvider",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_launch_vehicle_attr_launchprovider"
           },
           {
             "name": "launchSuccess",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_launch_vehicle_attr_launchsuccess"
           },
           {
             "name": "launchMassToLeoKg",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_launch_vehicle_attr_launchmasstoleokg"
           },
           {
             "name": "launchMassToGtoKg",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_launch_vehicle_attr_launchmasstogtokg"
           },
           {
             "name": "firstFlightDate",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_launch_vehicle_attr_firstflightdate"
           }
         ],
@@ -368,7 +300,8 @@
             "borderColor": "#1E293B",
             "borderWidth": 0.025,
             "cornerRadius": 0.12
-          }
+          },
+          "attributes": {}
         }
       },
       {
@@ -379,44 +312,26 @@
         "attributes": [
           {
             "name": "organizationId",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_organization_attr_organizationid"
           },
           {
             "name": "name",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_organization_attr_name"
           },
           {
             "name": "country",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_organization_attr_country"
           },
           {
             "name": "role",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_organization_attr_role"
           },
           {
             "name": "organizationType",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_organization_attr_organizationtype"
           },
           {
             "name": "foundedDate",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_organization_attr_foundeddate"
           }
         ],
@@ -436,7 +351,8 @@
             "borderColor": "#1E293B",
             "borderWidth": 0.025,
             "cornerRadius": 0.12
-          }
+          },
+          "attributes": {}
         }
       },
       {
@@ -447,58 +363,34 @@
         "attributes": [
           {
             "name": "tleEpochUtc",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_tle_set_attr_tleepochutc"
           },
           {
             "name": "tleLine1",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_tle_set_attr_tleline1"
           },
           {
             "name": "tleLine2",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_tle_set_attr_tleline2"
           },
           {
             "name": "inclinationDeg",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_tle_set_attr_inclinationdeg"
           },
           {
             "name": "eccentricity",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_tle_set_attr_eccentricity"
           },
           {
             "name": "meanMotionRevPerDay",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_tle_set_attr_meanmotionrevperday"
           },
           {
             "name": "raanDeg",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_tle_set_attr_raandeg"
           },
           {
             "name": "argPerigeeDeg",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_tle_set_attr_argperigeedeg"
           }
         ],
@@ -518,7 +410,8 @@
             "borderColor": "#1E293B",
             "borderWidth": 0.025,
             "cornerRadius": 0.12
-          }
+          },
+          "attributes": {}
         }
       },
       {
@@ -529,51 +422,30 @@
         "attributes": [
           {
             "name": "payloadType",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_payload_profile_attr_payloadtype"
           },
           {
             "name": "missionClass",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_payload_profile_attr_missionclass"
           },
           {
             "name": "capacityDescriptor",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_payload_profile_attr_capacitydescriptor"
           },
           {
             "name": "frequencyBand",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_payload_profile_attr_frequencyband"
           },
           {
             "name": "coverageRegion",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_payload_profile_attr_coverageregion"
           },
           {
             "name": "designLifeYears",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_payload_profile_attr_designlifeyears"
           },
           {
             "name": "operatorOrgId",
-            "font": {
-              "size": 11
-            },
             "id": "satellite_world_simple_structure_payload_profile_attr_operatororgid"
           }
         ],
@@ -593,7 +465,8 @@
             "borderColor": "#1E293B",
             "borderWidth": 0.025,
             "cornerRadius": 0.12
-          }
+          },
+          "attributes": {}
         }
       }
     ],
@@ -618,11 +491,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -645,11 +519,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -672,11 +547,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -699,11 +575,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -726,11 +603,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -753,11 +631,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -780,11 +659,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -807,11 +687,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -834,11 +715,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -861,11 +743,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -888,11 +771,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -915,11 +799,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       },
       {
@@ -942,11 +827,12 @@
           "relationshipPortStroke": "#475569",
           "labelColor": "#0F172A",
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "labelFontSize": 14,
           "parallelRouteGap": 0.34,
           "obstacleRouteGap": 0.36,
           "globalRouteGap": 0.34,
-          "curveRadius": 0.18
+          "curveRadius": 0.18,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         }
       }
     ]

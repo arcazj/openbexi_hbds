@@ -52,7 +52,7 @@
     import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=label-readability-20260531c';
     import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=label-readability-20260531c';
     import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=label-readability-20260531c';
-    import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260530c';
+    import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260531b';
 
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {
         document.body.classList.add('embedded-shell-menu');
@@ -87,6 +87,7 @@
     const CANVAS_LOAD_PROGRESS_SHOW_AFTER_MS = 700;
     const CANVAS_LOAD_PROGRESS_LARGE_SHOW_AFTER_MS = 120;
     const LARGE_MODEL_NAME_PATTERN = /satellite_world_complete_structure\.json$/i;
+    const DEFAULT_MODEL_FILE_NAME = 'hyperclass_mail_Carrier_with_links.json';
     let debugModeEnabled = readStoredDebugMode();
     let canvasLoadProgressTimer = null;
     let canvasLoadProgressInterval = null;
@@ -349,6 +350,13 @@
         return LARGE_MODEL_NAME_PATTERN.test(modelFileNameFromValue(value, String(value || '')));
     }
 
+    function preferredDefaultModelValue(models = []) {
+        const match = models.find(model => (
+            modelFileNameFromValue(model?.value || '', model?.value || '') === DEFAULT_MODEL_FILE_NAME
+        ));
+        return match?.value || models[0]?.value || '';
+    }
+
     async function handleLayoutAlgorithmChange() {
         const algorithm = document.getElementById('layout-algorithm-select').value;
         setLayoutSettings({ ...getLayoutSettings(), algorithm }, { applyContext: false });
@@ -379,7 +387,7 @@
                     });
                     select.value = serverResult.models.some(model => model.value === selectedValue)
                         ? selectedValue
-                        : serverResult.models[0].value;
+                        : preferredDefaultModelValue(serverResult.models);
                     if (diagnostics) diagnostics.textContent = `Loaded ${serverResult.models.length} models from server.`;
                     setLoadStatus('Load status: server connected', 'ok');
                     modelsLoadOk = true;
@@ -412,7 +420,7 @@
                 });
                 select.value = models.some(model => model.value === selectedValue)
                     ? selectedValue
-                    : models[0].value;
+                    : preferredDefaultModelValue(models);
                 if (diagnostics) diagnostics.textContent = `Loaded ${models.length} models from manifest.`;
                 setLoadStatus('Load status: manifest loaded', 'ok');
                 modelsLoadOk = true;

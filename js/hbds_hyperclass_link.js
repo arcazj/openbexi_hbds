@@ -1,5 +1,5 @@
-export { Loader, updateLinkFontSizes, recalculateAllLinks } from './hbds_class_link.js?v=label-readability-20260531c';
-import { createLinkBetweenClass } from './hbds_class_link.js?v=label-readability-20260531c';
+﻿export { Loader, updateLinkFontSizes, recalculateAllLinks } from './hbds_class_link.js?v=font-types-20260531a';
+import { createLinkBetweenClass } from './hbds_class_link.js?v=font-types-20260531a';
 
 export function createLinkBetweenHyperClass(scene, sourceObject, targetObject, linkData, options = {}) {
   const classById = new Map([

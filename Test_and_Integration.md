@@ -17,6 +17,7 @@ Use this guide to validate:
 * 2-D and 3-D rendering
 * zoom, pan, fit, and overview behavior
 * class, hyperclass, attribute, and link editing
+* AI Support configuration UI for HBDS model generation, validation, and improvement prompts
 * model tree sidebar search, selection, and multi-selection
 * duplicate, copy, and paste for selected class and hyperclass nodes
 * bulk attribute add and selected attribute reorder
@@ -25,9 +26,10 @@ Use this guide to validate:
 * layout algorithms
 * API documentation and OpenAPI output
 * server connection indicator
+* shell menu app version display
 * collaboration panel and conflict-resolution choices
 * immediate class, hyperclass, and attribute label rendering after model load
-* smoke tests, manifest validation, naming lint, productivity helper tests, browser collaboration regression, and Maven tests through the repo-local wrapper
+* smoke tests, manifest validation, naming lint, AI helper tests, productivity helper tests, browser collaboration regression, and Maven tests through the repo-local wrapper
 
 ## 2. Investigation Issue Ledger
 
@@ -42,11 +44,10 @@ Resolved or mitigated issues:
 * Dynamic module imports could keep stale label-rendering code in the browser cache when cache-bust query strings were not updated together.
 * Model refresh could leave previous class or hyperclass label registry state active if registries were not cleared before re-rendering.
 * Java regression tests could not run because `mvn` was not available on the machine PATH; the repo now provides `mvn.cmd`, `mvn.ps1`, and `scripts/bootstrap_maven.ps1`.
+* `rg` was not available in the environment; the repo now provides `rg.cmd`, `rg.ps1`, and `scripts/bootstrap_ripgrep.ps1`.
 * `it_infrastructure_world_complete_structure.json` was removed from the model set and must not remain in manifests, tests, or large-model special-case references.
-
-Known data issue still detected by deep validation:
-
-* `tools/validate_models.py` can fail because `models/satellite_world_complete_structure.json` and `models/satellite_world_complete_structure2.json` contain duplicate global model IDs. Treat this as a model data failure, not a JavaScript rendering failure.
+* `models/satellite_world_complete_structure2.json` reused entity IDs from `models/satellite_world_complete_structure.json`; the second satellite model now uses a distinct `satellite_world_complete_structure2_*` ID namespace.
+* AI Support now needs provider-specific model presets, optional custom model entry, reasoning effort selection where supported, and pink section styling.
 
 Regression coverage required for these issues:
 
@@ -56,7 +57,8 @@ Regression coverage required for these issues:
 * Load a satellite model and verify label font sizes remain readable at near, default, and far zoom distances.
 * Restart the server and validate both manifests after removing or adding model files.
 * Run Maven through the repo-local wrapper so Java checks are never skipped because global Maven is missing.
-* Record any current model-data validation failure separately from code regressions.
+* Keep AI keys out of model JSON, exports, collaboration drafts, diagnostics, and debug logs.
+* Run `py tools\validate_models.py` and require all model IDs to be globally unique.
 
 ## 3. Prerequisites
 
@@ -148,6 +150,7 @@ Expected debug output:
 
 Validate:
 
+* The shell menu shows app version `v1.0`.
 * The connection indicator turns green/connected.
 * Stopping the server turns the indicator red/not connected after polling catches up.
 * Restarting the server reconnects the UI.
@@ -216,6 +219,7 @@ Validate:
 * Save writes to `./models/` in connected mode.
 * Existing model overwrite creates a backup under `models/.backups/`.
 * The JSON panel reflects the current model.
+* `AI Support` appears below `Model`, is collapsed by default, and does not trigger AI network calls on page load.
 
 Manual edit workflow:
 
@@ -241,6 +245,45 @@ Manual edit workflow:
 20. Switch back to 2-D and verify layout is preserved.
 21. Save.
 22. Reload the model and verify the saved changes are present.
+
+AI Support manual workflow:
+
+1. Expand `AI Support`.
+2. Confirm provider choices include `ChatGPT/OpenAI`, `ChatGPT Pro / Manual`, `Claude/Anthropic`, `Local/Ollama`, and `Custom OpenAI-compatible`.
+3. Confirm the section accent is pink and still readable in collapsed and expanded states.
+4. Select `ChatGPT/OpenAI` and confirm model presets include valid API model IDs such as `GPT-5.5`, `GPT-5.4`, `GPT-5.4 Mini`, and `GPT-4.1`.
+5. Select a reasoning-capable OpenAI model and confirm the Reasoning Effort combo offers `none`, `low`, `medium`, `high`, and `xhigh`.
+6. Select `Custom model...` and confirm the custom model text field appears without losing the provider selection.
+7. Select `ChatGPT/OpenAI` and confirm the API key field appears only when the server does not report configured credentials.
+8. Confirm the API key field is masked by default and the show/hide toggle works.
+9. Enter a valid transient API key and confirm the connection status automatically turns green after provider validation, without pressing `Reconnect`.
+10. Enter an invalid transient API key and confirm the connection status turns red and shows the provider cause, for example an invalid key, unavailable model, billing, or permission error.
+11. Confirm `Reconnect` reruns the same real provider validation and never reports green without a provider success.
+12. Select `Local/Ollama` and confirm no key field is required while Base URL is visible.
+13. Select `Custom OpenAI-compatible` and confirm Base URL is required while API key remains optional.
+14. Confirm operation modes include `Generate new model`, `Validate current model`, and `Improve current model`.
+15. Enter an HBDS request and click `Send Request`.
+16. With the default backend configuration and no transient key, confirm the server-prepared prompt requires JSON-only HBDS output, layout `none`, computed element positions, selected model, and selected reasoning effort.
+17. Select `ChatGPT Pro / Manual` and confirm no API key, Base URL, model, or reasoning controls are required.
+18. In manual mode, click `Generate Prompt`, then confirm `Copy Prompt`, `Open ChatGPT`, `Paste AI Response`, and `Validate Response` are visible.
+19. Click `Open ChatGPT` and confirm it opens `https://chatgpt.com/` in a separate tab without sending credentials from HBDS.
+20. Paste a Markdown-fenced response and confirm validation rejects it.
+21. Paste valid HBDS JSON with `metadata`, `hypergraph.class`, `hypergraph.link`, valid IDs, valid references, and numeric positions for all elements; confirm `Apply AI Result` becomes enabled.
+22. Confirm provider responses that use common AI aliases such as `kind`, `attribute`, `source`, and `target` are normalized to HBDS fields `type`, `attributes`, `sourceClassId`, and `targetClassId` before validation.
+23. When testing real provider calls, either enable `HBDS_AI_ENABLED` with a server environment key or provide a transient UI key for providers that require one.
+24. Confirm provider text is shown in the preview and `Apply AI Result` is enabled only when a valid HBDS model response is parsed.
+25. Confirm AI configuration and keys are not written into the JSON preview, saved model, selected export, collaboration presence, or collaboration draft.
+26. Click `Apply AI Result` and confirm a dedicated `AI Changes Preview` window opens before any model is saved.
+27. Confirm the diff window summarizes added, removed, renamed, and modified classes, attributes, links, and metadata.
+28. Confirm the diff window `Close` button is in the bottom action row, and the action buttons stay on one row on desktop with distinct preview, new-model, save, cancel, and close colors.
+29. Confirm removed or renamed existing elements require the destructive-change checkbox before `Apply and Save` or `Apply as New Model` can run.
+30. Click `Preview on Canvas` and confirm the AI model displays with a temporary grid layout, the saved AI JSON still keeps its original layout metadata such as `layout.algorithm = "none"`, and no model file is saved by preview alone.
+31. Click `Rollback AI Apply` after preview and confirm the previous model returns.
+32. Click `Apply as New Model` from the diff window and confirm the AI model displays on the canvas, appears in the model selector, and is saved under `./models/` in Edit mode or `./test_models/` in Tests mode.
+33. Select `Validate current model` or `Improve current model`, apply the result to the same selected file, and confirm rollback restores the previous saved model content.
+34. Apply an AI result as a new model, then click `Rollback AI Apply` and confirm the newly-created AI model is deleted and the previous selection is restored.
+35. Confirm `Delete Model` appears in `Session` between `Save` and `Reset`, requires confirmation, keeps a backup under `.backups`, refreshes the selector/manifest, and refuses protected default models unless an explicit API override is used.
+36. Confirm `/api/ai/apply`, `/api/ai/rollback`, `DELETE /api/models/{modelName}`, and `DELETE /api/model-files/{scope}/{modelName}` are present in Swagger and match the browser behavior above.
 
 ## 9. Tests View Test
 
@@ -278,6 +321,7 @@ Validate:
 
 * Help opens as a panel.
 * Keyboard/help content is grouped under Help.
+* The comprehensive `User Guide` section is present and covers model loading, navigation, editing classes/hyperclasses/attributes/links, layout/view controls, saving, deleting, collaboration, AI Support, ChatGPT Pro manual workflow, API key handling, AI request/validation, Preview on Canvas, apply/save, rollback, and Edit versus Tests save locations.
 * API documentation link opens a readable HTML documentation page.
 * OpenAPI link or direct URL can return JSON.
 
@@ -372,6 +416,31 @@ $spec = Invoke-RestMethod http://127.0.0.1:8010/api/openapi.json
 $spec.openapi
 $spec.paths.PSObject.Properties.Name
 ```
+
+AI support endpoints:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8010/api/ai/providers
+Invoke-RestMethod http://127.0.0.1:8010/api/ai/connection -Method Post -ContentType 'application/json' -Body '{"providerId":"chatgpt-manual"}'
+Invoke-RestMethod http://127.0.0.1:8010/api/ai/prompt -Method Post -ContentType 'application/json' -Body '{"providerId":"openai","modelName":"gpt-5.5","reasoningEffort":"xhigh","operationMode":"generate","requestText":"Generate a small HBDS model"}'
+Invoke-RestMethod http://127.0.0.1:8010/api/ai/apply -Method Post -ContentType 'application/json' -Body '{"scope":"models","operationMode":"generate","saveMode":"new","requestedName":"AI Smoke","model":{"metadata":{"name":"AI Smoke","layout":{"algorithm":"none"}},"hypergraph":{"class":[],"link":[]}}}'
+```
+
+Expected:
+
+* `/api/ai/providers` reports provider capability metadata and whether real AI calls are enabled.
+* `/api/ai/connection` validates provider credentials and model access when a server key or transient UI key is available, and returns provider error causes without exposing secrets.
+* OpenAI provider metadata includes valid API model presets such as `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, and `gpt-4.1`, plus reasoning-effort support where applicable.
+* `ChatGPT Pro / Manual` provider metadata reports `manualWorkflow: true` and never requires an API key.
+* Provider responses never expose secret values or environment variable values.
+* `/api/ai/prompt` returns a deterministic `hbds-ai-prompt-v1` enhanced prompt and attempts the selected API provider call when `HBDS_AI_ENABLED` is true or when a transient user key is supplied.
+* `/api/ai/prompt` must never call an external provider for `ChatGPT Pro / Manual`; it only prepares a copy/paste prompt.
+* The enhanced prompt requires JSON only, valid HBDS JSON, layout `none`, computed positions, selected model, and selected reasoning effort.
+* AI model responses using common aliases are normalized before validation: `kind` to `type`, `attribute` to `attributes`, and `source`/`target` to `sourceClassId`/`targetClassId`.
+* `/api/ai/apply` saves normalized AI models to `models` or `test_models`, refreshes manifests, returns the saved model, and never accepts or returns provider keys.
+* `/api/ai/rollback` saves a previous HBDS snapshot over the selected model after validate/improve apply.
+* `DELETE /api/models/{modelName}` and `DELETE /api/model-files/{scope}/{modelName}` move models to `.backups`, refresh manifests, clear drafts, and publish `model.updated`.
+* Real AI provider calls are disabled unless `HBDS_AI_ENABLED` is explicitly enabled or a transient user key is supplied; user-provided keys are transient and must not appear in responses, logs, saved models, exports, or collaboration state.
 
 Server-Sent Events can be manually checked in a browser by opening:
 
@@ -805,6 +874,25 @@ http://127.0.0.1:8010/test_dynamic_hbds_layout.html?modelsPath=models/&manifestP
 3. Wait for the status message.
 4. Confirm near, default, and far zoom samples keep readable class, hyperclass, and attribute text.
 
+Model font settings regression:
+
+1. Open Edit or Tests and load `test_models/render_033_font_properties.json`.
+2. Change the general Settings > Font size and confirm class, hyperclass, attribute, and link labels update immediately without pan, zoom, move, fit, or selection.
+3. Confirm changing the general slider does not clear category-level or element-level font-size overrides.
+4. Change Class, Hyperclass, Attribute, and Link font size controls independently.
+5. Confirm each dedicated size affects only its own text type, overrides the general size, and clears existing element-level font-size overrides for that same text type only.
+6. Change a selected class, hyperclass, attribute, and link label font size in Appearance and confirm the element-level value overrides the category and general size.
+7. For attributes, validate every supported font-size storage path:
+   * individual attribute override: `attribute.font.size`
+   * legacy/nested attribute override: `attribute.rendering.font.size`
+   * class-level attribute rendering override: `node.rendering.attributes.font.size`
+   * class-level shorthand overrides: `node.rendering.attributes.fontSize` and `node.rendering.attributes.labelFontSize`
+8. Change the Attribute font-size control and confirm all attribute font-size override paths listed above are cleared, so every attribute label inherits `metadata.font.attributeSize`.
+9. Click `Apply Overall Font To All` and confirm it preserves the current overall font size, clears `metadata.font.classSize`, `metadata.font.hyperclassSize`, `metadata.font.attributeSize`, and `metadata.font.linkSize`, and clears all element-level font-size overrides, including the attribute-specific paths listed above.
+10. Save, reload, and confirm general, category-level, and element-level font values persist according to the latest edits.
+11. Load `test_models/links_034_extended_arrow_types.json`, change the Link font-size control, and confirm all link `labelFontSize` element overrides are cleared so link labels inherit `metadata.font.linkSize`.
+12. Load a dense linked model and confirm link labels remain controlled by link-specific or per-type link sizing and do not regress into large overlap.
+
 ## 21. Layout Regression
 
 In Edit or Tests:
@@ -863,6 +951,7 @@ Feature scope:
 * selected attribute move up/down
 * selected link source/target swap
 * selected link route presets
+* selected link arrow type, arrow direction, line style, line width, line color, and arrow color
 * selected subgraph JSON export
 
 Affected source and documentation files:
@@ -890,14 +979,19 @@ Manual validation:
 8. Add multiple attributes with Bulk Attributes and confirm duplicate names are rejected before applying.
 9. Move the selected attribute up and down, preserving its name, type, value, and rendering fields.
 10. Select a link, swap source and target, then apply `auto`, `horizontal`, `vertical`, `direct`, and `orthogonal` route presets.
-11. Export Selected and confirm the JSON includes selected nodes, descendants of selected hyperclasses, and links where both endpoints are included.
-12. Confirm Export Selected does not mutate the active model or current selection.
+11. Select a link and apply arrow types `triangle`, `outline`, `chevron`, `double-chevron`, `triple-chevron`, `filled-triangle`, `hollow-triangle`, `dotted`, `bar-arrow`, `double-bar-arrow`, `cone`, `diamond`, and `none`.
+12. Confirm `source-to-target`, `target-to-source`, `bidirectional`, and `none` arrow directions render correctly and save into link `rendering`.
+13. Confirm line styles `solid`, `dashed`, `dotted`, `thick`, and `thin` remain independent from arrow type, line width, line color, and arrow color.
+14. Load `test_models/links_034_extended_arrow_types.json`, `test_models/render_030_extended_shape_class_bodies.json`, and `test_models/render_031_class_image_gallery.json`; confirm link labels remain readable and arrow heads stay attached to routed link endpoints.
+15. Export Selected and confirm the JSON includes selected nodes, descendants of selected hyperclasses, and links where both endpoints are included.
+16. Confirm Export Selected does not mutate the active model or current selection.
 
 Expected pass criteria:
 
 * Productivity controls are hidden or disabled when no compatible selection exists.
 * Duplicate and paste produce unique IDs and readable names.
 * Link helpers operate only on selected links.
+* New link rendering fields save, load, show in the property panel, and appear in collaboration diff text.
 * Bulk attribute actions do not create duplicate attribute names.
 * Export Selected produces valid model JSON without changing the open model.
 * The browser console has no new runtime errors during the workflow.
@@ -920,9 +1014,8 @@ Execution order:
 
 Automated pass criteria:
 
-* All automated checks must pass except explicitly accepted known data issues.
-* The current accepted known data issue is `py tools\validate_models.py` failing because `models/satellite_world_complete_structure.json` and `models/satellite_world_complete_structure2.json` share duplicate global model IDs.
-* If `py tools\validate_models.py` fails for any different reason, treat it as a new failure.
+* All automated checks must pass.
+* `py tools\validate_models.py` must pass; duplicate satellite IDs are no longer an accepted data issue.
 * Browser regressions must pass with no significant console errors.
 * The run is complete only when no remaining failure requires code changes.
 
@@ -943,6 +1036,8 @@ Validate manifests:
 ```powershell
 py tools\validate_manifests.py
 ```
+
+This includes the dedicated link rendering regression model `test_models\links_034_extended_arrow_types.json` plus extended arrow coverage in test models 30 and 31.
 
 Validate model metadata and unique IDs:
 
@@ -968,6 +1063,12 @@ Run productivity helper tests:
 node scripts\productivity_helpers_test.mjs
 ```
 
+Run AI Support helper tests:
+
+```powershell
+node scripts\ai_support_test.mjs
+```
+
 Run collaboration draft helper tests:
 
 ```powershell
@@ -984,16 +1085,23 @@ This opens real headless Edge/Chrome clients with `debug=1`, verifies second-pag
 
 Automated collaboration coverage:
 
+* shell menu displays app version `v1.0`
+* Help includes the comprehensive user guide with AI, model delete, rollback, collaboration, and Edit/Tests save-location guidance
+* AI Support panel collapsed by default, pink section styling, provider-dependent credential UI, provider-specific model combo, custom model fallback, reasoning effort payload, and ChatGPT Pro / Manual no-key workflow
+* manual ChatGPT workflow prepares a prompt, exposes copy/open/paste/validate controls, rejects Markdown-fenced responses, and enables Apply only for strict valid HBDS JSON
+* AI apply opens the dedicated diff window, keeps the close button in the bottom action row, keeps desktop action buttons aligned on one row, uses a grid Preview on Canvas without changing saved layout metadata, saves new AI models, deletes AI-created models from the Session control, and rolls back saved AI apply results
+* AI key masking, redacted debug state, no key leakage into model JSON, and no automatic AI result application
 * two real browser clients on the same model
 * second-page model selection while another client is already active
 * live draft publishing from UI edits
 * operation-only remote draft display
 * merge enablement for safe class and link operations
+* link operation summaries for arrow type, arrow direction, arrow color, line color, and line width changes
 * merge disablement for display-only or mixed non-mergeable operations
 * real-time replacement of `Remote operations` rows without stale text
 * class rename, movement, rendering, parent, attribute, create, and delete operation summaries
-* link update, create, and delete operation summaries
-* layout, font, scene, and viewport operation summaries
+* link update, create, and delete operation summaries, including expanded arrow rendering fields
+* layout, general font, per-type font, scene, and viewport operation summaries
 * collaboration performance diagnostics for panel render, draft build, and draft publish
 * absence of wait popups and canvas collaboration progress indicators during normal updates
 * visible non-blocking canvas progress indicator for intentionally long collaboration work
@@ -1196,6 +1304,7 @@ Before release:
 * run `py tools\validate_test_models.py`
 * run `py tools\lint_model_naming.py`
 * run `node scripts\productivity_helpers_test.mjs`
+* run `node scripts\ai_support_test.mjs`
 * run `node scripts\collaboration_drafts_test.mjs`
 * run `py scripts\collaboration_browser_regression.py`
 * run JavaScript syntax checks for all `js/*.js` modules

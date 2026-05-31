@@ -14,7 +14,7 @@ An interactive browser-based simulator for **Hypergraph-Based Data Structures (H
 
 This README is the main entry point for setup, features, server mode, API endpoints, usage, and project structure. Other project Markdown files:
 
-* [Test_and_Integration.md](Test_and_Integration.md) - authoritative validation and integration checklist, including smoke tests, model validators, JavaScript syntax checks, optional Maven tests, manual workflows, and expected pass/fail reporting.
+* [Test_and_Integration.md](Test_and_Integration.md) - authoritative validation and integration checklist, including smoke tests, model validators, AI helper tests, JavaScript syntax checks, Maven tests through the repo-local wrapper, browser regressions, manual workflows, and expected pass/fail reporting.
 * [Prompt4HDBS_graphi_ simulator.md](Prompt4HDBS_graphi_%20simulator.md) - reverse-engineering and phased implementation prompt for covering the full HBDS Graphic Simulator capability set.
 
 Generated preview caches may contain third-party Markdown under hidden directories such as `.codex_previews/`; those files are not project documentation.
@@ -29,6 +29,13 @@ This week the project added a larger local-server workflow and collaboration sur
 * **OpenAPI specification**: `GET /api/openapi.json` remains available for tools and clients that need machine-readable API metadata.
 * **Automatic manifests**: `models/models_manifest.json` and `test_models/test_models_manifest.json` are regenerated every time `server.py` starts.
 * **Scoped test-model saving**: saves from the Tests workspace use `./test_models/`.
+* **AI Support**: Edit and Tests include an AI Support panel for HBDS model generation, validation, and improvement using OpenAI/ChatGPT, Claude/Anthropic, Local/Ollama, custom OpenAI-compatible providers, or ChatGPT Pro manual copy/paste.
+* **Transient AI keys**: API keys entered in the UI are held in memory only, validated against the provider, and are not written into saved models, exports, collaboration drafts, diagnostics, or server responses.
+* **AI response validation**: AI output must be strict HBDS JSON. Common aliases such as `kind`, `attribute`, `source`, and `target` are normalized before validation.
+* **AI changes preview**: applying AI results opens a dedicated diff window. `Preview on Canvas` displays a temporary grid-arranged preview while keeping saved AI JSON layout metadata unchanged unless the user explicitly saves another layout.
+* **AI apply, save, and rollback**: AI results can update the current model, save as a new model, or roll back the last AI apply. Save-as-new rollback deletes the AI-created file and restores the previous selection.
+* **Model deletion**: Edit and Tests include `Delete Model` in Session. Deletes keep a backup under the matching `.backups/` directory, refresh manifests, and refuse protected default models.
+* **Swagger coverage**: the OpenAPI docs include AI provider, prompt, apply, rollback, model delete, scoped model, draft, event, and operation endpoints.
 * **Model operations API**: element-level operations can be applied through the server with revision checks and automatic merge for simple non-conflicting stale edits.
 * **Live collaboration**: Edit and Tests views publish live draft state over Server-Sent Events and show other users in a floating collaboration panel.
 * **Collaboration conflict choices**: users can choose `Merge Both`, `Use Theirs`, or `Keep Mine` before saving over another active edit.
@@ -39,20 +46,23 @@ This week the project added a larger local-server workflow and collaboration sur
 * **Per-change timestamp history**: older remote changes keep their first-seen time when later remote updates arrive.
 * **Models view cleanup**: Models mode is read-focused and keeps model selection, 3-D view, fit, zoom, and overview behavior without edit/save controls.
 * **Editing cleanup**: attribute deletion has a dedicated button, and selected link deletion now uses explicit link text.
-* **Regression coverage**: the smoke suite now checks health, OpenAPI, manifests, drafts, events, presence, scoped saves, operation merge, stale conflicts, and server shutdown.
+* **Tool wrappers**: repo-local `mvn.cmd`, `mvn.ps1`, `rg.cmd`, and `rg.ps1` wrappers are available when global Maven or ripgrep is not installed.
+* **Regression coverage**: the smoke suite now checks health, OpenAPI, manifests, AI apply/rollback/delete APIs, drafts, events, presence, scoped saves, operation merge, stale conflicts, and server shutdown. Browser regression covers the shell version, Help user guide, AI UI, AI diff modal, AI grid preview, delete, rollback, and collaboration flows.
 
 ## Features
 
 * **2-D and 3-D views**: switch between an editable 2-D canvas and an orbitable 3-D view.
 * **Models, Edit, and Tests workspaces**: use Models for read-focused viewing, Edit for model editing, and Tests for regression/test models.
-* **Class, hyperclass, attribute, and link rendering**: visualize nested hyperclasses, attributes, and relationships between classes.
+* **Class, hyperclass, attribute, and link rendering**: visualize nested hyperclasses, attributes, and relationships with expanded arrow types, directions, line styles, and colors.
 * **Direct manipulation**: drag classes and hyperclasses in editable mode.
 * **Layout tools**: fit models to the canvas and optimize placement with `grid`, `hierarchy`, or `radial` layout algorithms where editing is enabled.
+* **AI-assisted modeling**: prepare HBDS-specific AI prompts, validate strict JSON responses, preview AI results on the canvas, apply/save AI models, and roll back the last AI apply.
 * **Overview minimap**: navigate larger models with the built-in model overview.
 * **Model tree navigation**: search, inspect, and select classes, hyperclasses, attributes, and links from a compact tree sidebar in editable workspaces.
 * **Productivity editing**: duplicate or copy/paste selected nodes, add multiple attributes at once, reorder attributes, swap link endpoints, and apply route presets.
 * **Selected subgraph export**: download JSON for selected nodes plus links whose endpoints are included.
 * **Model export and server save**: download JSON locally or save through the Python server when connected.
+* **Model deletion**: delete the selected saved model from Edit or Tests, with a backup retained under `.backups/`.
 * **Live collaboration UI**: see other connected users, inspect their live draft, review remote differences, and choose how to resolve save conflicts.
 * **Local model API**: load, save, draft, stream, and merge model changes through the Python backend.
 * **Dynamic layout test page**: use `test_dynamic_hbds_layout.html` to add, delete, link, test, and export model elements during development.
@@ -124,7 +134,7 @@ The main shell has four menu entries:
 * **Models**: read-focused model viewer. It keeps model selection, 3-D toggle, fit, zoom, and overview behavior. Save and layout-edit controls are hidden.
 * **Edit**: editable workspace for files from `models/`.
 * **Tests**: editable workspace for files from `test_models/`; server saves stay under `./test_models/`.
-* **Help**: project help, API documentation links, and keyboard help.
+* **Help**: project help, a comprehensive user guide, API documentation links, and keyboard help.
 
 ## Collaboration
 
@@ -151,16 +161,23 @@ Connected mode exposes these main endpoints:
 * `GET /api/models` - list JSON models in `models/`.
 * `GET /api/models/{modelName}` - load one model from `models/`.
 * `POST /api/models/{modelName}` - validate and save one model into `models/`.
+* `DELETE /api/models/{modelName}` - delete one model from `models/` after creating a backup.
 * `POST /api/models/{modelName}/ops` - apply element-level model operations with revision checks.
 * `GET /api/models/{modelName}/drafts` - list live drafts for one model.
 * `POST /api/models/{modelName}/drafts/{clientId}` - publish one client's live model draft.
 * `DELETE /api/models/{modelName}/drafts/{clientId}` - clear one client's live draft.
 * `GET /api/model-files/{scope}/{modelName}` - load a model from `models` or `test_models`.
 * `POST /api/model-files/{scope}/{modelName}` - save a scoped model file; scoped saving is enabled for `test_models`.
+* `DELETE /api/model-files/{scope}/{modelName}` - delete a scoped model file after creating a backup.
 * `GET /api/drafts/{scope}/{modelName}` - list scoped live drafts.
 * `POST /api/drafts/{scope}/{modelName}/clients/{clientId}` - publish a scoped live draft.
 * `DELETE /api/drafts/{scope}/{modelName}/clients/{clientId}` - clear a scoped live draft.
 * `GET /api/events` - Server-Sent Events stream for presence, model updates, draft updates, and draft clears.
+* `GET /api/ai/providers` - list AI provider capabilities without exposing secrets.
+* `POST /api/ai/connection` - validate an AI provider credential and selected model.
+* `POST /api/ai/prompt` - prepare the deterministic HBDS AI prompt and optionally call the selected provider when enabled.
+* `POST /api/ai/apply` - normalize, validate, save, and return an AI-produced HBDS model.
+* `POST /api/ai/rollback` - restore a previous HBDS snapshot after an AI apply.
 * `GET /api/docs` - browser-readable API documentation.
 * `GET /api/openapi.json` - machine-readable OpenAPI specification.
 
@@ -200,10 +217,15 @@ When running with `server.py`, adding or removing a model file only requires res
 * **Move Attr Up** and **Move Attr Down** reorder the selected attribute while preserving its data and rendering fields.
 * **Swap Link** reverses the selected link source and target.
 * **Route** presets update selected link routing with `auto`, `horizontal`, `vertical`, `direct`, or `orthogonal`.
+* **Link styling** supports filled, outline, chevron, dotted, bar-arrow, cone, diamond, bidirectional, and plain association arrows with independent direction, line style, width, line color, arrow color, and label size.
+* **Font settings** include one overall model font size plus dedicated class, hyperclass, attribute, and link font sizes. Changing a dedicated size clears same-type element font-size overrides; **Apply Overall Font To All** clears every category and element font-size override so all labels inherit the current overall size.
 * **Export Selected** downloads a JSON subgraph containing selected nodes, descendants of selected hyperclasses, and links where both endpoints are included.
 * **Delete Attribute** removes the selected attribute without deleting its owning class.
 * **Delete selected link** removes the selected link when a link is selected.
 * **Save** writes to the active workspace in connected mode or downloads JSON in browser-only mode.
+* **Delete Model** removes the selected saved model in connected mode after confirmation and leaves a backup under `.backups/`.
+* **AI Support** can generate a new HBDS model, validate the current model, or improve the current model. ChatGPT Pro / Manual mode prepares a copy/paste prompt for ChatGPT without using an API key.
+* **AI Changes Preview** appears before saving an AI result. Use Preview on Canvas for a temporary grid-arranged view, Apply and Save for same-file validate/improve workflows, Apply as New Model for a new file, and Rollback AI Apply to restore the previous state.
 
 ## Testing
 
@@ -223,6 +245,9 @@ The smoke test starts a temporary server port and verifies:
 
 * health and disconnected states
 * OpenAPI generation
+* link rendering schema for arrow type, arrow direction, line style, line color, arrow color, and label font size
+* model font settings with overall, per-type, element-level, and reset-all inheritance behavior
+* AI provider metadata, prompt preparation, AI apply, AI rollback, and AI-created model deletion
 * automatic manifest generation
 * model list/load/save
 * revision conflict handling
@@ -238,7 +263,15 @@ Optional model checks:
 
 ```sh
 python tools/validate_manifests.py
+python tools/validate_models.py
+python tools/validate_test_models.py
 python tools/lint_model_naming.py
+```
+
+Run AI Support helper coverage:
+
+```sh
+node scripts/ai_support_test.mjs
 ```
 
 Run productivity helper coverage:
@@ -251,16 +284,24 @@ Run JavaScript syntax checks for the editable workspace and helper modules:
 
 ```sh
 Get-Content -Raw js/test_dynamic_hbds_layout.js | node --input-type=module --check
+Get-Content -Raw js/hbds_server_api.js | node --input-type=module --check
+Get-Content -Raw js/hbds_ai_support.js | node --input-type=module --check
 Get-Content -Raw js/hbds_model_productivity.js | node --input-type=module --check
 ```
 
-On systems where Maven is installed, Java tests can be run with:
+Run the browser collaboration and AI UI regression:
 
 ```sh
-mvn test
+python scripts/collaboration_browser_regression.py
 ```
 
-This repository currently does not include a Maven wrapper, so `mvn` must be installed separately.
+Run Java tests through the repo-local Maven wrapper:
+
+```sh
+.\mvn.cmd test
+```
+
+If the wrapper is missing, run `.\scripts\bootstrap_maven.ps1` first. The repository also includes `rg.cmd` and `rg.ps1`; run `.\scripts\bootstrap_ripgrep.ps1` if the ripgrep wrapper needs to be recreated.
 
 ## Project Structure
 
@@ -270,17 +311,22 @@ This repository currently does not include a Maven wrapper, so `mvn` must be ins
 |-- icons/                         # Shell and menu icons
 |-- images/                        # Model/image assets
 |-- js/                            # HBDS rendering, model, layout, server, and collaboration modules
+|-- js/hbds_ai_support.js          # AI provider, prompt, validation, and response-normalization helpers
 |-- js/hbds_model_productivity.js  # Pure helpers for duplicate, paste, route preset, and subgraph export workflows
 |-- models/                        # Standard/sample HBDS JSON models
 |-- test_models/                   # Regression and test HBDS JSON models
 |-- pictures/                      # README and project images
 |-- scripts/smoke_server.py        # Server regression smoke suite
+|-- scripts/ai_support_test.mjs    # Node checks for AI Support helper behavior
 |-- scripts/productivity_helpers_test.mjs # Node checks for productivity helper behavior
+|-- scripts/collaboration_browser_regression.py # Headless browser regression for shell, AI UI, and collaboration
 |-- tools/                         # Manifest and naming validation helpers
 |-- index.html                     # Main shell: Models, Edit, Tests, Help
 |-- index_models.html              # Models viewer
 |-- test_dynamic_hbds_layout.html  # Editable dynamic layout/test UI
 |-- server.py                      # Local UI/API/collaboration server
+|-- mvn.cmd, mvn.ps1               # Repo-local Maven wrappers
+|-- rg.cmd, rg.ps1                 # Repo-local ripgrep wrappers
 `-- pom.xml                        # Java/Maven scaffold, not required for the browser app
 ```
 
@@ -291,7 +337,7 @@ This repository currently does not include a Maven wrapper, so `mvn` must be ins
 * [ ] Add richer relationship editing between hyperclasses and classes.
 * [ ] Add stronger visual conflict resolution for complex simultaneous edits.
 * [ ] Add undo/redo coverage for productivity operations.
-* [ ] Add a committed Maven wrapper so Java tests can run without a global Maven install.
+* [ ] Add broader undo/redo coverage around AI preview, apply, and rollback workflows.
 
 See the [open issues](https://github.com/arcazj/openbexi_hbds/issues) for proposed features and known issues.
 

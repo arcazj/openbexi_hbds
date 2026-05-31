@@ -7,7 +7,60 @@
       "human",
       "car",
       "links"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.35,
+        "fitHeightDistance": 3.0447,
+        "fitWidthDistance": 5.5382,
+        "distance": 5.6125,
+        "diagramWidth": 5.6,
+        "diagramHeight": 2.2,
+        "diagramDepth": 0.11,
+        "radius": 3.0088,
+        "center": {
+          "x": 22.2,
+          "y": 5,
+          "z": 0.055
+        },
+        "cameraAspect": 1.3994,
+        "cameraFov": 52,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 2
+      }
+    },
+    "font": {
+      "size": 18,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
   },
   "hypergraph": {
     "class": [
@@ -27,7 +80,7 @@
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.2,
           "height": 2.2
         },
         "rendering": {
@@ -41,13 +94,19 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
             "lineColor": "#000000",
             "lineWidth": 0.01
           },
-          "textColor": "#000000"
+          "textColor": "#000000",
+          "font": {
+            "size": 32
+          }
         }
       },
       {
@@ -66,7 +125,7 @@
           "z": 0
         },
         "size": {
-          "width": 1,
+          "width": 1.2,
           "height": 2.2
         },
         "rendering": {
@@ -80,13 +139,19 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
             "lineColor": "#000000",
             "lineWidth": 0.01
           },
-          "textColor": "#000000"
+          "textColor": "#000000",
+          "font": {
+            "size": 38
+          }
         }
       }
     ],
@@ -96,6 +161,7 @@
         "targetClassId": "human_and_car_links_2",
         "rendering": {
           "labelText": "drive",
+          "orthogonalStyle": "auto",
           "lineColor": "#1a237e",
           "lineWidth": 2,
           "lineStyle": "solid",
@@ -103,7 +169,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#0d1321",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.43,
@@ -111,13 +177,15 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8
         },
-        "id": "human_and_car_links_link_1_to_2_001"
+        "id": "human_and_car_links_link_1_to_2_001",
+        "allowSelfLink": true
       },
       {
         "sourceClassId": "human_and_car_links_1",
         "targetClassId": "human_and_car_links_2",
         "rendering": {
           "labelText": "own",
+          "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
           "lineStyle": "dashed",
@@ -125,7 +193,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#0b3d02",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelPositionAlongPath": 0.58,
@@ -133,7 +201,8 @@
           "labelRotationBehavior": "follow",
           "zIndex": 8
         },
-        "id": "human_and_car_links_link_1_to_2_002"
+        "id": "human_and_car_links_link_1_to_2_002",
+        "allowSelfLink": true
       }
     ]
   }

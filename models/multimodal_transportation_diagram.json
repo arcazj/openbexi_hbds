@@ -54,7 +54,7 @@
       "diagram"
     ],
     "font": {
-      "size": 12,
+      "size": 18,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
@@ -127,6 +127,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -199,6 +202,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -267,6 +273,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -327,6 +336,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -400,6 +412,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -456,6 +471,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -508,6 +526,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -556,6 +577,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -624,6 +648,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -680,6 +707,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -732,6 +762,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -800,6 +833,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -860,6 +896,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -908,6 +947,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -976,6 +1018,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1032,6 +1077,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1084,6 +1132,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1151,6 +1202,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1203,6 +1257,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -1227,7 +1284,7 @@
           "curveOffset": 0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#7c2d12",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1264,7 +1321,7 @@
           "curveOffset": -0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#14532d",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": -0.18,
@@ -1296,7 +1353,7 @@
           "curveOffset": 0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#4a148c",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1333,7 +1390,7 @@
           "curveOffset": -0.35,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#4a148c",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": -0.18,
@@ -1365,7 +1422,7 @@
           "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#4a148c",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1397,7 +1454,7 @@
           "curveOffset": 0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#14532d",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1429,7 +1486,7 @@
           "curveOffset": 0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#164e63",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1461,7 +1518,7 @@
           "curveOffset": -0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#713f12",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": -0.18,
@@ -1493,7 +1550,7 @@
           "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#713f12",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1525,7 +1582,7 @@
           "curveOffset": 0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#164e63",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1557,7 +1614,7 @@
           "curveOffset": -0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#831843",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": -0.18,
@@ -1589,7 +1646,7 @@
           "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#164e63",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1621,7 +1678,7 @@
           "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#164e63",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1653,7 +1710,7 @@
           "curveOffset": 0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#164e63",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1685,7 +1742,7 @@
           "curveOffset": -0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#164e63",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": -0.18,
@@ -1717,7 +1774,7 @@
           "curveOffset": 0.35,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#831843",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1749,7 +1806,7 @@
           "curveOffset": -0.35,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#831843",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": -0.18,
@@ -1781,7 +1838,7 @@
           "curveOffset": 0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#1e3a8a",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": 0.18,
@@ -1813,7 +1870,7 @@
           "curveOffset": -0.45,
           "arrowheadVisibility": true,
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 14,
           "labelColor": "#831843",
           "labelBackgroundColor": "rgba(255,255,255,0.95)",
           "labelOffsetFromPath": -0.18,

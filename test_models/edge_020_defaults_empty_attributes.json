@@ -6,7 +6,64 @@
     "regressionTags": [
       "edge",
       "defaults"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.35,
+        "fitHeightDistance": 2.7679,
+        "fitWidthDistance": 7.0538,
+        "distance": 7.1281,
+        "diagramWidth": 7.1325,
+        "diagramHeight": 2,
+        "diagramDepth": 0.11,
+        "radius": 3.7042,
+        "center": {
+          "x": 0.2863,
+          "y": 0,
+          "z": 0.055
+        },
+        "cameraAspect": 1.3994,
+        "cameraFov": 52,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 2
+      }
+    },
+    "font": {
+      "size": 22,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false,
+      "classSize": null,
+      "hyperclassSize": null,
+      "attributeSize": null,
+      "linkSize": null
+    }
   },
   "hypergraph": {
     "class": [
@@ -18,7 +75,12 @@
           "x": -2.1,
           "y": 0,
           "z": 0
-        }
+        },
+        "size": {
+          "width": 2.3600000000000003,
+          "height": 1.6
+        },
+        "type": "roundedRectangle"
       },
       {
         "id": "edge_missing_name_attr",
@@ -37,7 +99,7 @@
           "z": 0
         },
         "size": {
-          "width": 1.55,
+          "width": 2.705,
           "height": 2
         },
         "rendering": {
@@ -65,7 +127,8 @@
             "lineWidth": 0.01
           },
           "textColor": "#0f172a"
-        }
+        },
+        "type": "roundedRectangle"
       }
     ],
     "link": [
@@ -76,18 +139,20 @@
         "name": "default link",
         "rendering": {
           "labelText": "default link",
+          "orthogonalStyle": "auto",
           "lineColor": "#7c4a03",
           "lineWidth": 2,
           "arrowheadSize": 0.12,
           "arrowheadScale": 0.55,
           "maxArrowheadSize": 0.1,
-          "orthogonalStyle": "auto",
           "orthogonalClearance": 0.55,
           "parallelRouteGap": 0.26,
           "labelBackgroundColor": "rgba(255,255,255,0.92)",
           "labelColor": "#111827",
-          "labelFontSize": 12
-        }
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
       }
     ]
   }

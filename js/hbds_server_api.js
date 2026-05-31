@@ -150,6 +150,49 @@ export async function listServerModels(options = {}) {
   };
 }
 
+export async function listAiProviders(options = {}) {
+  return apiRequest('/api/ai/providers', {
+    ...options,
+    timeoutMs: options.timeoutMs ?? 2500
+  });
+}
+
+export async function prepareAiPrompt(payload = {}, options = {}) {
+  return apiRequest('/api/ai/prompt', {
+    ...options,
+    method: 'POST',
+    body: payload,
+    timeoutMs: options.timeoutMs ?? 8000
+  });
+}
+
+export async function validateAiConnection(payload = {}, options = {}) {
+  return apiRequest('/api/ai/connection', {
+    ...options,
+    method: 'POST',
+    body: payload,
+    timeoutMs: options.timeoutMs ?? 12000
+  });
+}
+
+export async function applyAiModel(payload = {}, options = {}) {
+  return apiRequest('/api/ai/apply', {
+    ...options,
+    method: 'POST',
+    body: payload,
+    timeoutMs: options.timeoutMs ?? 12000
+  });
+}
+
+export async function rollbackAiModel(payload = {}, options = {}) {
+  return apiRequest('/api/ai/rollback', {
+    ...options,
+    method: 'POST',
+    body: payload,
+    timeoutMs: options.timeoutMs ?? 12000
+  });
+}
+
 export async function loadServerModel(modelName, options = {}) {
   const name = encodeURIComponent(modelFileNameFromValue(modelName));
   return apiRequest(`/api/models/${name}`, options);
@@ -193,6 +236,28 @@ export async function saveScopedModel(modelName, modelData, options = {}) {
     headers,
     method: 'POST',
     body: modelData
+  });
+}
+
+export async function deleteServerModel(modelName, options = {}) {
+  const name = encodeURIComponent(modelFileNameFromValue(modelName));
+  return apiRequest(`/api/models/${name}`, {
+    ...options,
+    method: 'DELETE',
+    body: options.body || {},
+    timeoutMs: options.timeoutMs ?? 8000
+  });
+}
+
+export async function deleteScopedModel(modelName, options = {}) {
+  const scope = normalizeDraftScope(options.modelScope || options.scope);
+  if (!scope) return deleteServerModel(modelName, options);
+  const name = encodeURIComponent(modelFileNameFromValue(modelName));
+  return apiRequest(`/api/model-files/${encodeURIComponent(scope)}/${name}`, {
+    ...options,
+    method: 'DELETE',
+    body: options.body || {},
+    timeoutMs: options.timeoutMs ?? 8000
   });
 }
 
@@ -453,6 +518,12 @@ async function apiRequest(path, options = {}) {
 
 async function attemptApiRequest(apiBase, path, options, timeoutMs) {
   const controller = new AbortController();
+  let externalAbortHandler = null;
+  if (options.signal) {
+    if (options.signal.aborted) controller.abort();
+    externalAbortHandler = () => controller.abort();
+    options.signal.addEventListener('abort', externalAbortHandler, { once: true });
+  }
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   const headers = clientHeaders(options);
   const requestOptions = {
@@ -528,6 +599,9 @@ async function attemptApiRequest(apiBase, path, options, timeoutMs) {
     };
   } finally {
     clearTimeout(timeoutId);
+    if (options.signal && externalAbortHandler) {
+      options.signal.removeEventListener('abort', externalAbortHandler);
+    }
     if (clientDebugEnabled && !options.skipDebugLog && path !== '/api/debug/logs') {
       recordClientDebugEvent('client.function-timing', {
         functionName: `apiRequest ${requestOptions.method} ${path}`,

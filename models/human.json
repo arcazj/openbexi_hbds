@@ -26,25 +26,28 @@
     "layout": {
       "algorithm": "none",
       "fit": {
-        "padding": 1.18,
-        "fitHeightDistance": 3.7989,
-        "fitWidthDistance": 2.5979,
-        "distance": 4.2094,
+        "padding": 1.35,
+        "fitHeightDistance": 3.7367,
+        "fitWidthDistance": 1.5824,
+        "distance": 4.0807,
         "diagramWidth": 1.6,
         "diagramHeight": 2.7,
         "diagramDepth": 0.11,
         "radius": 1.5702,
         "center": {
-          "x": 20.2,
-          "y": 4.65,
+          "x": 20.2602,
+          "y": 4.4325,
           "z": 0.055
         },
-        "cameraAspect": 1.4623,
-        "cameraFov": 52
+        "cameraAspect": 1.3994,
+        "cameraFov": 52,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 1
       }
     },
     "font": {
-      "size": 48,
+      "size": 18,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
@@ -105,6 +108,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -113,7 +119,7 @@
           },
           "textColor": "#000000",
           "font": {
-            "size": 96,
+            "size": 46,
             "italic": false,
             "bold": true
           }

@@ -53,7 +53,7 @@
       }
     },
     "font": {
-      "size": 12,
+      "size": 18,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
@@ -107,6 +107,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -164,6 +167,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -210,6 +216,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -256,6 +265,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -302,6 +314,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -348,6 +363,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -395,6 +413,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -441,6 +462,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -487,6 +511,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -533,6 +560,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -579,6 +609,9 @@
             "size": {
               "width": 0.12,
               "height": 0.12
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -604,7 +637,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#082f49",
           "labelBackgroundColor": "rgba(224,242,254,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -628,7 +661,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#451a03",
           "labelBackgroundColor": "rgba(254,243,199,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -652,7 +685,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#450a0a",
           "labelBackgroundColor": "rgba(254,226,226,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -676,7 +709,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#3b0764",
           "labelBackgroundColor": "rgba(243,232,255,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -700,7 +733,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#2e1065",
           "labelBackgroundColor": "rgba(237,233,254,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -724,7 +757,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#042f2e",
           "labelBackgroundColor": "rgba(204,251,241,0.95)",
           "labelPositionAlongPath": 0.5,
@@ -748,7 +781,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#422006",
           "labelBackgroundColor": "rgba(254,249,195,0.95)",
           "labelPositionAlongPath": 0.48,
@@ -772,7 +805,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#500724",
           "labelBackgroundColor": "rgba(252,231,243,0.95)",
           "labelPositionAlongPath": 0.52,

@@ -1,11 +1,11 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Lab</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=fit-quality-20260530b">
+  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=ai-preview-guide-20260531a">
   <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -110,6 +110,71 @@
       <div id="model-summary" class="section-meta">Blank workspace</div>
     </section>
 
+    <section class="control-group" data-section="ai-support">
+      <div class="section-title">AI Support</div>
+      <div id="ai-feature-summary" class="section-meta">HBDS AI configuration only. No AI call runs on page load.</div>
+      <label for="ai-provider-select">Provider</label>
+      <select id="ai-provider-select"></select>
+      <div id="ai-credential-status" class="status-chip">Disconnected</div>
+      <label id="ai-api-key-field" for="ai-api-key-input">
+        API Key
+        <span class="ai-secret-row">
+          <input id="ai-api-key-input" type="password" autocomplete="off" spellcheck="false" placeholder="Stored in memory only">
+          <button id="ai-api-key-toggle" type="button" class="quiet">Show</button>
+        </span>
+      </label>
+      <label id="ai-base-url-field" for="ai-base-url-input">Base URL
+        <input id="ai-base-url-input" type="text" autocomplete="off" spellcheck="false" placeholder="http://127.0.0.1:11434">
+      </label>
+      <label id="ai-model-select-field" for="ai-model-select">Model
+        <select id="ai-model-select"></select>
+      </label>
+      <label id="ai-custom-model-field" for="ai-model-input">Custom Model
+        <input id="ai-model-input" type="text" autocomplete="off" spellcheck="false" placeholder="Provider model name">
+      </label>
+      <label id="ai-reasoning-field" for="ai-reasoning-select">Reasoning Effort
+        <select id="ai-reasoning-select">
+          <option value="none">none</option>
+          <option value="low">low</option>
+          <option value="medium">medium</option>
+          <option value="high">high</option>
+          <option value="xhigh">xhigh</option>
+        </select>
+      </label>
+      <label for="ai-operation-select">Operation</label>
+      <select id="ai-operation-select">
+        <option value="generate">Generate new model</option>
+        <option value="validate">Validate current model</option>
+        <option value="improve">Improve current model</option>
+      </select>
+      <label for="ai-request-input">HBDS Request</label>
+      <textarea id="ai-request-input" class="compact-textarea" spellcheck="false" placeholder="Ask for an HBDS model, model validation, or model improvement"></textarea>
+      <div class="control-row">
+        <button id="ai-test-connection-button" type="button">Reconnect</button>
+        <button id="ai-send-request-button" type="button" class="primary">Send Request</button>
+      </div>
+      <div id="ai-manual-actions" class="control-row" hidden>
+        <button id="ai-copy-prompt-button" type="button">Copy Prompt</button>
+        <button id="ai-open-chatgpt-button" type="button">Open ChatGPT</button>
+      </div>
+      <div class="control-row">
+        <button id="ai-cancel-request-button" type="button" disabled>Cancel</button>
+        <button id="ai-discard-result-button" type="button" disabled>Discard</button>
+      </div>
+      <label for="ai-result-preview">AI Result Preview</label>
+      <textarea id="ai-result-preview" class="compact-textarea" spellcheck="false" readonly placeholder="AI response preview or prompt preparation result"></textarea>
+      <label id="ai-manual-response-field" for="ai-manual-response-input" hidden>Paste AI Response
+        <textarea id="ai-manual-response-input" class="compact-textarea" spellcheck="false" placeholder="Paste the JSON response from ChatGPT here"></textarea>
+      </label>
+      <div id="ai-manual-response-actions" class="control-row" hidden>
+        <button id="ai-paste-response-button" type="button">Paste AI Response</button>
+        <button id="ai-validate-response-button" type="button">Validate Response</button>
+      </div>
+      <button id="ai-apply-result-button" type="button" disabled>Apply AI Result</button>
+      <button id="ai-rollback-result-button" type="button" disabled>Rollback AI Apply</button>
+      <div id="ai-status-message" class="section-meta" aria-live="polite">AI backend disabled until configured on the server.</div>
+    </section>
+
     <section class="control-group" data-section="layout-view">
       <div class="section-title">Layout and View</div>
       <label for="layout-algorithm-select">Algorithm</label>
@@ -168,12 +233,17 @@
       <label class="checkbox-wrapper" for="debug-mode-toggle"><input type="checkbox" id="debug-mode-toggle"><span>Debug Logging</span></label>
       <div id="debug-session-id" class="section-meta" aria-live="polite"></div>
       <div class="settings-subtitle">Font</div>
-      <label class="range-field" for="model-font-size-input"><span>Size</span><span class="range-control"><input type="range" id="model-font-size-input" min="6" max="48" step="1" value="12"><output id="model-font-size-value" class="range-value" for="model-font-size-input">12px</output></span></label>
+      <label class="range-field" for="model-font-size-input"><span>Size</span><span class="range-control"><input type="range" id="model-font-size-input" min="6" max="72" step="1" value="12"><output id="model-font-size-value" class="range-value" for="model-font-size-input">12px</output></span></label>
       <label class="inline-field" for="model-font-family-input"><span>Family</span><input type="text" id="model-font-family-input" value="Arial, sans-serif"></label>
       <label class="checkbox-wrapper" for="model-font-bold-input"><input type="checkbox" id="model-font-bold-input"><span>Bold</span></label>
       <label class="checkbox-wrapper" for="model-font-italic-input"><input type="checkbox" id="model-font-italic-input"><span>Italic</span></label>
       <label class="checkbox-wrapper" for="model-font-underline-input"><input type="checkbox" id="model-font-underline-input"><span>Underline</span></label>
-      <button id="reset-model-font-settings-button" type="button" class="quiet">Reset Font Settings</button>
+      <div class="settings-subtitle">Type Font Size</div>
+      <label class="range-field" for="model-class-font-size-input"><span>Class</span><span class="range-control"><input type="range" id="model-class-font-size-input" min="6" max="72" step="1" value="12"><output id="model-class-font-size-value" class="range-value" for="model-class-font-size-input">Overall</output></span></label>
+      <label class="range-field" for="model-hyperclass-font-size-input"><span>Hyperclass</span><span class="range-control"><input type="range" id="model-hyperclass-font-size-input" min="6" max="72" step="1" value="12"><output id="model-hyperclass-font-size-value" class="range-value" for="model-hyperclass-font-size-input">Overall</output></span></label>
+      <label class="range-field" for="model-attribute-font-size-input"><span>Attribute</span><span class="range-control"><input type="range" id="model-attribute-font-size-input" min="6" max="72" step="1" value="12"><output id="model-attribute-font-size-value" class="range-value" for="model-attribute-font-size-input">Overall</output></span></label>
+      <label class="range-field" for="model-link-font-size-input"><span>Link</span><span class="range-control"><input type="range" id="model-link-font-size-input" min="6" max="72" step="1" value="12"><output id="model-link-font-size-value" class="range-value" for="model-link-font-size-input">Overall</output></span></label>
+      <button id="reset-model-font-settings-button" type="button" class="quiet">Apply Overall Font To All</button>
       <div class="settings-subtitle">Lighting</div>
       <label class="inline-field" for="scene-background-input"><span>Background</span><input type="color" id="scene-background-input" value="#eef2f6"></label>
       <label class="range-field" for="horizontal-light-intensity-input"><span>Horizontal Strength</span><input type="range" id="horizontal-light-intensity-input" min="0" max="2" step="0.01" value="1"></label>
@@ -244,6 +314,7 @@
       <div class="section-title">Session</div>
       <div class="control-row">
         <button id="save-model-button" type="button">Save</button>
+        <button id="delete-model-button" type="button" class="danger">Delete Model</button>
         <button id="reset-model-button" type="button" class="danger">Reset</button>
       </div>
       <pre id="layout-status" aria-live="polite"></pre>
@@ -258,7 +329,27 @@
       <div id="command-palette-list" class="command-palette-list" role="listbox"></div>
     </div>
   </div>
+  <div id="ai-diff-modal" class="modal-shell" role="dialog" aria-modal="true" aria-labelledby="ai-diff-title" hidden>
+    <div class="modal-panel ai-diff-panel">
+      <div class="modal-header">
+        <h2 id="ai-diff-title">AI Changes Preview</h2>
+      </div>
+      <div id="ai-diff-summary" class="ai-diff-summary"></div>
+      <div id="ai-diff-content" class="ai-diff-content"></div>
+      <label class="checkbox-wrapper ai-diff-confirm" for="ai-destructive-confirm">
+        <input type="checkbox" id="ai-destructive-confirm">
+        <span>Confirm removed or renamed existing elements</span>
+      </label>
+      <div class="modal-actions ai-diff-actions">
+        <button id="ai-diff-preview-button" type="button">Preview on Canvas</button>
+        <button id="ai-diff-apply-new-button" type="button">Apply as New Model</button>
+        <button id="ai-diff-apply-save-button" type="button" class="primary">Apply and Save</button>
+        <button id="ai-diff-cancel-button" type="button" class="quiet">Cancel</button>
+        <button id="ai-diff-close-button" type="button" class="danger">Close</button>
+      </div>
+    </div>
+  </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=label-readability-20260531c"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=font-types-20260531a"></script>
 </body>
 </html>

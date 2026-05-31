@@ -1,0 +1,4784 @@
+{
+  "$schema": "https://openbexi.local/hbds/model/v1",
+  "metadata": {
+    "id": "AI_Models_World",
+    "name": "AI Models World - HBDS Model",
+    "version": "1.1-ai-support-menu",
+    "description": "HBDS structure describing AI providers, model families, model versions, capabilities, modalities, deployment options, and the HBDS AI Support menu workflows.",
+    "purpose": "Reference model for AI provider concepts and the HBDS AI Support UI, API, manual ChatGPT workflow, security constraints, response validation, and regression coverage.",
+    "regressionTags": [
+      "model",
+      "ai",
+      "ai-support",
+      "manual-chatgpt",
+      "provider-catalog",
+      "response-validation"
+    ],
+    "layout": {
+      "algorithm": "none",
+      "layout": "none"
+    },
+    "sceneSettings": {
+      "background": "#f8fbff",
+      "ambient": 0.75,
+      "front": 0.2
+    },
+    "font": {
+      "size": 18,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "updated": "2026-05-31"
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "HC_AI_WORLD",
+        "name": "AI World",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "name": "domain",
+            "value": "Artificial Intelligence",
+            "id": "HC_AI_WORLD_ATTR_01_DOMAIN"
+          },
+          {
+            "name": "scope",
+            "value": "Public, API, open-weight, enterprise and multimodal AI models",
+            "id": "HC_AI_WORLD_ATTR_02_SCOPE"
+          },
+          {
+            "name": "updated",
+            "value": "2026-05-31",
+            "id": "HC_AI_WORLD_ATTR_03_UPDATED"
+          }
+        ],
+        "rendering": {
+          "color": "#1f4e79",
+          "textColor": "#ffffff",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "children": [],
+        "position": {
+          "x": 0,
+          "y": 12,
+          "z": 0
+        },
+        "size": {
+          "width": 4.8,
+          "height": 2.1
+        }
+      },
+      {
+        "id": "HC_AI_PROVIDERS",
+        "name": "AI Providers",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "name": "role",
+            "value": "Organizations publishing AI models",
+            "id": "HC_AI_PROVIDERS_ATTR_01_ROLE"
+          },
+          {
+            "name": "examples",
+            "value": "OpenAI, Anthropic, Google, Meta, Mistral, Cohere, DeepSeek, xAI",
+            "id": "HC_AI_PROVIDERS_ATTR_02_EXAMPLES"
+          }
+        ],
+        "rendering": {
+          "color": "#2f75b5",
+          "textColor": "#ffffff",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "children": [],
+        "position": {
+          "x": -18,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 4.8,
+          "height": 2.1
+        }
+      },
+      {
+        "id": "HC_MODEL_FAMILIES",
+        "name": "Model Families",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "name": "role",
+            "value": "Groups of related models created by the same provider",
+            "id": "HC_MODEL_FAMILIES_ATTR_01_ROLE"
+          },
+          {
+            "name": "examples",
+            "value": "GPT, Claude, Gemini, Llama, Mistral, Qwen, Grok, Nova",
+            "id": "HC_MODEL_FAMILIES_ATTR_02_EXAMPLES"
+          }
+        ],
+        "rendering": {
+          "color": "#4472c4",
+          "textColor": "#ffffff",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "children": [],
+        "position": {
+          "x": -12,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 4.8,
+          "height": 2.1
+        }
+      },
+      {
+        "id": "HC_MODEL_VERSIONS",
+        "name": "Model Versions",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "name": "role",
+            "value": "Specific released model identifiers or commercial versions",
+            "id": "HC_MODEL_VERSIONS_ATTR_01_ROLE"
+          },
+          {
+            "name": "examples",
+            "value": "GPT-5.5, Claude Opus 4.8, Gemini 3.1 Pro, Llama 4 Maverick",
+            "id": "HC_MODEL_VERSIONS_ATTR_02_EXAMPLES"
+          }
+        ],
+        "rendering": {
+          "color": "#5b9bd5",
+          "textColor": "#ffffff",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "children": [],
+        "position": {
+          "x": -6,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 4.8,
+          "height": 2.1
+        }
+      },
+      {
+        "id": "HC_CAPABILITIES",
+        "name": "AI Capabilities",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "name": "role",
+            "value": "What a model can do",
+            "id": "HC_CAPABILITIES_ATTR_01_ROLE"
+          },
+          {
+            "name": "examples",
+            "value": "chat, reasoning, coding, vision, image generation, speech, video, embeddings, OCR",
+            "id": "HC_CAPABILITIES_ATTR_02_EXAMPLES"
+          }
+        ],
+        "rendering": {
+          "color": "#70ad47",
+          "textColor": "#ffffff",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "children": [],
+        "position": {
+          "x": 0,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 4.8,
+          "height": 2.1
+        }
+      },
+      {
+        "id": "HC_MODALITIES",
+        "name": "Modalities",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "name": "role",
+            "value": "Input and output data types supported by AI models",
+            "id": "HC_MODALITIES_ATTR_01_ROLE"
+          },
+          {
+            "name": "examples",
+            "value": "text, image, audio, video, code, structured data",
+            "id": "HC_MODALITIES_ATTR_02_EXAMPLES"
+          }
+        ],
+        "rendering": {
+          "color": "#a9d18e",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "children": [],
+        "position": {
+          "x": 6,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 4.8,
+          "height": 2.1
+        }
+      },
+      {
+        "id": "HC_DEPLOYMENT",
+        "name": "Deployment Modes",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "name": "role",
+            "value": "How models are accessed or hosted",
+            "id": "HC_DEPLOYMENT_ATTR_01_ROLE"
+          },
+          {
+            "name": "examples",
+            "value": "SaaS app, API, cloud managed, self-hosted, edge, local open-weight",
+            "id": "HC_DEPLOYMENT_ATTR_02_EXAMPLES"
+          }
+        ],
+        "rendering": {
+          "color": "#ed7d31",
+          "textColor": "#ffffff",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "children": [],
+        "position": {
+          "x": 12,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 4.8,
+          "height": 2.1
+        }
+      },
+      {
+        "id": "C_OPENAI",
+        "name": "OpenAI",
+        "type": "provider",
+        "attributes": [
+          {
+            "name": "providerType",
+            "value": "Commercial AI provider",
+            "id": "C_OPENAI_ATTR_01_PROVIDERTYPE"
+          },
+          {
+            "name": "mainFamilies",
+            "value": "GPT, GPT Image, Realtime, Whisper, Embeddings",
+            "id": "C_OPENAI_ATTR_02_MAINFAMILIES"
+          },
+          {
+            "name": "access",
+            "value": "ChatGPT, API, enterprise",
+            "id": "C_OPENAI_ATTR_03_ACCESS"
+          }
+        ],
+        "rendering": {
+          "color": "#d9eaf7",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -18,
+          "y": 4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_GPT_FAMILY",
+        "name": "GPT Family",
+        "type": "model_family",
+        "attributes": [
+          {
+            "name": "provider",
+            "value": "OpenAI",
+            "id": "C_GPT_FAMILY_ATTR_01_PROVIDER"
+          },
+          {
+            "name": "role",
+            "value": "General purpose reasoning, chat, coding and agentic models",
+            "id": "C_GPT_FAMILY_ATTR_02_ROLE"
+          }
+        ],
+        "rendering": {
+          "color": "#bdd7ee",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -12,
+          "y": 4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_GPT_55",
+        "name": "GPT-5.5",
+        "type": "model_version",
+        "attributes": [
+          {
+            "name": "family",
+            "value": "GPT",
+            "id": "C_GPT_55_ATTR_01_FAMILY"
+          },
+          {
+            "name": "provider",
+            "value": "OpenAI",
+            "id": "C_GPT_55_ATTR_02_PROVIDER"
+          },
+          {
+            "name": "capabilities",
+            "value": "reasoning, coding, chat, multimodal",
+            "id": "C_GPT_55_ATTR_03_CAPABILITIES"
+          },
+          {
+            "name": "deployment",
+            "value": "SaaS/API",
+            "id": "C_GPT_55_ATTR_04_DEPLOYMENT"
+          }
+        ],
+        "rendering": {
+          "color": "#eaf3f8",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -6,
+          "y": 4.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_GPT_55_PRO",
+        "name": "GPT-5.5 Pro",
+        "type": "model_version",
+        "attributes": [
+          {
+            "name": "family",
+            "value": "GPT",
+            "id": "C_GPT_55_PRO_ATTR_01_FAMILY"
+          },
+          {
+            "name": "provider",
+            "value": "OpenAI",
+            "id": "C_GPT_55_PRO_ATTR_02_PROVIDER"
+          },
+          {
+            "name": "capabilities",
+            "value": "advanced reasoning, deep analysis, coding, multimodal",
+            "id": "C_GPT_55_PRO_ATTR_03_CAPABILITIES"
+          },
+          {
+            "name": "deployment",
+            "value": "SaaS/API",
+            "id": "C_GPT_55_PRO_ATTR_04_DEPLOYMENT"
+          }
+        ],
+        "rendering": {
+          "color": "#eaf3f8",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -6,
+          "y": 2.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_ANTHROPIC",
+        "name": "Anthropic",
+        "type": "provider",
+        "attributes": [
+          {
+            "name": "providerType",
+            "value": "Commercial AI provider",
+            "id": "C_ANTHROPIC_ATTR_01_PROVIDERTYPE"
+          },
+          {
+            "name": "mainFamilies",
+            "value": "Claude",
+            "id": "C_ANTHROPIC_ATTR_02_MAINFAMILIES"
+          },
+          {
+            "name": "access",
+            "value": "Claude app, API, enterprise",
+            "id": "C_ANTHROPIC_ATTR_03_ACCESS"
+          }
+        ],
+        "rendering": {
+          "color": "#fce4d6",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -18,
+          "y": 1.5,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_CLAUDE_FAMILY",
+        "name": "Claude Family",
+        "type": "model_family",
+        "attributes": [
+          {
+            "name": "provider",
+            "value": "Anthropic",
+            "id": "C_CLAUDE_FAMILY_ATTR_01_PROVIDER"
+          },
+          {
+            "name": "role",
+            "value": "Reasoning, writing, coding, analysis and agentic workflows",
+            "id": "C_CLAUDE_FAMILY_ATTR_02_ROLE"
+          }
+        ],
+        "rendering": {
+          "color": "#f8cbad",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -12,
+          "y": 1.5,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_CLAUDE_OPUS_48",
+        "name": "Claude Opus 4.8",
+        "type": "model_version",
+        "attributes": [
+          {
+            "name": "family",
+            "value": "Claude",
+            "id": "C_CLAUDE_OPUS_48_ATTR_01_FAMILY"
+          },
+          {
+            "name": "provider",
+            "value": "Anthropic",
+            "id": "C_CLAUDE_OPUS_48_ATTR_02_PROVIDER"
+          },
+          {
+            "name": "capabilities",
+            "value": "advanced reasoning, coding, long-context analysis",
+            "id": "C_CLAUDE_OPUS_48_ATTR_03_CAPABILITIES"
+          },
+          {
+            "name": "deployment",
+            "value": "SaaS/API",
+            "id": "C_CLAUDE_OPUS_48_ATTR_04_DEPLOYMENT"
+          }
+        ],
+        "rendering": {
+          "color": "#fff2cc",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -6,
+          "y": 0.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_CLAUDE_SONNET_46",
+        "name": "Claude Sonnet 4.6",
+        "type": "model_version",
+        "attributes": [
+          {
+            "name": "family",
+            "value": "Claude",
+            "id": "C_CLAUDE_SONNET_46_ATTR_01_FAMILY"
+          },
+          {
+            "name": "provider",
+            "value": "Anthropic",
+            "id": "C_CLAUDE_SONNET_46_ATTR_02_PROVIDER"
+          },
+          {
+            "name": "capabilities",
+            "value": "balanced reasoning, coding, writing, vision",
+            "id": "C_CLAUDE_SONNET_46_ATTR_03_CAPABILITIES"
+          },
+          {
+            "name": "deployment",
+            "value": "SaaS/API",
+            "id": "C_CLAUDE_SONNET_46_ATTR_04_DEPLOYMENT"
+          }
+        ],
+        "rendering": {
+          "color": "#fff2cc",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -6,
+          "y": -1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_GOOGLE",
+        "name": "Google",
+        "type": "provider",
+        "attributes": [
+          {
+            "name": "providerType",
+            "value": "Commercial and open model provider",
+            "id": "C_GOOGLE_ATTR_01_PROVIDERTYPE"
+          },
+          {
+            "name": "mainFamilies",
+            "value": "Gemini, Gemma",
+            "id": "C_GOOGLE_ATTR_02_MAINFAMILIES"
+          },
+          {
+            "name": "access",
+            "value": "Gemini app, Google AI Studio, Vertex AI, open weights",
+            "id": "C_GOOGLE_ATTR_03_ACCESS"
+          }
+        ],
+        "rendering": {
+          "color": "#d9ead3",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -18,
+          "y": -1,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_GEMINI_FAMILY",
+        "name": "Gemini Family",
+        "type": "model_family",
+        "attributes": [
+          {
+            "name": "provider",
+            "value": "Google",
+            "id": "C_GEMINI_FAMILY_ATTR_01_PROVIDER"
+          },
+          {
+            "name": "role",
+            "value": "General multimodal AI, reasoning, live interaction and agents",
+            "id": "C_GEMINI_FAMILY_ATTR_02_ROLE"
+          }
+        ],
+        "rendering": {
+          "color": "#c6e0b4",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -12,
+          "y": -1,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_GEMINI_31_PRO",
+        "name": "Gemini 3.1 Pro",
+        "type": "model_version",
+        "attributes": [
+          {
+            "name": "family",
+            "value": "Gemini",
+            "id": "C_GEMINI_31_PRO_ATTR_01_FAMILY"
+          },
+          {
+            "name": "provider",
+            "value": "Google",
+            "id": "C_GEMINI_31_PRO_ATTR_02_PROVIDER"
+          },
+          {
+            "name": "capabilities",
+            "value": "reasoning, multimodal, coding, agents",
+            "id": "C_GEMINI_31_PRO_ATTR_03_CAPABILITIES"
+          },
+          {
+            "name": "deployment",
+            "value": "SaaS/API/cloud",
+            "id": "C_GEMINI_31_PRO_ATTR_04_DEPLOYMENT"
+          }
+        ],
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -6,
+          "y": -4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_META",
+        "name": "Meta",
+        "type": "provider",
+        "attributes": [
+          {
+            "name": "providerType",
+            "value": "Open-weight AI provider",
+            "id": "C_META_ATTR_01_PROVIDERTYPE"
+          },
+          {
+            "name": "mainFamilies",
+            "value": "Llama",
+            "id": "C_META_ATTR_02_MAINFAMILIES"
+          },
+          {
+            "name": "access",
+            "value": "Open weights, cloud providers, self-hosting",
+            "id": "C_META_ATTR_03_ACCESS"
+          }
+        ],
+        "rendering": {
+          "color": "#dae8fc",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -18,
+          "y": -3.5,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_LLAMA_FAMILY",
+        "name": "Llama Family",
+        "type": "model_family",
+        "attributes": [
+          {
+            "name": "provider",
+            "value": "Meta",
+            "id": "C_LLAMA_FAMILY_ATTR_01_PROVIDER"
+          },
+          {
+            "name": "role",
+            "value": "Open-weight models for self-hosting and application integration",
+            "id": "C_LLAMA_FAMILY_ATTR_02_ROLE"
+          }
+        ],
+        "rendering": {
+          "color": "#b4c7e7",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -12,
+          "y": -3.5,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_LLAMA_4_MAVERICK",
+        "name": "Llama 4 Maverick",
+        "type": "model_version",
+        "attributes": [
+          {
+            "name": "family",
+            "value": "Llama",
+            "id": "C_LLAMA_4_MAVERICK_ATTR_01_FAMILY"
+          },
+          {
+            "name": "provider",
+            "value": "Meta",
+            "id": "C_LLAMA_4_MAVERICK_ATTR_02_PROVIDER"
+          },
+          {
+            "name": "capabilities",
+            "value": "open-weight reasoning, chat, multimodal",
+            "id": "C_LLAMA_4_MAVERICK_ATTR_03_CAPABILITIES"
+          },
+          {
+            "name": "deployment",
+            "value": "self-hosted/cloud/open-weight",
+            "id": "C_LLAMA_4_MAVERICK_ATTR_04_DEPLOYMENT"
+          }
+        ],
+        "rendering": {
+          "color": "#d9e2f3",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -6,
+          "y": -6.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_MISTRAL",
+        "name": "Mistral AI",
+        "type": "provider",
+        "attributes": [
+          {
+            "name": "providerType",
+            "value": "Commercial and open-weight AI provider",
+            "id": "C_MISTRAL_ATTR_01_PROVIDERTYPE"
+          },
+          {
+            "name": "mainFamilies",
+            "value": "Mistral, Ministral, Codestral, Voxtral",
+            "id": "C_MISTRAL_ATTR_02_MAINFAMILIES"
+          },
+          {
+            "name": "access",
+            "value": "API, cloud, open weights",
+            "id": "C_MISTRAL_ATTR_03_ACCESS"
+          }
+        ],
+        "rendering": {
+          "color": "#fde9d9",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -18,
+          "y": -6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_MISTRAL_FAMILY",
+        "name": "Mistral Family",
+        "type": "model_family",
+        "attributes": [
+          {
+            "name": "provider",
+            "value": "Mistral AI",
+            "id": "C_MISTRAL_FAMILY_ATTR_01_PROVIDER"
+          },
+          {
+            "name": "role",
+            "value": "General LLMs, code models, OCR, speech and embeddings",
+            "id": "C_MISTRAL_FAMILY_ATTR_02_ROLE"
+          }
+        ],
+        "rendering": {
+          "color": "#f4b183",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -12,
+          "y": -6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_DEEPSEEK",
+        "name": "DeepSeek",
+        "type": "provider",
+        "attributes": [
+          {
+            "name": "providerType",
+            "value": "Commercial and open model provider",
+            "id": "C_DEEPSEEK_ATTR_01_PROVIDERTYPE"
+          },
+          {
+            "name": "mainFamilies",
+            "value": "DeepSeek-V",
+            "id": "C_DEEPSEEK_ATTR_02_MAINFAMILIES"
+          },
+          {
+            "name": "access",
+            "value": "API, open models",
+            "id": "C_DEEPSEEK_ATTR_03_ACCESS"
+          }
+        ],
+        "rendering": {
+          "color": "#e4dfec",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -18,
+          "y": -8.5,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_DEEPSEEK_V4_PRO",
+        "name": "DeepSeek-V4-Pro",
+        "type": "model_version",
+        "attributes": [
+          {
+            "name": "family",
+            "value": "DeepSeek",
+            "id": "C_DEEPSEEK_V4_PRO_ATTR_01_FAMILY"
+          },
+          {
+            "name": "provider",
+            "value": "DeepSeek",
+            "id": "C_DEEPSEEK_V4_PRO_ATTR_02_PROVIDER"
+          },
+          {
+            "name": "capabilities",
+            "value": "reasoning, coding, chat",
+            "id": "C_DEEPSEEK_V4_PRO_ATTR_03_CAPABILITIES"
+          },
+          {
+            "name": "deployment",
+            "value": "API/open model",
+            "id": "C_DEEPSEEK_V4_PRO_ATTR_04_DEPLOYMENT"
+          }
+        ],
+        "rendering": {
+          "color": "#d9d2e9",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": -6,
+          "y": -8.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_CAP_TEXT",
+        "name": "Text Generation",
+        "type": "capability",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Generate, summarize, transform and analyze text",
+            "id": "C_CAP_TEXT_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": 0,
+          "y": 4.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_CAP_REASONING",
+        "name": "Reasoning",
+        "type": "capability",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Solve complex tasks, plan, infer and analyze",
+            "id": "C_CAP_REASONING_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": 0,
+          "y": 2.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_CAP_CODING",
+        "name": "Coding",
+        "type": "capability",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Generate, debug, refactor and explain source code",
+            "id": "C_CAP_CODING_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": 0,
+          "y": 0.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_CAP_VISION",
+        "name": "Vision",
+        "type": "capability",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Analyze images, charts, screenshots and visual context",
+            "id": "C_CAP_VISION_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": 0,
+          "y": -1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_CAP_IMAGE_GEN",
+        "name": "Image Generation",
+        "type": "capability",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Create or edit images from prompts or source images",
+            "id": "C_CAP_IMAGE_GEN_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": 0,
+          "y": -4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_CAP_SPEECH",
+        "name": "Speech",
+        "type": "capability",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Text-to-speech, speech-to-text, realtime voice interaction",
+            "id": "C_CAP_SPEECH_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": 0,
+          "y": -6.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_DEPLOY_API",
+        "name": "API Access",
+        "type": "deployment_mode",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Model consumed through provider API endpoint",
+            "id": "C_DEPLOY_API_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "rendering": {
+          "color": "#fce4d6",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": 12,
+          "y": 4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_DEPLOY_SAAS",
+        "name": "SaaS Application",
+        "type": "deployment_mode",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Model accessed through hosted chat or productivity application",
+            "id": "C_DEPLOY_SAAS_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "rendering": {
+          "color": "#fce4d6",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": 12,
+          "y": 1.5,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_DEPLOY_OPEN",
+        "name": "Open-Weight Self Hosting",
+        "type": "deployment_mode",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Model weights available for local, edge or private cloud deployment",
+            "id": "C_DEPLOY_OPEN_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "rendering": {
+          "color": "#fce4d6",
+          "textColor": "#000000",
+          "hubColor": "#ff0000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        },
+        "position": {
+          "x": 12,
+          "y": -1,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.35
+        }
+      },
+      {
+        "id": "C_MODALITY_TEXT",
+        "name": "Text",
+        "type": "modality",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Natural language prompts and completions",
+            "id": "C_MODALITY_TEXT_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "position": {
+          "x": 6,
+          "y": 4.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_MODALITY_CODE",
+        "name": "Code",
+        "type": "modality",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Source code, structured code edits, and generated snippets",
+            "id": "C_MODALITY_CODE_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "position": {
+          "x": 6,
+          "y": 2.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_MODALITY_IMAGE",
+        "name": "Image",
+        "type": "modality",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Image input, vision analysis, and image generation",
+            "id": "C_MODALITY_IMAGE_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "position": {
+          "x": 6,
+          "y": 0.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_MODALITY_AUDIO",
+        "name": "Audio",
+        "type": "modality",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Speech input and generated audio",
+            "id": "C_MODALITY_AUDIO_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "position": {
+          "x": 6,
+          "y": -1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_MODALITY_STRUCTURED_JSON",
+        "name": "Structured JSON",
+        "type": "modality",
+        "attributes": [
+          {
+            "name": "description",
+            "value": "Machine-readable JSON responses such as HBDS model payloads",
+            "id": "C_MODALITY_STRUCTURED_JSON_ATTR_01_DESCRIPTION"
+          }
+        ],
+        "position": {
+          "x": 6,
+          "y": -4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.6,
+          "height": 1.25
+        },
+        "rendering": {
+          "color": "#e2f0d9",
+          "textColor": "#000000",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "HC_AI_SUPPORT_MENU",
+        "name": "HBDS AI Support Menu",
+        "type": "hyperclass",
+        "attributes": [
+          {
+            "name": "role",
+            "value": "Current HBDS UI section for AI model generation, validation, improvement, and manual ChatGPT copy/paste workflows",
+            "id": "HC_AI_SUPPORT_MENU_ATTR_01_ROLE"
+          },
+          {
+            "name": "defaultState",
+            "value": "Collapsed by default under Model",
+            "id": "HC_AI_SUPPORT_MENU_ATTR_02_DEFAULTSTATE"
+          },
+          {
+            "name": "theme",
+            "value": "Pink section styling",
+            "id": "HC_AI_SUPPORT_MENU_ATTR_03_THEME"
+          }
+        ],
+        "children": [],
+        "position": {
+          "x": 18.5,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 5.4,
+          "height": 2.2
+        },
+        "rendering": {
+          "color": "#f9a8d4",
+          "textColor": "#4a1029",
+          "hubColor": "#be185d",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_SUPPORT_SECTION",
+        "name": "AI Support Section",
+        "type": "ui_section",
+        "attributes": [
+          {
+            "name": "collapsedByDefault",
+            "value": "true",
+            "id": "C_AI_SUPPORT_SECTION_ATTR_01_COLLAPSEDBYDEFAULT"
+          },
+          {
+            "name": "colorTheme",
+            "value": "pink",
+            "id": "C_AI_SUPPORT_SECTION_ATTR_02_COLORTHEME"
+          },
+          {
+            "name": "scope",
+            "value": "HBDS model generation, validation, improvement, and manual response validation",
+            "id": "C_AI_SUPPORT_SECTION_ATTR_03_SCOPE"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": 4.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_PROVIDER_SELECTOR",
+        "name": "Provider Selector",
+        "type": "ui_control",
+        "attributes": [
+          {
+            "name": "field",
+            "value": "providerId",
+            "id": "C_AI_PROVIDER_SELECTOR_ATTR_01_FIELD"
+          },
+          {
+            "name": "options",
+            "value": "OpenAI API, ChatGPT Pro / Manual, Claude, Ollama, Custom OpenAI-compatible",
+            "id": "C_AI_PROVIDER_SELECTOR_ATTR_02_OPTIONS"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": 2.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_OPENAI_API_MODE",
+        "name": "OpenAI API Mode",
+        "type": "provider_option",
+        "attributes": [
+          {
+            "name": "providerId",
+            "value": "openai",
+            "id": "C_AI_OPENAI_API_MODE_ATTR_01_PROVIDERID"
+          },
+          {
+            "name": "apiKeyRequired",
+            "value": "true unless configured on server",
+            "id": "C_AI_OPENAI_API_MODE_ATTR_02_APIKEYREQUIRED"
+          },
+          {
+            "name": "supportsReasoningEffort",
+            "value": "true",
+            "id": "C_AI_OPENAI_API_MODE_ATTR_03_SUPPORTSREASONINGEFFORT"
+          },
+          {
+            "name": "defaultModel",
+            "value": "gpt-5.5",
+            "id": "C_AI_OPENAI_API_MODE_ATTR_04_DEFAULTMODEL"
+          },
+          {
+            "name": "modelPresets",
+            "value": "gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-4.1",
+            "id": "C_AI_OPENAI_API_MODE_ATTR_05_MODELPRESETS"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": 0.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_CHATGPT_MANUAL_MODE",
+        "name": "ChatGPT Pro / Manual Mode",
+        "type": "provider_option",
+        "attributes": [
+          {
+            "name": "providerId",
+            "value": "chatgpt-manual",
+            "id": "C_AI_CHATGPT_MANUAL_MODE_ATTR_01_PROVIDERID"
+          },
+          {
+            "name": "manualWorkflow",
+            "value": "true",
+            "id": "C_AI_CHATGPT_MANUAL_MODE_ATTR_02_MANUALWORKFLOW"
+          },
+          {
+            "name": "apiKeyRequired",
+            "value": "false",
+            "id": "C_AI_CHATGPT_MANUAL_MODE_ATTR_03_APIKEYREQUIRED"
+          },
+          {
+            "name": "providerCall",
+            "value": "never",
+            "id": "C_AI_CHATGPT_MANUAL_MODE_ATTR_04_PROVIDERCALL"
+          },
+          {
+            "name": "subscriptionBoundary",
+            "value": "ChatGPT Pro subscription does not provide OpenAI API access",
+            "id": "C_AI_CHATGPT_MANUAL_MODE_ATTR_05_SUBSCRIPTIONBOUNDARY"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": 0.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_CLAUDE_OPTION",
+        "name": "Claude / Anthropic Option",
+        "type": "provider_option",
+        "attributes": [
+          {
+            "name": "providerId",
+            "value": "anthropic",
+            "id": "C_AI_CLAUDE_OPTION_ATTR_01_PROVIDERID"
+          },
+          {
+            "name": "apiKeyRequired",
+            "value": "true unless configured on server",
+            "id": "C_AI_CLAUDE_OPTION_ATTR_02_APIKEYREQUIRED"
+          },
+          {
+            "name": "models",
+            "value": "claude-3-5-sonnet-latest, claude-3-5-haiku-latest, claude-3-opus-latest",
+            "id": "C_AI_CLAUDE_OPTION_ATTR_03_MODELS"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_OLLAMA_OPTION",
+        "name": "Local / Ollama Option",
+        "type": "provider_option",
+        "attributes": [
+          {
+            "name": "providerId",
+            "value": "ollama",
+            "id": "C_AI_OLLAMA_OPTION_ATTR_01_PROVIDERID"
+          },
+          {
+            "name": "apiKeyRequired",
+            "value": "false",
+            "id": "C_AI_OLLAMA_OPTION_ATTR_02_APIKEYREQUIRED"
+          },
+          {
+            "name": "baseUrlRequired",
+            "value": "true",
+            "id": "C_AI_OLLAMA_OPTION_ATTR_03_BASEURLREQUIRED"
+          },
+          {
+            "name": "defaultBaseUrl",
+            "value": "http://127.0.0.1:11434",
+            "id": "C_AI_OLLAMA_OPTION_ATTR_04_DEFAULTBASEURL"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_CUSTOM_OPENAI_OPTION",
+        "name": "Custom OpenAI-Compatible Option",
+        "type": "provider_option",
+        "attributes": [
+          {
+            "name": "providerId",
+            "value": "custom-openai",
+            "id": "C_AI_CUSTOM_OPENAI_OPTION_ATTR_01_PROVIDERID"
+          },
+          {
+            "name": "baseUrlRequired",
+            "value": "true",
+            "id": "C_AI_CUSTOM_OPENAI_OPTION_ATTR_02_BASEURLREQUIRED"
+          },
+          {
+            "name": "apiKeyRequired",
+            "value": "optional",
+            "id": "C_AI_CUSTOM_OPENAI_OPTION_ATTR_03_APIKEYREQUIRED"
+          },
+          {
+            "name": "supportsReasoningEffort",
+            "value": "true",
+            "id": "C_AI_CUSTOM_OPENAI_OPTION_ATTR_04_SUPPORTSREASONINGEFFORT"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_API_KEY_FIELD",
+        "name": "API Key Field",
+        "type": "ui_control",
+        "attributes": [
+          {
+            "name": "storage",
+            "value": "memory only",
+            "id": "C_AI_API_KEY_FIELD_ATTR_01_STORAGE"
+          },
+          {
+            "name": "visibleWhen",
+            "value": "provider needs user key and server key is not configured",
+            "id": "C_AI_API_KEY_FIELD_ATTR_02_VISIBLEWHEN"
+          },
+          {
+            "name": "savedToModel",
+            "value": "false",
+            "id": "C_AI_API_KEY_FIELD_ATTR_03_SAVEDTOMODEL"
+          },
+          {
+            "name": "debugValue",
+            "value": "redacted",
+            "id": "C_AI_API_KEY_FIELD_ATTR_04_DEBUGVALUE"
+          },
+          {
+            "name": "autoValidation",
+            "value": "typing a transient key automatically validates provider credential and selected model",
+            "id": "C_AI_API_KEY_FIELD_ATTR_05_AUTOVALIDATION"
+          },
+          {
+            "name": "feedback",
+            "value": "green on provider success, red with provider cause on invalid key, model, billing, permission, timeout, or unreachable endpoint",
+            "id": "C_AI_API_KEY_FIELD_ATTR_06_FEEDBACK"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_SERVER_CREDENTIAL_STATE",
+        "name": "Server Credential State",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "configuredOnServer",
+            "value": "boolean",
+            "id": "C_AI_SERVER_CREDENTIAL_STATE_ATTR_01_CONFIGUREDONSERVER"
+          },
+          {
+            "name": "credentialStatus",
+            "value": "configured_on_server, key_required, no_key_required",
+            "id": "C_AI_SERVER_CREDENTIAL_STATE_ATTR_02_CREDENTIALSTATUS"
+          },
+          {
+            "name": "envKeysHidden",
+            "value": "true",
+            "id": "C_AI_SERVER_CREDENTIAL_STATE_ATTR_03_ENVKEYSHIDDEN"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_BASE_URL_FIELD",
+        "name": "Base URL Field",
+        "type": "ui_control",
+        "attributes": [
+          {
+            "name": "field",
+            "value": "baseUrl",
+            "id": "C_AI_BASE_URL_FIELD_ATTR_01_FIELD"
+          },
+          {
+            "name": "visibleWhen",
+            "value": "Ollama or Custom OpenAI-compatible",
+            "id": "C_AI_BASE_URL_FIELD_ATTR_02_VISIBLEWHEN"
+          },
+          {
+            "name": "requiredFor",
+            "value": "providers requiring custom endpoint",
+            "id": "C_AI_BASE_URL_FIELD_ATTR_03_REQUIREDFOR"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_MODEL_COMBO",
+        "name": "Model Combo",
+        "type": "ui_control",
+        "attributes": [
+          {
+            "name": "field",
+            "value": "modelName",
+            "id": "C_AI_MODEL_COMBO_ATTR_01_FIELD"
+          },
+          {
+            "name": "providerSpecific",
+            "value": "true",
+            "id": "C_AI_MODEL_COMBO_ATTR_02_PROVIDERSPECIFIC"
+          },
+          {
+            "name": "customFallback",
+            "value": "Custom model option",
+            "id": "C_AI_MODEL_COMBO_ATTR_03_CUSTOMFALLBACK"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -6.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_CUSTOM_MODEL_FALLBACK",
+        "name": "Custom Model Fallback",
+        "type": "ui_control",
+        "attributes": [
+          {
+            "name": "visibleWhen",
+            "value": "Custom model option selected",
+            "id": "C_AI_CUSTOM_MODEL_FALLBACK_ATTR_01_VISIBLEWHEN"
+          },
+          {
+            "name": "purpose",
+            "value": "Allow provider model identifiers not present in presets",
+            "id": "C_AI_CUSTOM_MODEL_FALLBACK_ATTR_02_PURPOSE"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -6.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_REASONING_EFFORT_COMBO",
+        "name": "Reasoning Effort Combo",
+        "type": "ui_control",
+        "attributes": [
+          {
+            "name": "field",
+            "value": "reasoningEffort",
+            "id": "C_AI_REASONING_EFFORT_COMBO_ATTR_01_FIELD"
+          },
+          {
+            "name": "values",
+            "value": "none, low, medium, high, xhigh",
+            "id": "C_AI_REASONING_EFFORT_COMBO_ATTR_02_VALUES"
+          },
+          {
+            "name": "visibleWhen",
+            "value": "provider and model support reasoning effort",
+            "id": "C_AI_REASONING_EFFORT_COMBO_ATTR_03_VISIBLEWHEN"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -6.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_OPERATION_MODE_SELECT",
+        "name": "Operation Mode Select",
+        "type": "ui_control",
+        "attributes": [
+          {
+            "name": "field",
+            "value": "operationMode",
+            "id": "C_AI_OPERATION_MODE_SELECT_ATTR_01_FIELD"
+          },
+          {
+            "name": "values",
+            "value": "generate, validate, improve",
+            "id": "C_AI_OPERATION_MODE_SELECT_ATTR_02_VALUES"
+          },
+          {
+            "name": "currentModelIncludedFor",
+            "value": "validate, improve",
+            "id": "C_AI_OPERATION_MODE_SELECT_ATTR_03_CURRENTMODELINCLUDEDFOR"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -8.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_HBDS_REQUEST_FIELD",
+        "name": "HBDS Request Field",
+        "type": "ui_control",
+        "attributes": [
+          {
+            "name": "field",
+            "value": "requestText",
+            "id": "C_AI_HBDS_REQUEST_FIELD_ATTR_01_FIELD"
+          },
+          {
+            "name": "scope",
+            "value": "HBDS model request, model validation, or model improvement only",
+            "id": "C_AI_HBDS_REQUEST_FIELD_ATTR_02_SCOPE"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -8.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_PROMPT_ENHANCER",
+        "name": "Server Prompt Enhancer",
+        "type": "server_function",
+        "attributes": [
+          {
+            "name": "promptTemplateVersion",
+            "value": "hbds-ai-prompt-v1",
+            "id": "C_AI_PROMPT_ENHANCER_ATTR_01_PROMPTTEMPLATEVERSION"
+          },
+          {
+            "name": "requires",
+            "value": "JSON only, metadata, hypergraph.class, hypergraph.link, layout none, computed positions",
+            "id": "C_AI_PROMPT_ENHANCER_ATTR_02_REQUIRES"
+          },
+          {
+            "name": "serverSide",
+            "value": "true",
+            "id": "C_AI_PROMPT_ENHANCER_ATTR_03_SERVERSIDE"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -8.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_RESULT_PREVIEW",
+        "name": "Result Preview",
+        "type": "ui_control",
+        "attributes": [
+          {
+            "name": "content",
+            "value": "enhanced prompt, provider text, or manual prompt preparation result",
+            "id": "C_AI_RESULT_PREVIEW_ATTR_01_CONTENT"
+          },
+          {
+            "name": "readOnly",
+            "value": "true for generated preview",
+            "id": "C_AI_RESULT_PREVIEW_ATTR_02_READONLY"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -10.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_COPY_PROMPT_BUTTON",
+        "name": "Copy Prompt Button",
+        "type": "ui_command",
+        "attributes": [
+          {
+            "name": "manualModeOnly",
+            "value": "true",
+            "id": "C_AI_COPY_PROMPT_BUTTON_ATTR_01_MANUALMODEONLY"
+          },
+          {
+            "name": "action",
+            "value": "copy enhanced prompt to clipboard",
+            "id": "C_AI_COPY_PROMPT_BUTTON_ATTR_02_ACTION"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -10.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_OPEN_CHATGPT_BUTTON",
+        "name": "Open ChatGPT Button",
+        "type": "ui_command",
+        "attributes": [
+          {
+            "name": "manualModeOnly",
+            "value": "true",
+            "id": "C_AI_OPEN_CHATGPT_BUTTON_ATTR_01_MANUALMODEONLY"
+          },
+          {
+            "name": "url",
+            "value": "https://chatgpt.com/",
+            "id": "C_AI_OPEN_CHATGPT_BUTTON_ATTR_02_URL"
+          },
+          {
+            "name": "credentialHandling",
+            "value": "no HBDS login or password collection",
+            "id": "C_AI_OPEN_CHATGPT_BUTTON_ATTR_03_CREDENTIALHANDLING"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -10.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_PASTE_RESPONSE_BUTTON",
+        "name": "Paste AI Response Button",
+        "type": "ui_command",
+        "attributes": [
+          {
+            "name": "manualModeOnly",
+            "value": "true",
+            "id": "C_AI_PASTE_RESPONSE_BUTTON_ATTR_01_MANUALMODEONLY"
+          },
+          {
+            "name": "input",
+            "value": "manual ChatGPT JSON response",
+            "id": "C_AI_PASTE_RESPONSE_BUTTON_ATTR_02_INPUT"
+          },
+          {
+            "name": "clipboardOptional",
+            "value": "true",
+            "id": "C_AI_PASTE_RESPONSE_BUTTON_ATTR_03_CLIPBOARDOPTIONAL"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -12.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_VALIDATE_RESPONSE_BUTTON",
+        "name": "Validate Response Button",
+        "type": "ui_command",
+        "attributes": [
+          {
+            "name": "manualModeOnly",
+            "value": "true",
+            "id": "C_AI_VALIDATE_RESPONSE_BUTTON_ATTR_01_MANUALMODEONLY"
+          },
+          {
+            "name": "action",
+            "value": "parse strict JSON and validate HBDS structure before apply",
+            "id": "C_AI_VALIDATE_RESPONSE_BUTTON_ATTR_02_ACTION"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -12.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_RESPONSE_VALIDATOR",
+        "name": "AI Response Validator",
+        "type": "validation_service",
+        "attributes": [
+          {
+            "name": "rejects",
+            "value": "Markdown fences, prose-only response, invalid JSON, missing metadata, missing hypergraph, invalid IDs, invalid references, missing positions",
+            "id": "C_AI_RESPONSE_VALIDATOR_ATTR_01_REJECTS"
+          },
+          {
+            "name": "accepts",
+            "value": "strict valid HBDS JSON only",
+            "id": "C_AI_RESPONSE_VALIDATOR_ATTR_02_ACCEPTS"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -12.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_APPLY_RESULT_BUTTON",
+        "name": "Apply AI Result Button",
+        "type": "ui_command",
+        "attributes": [
+          {
+            "name": "enabledWhen",
+            "value": "validated HBDS JSON response is available",
+            "id": "C_AI_APPLY_RESULT_BUTTON_ATTR_01_ENABLEDWHEN"
+          },
+          {
+            "name": "disabledWhen",
+            "value": "no valid response or validation failed",
+            "id": "C_AI_APPLY_RESULT_BUTTON_ATTR_02_DISABLEDWHEN"
+          },
+          {
+            "name": "updates",
+            "value": "current model only after validation",
+            "id": "C_AI_APPLY_RESULT_BUTTON_ATTR_03_UPDATES"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -15,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_SECURITY_POLICY",
+        "name": "AI Security Policy",
+        "type": "security_policy",
+        "attributes": [
+          {
+            "name": "noSecretsIn",
+            "value": "model JSON, exports, diagnostics, debug logs, collaboration drafts, saved models",
+            "id": "C_AI_SECURITY_POLICY_ATTR_01_NOSECRETSIN"
+          },
+          {
+            "name": "apiKeyHandling",
+            "value": "transient or server environment only",
+            "id": "C_AI_SECURITY_POLICY_ATTR_02_APIKEYHANDLING"
+          },
+          {
+            "name": "manualMode",
+            "value": "no ChatGPT credential handling",
+            "id": "C_AI_SECURITY_POLICY_ATTR_03_MANUALMODE"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -15,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_DATA_CONTRACT",
+        "name": "AI Data Contract",
+        "type": "data_contract",
+        "attributes": [
+          {
+            "name": "fields",
+            "value": "providerId, modelName, reasoningEffort, operationMode, requestText, promptTemplateVersion, enhancedPrompt, manualWorkflow, aiCallEnabled, configuredOnServer, credentialStatus, connected, providerErrorMessage",
+            "id": "C_AI_DATA_CONTRACT_ATTR_01_FIELDS"
+          },
+          {
+            "name": "connectionEndpoint",
+            "value": "/api/ai/connection validates provider credential and model without exposing keys",
+            "id": "C_AI_DATA_CONTRACT_ATTR_03_CONNECTIONENDPOINT"
+          },
+          {
+            "name": "responseModel",
+            "value": "HBDS JSON object",
+            "id": "C_AI_DATA_CONTRACT_ATTR_02_RESPONSEMODEL"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -15,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_PROMPT_PREPARED",
+        "name": "State: Prompt Prepared",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "enhancedPrompt is available",
+            "id": "C_AI_STATE_PROMPT_PREPARED_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -17.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_PROVIDER_CALL_DISABLED",
+        "name": "State: Provider Call Disabled",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "HBDS_AI_ENABLED false or manual provider selected",
+            "id": "C_AI_STATE_PROVIDER_CALL_DISABLED_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -17.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_PROVIDER_CALL_ENABLED",
+        "name": "State: Provider Call Enabled",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "HBDS_AI_ENABLED true for API provider",
+            "id": "C_AI_STATE_PROVIDER_CALL_ENABLED_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -17.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_PROVIDER_UNREACHABLE",
+        "name": "State: Provider Unreachable",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "provider endpoint cannot be reached",
+            "id": "C_AI_STATE_PROVIDER_UNREACHABLE_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 25.5,
+          "y": -17.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_PROVIDER_TIMEOUT",
+        "name": "State: Provider Timeout",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "provider request exceeded timeout",
+            "id": "C_AI_STATE_PROVIDER_TIMEOUT_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 29,
+          "y": -17.2,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_INVALID_JSON",
+        "name": "State: Invalid JSON",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "response cannot be parsed as JSON",
+            "id": "C_AI_STATE_INVALID_JSON_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -19.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_MARKDOWN_REJECTED",
+        "name": "State: Markdown Rejected",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "response includes Markdown fences and is rejected",
+            "id": "C_AI_STATE_MARKDOWN_REJECTED_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -19.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_VALID_JSON",
+        "name": "State: Valid HBDS JSON",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "response passes HBDS structural validation",
+            "id": "C_AI_STATE_VALID_JSON_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -19.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_APPLY_DISABLED",
+        "name": "State: Apply Disabled",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "Apply remains disabled before validation succeeds",
+            "id": "C_AI_STATE_APPLY_DISABLED_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 25.5,
+          "y": -19.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_STATE_APPLY_ENABLED",
+        "name": "State: Apply Enabled",
+        "type": "state",
+        "attributes": [
+          {
+            "name": "meaning",
+            "value": "Apply is enabled after valid HBDS JSON",
+            "id": "C_AI_STATE_APPLY_ENABLED_ATTR_01_MEANING"
+          }
+        ],
+        "position": {
+          "x": 29,
+          "y": -19.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_HELPER_TEST",
+        "name": "AI Helper Test",
+        "type": "test_case",
+        "attributes": [
+          {
+            "name": "coverage",
+            "value": "provider catalog, reasoning effort, manual response parsing and validation",
+            "id": "C_AI_HELPER_TEST_ATTR_01_COVERAGE"
+          }
+        ],
+        "position": {
+          "x": 15,
+          "y": -21.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_SMOKE_TEST",
+        "name": "Smoke Server AI Endpoint Test",
+        "type": "test_case",
+        "attributes": [
+          {
+            "name": "coverage",
+            "value": "AI provider metadata, connection endpoint, enhanced prompt, no secret leakage, manualWorkflow metadata",
+            "id": "C_AI_SMOKE_TEST_ATTR_01_COVERAGE"
+          }
+        ],
+        "position": {
+          "x": 18.5,
+          "y": -21.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      },
+      {
+        "id": "C_AI_BROWSER_REGRESSION",
+        "name": "Browser AI Support Regression",
+        "type": "test_case",
+        "attributes": [
+          {
+            "name": "coverage",
+            "value": "pink UI, model combo, reasoning effort, automatic connection feedback, manual no-key workflow, response validation, no leakage",
+            "id": "C_AI_BROWSER_REGRESSION_ATTR_01_COVERAGE"
+          }
+        ],
+        "position": {
+          "x": 22,
+          "y": -21.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.85,
+          "height": 1.38
+        },
+        "rendering": {
+          "color": "#fff0f6",
+          "textColor": "#4a1029",
+          "attributes": {
+            "font": {
+              "size": 14
+            }
+          }
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "L_AI_WORLD_PROVIDERS",
+        "name": "contains",
+        "sourceClassId": "HC_AI_WORLD",
+        "targetClassId": "HC_AI_PROVIDERS",
+        "type": "hyperclass_link",
+        "attributes": [
+          {
+            "name": "relationship",
+            "value": "AI World contains AI Providers",
+            "id": "L_AI_WORLD_PROVIDERS_ATTR_01_RELATIONSHIP"
+          }
+        ],
+        "rendering": {
+          "labelText": "contains",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_WORLD_FAMILIES",
+        "name": "contains",
+        "sourceClassId": "HC_AI_WORLD",
+        "targetClassId": "HC_MODEL_FAMILIES",
+        "type": "hyperclass_link",
+        "attributes": [
+          {
+            "name": "relationship",
+            "value": "AI World contains Model Families",
+            "id": "L_AI_WORLD_FAMILIES_ATTR_01_RELATIONSHIP"
+          }
+        ],
+        "rendering": {
+          "labelText": "contains",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_WORLD_VERSIONS",
+        "name": "contains",
+        "sourceClassId": "HC_AI_WORLD",
+        "targetClassId": "HC_MODEL_VERSIONS",
+        "type": "hyperclass_link",
+        "attributes": [
+          {
+            "name": "relationship",
+            "value": "AI World contains Model Versions",
+            "id": "L_AI_WORLD_VERSIONS_ATTR_01_RELATIONSHIP"
+          }
+        ],
+        "rendering": {
+          "labelText": "contains",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_WORLD_CAPABILITIES",
+        "name": "contains",
+        "sourceClassId": "HC_AI_WORLD",
+        "targetClassId": "HC_CAPABILITIES",
+        "type": "hyperclass_link",
+        "attributes": [
+          {
+            "name": "relationship",
+            "value": "AI World contains capabilities",
+            "id": "L_AI_WORLD_CAPABILITIES_ATTR_01_RELATIONSHIP"
+          }
+        ],
+        "rendering": {
+          "labelText": "contains",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_OPENAI",
+        "name": "member_of",
+        "sourceClassId": "C_OPENAI",
+        "targetClassId": "HC_AI_PROVIDERS",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_ANTHROPIC",
+        "name": "member_of",
+        "sourceClassId": "C_ANTHROPIC",
+        "targetClassId": "HC_AI_PROVIDERS",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_GOOGLE",
+        "name": "member_of",
+        "sourceClassId": "C_GOOGLE",
+        "targetClassId": "HC_AI_PROVIDERS",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_META",
+        "name": "member_of",
+        "sourceClassId": "C_META",
+        "targetClassId": "HC_AI_PROVIDERS",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_MISTRAL",
+        "name": "member_of",
+        "sourceClassId": "C_MISTRAL",
+        "targetClassId": "HC_AI_PROVIDERS",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_DEEPSEEK",
+        "name": "member_of",
+        "sourceClassId": "C_DEEPSEEK",
+        "targetClassId": "HC_AI_PROVIDERS",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_OPENAI_OWNS_GPT",
+        "name": "publishes",
+        "sourceClassId": "C_OPENAI",
+        "targetClassId": "C_GPT_FAMILY",
+        "type": "class_link",
+        "attributes": [
+          {
+            "name": "cardinality",
+            "value": "1 provider to many model families",
+            "id": "L_OPENAI_OWNS_GPT_ATTR_01_CARDINALITY"
+          }
+        ],
+        "rendering": {
+          "labelText": "publishes",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_ANTHROPIC_OWNS_CLAUDE",
+        "name": "publishes",
+        "sourceClassId": "C_ANTHROPIC",
+        "targetClassId": "C_CLAUDE_FAMILY",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "publishes",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GOOGLE_OWNS_GEMINI",
+        "name": "publishes",
+        "sourceClassId": "C_GOOGLE",
+        "targetClassId": "C_GEMINI_FAMILY",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "publishes",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_META_OWNS_LLAMA",
+        "name": "publishes",
+        "sourceClassId": "C_META",
+        "targetClassId": "C_LLAMA_FAMILY",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "publishes",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_MISTRAL_OWNS_MISTRAL",
+        "name": "publishes",
+        "sourceClassId": "C_MISTRAL",
+        "targetClassId": "C_MISTRAL_FAMILY",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "publishes",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GPT_CONTAINS_GPT55",
+        "name": "has_version",
+        "sourceClassId": "C_GPT_FAMILY",
+        "targetClassId": "C_GPT_55",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "has_version",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GPT_CONTAINS_GPT55_PRO",
+        "name": "has_version",
+        "sourceClassId": "C_GPT_FAMILY",
+        "targetClassId": "C_GPT_55_PRO",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "has_version",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_CLAUDE_CONTAINS_OPUS",
+        "name": "has_version",
+        "sourceClassId": "C_CLAUDE_FAMILY",
+        "targetClassId": "C_CLAUDE_OPUS_48",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "has_version",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_CLAUDE_CONTAINS_SONNET",
+        "name": "has_version",
+        "sourceClassId": "C_CLAUDE_FAMILY",
+        "targetClassId": "C_CLAUDE_SONNET_46",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "has_version",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GEMINI_CONTAINS_31_PRO",
+        "name": "has_version",
+        "sourceClassId": "C_GEMINI_FAMILY",
+        "targetClassId": "C_GEMINI_31_PRO",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "has_version",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_LLAMA_CONTAINS_MAVERICK",
+        "name": "has_version",
+        "sourceClassId": "C_LLAMA_FAMILY",
+        "targetClassId": "C_LLAMA_4_MAVERICK",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "has_version",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_DEEPSEEK_CONTAINS_V4_PRO",
+        "name": "has_version",
+        "sourceClassId": "C_DEEPSEEK",
+        "targetClassId": "C_DEEPSEEK_V4_PRO",
+        "type": "class_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "has_version",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GPT55_REASONING",
+        "name": "supports",
+        "sourceClassId": "C_GPT_55",
+        "targetClassId": "C_CAP_REASONING",
+        "type": "capability_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "supports",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GPT55_CODING",
+        "name": "supports",
+        "sourceClassId": "C_GPT_55",
+        "targetClassId": "C_CAP_CODING",
+        "type": "capability_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "supports",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GPT55_TEXT",
+        "name": "supports",
+        "sourceClassId": "C_GPT_55",
+        "targetClassId": "C_CAP_TEXT",
+        "type": "capability_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "supports",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_CLAUDE_OPUS_REASONING",
+        "name": "supports",
+        "sourceClassId": "C_CLAUDE_OPUS_48",
+        "targetClassId": "C_CAP_REASONING",
+        "type": "capability_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "supports",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GEMINI_VISION",
+        "name": "supports",
+        "sourceClassId": "C_GEMINI_31_PRO",
+        "targetClassId": "C_CAP_VISION",
+        "type": "capability_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "supports",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_LLAMA_SELF_HOST",
+        "name": "deployed_as",
+        "sourceClassId": "C_LLAMA_4_MAVERICK",
+        "targetClassId": "C_DEPLOY_OPEN",
+        "type": "deployment_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "deployed_as",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GPT55_API",
+        "name": "deployed_as",
+        "sourceClassId": "C_GPT_55",
+        "targetClassId": "C_DEPLOY_API",
+        "type": "deployment_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "deployed_as",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_GPT55_SAAS",
+        "name": "deployed_as",
+        "sourceClassId": "C_GPT_55",
+        "targetClassId": "C_DEPLOY_SAAS",
+        "type": "deployment_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "deployed_as",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_MODALITY_TEXT_MEMBER_OF_MODALITIES",
+        "name": "member_of",
+        "sourceClassId": "C_MODALITY_TEXT",
+        "targetClassId": "HC_MODALITIES",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_MODALITY_CODE_MEMBER_OF_MODALITIES",
+        "name": "member_of",
+        "sourceClassId": "C_MODALITY_CODE",
+        "targetClassId": "HC_MODALITIES",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_MODALITY_IMAGE_MEMBER_OF_MODALITIES",
+        "name": "member_of",
+        "sourceClassId": "C_MODALITY_IMAGE",
+        "targetClassId": "HC_MODALITIES",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_MODALITY_AUDIO_MEMBER_OF_MODALITIES",
+        "name": "member_of",
+        "sourceClassId": "C_MODALITY_AUDIO",
+        "targetClassId": "HC_MODALITIES",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_MODALITY_STRUCTURED_JSON_MEMBER_OF_MODALITIES",
+        "name": "member_of",
+        "sourceClassId": "C_MODALITY_STRUCTURED_JSON",
+        "targetClassId": "HC_MODALITIES",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_SUPPORT_SECTION_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_SUPPORT_SECTION",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_PROVIDER_SELECTOR_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_PROVIDER_SELECTOR",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_OPENAI_API_MODE_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_OPENAI_API_MODE",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_CHATGPT_MANUAL_MODE_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_CHATGPT_MANUAL_MODE",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_CLAUDE_OPTION_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_CLAUDE_OPTION",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_OLLAMA_OPTION_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_OLLAMA_OPTION",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_CUSTOM_OPENAI_OPTION_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_CUSTOM_OPENAI_OPTION",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_API_KEY_FIELD_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_API_KEY_FIELD",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_SERVER_CREDENTIAL_STATE_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_SERVER_CREDENTIAL_STATE",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_BASE_URL_FIELD_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_BASE_URL_FIELD",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_MODEL_COMBO_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_MODEL_COMBO",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_CUSTOM_MODEL_FALLBACK_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_CUSTOM_MODEL_FALLBACK",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_REASONING_EFFORT_COMBO_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_REASONING_EFFORT_COMBO",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_OPERATION_MODE_SELECT_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_OPERATION_MODE_SELECT",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_HBDS_REQUEST_FIELD_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_HBDS_REQUEST_FIELD",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_PROMPT_ENHANCER_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_PROMPT_ENHANCER",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_RESULT_PREVIEW_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_RESULT_PREVIEW",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_COPY_PROMPT_BUTTON_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_COPY_PROMPT_BUTTON",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_OPEN_CHATGPT_BUTTON_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_OPEN_CHATGPT_BUTTON",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_PASTE_RESPONSE_BUTTON_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_PASTE_RESPONSE_BUTTON",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_VALIDATE_RESPONSE_BUTTON_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_VALIDATE_RESPONSE_BUTTON",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_RESPONSE_VALIDATOR_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_RESPONSE_VALIDATOR",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_APPLY_RESULT_BUTTON_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_APPLY_RESULT_BUTTON",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_SECURITY_POLICY_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_SECURITY_POLICY",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_DATA_CONTRACT_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_DATA_CONTRACT",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_PROMPT_PREPARED_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_PROMPT_PREPARED",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_PROVIDER_CALL_DISABLED_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_PROVIDER_CALL_DISABLED",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_PROVIDER_CALL_ENABLED_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_PROVIDER_CALL_ENABLED",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_PROVIDER_UNREACHABLE_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_PROVIDER_UNREACHABLE",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_PROVIDER_TIMEOUT_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_PROVIDER_TIMEOUT",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_INVALID_JSON_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_INVALID_JSON",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_MARKDOWN_REJECTED_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_MARKDOWN_REJECTED",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_VALID_JSON_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_VALID_JSON",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_APPLY_DISABLED_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_APPLY_DISABLED",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_STATE_APPLY_ENABLED_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_STATE_APPLY_ENABLED",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_HELPER_TEST_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_HELPER_TEST",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_SMOKE_TEST_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_SMOKE_TEST",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_C_AI_BROWSER_REGRESSION_MEMBER_OF_AI_SUPPORT",
+        "name": "member_of",
+        "sourceClassId": "C_AI_BROWSER_REGRESSION",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "class_hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "member_of",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_WORLD_INCLUDES_AI_SUPPORT_MENU",
+        "name": "includes",
+        "sourceClassId": "HC_AI_WORLD",
+        "targetClassId": "HC_AI_SUPPORT_MENU",
+        "type": "hyperclass_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "includes",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_SUPPORT_CONTAINS_PROVIDER_SELECTOR",
+        "name": "contains",
+        "sourceClassId": "C_AI_SUPPORT_SECTION",
+        "targetClassId": "C_AI_PROVIDER_SELECTOR",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "contains",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_SELECTOR_CHOOSES_OPENAI_API",
+        "name": "chooses",
+        "sourceClassId": "C_AI_PROVIDER_SELECTOR",
+        "targetClassId": "C_AI_OPENAI_API_MODE",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "chooses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_SELECTOR_CHOOSES_CHATGPT_MANUAL",
+        "name": "chooses",
+        "sourceClassId": "C_AI_PROVIDER_SELECTOR",
+        "targetClassId": "C_AI_CHATGPT_MANUAL_MODE",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "chooses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_SELECTOR_CHOOSES_CLAUDE",
+        "name": "chooses",
+        "sourceClassId": "C_AI_PROVIDER_SELECTOR",
+        "targetClassId": "C_AI_CLAUDE_OPTION",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "chooses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_SELECTOR_CHOOSES_OLLAMA",
+        "name": "chooses",
+        "sourceClassId": "C_AI_PROVIDER_SELECTOR",
+        "targetClassId": "C_AI_OLLAMA_OPTION",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "chooses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_SELECTOR_CHOOSES_CUSTOM_OPENAI",
+        "name": "chooses",
+        "sourceClassId": "C_AI_PROVIDER_SELECTOR",
+        "targetClassId": "C_AI_CUSTOM_OPENAI_OPTION",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "chooses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_OPENAI_API_REQUIRES_API_KEY",
+        "name": "may_require",
+        "sourceClassId": "C_AI_OPENAI_API_MODE",
+        "targetClassId": "C_AI_API_KEY_FIELD",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "may_require",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_OPENAI_API_USES_SERVER_CREDENTIAL",
+        "name": "may_use",
+        "sourceClassId": "C_AI_OPENAI_API_MODE",
+        "targetClassId": "C_AI_SERVER_CREDENTIAL_STATE",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "may_use",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_CUSTOM_OPENAI_USES_BASE_URL",
+        "name": "uses",
+        "sourceClassId": "C_AI_CUSTOM_OPENAI_OPTION",
+        "targetClassId": "C_AI_BASE_URL_FIELD",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_OLLAMA_USES_BASE_URL",
+        "name": "uses",
+        "sourceClassId": "C_AI_OLLAMA_OPTION",
+        "targetClassId": "C_AI_BASE_URL_FIELD",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDERS_USE_MODEL_COMBO",
+        "name": "uses",
+        "sourceClassId": "C_AI_PROVIDER_SELECTOR",
+        "targetClassId": "C_AI_MODEL_COMBO",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_MODEL_COMBO_HAS_CUSTOM_FALLBACK",
+        "name": "has_fallback",
+        "sourceClassId": "C_AI_MODEL_COMBO",
+        "targetClassId": "C_AI_CUSTOM_MODEL_FALLBACK",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "has_fallback",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_OPENAI_MODEL_SUPPORTS_REASONING",
+        "name": "supports",
+        "sourceClassId": "C_AI_OPENAI_API_MODE",
+        "targetClassId": "C_AI_REASONING_EFFORT_COMBO",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "supports",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_OPERATION_USES_REQUEST_FIELD",
+        "name": "uses",
+        "sourceClassId": "C_AI_OPERATION_MODE_SELECT",
+        "targetClassId": "C_AI_HBDS_REQUEST_FIELD",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_REQUEST_ENHANCED_BY_PROMPT_BUILDER",
+        "name": "enhanced_by",
+        "sourceClassId": "C_AI_HBDS_REQUEST_FIELD",
+        "targetClassId": "C_AI_PROMPT_ENHANCER",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "enhanced_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROMPT_BUILDER_WRITES_PREVIEW",
+        "name": "writes",
+        "sourceClassId": "C_AI_PROMPT_ENHANCER",
+        "targetClassId": "C_AI_RESULT_PREVIEW",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "writes",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_MANUAL_MODE_USES_COPY_PROMPT",
+        "name": "uses",
+        "sourceClassId": "C_AI_CHATGPT_MANUAL_MODE",
+        "targetClassId": "C_AI_COPY_PROMPT_BUTTON",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_MANUAL_MODE_OPENS_CHATGPT",
+        "name": "opens",
+        "sourceClassId": "C_AI_CHATGPT_MANUAL_MODE",
+        "targetClassId": "C_AI_OPEN_CHATGPT_BUTTON",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "opens",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_MANUAL_MODE_PASTES_RESPONSE",
+        "name": "uses",
+        "sourceClassId": "C_AI_CHATGPT_MANUAL_MODE",
+        "targetClassId": "C_AI_PASTE_RESPONSE_BUTTON",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PASTED_RESPONSE_VALIDATED",
+        "name": "validated_by",
+        "sourceClassId": "C_AI_PASTE_RESPONSE_BUTTON",
+        "targetClassId": "C_AI_VALIDATE_RESPONSE_BUTTON",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "validated_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_VALIDATE_BUTTON_USES_RESPONSE_VALIDATOR",
+        "name": "uses",
+        "sourceClassId": "C_AI_VALIDATE_RESPONSE_BUTTON",
+        "targetClassId": "C_AI_RESPONSE_VALIDATOR",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_RESPONSE_VALIDATOR_ENABLES_APPLY",
+        "name": "enables",
+        "sourceClassId": "C_AI_RESPONSE_VALIDATOR",
+        "targetClassId": "C_AI_APPLY_RESULT_BUTTON",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "enables",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_APPLY_UPDATES_CURRENT_MODEL",
+        "name": "updates",
+        "sourceClassId": "C_AI_APPLY_RESULT_BUTTON",
+        "targetClassId": "HC_AI_WORLD",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "updates",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_SECURITY_PROTECTS_API_KEY_FIELD",
+        "name": "protects",
+        "sourceClassId": "C_AI_SECURITY_POLICY",
+        "targetClassId": "C_AI_API_KEY_FIELD",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "protects",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_SECURITY_PROTECTS_MANUAL_MODE",
+        "name": "protects",
+        "sourceClassId": "C_AI_SECURITY_POLICY",
+        "targetClassId": "C_AI_CHATGPT_MANUAL_MODE",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "protects",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_DATA_CONTRACT_DESCRIBES_PROMPT_ENHANCER",
+        "name": "describes",
+        "sourceClassId": "C_AI_DATA_CONTRACT",
+        "targetClassId": "C_AI_PROMPT_ENHANCER",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "describes",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROMPT_PREPARED_STATE_FROM_PROMPT_BUILDER",
+        "name": "emitted_by",
+        "sourceClassId": "C_AI_STATE_PROMPT_PREPARED",
+        "targetClassId": "C_AI_PROMPT_ENHANCER",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "emitted_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_DISABLED_STATE_FOR_MANUAL",
+        "name": "applies_to",
+        "sourceClassId": "C_AI_STATE_PROVIDER_CALL_DISABLED",
+        "targetClassId": "C_AI_CHATGPT_MANUAL_MODE",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "applies_to",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_ENABLED_STATE_FOR_API",
+        "name": "applies_to",
+        "sourceClassId": "C_AI_STATE_PROVIDER_CALL_ENABLED",
+        "targetClassId": "C_AI_OPENAI_API_MODE",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "applies_to",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_UNREACHABLE_VALIDATED_BY_TESTS",
+        "name": "covered_by",
+        "sourceClassId": "C_AI_STATE_PROVIDER_UNREACHABLE",
+        "targetClassId": "C_AI_SMOKE_TEST",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "covered_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_PROVIDER_TIMEOUT_VALIDATED_BY_TESTS",
+        "name": "covered_by",
+        "sourceClassId": "C_AI_STATE_PROVIDER_TIMEOUT",
+        "targetClassId": "C_AI_SMOKE_TEST",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "covered_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_INVALID_JSON_REJECTED_BY_VALIDATOR",
+        "name": "rejected_by",
+        "sourceClassId": "C_AI_STATE_INVALID_JSON",
+        "targetClassId": "C_AI_RESPONSE_VALIDATOR",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "rejected_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_MARKDOWN_REJECTED_BY_VALIDATOR",
+        "name": "rejected_by",
+        "sourceClassId": "C_AI_STATE_MARKDOWN_REJECTED",
+        "targetClassId": "C_AI_RESPONSE_VALIDATOR",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "rejected_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_VALID_JSON_ACCEPTED_BY_VALIDATOR",
+        "name": "accepted_by",
+        "sourceClassId": "C_AI_STATE_VALID_JSON",
+        "targetClassId": "C_AI_RESPONSE_VALIDATOR",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "accepted_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_APPLY_DISABLED_BEFORE_VALIDATION",
+        "name": "precedes",
+        "sourceClassId": "C_AI_STATE_APPLY_DISABLED",
+        "targetClassId": "C_AI_STATE_APPLY_ENABLED",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "precedes",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_HELPER_TEST_COVERS_DATA_CONTRACT",
+        "name": "covers",
+        "sourceClassId": "C_AI_HELPER_TEST",
+        "targetClassId": "C_AI_DATA_CONTRACT",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "covers",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_SMOKE_TEST_COVERS_ENDPOINTS",
+        "name": "covers",
+        "sourceClassId": "C_AI_SMOKE_TEST",
+        "targetClassId": "C_AI_PROMPT_ENHANCER",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "covers",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_BROWSER_REGRESSION_COVERS_MENU",
+        "name": "covers",
+        "sourceClassId": "C_AI_BROWSER_REGRESSION",
+        "targetClassId": "C_AI_SUPPORT_SECTION",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "covers",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_BROWSER_REGRESSION_COVERS_MANUAL",
+        "name": "covers",
+        "sourceClassId": "C_AI_BROWSER_REGRESSION",
+        "targetClassId": "C_AI_CHATGPT_MANUAL_MODE",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "covers",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_JSON_MODALITY_USED_BY_RESPONSE_VALIDATOR",
+        "name": "uses_modality",
+        "sourceClassId": "C_AI_RESPONSE_VALIDATOR",
+        "targetClassId": "C_MODALITY_STRUCTURED_JSON",
+        "type": "ai_support_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses_modality",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_OPENAI_MODE_MAPS_TO_OPENAI_PROVIDER",
+        "name": "implemented_by",
+        "sourceClassId": "C_AI_OPENAI_API_MODE",
+        "targetClassId": "C_OPENAI",
+        "type": "cross_domain_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "implemented_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_MANUAL_MODE_USES_CHATGPT_SAAS",
+        "name": "uses_deployment",
+        "sourceClassId": "C_AI_CHATGPT_MANUAL_MODE",
+        "targetClassId": "C_DEPLOY_SAAS",
+        "type": "cross_domain_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses_deployment",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_OPENAI_MODE_USES_API_DEPLOYMENT",
+        "name": "uses_deployment",
+        "sourceClassId": "C_AI_OPENAI_API_MODE",
+        "targetClassId": "C_DEPLOY_API",
+        "type": "cross_domain_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses_deployment",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_CLAUDE_OPTION_MAPS_TO_ANTHROPIC",
+        "name": "implemented_by",
+        "sourceClassId": "C_AI_CLAUDE_OPTION",
+        "targetClassId": "C_ANTHROPIC",
+        "type": "cross_domain_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "implemented_by",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_OLLAMA_OPTION_MAPS_TO_OPEN_WEIGHT",
+        "name": "uses_deployment",
+        "sourceClassId": "C_AI_OLLAMA_OPTION",
+        "targetClassId": "C_DEPLOY_OPEN",
+        "type": "cross_domain_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses_deployment",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_REASONING_COMBO_MAPS_TO_REASONING_CAP",
+        "name": "controls",
+        "sourceClassId": "C_AI_REASONING_EFFORT_COMBO",
+        "targetClassId": "C_CAP_REASONING",
+        "type": "cross_domain_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "controls",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_REQUEST_FIELD_USES_TEXT_MODALITY",
+        "name": "uses_modality",
+        "sourceClassId": "C_AI_HBDS_REQUEST_FIELD",
+        "targetClassId": "C_MODALITY_TEXT",
+        "type": "cross_domain_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses_modality",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      },
+      {
+        "id": "L_AI_RESPONSE_USES_JSON_MODALITY",
+        "name": "uses_modality",
+        "sourceClassId": "C_AI_RESULT_PREVIEW",
+        "targetClassId": "C_MODALITY_STRUCTURED_JSON",
+        "type": "cross_domain_link",
+        "attributes": [],
+        "rendering": {
+          "labelText": "uses_modality",
+          "labelFontSize": 8,
+          "font": {
+            "size": 8
+          }
+        }
+      }
+    ]
+  }
+}

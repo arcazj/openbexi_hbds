@@ -802,12 +802,20 @@
           "orthogonalStyle": "horizontal",
           "lineColor": "#475569",
           "lineWidth": 2,
-          "lineStyle": "solid",
+          "lineStyle": "dashed",
           "sourcePortSide": "top",
           "targetPortSide": "top",
           "routeSide": "top",
           "orthogonalClearance": 0.6,
-          "relationshipCornerRadius": 0.18
+          "relationshipCornerRadius": 0.18,
+          "arrowType": "outline",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#1d4ed8",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.18,
+          "arrowheadScale": 0.9,
+          "maxArrowheadSize": 0.22,
+          "labelFontSize": 11
         },
         "allowSelfLink": true
       },
@@ -821,12 +829,20 @@
           "orthogonalStyle": "horizontal",
           "lineColor": "#7e22ce",
           "lineWidth": 2,
-          "lineStyle": "dashed",
+          "lineStyle": "thick",
           "sourcePortSide": "bottom",
           "targetPortSide": "bottom",
           "routeSide": "bottom",
           "orthogonalClearance": 0.62,
-          "relationshipCornerRadius": 0.18
+          "relationshipCornerRadius": 0.18,
+          "arrowType": "double-chevron",
+          "arrowDirection": "bidirectional",
+          "arrowColor": "#be123c",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.18,
+          "arrowheadScale": 0.9,
+          "maxArrowheadSize": 0.22,
+          "labelFontSize": 11
         },
         "allowSelfLink": true
       },
@@ -844,7 +860,15 @@
           "sourcePortSide": "right",
           "targetPortSide": "left",
           "orthogonalClearance": 0.5,
-          "relationshipCornerRadius": 0.16
+          "relationshipCornerRadius": 0.16,
+          "arrowType": "dotted",
+          "arrowDirection": "target-to-source",
+          "arrowColor": "#047857",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.18,
+          "arrowheadScale": 0.9,
+          "maxArrowheadSize": 0.22,
+          "labelFontSize": 11
         },
         "allowSelfLink": true
       }

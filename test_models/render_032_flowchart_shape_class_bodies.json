@@ -7,20 +7,23 @@
       "algorithm": "grid",
       "fit": {
         "padding": 1.18,
-        "fitHeightDistance": 35.3338,
-        "fitWidthDistance": 20.512,
-        "distance": 21.8916,
+        "fitHeightDistance": 16.1129,
+        "fitWidthDistance": 22.4709,
+        "distance": 22.5476,
         "diagramWidth": 25.995,
         "diagramHeight": 13.32,
         "diagramDepth": 0.13,
         "radius": 14.6046,
         "center": {
-          "x": -0.76,
-          "y": 0,
+          "x": -2.4324,
+          "y": -0.3658,
           "z": 0.065
         },
-        "cameraAspect": 1.7226,
-        "cameraFov": 52
+        "cameraAspect": 1.3994,
+        "cameraFov": 52,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 22
       }
     },
     "regressionTags": [
@@ -31,26 +34,37 @@
     ],
     "sceneSettings": {
       "background": "#eef2f6",
-      "ambient": 0.82,
-      "front": 0.16,
+      "ambient": 0,
+      "front": 0,
       "sources": [
         {
-          "intensity": 0.14,
+          "intensity": 1,
           "direction": {
-            "x": -5,
+            "x": -5.734,
             "y": 7,
-            "z": 13
+            "z": 14.937
           }
         },
         {
-          "intensity": 0.1,
+          "intensity": 0.6,
           "direction": {
-            "x": 8,
-            "y": -6,
-            "z": 10
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
           }
         }
       ]
+    },
+    "font": {
+      "size": 20,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false,
+      "classSize": 33,
+      "hyperclassSize": 44,
+      "attributeSize": 30,
+      "linkSize": 19
     }
   },
   "hypergraph": {
@@ -108,7 +122,8 @@
             "cornerRadius": 0.28,
             "metalness": 0.36,
             "roughness": 0.34,
-            "material": "metallic"
+            "material": "metallic",
+            "emissiveIntensity": 0.035
           },
           "textColor": "#0f172a"
         }
@@ -842,7 +857,9 @@
           "lineStyle": "solid",
           "sourcePortSide": "right",
           "targetPortSide": "left",
-          "relationshipCornerRadius": 0.12
+          "relationshipCornerRadius": 0.12,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -859,7 +876,9 @@
           "lineStyle": "dashed",
           "sourcePortSide": "right",
           "targetPortSide": "left",
-          "relationshipCornerRadius": 0.12
+          "relationshipCornerRadius": 0.12,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -876,7 +895,9 @@
           "lineStyle": "dotted",
           "sourcePortSide": "right",
           "targetPortSide": "left",
-          "relationshipCornerRadius": 0.12
+          "relationshipCornerRadius": 0.12,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       }

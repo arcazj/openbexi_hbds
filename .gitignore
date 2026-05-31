@@ -42,3 +42,4 @@ build/
 __pycache__/
 /.codex_server_*.log
 /.tools/
+/AI_KEY/

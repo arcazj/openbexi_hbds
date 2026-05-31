@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings } from './hbds_class.js?v=label-readability-20260531c';
+﻿import * as THREE from 'three';
+import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=font-types-20260531a';
 
 const hyperclassLabels = [];
 const MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE = 6;
@@ -81,7 +81,7 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
     isHyperclass: true,
     textColor,
     font: hyperClassData.rendering?.font,
-    modelFont: hyperClassData.modelFont,
+    modelFont: hyperClassData.modelTitleFont ?? hyperClassData.modelFont,
     legacyFont: 'bold 18px Arial',
     iconFont: 'bold 18px Arial',
     iconSize: classCfg.iconSize ?? 1,
@@ -143,7 +143,7 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
       lineWidth: hyperClassData.rendering?.connections?.lineWidth ?? 0.01
     },
     textColor,
-    modelFont: hyperClassData.modelFont,
+    modelFont: hyperClassData.modelAttributeFont ?? hyperClassData.modelFont,
     startY: sz.height / 2 - 0.45,
     gapY: 0.16,
     colX: sz.width / 2 + 0.28,
@@ -167,22 +167,26 @@ export function updateLabelFontSizes(camera, renderer, options = {}) {
     label.getWorldPosition(wp);
     const dist = Math.max(1, wp.distanceTo(cp));
     const nodeWidth = label.userData?.nodeSize?.width ?? label.parent?.userData?.modelData?.size?.width ?? 4;
+    const nodeHeight = label.userData?.nodeSize?.height ?? label.parent?.userData?.modelData?.size?.height ?? 3.2;
     const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, dist, viewportHeight);
     const availableWidthPx = Math.max(72, (nodeWidth - 0.36) * pixelsPerWorldUnit);
-    const distanceSize = THREE.MathUtils.clamp(150 / dist, 2.8, 22);
-    const verticalCap = Math.max(1.5, 0.24 * pixelsPerWorldUnit);
     const text = label.userData?.text || label.element.textContent || '';
     const fitSize = availableWidthPx / Math.max(1, String(text).length * 0.62 + (label.element.classList.contains('hbds-icon-title') ? 1.25 : 0));
-    const configuredSize = Number(label.userData?.fontSettings?.size);
-    const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), 1.5, 22);
-    const minSize = Number.isFinite(configuredSize)
-      ? Math.min(configuredSize, MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE)
-      : MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE;
-    const size = Number.isFinite(configuredSize)
-      ? THREE.MathUtils.clamp(Math.min(configuredSize, dynamicSize), minSize, configuredSize)
-      : Math.max(minSize, dynamicSize);
+    const configuredSize = clampHyperclassFontSize(label.userData?.fontSettings?.size);
+    const minSize = Math.min(configuredSize, MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE);
+    const configuredScale = Math.max(1, configuredSize / 12);
+    const distanceSize = THREE.MathUtils.clamp((150 * configuredScale) / dist, minSize, configuredSize);
+    const verticalCap = Math.max(minSize, nodeHeight * pixelsPerWorldUnit * 0.28);
+    const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), minSize, configuredSize);
+    const size = THREE.MathUtils.clamp(dynamicSize, minSize, configuredSize);
     applyHyperclassTitleSizing(label.element, availableWidthPx, size);
   });
+}
+
+function clampHyperclassFontSize(value, fallback = 12) {
+  const number = Number(value);
+  const size = Number.isFinite(number) && number > 0 ? number : fallback;
+  return THREE.MathUtils.clamp(size, 1, MAX_LABEL_FONT_SIZE);
 }
 
 function getPixelsPerWorldUnit(camera, distance, viewportHeight) {

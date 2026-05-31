@@ -47,7 +47,7 @@
       }
     },
     "font": {
-      "size": 12,
+      "size": 18,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
@@ -81,7 +81,7 @@
         "position": {
           "x": -3.71,
           "y": 2.175,
-          "z": 0
+          "z": 0.0
         },
         "size": {
           "width": 1.35,
@@ -102,6 +102,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -128,7 +131,7 @@
         "position": {
           "x": -3.6274999999999995,
           "y": -2.175,
-          "z": 0
+          "z": 0.0
         },
         "size": {
           "width": 1.35,
@@ -149,6 +152,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -175,7 +181,7 @@
         "position": {
           "x": 2.085,
           "y": 2.175,
-          "z": 0
+          "z": 0.0
         },
         "size": {
           "width": 1.6700000000000002,
@@ -199,6 +205,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -225,7 +234,7 @@
         "position": {
           "x": 2.0025,
           "y": -2.175,
-          "z": 0
+          "z": 0.0
         },
         "size": {
           "width": 1.35,
@@ -247,6 +256,9 @@
             "size": {
               "width": 0.1,
               "height": 0.1
+            },
+            "font": {
+              "size": 14
             }
           },
           "connections": {
@@ -271,7 +283,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#0d1321",
           "labelPositionAlongPath": 0.35,
           "labelOffsetFromPath": 0.2,
@@ -295,7 +307,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#0b3d02",
           "labelPositionAlongPath": 0.65,
           "labelOffsetFromPath": -0.2,
@@ -319,7 +331,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#0d1321",
           "labelPositionAlongPath": 0.55,
           "labelOffsetFromPath": 0.2,
@@ -343,7 +355,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#0b3d02",
           "labelPositionAlongPath": 0.45,
           "labelOffsetFromPath": -0.2,
@@ -367,7 +379,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#3b0a57",
           "labelPositionAlongPath": 0.4,
           "labelOffsetFromPath": 0.2,
@@ -391,7 +403,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#4a2500",
           "labelPositionAlongPath": 0.55,
           "labelOffsetFromPath": -0.2,
@@ -415,7 +427,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#0d1321",
           "labelPositionAlongPath": 0.45,
           "labelOffsetFromPath": 0.2,
@@ -439,7 +451,7 @@
           "arrowheadVisibility": true,
           "arrowheadType": "triangle",
           "arrowheadSize": 0.22,
-          "labelFontSize": 13,
+          "labelFontSize": 22,
           "labelColor": "#0b3d02",
           "labelPositionAlongPath": 0.6,
           "labelOffsetFromPath": -0.2,

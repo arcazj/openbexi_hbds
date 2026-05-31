@@ -7,7 +7,64 @@
       "text",
       "attributes",
       "fallback"
-    ]
+    ],
+    "sceneSettings": {
+      "background": "#eef2f6",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.35,
+        "fitHeightDistance": 3.7636,
+        "fitWidthDistance": 3.3308,
+        "distance": 6.633,
+        "diagramWidth": 3.22,
+        "diagramHeight": 2.6,
+        "diagramDepth": 0.11,
+        "radius": 2.0701,
+        "center": {
+          "x": 0.2,
+          "y": 0,
+          "z": 0.055
+        },
+        "cameraAspect": 1.3994,
+        "cameraFov": 50,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 1
+      }
+    },
+    "font": {
+      "size": 37,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false,
+      "classSize": null,
+      "hyperclassSize": null,
+      "attributeSize": 17,
+      "linkSize": null
+    }
   },
   "hypergraph": {
     "class": [
@@ -43,7 +100,7 @@
           "z": 0
         },
         "size": {
-          "width": 2.2,
+          "width": 2.8200000000000003,
           "height": 2.6
         },
         "rendering": {
