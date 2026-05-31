@@ -332,6 +332,8 @@ If the wrapper is missing, run `.\scripts\bootstrap_maven.ps1` first. The reposi
 
 ## Roadmap
 
+See [Roadmap.md](Roadmap.md) for a detailed backlog of executable future prompts, priorities, expected benefits, affected files, suggested regression tests, security notes, compatibility requirements, and technical debt cleanup.
+
 * [ ] Add richer tree actions such as drag-to-reparent and inline rename.
 * [ ] Expand hyperclass editing workflows.
 * [ ] Add richer relationship editing between hyperclasses and classes.
