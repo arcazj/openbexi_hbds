@@ -26,9 +26,39 @@ Use this guide to validate:
 * API documentation and OpenAPI output
 * server connection indicator
 * collaboration panel and conflict-resolution choices
-* smoke tests, manifest validation, naming lint, productivity helper tests, browser collaboration regression, and optional Maven tests
+* immediate class, hyperclass, and attribute label rendering after model load
+* smoke tests, manifest validation, naming lint, productivity helper tests, browser collaboration regression, and Maven tests through the repo-local wrapper
 
-## 2. Prerequisites
+## 2. Investigation Issue Ledger
+
+This section records the regression issues that must stay covered by future test passes.
+
+Resolved or mitigated issues:
+
+* Class, hyperclass, and attribute text labels could be invisible immediately after loading a model and only appeared after moving the model, zooming, or selecting an element.
+* CSS2D label placement could be broken when code assigned a fixed `translateZ(0)` transform to label elements, replacing the renderer-managed screen transform.
+* Class and hyperclass text could become unreadable at some zoom levels when label font sizing had no practical readable floor.
+* Empty or missing class icon paths could leave label rendering in a fragile state during model load.
+* Dynamic module imports could keep stale label-rendering code in the browser cache when cache-bust query strings were not updated together.
+* Model refresh could leave previous class or hyperclass label registry state active if registries were not cleared before re-rendering.
+* Java regression tests could not run because `mvn` was not available on the machine PATH; the repo now provides `mvn.cmd`, `mvn.ps1`, and `scripts/bootstrap_maven.ps1`.
+* `it_infrastructure_world_complete_structure.json` was removed from the model set and must not remain in manifests, tests, or large-model special-case references.
+
+Known data issue still detected by deep validation:
+
+* `tools/validate_models.py` can fail because `models/satellite_world_complete_structure.json` and `models/satellite_world_complete_structure2.json` contain duplicate global model IDs. Treat this as a model data failure, not a JavaScript rendering failure.
+
+Regression coverage required for these issues:
+
+* Load models in Edit and Tests and confirm class, hyperclass, and attribute names are visible before any pan, zoom, fit, move, or selection.
+* Inspect label metrics after load and require non-empty CSS transforms, non-zero bounding boxes, readable font sizes, and placement inside the viewport.
+* Repeat label checks after zoom in, zoom out, pan, fit, overview drag, element selection, and switching between 2-D and 3-D.
+* Load a satellite model and verify label font sizes remain readable at near, default, and far zoom distances.
+* Restart the server and validate both manifests after removing or adding model files.
+* Run Maven through the repo-local wrapper so Java checks are never skipped because global Maven is missing.
+* Record any current model-data validation failure separately from code regressions.
+
+## 3. Prerequisites
 
 From the repository root:
 
@@ -49,12 +79,19 @@ On Windows, `py` is usually the most reliable command. If `python` or `python3` 
 Check Maven if Java tests are required:
 
 ```powershell
-mvn -v
+.\mvn.cmd -v
+.\mvn.ps1 -v
 ```
 
-If Maven is not installed, Java tests cannot run until Maven is installed or a Maven wrapper is added.
+If repo-local Maven is missing, bootstrap it:
 
-## 3. Static Mode Smoke Test
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\bootstrap_maven.ps1
+```
+
+The wrapper uses an installed JDK 17 when `JAVA_HOME` is not already set. In PowerShell, prefer `.\mvn.cmd test` or `.\mvn.ps1 test`. In `cmd.exe`, `mvn test` works from the repository root because `mvn.cmd` is in the current directory.
+
+## 4. Static Mode Smoke Test
 
 Static mode verifies that the browser UI can be served without the Python API.
 
@@ -80,7 +117,7 @@ Validate:
 
 Stop the static server with `Ctrl+C`.
 
-## 4. Connected Server Mode
+## 5. Connected Server Mode
 
 Connected mode is the main integration mode.
 
@@ -117,7 +154,7 @@ Validate:
 * `models/models_manifest.json` and `test_models/test_models_manifest.json` are refreshed at server startup.
 * Loading a large model such as `satellite_world_complete_structure.json` shows a centered non-blocking canvas progress bar instead of a blank or frozen canvas.
 
-## 5. Port In Use Check
+## 6. Port In Use Check
 
 If port `8010` is already in use:
 
@@ -137,7 +174,7 @@ Open:
 http://127.0.0.1:8011/index.html
 ```
 
-## 6. Models View Test
+## 7. Models View Test
 
 Open the main shell and select `Models`.
 
@@ -150,6 +187,7 @@ Validate:
 * Zoom in and zoom out still work.
 * The overview/minimap is visible and tracks the current viewport.
 * Loading multiple models updates the diagram and overview.
+* Loading a model with text labels shows class, hyperclass, attribute, and link labels immediately before any interaction.
 * Switching between 2-D and 3-D does not break rendering.
 
 Recommended model coverage:
@@ -159,7 +197,7 @@ Recommended model coverage:
 * a hyperclass model
 * a larger model, for example a satellite model
 
-## 7. Edit View Test
+## 8. Edit View Test
 
 Select `Edit` from the shell.
 
@@ -167,7 +205,8 @@ Validate:
 
 * The model selector reads from `models/models_manifest.json`.
 * A blank workspace is available after reset.
-* Class and hyperclass name labels are visible immediately after loading a model, before moving, zooming, or pressing Fit.
+* Class, hyperclass, and attribute name labels are visible immediately after loading a model, before moving, zooming, pressing Fit, or selecting any element.
+* Label DOM nodes have non-empty renderer transforms and non-zero bounds immediately after load.
 * Fit uses most of the available canvas without clipping the model or hiding labels.
 * Legacy/generated `metadata.layout.fit` values are normalized to the current model bounds and canvas aspect on load.
 * Saving after pan, zoom, overview pan, or `Fit Model` stores the current user view in `metadata.layout.fit`.
@@ -203,14 +242,15 @@ Manual edit workflow:
 21. Save.
 22. Reload the model and verify the saved changes are present.
 
-## 8. Tests View Test
+## 9. Tests View Test
 
 Select `Tests` from the shell.
 
 Validate:
 
 * The model selector reads from `test_models/test_models_manifest.json`.
-* Class and hyperclass name labels are visible immediately after loading a test model, before any canvas interaction.
+* Class, hyperclass, and attribute name labels are visible immediately after loading a test model, before any canvas interaction.
+* Label DOM nodes have non-empty renderer transforms and non-zero bounds immediately after load.
 * Fit uses most of the available canvas without clipping the model or labels.
 * Legacy/generated `metadata.layout.fit` values are normalized to the current model bounds and canvas aspect on load.
 * Saving after pan, zoom, overview pan, or `Fit Model` stores the current user view in `metadata.layout.fit`.
@@ -230,7 +270,7 @@ Scoped save test:
 4. Confirm the file exists under `test_models/`.
 5. Confirm it does not appear under `models/`.
 
-## 9. Help And API Documentation
+## 10. Help And API Documentation
 
 Open `Help` from the shell.
 
@@ -260,7 +300,7 @@ Expected:
 * `/api/docs` is readable API documentation.
 * `/api/openapi.json` is JSON because it is meant for tools and clients.
 
-## 10. Automatic Manifest Generation
+## 11. Automatic Manifest Generation
 
 The server regenerates both manifests every time `server.py` starts.
 
@@ -295,10 +335,11 @@ Rules:
 
 * hidden files are ignored
 * manifest files are ignored
+* removed model files, including `it_infrastructure_world_complete_structure.json`, are removed from the manifest after server restart
 * `_` and `-` are converted to spaces in labels
 * description matches the label
 
-## 11. API Integration Tests
+## 12. API Integration Tests
 
 Health:
 
@@ -343,7 +384,7 @@ Expected:
 * the stream connects
 * events appear when another tab joins, publishes a draft, saves, or disconnects
 
-## 12. Collaboration Test
+## 13. Collaboration Test
 
 Use connected server mode.
 
@@ -410,7 +451,7 @@ Performance pass criteria:
 * full snapshots should not be sent on every small edit
 * the wait/loading popup should appear only for genuinely long-running work, such as server load/save, large merge, or large preview generation
 
-## 13. Remote Changes Vs Mine
+## 14. Remote Changes Vs Mine
 
 With two browser windows on the same model:
 
@@ -455,7 +496,7 @@ Fallback merge coverage:
 2. In window A, confirm the UI falls back to full snapshot merge when operations are not sufficient.
 3. Confirm no partial operation merge is offered for an incomplete operation buffer.
 
-## 14. Conflict Choice Test
+## 15. Conflict Choice Test
 
 Use two browser windows on the same model.
 
@@ -507,7 +548,7 @@ Same-field conflict workflow:
 5. Resolve with `Use Theirs` or `Keep Mine`.
 6. Save and reload to confirm the selected resolution persists.
 
-## 15. External Client Collaboration Test
+## 16. External Client Collaboration Test
 
 External clients can interact through HTTP.
 
@@ -582,7 +623,7 @@ External client operation checks:
 6. Confirm merge reports a conflict.
 7. Clear the external draft and confirm the browser panel removes it.
 
-## 15A. Large-Model Collaboration Performance Test
+## 17. Large-Model Collaboration Performance Test
 
 Use this section whenever collaboration publishing, remote draft handling, preview generation, merge/diff rendering, or wait/loading behavior changes.
 
@@ -647,7 +688,7 @@ Large-model pass criteria:
 * remote presence and live preview continue to work
 * no unnecessary full snapshots are sent or rendered during rapid small edits
 
-## 15B. Sequential Live Remote Operations Regression
+## 18. Sequential Live Remote Operations Regression
 
 Use this section whenever `Live Collaboration`, draft publishing, remote draft refresh, merge policy, or the `Remote operations` UI changes.
 
@@ -689,7 +730,7 @@ Expected sequential behavior:
 * each remote operation update appears within the browser regression timing budget
 * the mixed operation matrix still renders all covered operation types and disables merge when non-mergeable display operations are present
 
-## 15C. Second-Page Model Selection Collaboration Latency Regression
+## 19. Second-Page Model Selection Collaboration Latency Regression
 
 Use this section whenever collaboration startup, model selection, edit-mode controls, draft cleanup, or remote draft refresh changes.
 
@@ -714,12 +755,13 @@ Expected output includes:
 PASS human_and_car_links second-page selection dispatch=<number>ms value=<selected option>
 ```
 
-## 16. Rendering And Navigation Regression
+## 20. Rendering And Navigation Regression
 
 2-D checks:
 
 * load simple, linked, hyperclass, and dense models
-* verify class and hyperclass names appear immediately after load in Edit and Tests before moving, zooming, or fitting
+* verify class, hyperclass, and attribute names appear immediately after load in Edit and Tests before moving, zooming, fitting, or selecting anything
+* verify immediate-load label DOM metrics include visible text, non-empty CSS transforms, non-zero bounds, readable font sizes, and viewport placement
 * verify legacy/generated `metadata.layout.fit` values adapt to the current canvas aspect and do not leave the loaded model tiny
 * save after pan, zoom, overview drag, and `Fit Model` in Edit and Tests, then reload and verify the same saved user view is restored
 * load and fit one-class and two-class models, then verify the smart margin keeps classes readable without making them oversized
@@ -738,7 +780,32 @@ PASS human_and_car_links second-page selection dispatch=<number>ms value=<select
 * verify class/hyperclass surfaces render
 * switch back to 2-D and verify the model remains usable
 
-## 17. Layout Regression
+Immediate label load regression:
+
+1. Start connected server mode.
+2. Open:
+
+```text
+http://127.0.0.1:8010/test_dynamic_hbds_layout.html?modelsPath=models/&manifestPath=models/models_manifest.json&debug=1&runImmediateLabelRegression=1
+```
+
+3. Wait for the status message.
+4. Confirm the pass summary reports visible and placed hyperclass, class, and attribute labels.
+5. Confirm no action was required before the labels became visible.
+
+Satellite font zoom regression:
+
+1. Start connected server mode.
+2. Open:
+
+```text
+http://127.0.0.1:8010/test_dynamic_hbds_layout.html?modelsPath=models/&manifestPath=models/models_manifest.json&debug=1&runSatelliteFontRegression=1
+```
+
+3. Wait for the status message.
+4. Confirm near, default, and far zoom samples keep readable class, hyperclass, and attribute text.
+
+## 21. Layout Regression
 
 In Edit or Tests:
 
@@ -757,7 +824,7 @@ Validate:
 * links route to expected source/target elements
 * no layout control appears in Models view
 
-## 18. Model Validation And JSON Editing
+## 22. Model Validation And JSON Editing
 
 Manual validation:
 
@@ -782,7 +849,7 @@ Server validation:
 
 The smoke suite covers these server cases.
 
-## 19. Medium-Risk Modeling Productivity Validation
+## 23. Medium-Risk Modeling Productivity Validation
 
 Validate this section whenever the model tree sidebar, productivity panel, copy/paste behavior, attribute helpers, link helpers, or selected subgraph export changes.
 
@@ -842,7 +909,22 @@ Known limitations:
 * Selected subgraph export is JSON only.
 * Model tree drag-to-reparent and inline rename are not included.
 
-## 20. Automated Regression Commands
+## 24. Automated Regression Commands
+
+Execution order:
+
+1. Run automated compile, unit/helper, manifest, model, Maven, and smoke checks.
+2. Run browser regressions.
+3. Run manual or interactive collaboration checks only for behavior not already covered by automation.
+4. If a test fails, fix the related code or test data, update this guide if expected behavior changed, and rerun the affected checks plus any broader regression that could be impacted.
+
+Automated pass criteria:
+
+* All automated checks must pass except explicitly accepted known data issues.
+* The current accepted known data issue is `py tools\validate_models.py` failing because `models/satellite_world_complete_structure.json` and `models/satellite_world_complete_structure2.json` share duplicate global model IDs.
+* If `py tools\validate_models.py` fails for any different reason, treat it as a new failure.
+* Browser regressions must pass with no significant console errors.
+* The run is complete only when no remaining failure requires code changes.
 
 Run Python compile checks:
 
@@ -900,6 +982,24 @@ py scripts\collaboration_browser_regression.py
 
 This opens real headless Edge/Chrome clients with `debug=1`, verifies second-page `human_and_car_links.json` model-selection latency during collaboration, then verifies a temporary server model for real draft publishing, sequential real-time `Remote operations` list updates, remote operation rendering for class, link, layout, font, scene, view, movement, rendering, parent, attribute, create, and delete updates, merge behavior, collaboration performance diagnostics, absence of normal-update wait/status dialogs, and the non-blocking long-work canvas progress indicator.
 
+Automated collaboration coverage:
+
+* two real browser clients on the same model
+* second-page model selection while another client is already active
+* live draft publishing from UI edits
+* operation-only remote draft display
+* merge enablement for safe class and link operations
+* merge disablement for display-only or mixed non-mergeable operations
+* real-time replacement of `Remote operations` rows without stale text
+* class rename, movement, rendering, parent, attribute, create, and delete operation summaries
+* link update, create, and delete operation summaries
+* layout, font, scene, and viewport operation summaries
+* collaboration performance diagnostics for panel render, draft build, and draft publish
+* absence of wait popups and canvas collaboration progress indicators during normal updates
+* visible non-blocking canvas progress indicator for intentionally long collaboration work
+
+Manual collaboration coverage is still required for final release if behavior outside the automated list changed, especially disconnect/reconnect timing, two different model tabs, external clients beyond operation-only drafts, and visual inspection of large-model collaboration under sustained human edits.
+
 After automated browser regression, inspect the logs:
 
 ```powershell
@@ -916,17 +1016,28 @@ Expected:
 Run Java/Maven tests if Maven is installed:
 
 ```powershell
-mvn test
+.\mvn.cmd test
 ```
 
-Run JavaScript syntax checks for touched modules:
+Run JavaScript syntax checks for all JavaScript modules:
 
 ```powershell
-Get-Content -Raw js\test_dynamic_hbds_layout.js | node --input-type=module --check
-Get-Content -Raw js\hbds_model_productivity.js | node --input-type=module --check
-Get-Content -Raw js\hbds_collaboration_drafts.js | node --input-type=module --check
-Get-Content -Raw js\hbds_collaboration_preview.js | node --input-type=module --check
-Get-Content -Raw js\hbds_floating_panel.js | node --input-type=module --check
+Get-ChildItem js -Filter *.js | ForEach-Object {
+  Get-Content -Raw $_.FullName | node --input-type=module --check
+}
+```
+
+Run browser label-load regressions in a connected browser:
+
+```text
+http://127.0.0.1:8010/test_dynamic_hbds_layout.html?modelsPath=models/&manifestPath=models/models_manifest.json&debug=1&runImmediateLabelRegression=1
+http://127.0.0.1:8010/test_dynamic_hbds_layout.html?modelsPath=models/&manifestPath=models/models_manifest.json&debug=1&runSatelliteFontRegression=1
+```
+
+Run the Tests-view scenario suite in a connected browser:
+
+```text
+http://127.0.0.1:8010/test_dynamic_hbds_layout.html?modelsPath=test_models/&manifestPath=test_models/test_models_manifest.json&debug=1&runScenarioSuite=1
 ```
 
 Run Git whitespace checks:
@@ -935,7 +1046,7 @@ Run Git whitespace checks:
 git diff --check
 ```
 
-## 21. Deep Manual Regression Matrix
+## 25. Deep Manual Regression Matrix
 
 Run this matrix before major releases.
 
@@ -1008,7 +1119,7 @@ Collaboration:
 * disconnect/reconnect
 * panel resize and drag
 
-## 22. Troubleshooting
+## 26. Troubleshooting
 
 Port already in use:
 
@@ -1037,10 +1148,16 @@ Server disconnected icon:
 Maven not installed:
 
 ```powershell
-mvn -v
+.\mvn.cmd -v
 ```
 
-If missing, install Maven with Winget or Chocolatey, then reopen PowerShell.
+If local Maven is missing, run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\bootstrap_maven.ps1
+```
+
+Then run `.\mvn.cmd test` from PowerShell. If this still fails, verify JDK 17 is installed or set `JAVA_HOME` to a JDK 17 directory.
 
 Python command differences:
 
@@ -1068,7 +1185,7 @@ OpenAPI or docs returns JSON when HTML was expected:
 * `/api/docs` is the readable documentation page
 * `/api/openapi.json` is the machine-readable JSON specification
 
-## 23. Release Checklist
+## 27. Release Checklist
 
 Before release:
 
@@ -1081,8 +1198,9 @@ Before release:
 * run `node scripts\productivity_helpers_test.mjs`
 * run `node scripts\collaboration_drafts_test.mjs`
 * run `py scripts\collaboration_browser_regression.py`
-* run JavaScript syntax checks for touched modules
-* run `mvn test` if Maven is installed
+* run JavaScript syntax checks for all `js/*.js` modules
+* run immediate label load and satellite font zoom browser regressions
+* run `.\mvn.cmd test`
 * run `git diff --check`
 * start `py server.py --port 8010`
 * verify Models, Edit, Tests, and Help manually
@@ -1102,7 +1220,7 @@ Before release:
 * review `git status --short`
 * update README or this guide if behavior changed
 
-## 24. Expected Clean-Up
+## 28. Expected Clean-Up
 
 After tests, confirm no temporary smoke files remain:
 

@@ -41,3 +41,4 @@ build/
 /debug_logs/
 __pycache__/
 /.codex_server_*.log
+/.tools/
