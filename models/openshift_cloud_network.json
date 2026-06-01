@@ -36,20 +36,23 @@
       "algorithm": "grid",
       "fit": {
         "padding": 1.18,
-        "fitHeightDistance": 30.8253,
-        "fitWidthDistance": 23.7526,
-        "distance": 21.5265,
+        "fitHeightDistance": 15.8663,
+        "fitWidthDistance": 17.0551,
+        "distance": 18.3129,
         "diagramWidth": 20.855,
-        "diagramHeight": 12.594,
+        "diagramHeight": 12.54,
         "diagramDepth": 0.08,
-        "radius": 12.1814,
+        "radius": 12.1675,
         "center": {
-          "x": -0.72,
-          "y": -0.027,
+          "x": -0.1037,
+          "y": -0.7438,
           "z": 0.04
         },
-        "cameraAspect": 1.2978,
-        "cameraFov": 50
+        "cameraAspect": 1.5472,
+        "cameraFov": 50,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 11
       }
     },
     "font": {
@@ -57,7 +60,11 @@
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
-      "underline": false
+      "underline": false,
+      "classSize": 30,
+      "hyperclassSize": null,
+      "attributeSize": 28,
+      "linkSize": null
     }
   },
   "hypergraph": {
@@ -107,9 +114,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -167,9 +171,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -216,9 +217,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -265,9 +263,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -314,9 +309,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -363,9 +355,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -413,9 +402,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -462,9 +448,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -511,9 +494,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -560,9 +540,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -609,9 +586,6 @@
             "size": {
               "width": 0.12,
               "height": 0.12
-            },
-            "font": {
-              "size": 14
             }
           },
           "connections": {
@@ -643,7 +617,9 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -667,7 +643,9 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -691,7 +669,9 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -715,7 +695,9 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -739,7 +721,9 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -763,7 +747,9 @@
           "labelPositionAlongPath": 0.5,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -787,7 +773,9 @@
           "labelPositionAlongPath": 0.48,
           "labelOffsetFromPath": -0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -811,7 +799,9 @@
           "labelPositionAlongPath": 0.52,
           "labelOffsetFromPath": 0.2,
           "labelRotationBehavior": "follow",
-          "zIndex": 8
+          "zIndex": 8,
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       }

@@ -30,20 +30,23 @@
       "algorithm": "grid",
       "fit": {
         "padding": 1.15,
-        "fitHeightDistance": 36.9016,
-        "fitWidthDistance": 25.2356,
-        "distance": 22.0944,
+        "fitHeightDistance": 23.4781,
+        "fitWidthDistance": 18.4009,
+        "distance": 23.5528,
         "diagramWidth": 23.0875,
         "diagramHeight": 19.04,
         "diagramDepth": 0.13,
         "radius": 14.963,
         "center": {
-          "x": -2.8505,
-          "y": 0.7456,
-          "z": 0.0745
+          "x": -0.6913,
+          "y": 0,
+          "z": 0.065
         },
-        "cameraAspect": 1.4623,
-        "cameraFov": 50
+        "cameraAspect": 1.5472,
+        "cameraFov": 50,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 19
       }
     },
     "purpose": "HBDS model reconstructed from the multimodal transportation diagram.",
@@ -54,11 +57,15 @@
       "diagram"
     ],
     "font": {
-      "size": 18,
+      "size": 24,
       "family": "Arial, sans-serif",
       "bold": false,
       "italic": false,
-      "underline": false
+      "underline": false,
+      "classSize": 35,
+      "hyperclassSize": 40,
+      "attributeSize": null,
+      "linkSize": null
     }
   },
   "hypergraph": {
@@ -120,7 +127,8 @@
             "opacity": 0.1,
             "material": "metallic",
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#ef4444",
@@ -405,7 +413,8 @@
             "opacity": 0.1,
             "material": "metallic",
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#ef4444",
@@ -641,7 +650,8 @@
             "opacity": 0.1,
             "material": "metallic",
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#ef4444",
@@ -826,7 +836,8 @@
             "opacity": 0.1,
             "material": "metallic",
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#ef4444",
@@ -1011,7 +1022,8 @@
             "opacity": 0.1,
             "material": "metallic",
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#ef4444",
@@ -1178,8 +1190,8 @@
           "multimodal_transportation_diagram_spaceship"
         ],
         "position": {
-          "x": -0.5749999999999994,
-          "y": -5.23,
+          "x": -1.1882,
+          "y": -7.0906,
           "z": 0
         },
         "size": {
@@ -1195,7 +1207,8 @@
             "opacity": 0.1,
             "material": "metallic",
             "metalness": 0.42,
-            "roughness": 0.28
+            "roughness": 0.28,
+            "emissiveIntensity": 0.035
           },
           "attributes": {
             "checkboxColor": "#ef4444",
@@ -1238,8 +1251,8 @@
         ],
         "parentClassId": "multimodal_transportation_diagram_space_transport",
         "position": {
-          "x": -1.4399999999999995,
-          "y": -5.405,
+          "x": -2.0532,
+          "y": -7.2656,
           "z": 0
         },
         "size": {
@@ -1304,7 +1317,9 @@
               "y": 5.85,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1336,7 +1351,9 @@
               "y": 1.15,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1373,7 +1390,9 @@
               "y": 4.8,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1405,7 +1424,9 @@
               "y": 0.75,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1437,7 +1458,9 @@
               "y": 0,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1469,7 +1492,9 @@
               "y": 4.35,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1501,7 +1526,9 @@
               "y": 3.7,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1533,7 +1560,9 @@
               "y": 4.55,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1565,7 +1594,9 @@
               "y": 0.75,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1597,7 +1628,9 @@
               "y": 1.65,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1629,7 +1662,9 @@
               "y": 0,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1661,7 +1696,9 @@
               "y": -0.65,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1693,7 +1730,9 @@
               "y": -3.55,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1725,7 +1764,9 @@
               "y": 0.65,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1757,7 +1798,9 @@
               "y": -0.35,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1789,7 +1832,9 @@
               "y": -2.25,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1821,7 +1866,9 @@
               "y": -0.15,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1853,7 +1900,9 @@
               "y": -4.35,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       },
@@ -1885,7 +1934,9 @@
               "y": -4.9,
               "z": 0
             }
-          ]
+          ],
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
         },
         "allowSelfLink": true
       }
