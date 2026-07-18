@@ -16,11 +16,6 @@
       "description": "bridge road links"
     },
     {
-      "value": "models/cloud_computing_architecture.json",
-      "label": "cloud computing architecture",
-      "description": "cloud computing architecture"
-    },
-    {
       "value": "models/complex_hyperclass_mail_Carrier_with_links.json",
       "label": "complex hyperclass mail Carrier with links",
       "description": "complex hyperclass mail Carrier with links"
