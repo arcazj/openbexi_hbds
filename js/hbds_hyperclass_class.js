@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three';
-import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=font-types-20260531a';
+import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=perf-hardening-20260718a';
 
 const hyperclassLabels = [];
 const MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE = 6;

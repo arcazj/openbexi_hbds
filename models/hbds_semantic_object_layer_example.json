@@ -1,0 +1,476 @@
+{
+  "$schema": "https://openbexi.local/hbds/model/v2",
+  "metadata": {
+    "id": "semex_model",
+    "name": "HBDS Semantic Object Layer Example",
+    "version": "2026.07.18-semantic-v1",
+    "purpose": "Provide a loadable HBDS semanticVersion 1 example covering objects, object links, memberships, inheritance, functor traversal, and optional semantic profiles.",
+    "semanticVersion": 1,
+    "semanticProfiles": {
+      "units": { "enabled": true },
+      "temporal": { "enabled": true },
+      "geospatial": { "enabled": true },
+      "fuzzy": { "enabled": true },
+      "prototype": { "enabled": true }
+    },
+    "preserveLayout": true,
+    "layout": {
+      "algorithm": "none",
+      "fit": { "padding": 1.18 }
+    },
+    "font": {
+      "size": 18,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false,
+      "classSize": 20,
+      "hyperclassSize": 22,
+      "attributeSize": 14,
+      "linkSize": 15
+    },
+    "sceneSettings": {
+      "background": "#F8FAFC",
+      "ambient": 0.78,
+      "front": 0.18,
+      "sources": [
+        {
+          "intensity": 0.18,
+          "direction": { "x": -6, "y": 8, "z": 14 }
+        },
+        {
+          "intensity": 0.12,
+          "direction": { "x": 8, "y": -5, "z": 11 }
+        }
+      ]
+    },
+    "semanticExamples": {
+      "functorQueries": [
+        {
+          "id": "semex_query_direct",
+          "name": "Direct satellite to ground site",
+          "query": {
+            "startObjectIds": ["semex_obj_satellite_alpha"],
+            "steps": [
+              { "kind": "direct", "classLinkId": "semex_link_communicates" }
+            ]
+          },
+          "expectedObjectIds": ["semex_obj_site_east"]
+        },
+        {
+          "id": "semex_query_inverse",
+          "name": "Inverse ground site to satellite",
+          "query": {
+            "startObjectIds": ["semex_obj_site_east"],
+            "steps": [
+              { "kind": "inverse", "classLinkId": "semex_link_communicates" }
+            ]
+          },
+          "expectedObjectIds": ["semex_obj_satellite_alpha"]
+        },
+        {
+          "id": "semex_query_homogeneous",
+          "name": "Homogeneous ground-site relay",
+          "query": {
+            "startObjectIds": ["semex_obj_site_east"],
+            "steps": [
+              { "kind": "homogeneous", "classLinkId": "semex_link_relays", "direction": "both" }
+            ]
+          },
+          "expectedObjectIds": ["semex_obj_site_west"]
+        },
+        {
+          "id": "semex_query_composed",
+          "name": "Mission through satellite to ground site",
+          "query": {
+            "startObjectIds": ["semex_obj_mission_demo"],
+            "steps": [
+              {
+                "kind": "chain",
+                "steps": [
+                  { "kind": "direct", "classLinkId": "semex_link_assigns" },
+                  { "kind": "direct", "classLinkId": "semex_link_communicates" }
+                ]
+              }
+            ]
+          },
+          "expectedObjectIds": ["semex_obj_site_east"]
+        }
+      ]
+    },
+    "regressionTags": [
+      "semantic",
+      "object-layer",
+      "functors",
+      "profiles",
+      "example"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "semex_hc_mission_domain",
+        "name": "Mission Domain",
+        "type": "hyperclass",
+        "position": { "x": -3.75, "y": 0, "z": 0 },
+        "size": { "width": 11, "height": 8 },
+        "attributes": [
+          { "id": "semex_hc_mission_attr_scope", "name": "operational scope" }
+        ],
+        "children": [
+          "semex_class_asset",
+          "semex_class_satellite",
+          "semex_class_ground_site",
+          "semex_class_mission"
+        ],
+        "rendering": {
+          "class": {
+            "color": "#E2E8F0",
+            "borderColor": "#475569",
+            "material": "flat",
+            "opacity": 0.34
+          }
+        }
+      },
+      {
+        "id": "semex_hc_spatial_domain",
+        "name": "Spatial Domain",
+        "type": "hyperclass",
+        "position": { "x": 4.75, "y": 0, "z": 0 },
+        "size": { "width": 4, "height": 3.5 },
+        "attributes": [
+          { "id": "semex_hc_spatial_attr_scope", "name": "geospatial scope" },
+          { "id": "semex_hc_spatial_attr_membership", "name": "semantic membership" }
+        ],
+        "children": [],
+        "rendering": {
+          "class": {
+            "color": "#DCFCE7",
+            "borderColor": "#15803D",
+            "material": "flat",
+            "opacity": 0.4
+          }
+        }
+      },
+      {
+        "id": "semex_class_asset",
+        "name": "Asset",
+        "type": "roundedRectangle",
+        "parentClassId": "semex_hc_mission_domain",
+        "position": { "x": -6.25, "y": 2, "z": 0.08 },
+        "size": { "width": 3.8, "height": 1.65 },
+        "attributes": [
+          { "id": "semex_asset_attr_external_id", "name": "externalId" },
+          { "id": "semex_asset_attr_display_name", "name": "displayName" }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#FEF3C7",
+            "borderColor": "#B45309",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "semex_class_satellite",
+        "name": "Satellite",
+        "type": "roundedRectangle",
+        "parentClassId": "semex_hc_mission_domain",
+        "position": { "x": -1.25, "y": 2, "z": 0.08 },
+        "size": { "width": 4.2, "height": 2.65 },
+        "attributes": [
+          { "id": "semex_satellite_attr_norad_id", "name": "noradCatalogId" },
+          { "id": "semex_satellite_attr_mass", "name": "mass" },
+          { "id": "semex_satellite_attr_service_window", "name": "serviceWindow" },
+          { "id": "semex_satellite_attr_position", "name": "position" },
+          { "id": "semex_satellite_attr_health", "name": "healthConfidence" }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#DBEAFE",
+            "borderColor": "#1D4ED8",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "semex_class_ground_site",
+        "name": "Ground Site",
+        "type": "roundedRectangle",
+        "parentClassId": "semex_hc_mission_domain",
+        "position": { "x": -6.25, "y": -2, "z": 0.08 },
+        "size": { "width": 3.8, "height": 2.15 },
+        "attributes": [
+          { "id": "semex_site_attr_code", "name": "siteCode" },
+          { "id": "semex_site_attr_position", "name": "position" },
+          { "id": "semex_site_attr_availability", "name": "availability" }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#FFE4E6",
+            "borderColor": "#BE123C",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "semex_class_mission",
+        "name": "Mission",
+        "type": "roundedRectangle",
+        "parentClassId": "semex_hc_mission_domain",
+        "position": { "x": -1.25, "y": -2, "z": 0.08 },
+        "size": { "width": 4.2, "height": 1.85 },
+        "attributes": [
+          { "id": "semex_mission_attr_code", "name": "missionCode" },
+          { "id": "semex_mission_attr_window", "name": "activeWindow" }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#F3E8FF",
+            "borderColor": "#7E22CE",
+            "material": "flat"
+          }
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "semex_link_assigns",
+        "sourceClassId": "semex_class_mission",
+        "targetClassId": "semex_class_satellite",
+        "name": "assigns",
+        "rendering": {
+          "labelText": "assigns",
+          "lineColor": "#6B21A8",
+          "lineWidth": 0.025,
+          "lineStyle": "solid",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        }
+      },
+      {
+        "id": "semex_link_communicates",
+        "sourceClassId": "semex_class_satellite",
+        "targetClassId": "semex_class_ground_site",
+        "name": "communicates with",
+        "rendering": {
+          "labelText": "communicates with",
+          "lineColor": "#0369A1",
+          "lineWidth": 0.025,
+          "lineStyle": "solid",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        }
+      },
+      {
+        "id": "semex_link_relays",
+        "sourceClassId": "semex_class_ground_site",
+        "targetClassId": "semex_class_ground_site",
+        "name": "relays to",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "relays to",
+          "lineColor": "#BE123C",
+          "lineWidth": 0.025,
+          "lineStyle": "dashed",
+          "arrowType": "double-chevron",
+          "arrowDirection": "source-to-target"
+        }
+      }
+    ],
+    "object": [
+      {
+        "id": "semex_obj_satellite_template",
+        "classId": "semex_class_satellite",
+        "name": "Satellite Template",
+        "isPrototype": true,
+        "attributeValues": [
+          { "attributeId": "semex_asset_attr_external_id", "value": "SAT-TEMPLATE" },
+          { "attributeId": "semex_asset_attr_display_name", "value": "Reference Satellite" },
+          { "attributeId": "semex_satellite_attr_norad_id", "value": "00000" },
+          {
+            "attributeId": "semex_satellite_attr_mass",
+            "value": { "semanticType": "unit", "value": 260, "unit": "kg", "dimension": "mass" }
+          },
+          {
+            "attributeId": "semex_satellite_attr_service_window",
+            "value": {
+              "semanticType": "temporal",
+              "start": "2026-01-01T00:00:00Z",
+              "end": "2031-01-01T00:00:00Z"
+            }
+          },
+          {
+            "attributeId": "semex_satellite_attr_position",
+            "value": { "semanticType": "geospatial", "latitude": 0, "longitude": 0, "altitude": 550000 }
+          },
+          {
+            "attributeId": "semex_satellite_attr_health",
+            "value": { "semanticType": "fuzzy", "memberships": { "nominal": 0.95, "degraded": 0.05 } }
+          }
+        ]
+      },
+      {
+        "id": "semex_obj_satellite_alpha",
+        "classId": "semex_class_satellite",
+        "name": "Satellite Alpha",
+        "prototypeId": "semex_obj_satellite_template",
+        "overrides": {
+          "semex_asset_attr_external_id": "SAT-ALPHA",
+          "semex_satellite_attr_norad_id": "44713",
+          "semex_satellite_attr_mass": 280
+        },
+        "attributeValues": [
+          { "attributeId": "semex_asset_attr_external_id", "value": "SAT-ALPHA" },
+          { "attributeId": "semex_asset_attr_display_name", "value": "Satellite Alpha" },
+          { "attributeId": "semex_satellite_attr_norad_id", "value": "44713" },
+          {
+            "attributeId": "semex_satellite_attr_mass",
+            "value": { "semanticType": "unit", "value": 280, "unit": "kg", "dimension": "mass" }
+          },
+          {
+            "attributeId": "semex_satellite_attr_position",
+            "value": { "semanticType": "geospatial", "latitude": 12.5, "longitude": -42.75, "altitude": 550000 }
+          },
+          {
+            "attributeId": "semex_satellite_attr_health",
+            "value": { "semanticType": "fuzzy", "membership": 0.92 }
+          }
+        ]
+      },
+      {
+        "id": "semex_obj_satellite_beta",
+        "classId": "semex_class_satellite",
+        "name": "Satellite Beta",
+        "prototypeId": "semex_obj_satellite_template",
+        "overrides": {
+          "semex_asset_attr_external_id": "SAT-BETA",
+          "semex_satellite_attr_norad_id": "56287"
+        },
+        "attributeValues": [
+          { "attributeId": "semex_asset_attr_external_id", "value": "SAT-BETA" },
+          { "attributeId": "semex_asset_attr_display_name", "value": "Satellite Beta" },
+          { "attributeId": "semex_satellite_attr_norad_id", "value": "56287" }
+        ]
+      },
+      {
+        "id": "semex_obj_site_east",
+        "classId": "semex_class_ground_site",
+        "name": "East Ground Site",
+        "attributeValues": [
+          { "attributeId": "semex_asset_attr_external_id", "value": "SITE-EAST" },
+          { "attributeId": "semex_asset_attr_display_name", "value": "East Ground Site" },
+          { "attributeId": "semex_site_attr_code", "value": "EAST" },
+          {
+            "attributeId": "semex_site_attr_position",
+            "value": { "semanticType": "geospatial", "latitude": 38.9171, "longitude": -77.2222, "altitude": 120 }
+          },
+          {
+            "attributeId": "semex_site_attr_availability",
+            "value": { "semanticType": "fuzzy", "membership": 0.98 }
+          }
+        ]
+      },
+      {
+        "id": "semex_obj_site_west",
+        "classId": "semex_class_ground_site",
+        "name": "West Ground Site",
+        "attributeValues": [
+          { "attributeId": "semex_asset_attr_external_id", "value": "SITE-WEST" },
+          { "attributeId": "semex_asset_attr_display_name", "value": "West Ground Site" },
+          { "attributeId": "semex_site_attr_code", "value": "WEST" },
+          {
+            "attributeId": "semex_site_attr_position",
+            "value": { "semanticType": "geospatial", "latitude": 33.735, "longitude": -116.901, "altitude": 460 }
+          }
+        ]
+      },
+      {
+        "id": "semex_obj_mission_demo",
+        "classId": "semex_class_mission",
+        "name": "Demonstration Mission",
+        "attributeValues": [
+          { "attributeId": "semex_mission_attr_code", "value": "DEMO-1" },
+          {
+            "attributeId": "semex_mission_attr_window",
+            "value": {
+              "semanticType": "temporal",
+              "start": "2026-07-18T12:00:00Z",
+              "end": "2026-07-18T18:00:00Z"
+            }
+          }
+        ]
+      }
+    ],
+    "objectLink": [
+      {
+        "id": "semex_object_link_mission_alpha",
+        "classLinkId": "semex_link_assigns",
+        "sourceObjectId": "semex_obj_mission_demo",
+        "targetObjectId": "semex_obj_satellite_alpha"
+      },
+      {
+        "id": "semex_object_link_alpha_east",
+        "classLinkId": "semex_link_communicates",
+        "sourceObjectId": "semex_obj_satellite_alpha",
+        "targetObjectId": "semex_obj_site_east"
+      },
+      {
+        "id": "semex_object_link_beta_west",
+        "classLinkId": "semex_link_communicates",
+        "sourceObjectId": "semex_obj_satellite_beta",
+        "targetObjectId": "semex_obj_site_west"
+      },
+      {
+        "id": "semex_object_link_east_west",
+        "classLinkId": "semex_link_relays",
+        "sourceObjectId": "semex_obj_site_east",
+        "targetObjectId": "semex_obj_site_west"
+      }
+    ],
+    "membership": [
+      {
+        "id": "semex_membership_asset_mission",
+        "classId": "semex_class_asset",
+        "hyperclassId": "semex_hc_mission_domain"
+      },
+      {
+        "id": "semex_membership_satellite_mission",
+        "classId": "semex_class_satellite",
+        "hyperclassId": "semex_hc_mission_domain"
+      },
+      {
+        "id": "semex_membership_satellite_spatial",
+        "classId": "semex_class_satellite",
+        "hyperclassId": "semex_hc_spatial_domain"
+      },
+      {
+        "id": "semex_membership_site_mission",
+        "classId": "semex_class_ground_site",
+        "hyperclassId": "semex_hc_mission_domain"
+      },
+      {
+        "id": "semex_membership_site_spatial",
+        "classId": "semex_class_ground_site",
+        "hyperclassId": "semex_hc_spatial_domain"
+      },
+      {
+        "id": "semex_membership_mission_mission",
+        "classId": "semex_class_mission",
+        "hyperclassId": "semex_hc_mission_domain"
+      }
+    ],
+    "inheritance": [
+      {
+        "id": "semex_inheritance_satellite_asset",
+        "subClassId": "semex_class_satellite",
+        "superClassId": "semex_class_asset"
+      },
+      {
+        "id": "semex_inheritance_site_asset",
+        "subClassId": "semex_class_ground_site",
+        "superClassId": "semex_class_asset"
+      }
+    ]
+  }
+}

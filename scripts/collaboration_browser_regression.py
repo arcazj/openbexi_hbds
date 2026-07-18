@@ -617,8 +617,16 @@ return Boolean(
         )
 
 
-def dynamic_layout_url(base_url: str, shared_model: str | None = None, models_path: str = "models/") -> str:
-    params = {"modelsPath": models_path, "debug": "1"}
+def dynamic_layout_url(
+    base_url: str,
+    shared_model: str | None = None,
+    models_path: str = "models/",
+    *,
+    debug: bool = True,
+) -> str:
+    params = {"modelsPath": models_path}
+    if debug:
+        params["debug"] = "1"
     if shared_model:
         params["sharedModel"] = shared_model
     return f"{base_url}/test_dynamic_hbds_layout.html?{urllib.parse.urlencode(params)}"
@@ -637,6 +645,326 @@ return Boolean(
         label,
         timeout=timeout,
     )
+
+
+def assert_browser_has_no_significant_errors(page: BrowserPage, label: str) -> None:
+    errors = page.significant_errors()
+    if errors:
+        raise BrowserRegressionError(f"{label} browser errors:\n" + "\n".join(errors[:SIGNIFICANT_ERROR_LIMIT]))
+
+
+def run_render_scheduler_regression(base_url: str, debug_port: int) -> None:
+    page = BrowserPage(create_target(debug_port))
+    viewer_page: BrowserPage | None = None
+    try:
+        page.cdp.send("Network.enable")
+        page.navigate(dynamic_layout_url(base_url, models_path="test_models/", debug=False))
+        wait_for_page_ready(page, "render scheduler regression page")
+        wait_for(
+            page,
+            """
+const state = window.__hbdsDynamicTest?.getRenderState?.();
+return state && !state.frameScheduled && !state.orbitFrameScheduled && !state.orbitRenderPending;
+""",
+            "editor renderer to settle",
+        )
+        idle = page.evaluate(
+            js_async(
+                """
+const before = window.__hbdsDynamicTest.getRenderState();
+await new Promise(resolve => setTimeout(resolve, 450));
+const after = window.__hbdsDynamicTest.getRenderState();
+return { before, after };
+"""
+            )
+        )
+        if idle["after"]["completedRenderCount"] != idle["before"]["completedRenderCount"]:
+            raise BrowserRegressionError(f"Editor renderer did not settle while idle: {idle}")
+
+        page.cdp.send(
+            "Network.emulateNetworkConditions",
+            {
+                "offline": False,
+                "latency": 700,
+                "downloadThroughput": 5_000_000,
+                "uploadThroughput": 5_000_000,
+                "connectionType": "wifi",
+            },
+        )
+        image_result = page.evaluate(
+            js_async(
+                """
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const waitUntil = async (predicate, label, timeoutMs = 25000) => {
+  const started = Date.now();
+  let value = null;
+  while (Date.now() - started < timeoutMs) {
+    value = predicate();
+    if (value) return value;
+    await sleep(50);
+  }
+  throw new Error(`${label} timed out; last=${JSON.stringify(value)}`);
+};
+const select = document.querySelector('#test-model-select');
+const option = [...select.options].find(item => item.value.endsWith('render_029_image_shape_class_bodies.json'));
+if (!option) throw new Error('Image-body regression fixture is missing');
+select.value = option.value;
+select.dispatchEvent(new Event('change', { bubbles: true }));
+await waitUntil(() => {
+  const states = window.__hbdsDynamicTest.getClassBodyStates();
+  return states.filter(state => state.bodyType === 'image').some(state => state.imageState === 'loading');
+}, 'image bodies to enter loading state');
+await waitUntil(() => {
+  const state = window.__hbdsDynamicTest.getRenderState();
+  return !state.frameScheduled && !state.orbitFrameScheduled;
+}, 'initial image-model frame to settle');
+const beforeAsyncCompletion = window.__hbdsDynamicTest.getRenderState();
+await waitUntil(() => {
+  const imageStates = window.__hbdsDynamicTest.getClassBodyStates().filter(state => state.bodyType === 'image');
+  return imageStates.length >= 3 && imageStates.every(state => state.imageState !== 'loading');
+}, 'image bodies to finish loading');
+await sleep(120);
+return {
+  beforeAsyncCompletion,
+  afterAsyncCompletion: window.__hbdsDynamicTest.getRenderState(),
+  bodyStates: window.__hbdsDynamicTest.getClassBodyStates(),
+  memory: window.__hbdsDynamicTest.getRendererMemory(),
+  pixels: window.__hbdsDynamicTest.sampleRendererPixels(28)
+};
+"""
+            ),
+            timeout=35,
+        )
+        page.cdp.send(
+            "Network.emulateNetworkConditions",
+            {
+                "offline": False,
+                "latency": 0,
+                "downloadThroughput": -1,
+                "uploadThroughput": -1,
+                "connectionType": "none",
+            },
+        )
+        image_states = [state for state in image_result["bodyStates"] if state["bodyType"] == "image"]
+        loaded_images = [state for state in image_states if state["imageState"] == "loaded"]
+        if len(loaded_images) < 2 or any(state["visualCount"] < 1 for state in loaded_images):
+            raise BrowserRegressionError(f"Image bodies did not render: {image_result}")
+        if image_result["afterAsyncCompletion"]["completedRenderCount"] <= image_result["beforeAsyncCompletion"]["completedRenderCount"]:
+            raise BrowserRegressionError(f"Async image completion did not invalidate rendering: {image_result}")
+        if image_result["pixels"]["nonBackground"] <= 10:
+            raise BrowserRegressionError(f"Image fixture canvas was blank: {image_result['pixels']}")
+
+        memory_result = page.evaluate(
+            js_async(
+                """
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const select = document.querySelector('#test-model-select');
+const find = suffix => [...select.options].find(item => item.value.endsWith(suffix));
+const image = find('render_029_image_shape_class_bodies.json');
+const plain = find('layout_001_single_class_few_attributes.json');
+if (!image || !plain) throw new Error('Texture-memory fixtures are missing');
+const load = async (option, expectImages) => {
+  select.value = option.value;
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+  const started = Date.now();
+  while (Date.now() - started < 20000) {
+    const states = window.__hbdsDynamicTest.getClassBodyStates();
+    const imageStates = states.filter(state => state.bodyType === 'image');
+    const selected = select.value === option.value;
+    const ready = expectImages
+      ? imageStates.length >= 3 && imageStates.every(state => state.imageState !== 'loading')
+      : states.length > 0 && imageStates.length === 0;
+    if (selected && ready) break;
+    await sleep(60);
+  }
+  await sleep(120);
+  return window.__hbdsDynamicTest.getRendererMemory().textures;
+};
+await load(plain, false);
+const baseline = window.__hbdsDynamicTest.getRendererMemory().textures;
+const cleanupCounts = [];
+for (let index = 0; index < 4; index += 1) {
+  await load(image, true);
+  await load(plain, false);
+  cleanupCounts.push(window.__hbdsDynamicTest.getRendererMemory().textures);
+}
+return { baseline, cleanupCounts };
+"""
+            ),
+            timeout=55,
+        )
+        if any(count > memory_result["baseline"] + 1 for count in memory_result["cleanupCounts"]):
+            raise BrowserRegressionError(f"Image texture memory grew across reloads: {memory_result}")
+
+        canvas_point = page.evaluate(
+            """
+(() => {
+  const rect = document.querySelector('#container canvas').getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+})()
+"""
+        )
+        before_wheel = page.evaluate("window.__hbdsDynamicTest.getRenderState()")
+        page.cdp.send(
+            "Input.dispatchMouseEvent",
+            {
+                "type": "mouseWheel",
+                "x": canvas_point["x"],
+                "y": canvas_point["y"],
+                "deltaX": 0,
+                "deltaY": 240,
+            },
+        )
+        settled_wheel = wait_for(
+            page,
+            f"""
+const state = window.__hbdsDynamicTest.getRenderState();
+return state.completedRenderCount > {before_wheel['completedRenderCount']}
+  && !state.frameScheduled && !state.orbitFrameScheduled && !state.orbitRenderPending
+  ? state : null;
+""",
+            "orbit damping to render and settle",
+        )
+        time.sleep(0.35)
+        stable_wheel = page.evaluate("window.__hbdsDynamicTest.getRenderState()")
+        if stable_wheel["completedRenderCount"] != settled_wheel["completedRenderCount"]:
+            raise BrowserRegressionError(f"Editor orbit rendering did not return to idle: {stable_wheel}")
+        assert_browser_has_no_significant_errors(page, "Editor render scheduler")
+
+        page.cdp.send(
+            "Emulation.setDeviceMetricsOverride",
+            {
+                "width": 390,
+                "height": 844,
+                "deviceScaleFactor": 1,
+                "mobile": True,
+                "screenWidth": 390,
+                "screenHeight": 844,
+            },
+        )
+        page.navigate(
+            dynamic_layout_url(
+                base_url,
+                shared_model="render_029_image_shape_class_bodies.json",
+                models_path="test_models/",
+                debug=False,
+            )
+        )
+        wait_for_page_ready(page, "mobile render scheduler regression page")
+        wait_for(
+            page,
+            """
+const states = window.__hbdsDynamicTest?.getClassBodyStates?.() || [];
+const images = states.filter(state => state.bodyType === 'image');
+return images.length >= 3 && images.every(state => state.imageState !== 'loading');
+""",
+            "mobile image model",
+        )
+        mobile_pixels = page.evaluate("window.__hbdsDynamicTest.sampleRendererPixels(16)")
+        if mobile_pixels["width"] < 300 or mobile_pixels["nonBackground"] <= 10:
+            raise BrowserRegressionError(f"Mobile canvas was collapsed or blank: {mobile_pixels}")
+        assert_browser_has_no_significant_errors(page, "Mobile editor rendering")
+
+        viewer_page = BrowserPage(create_target(debug_port))
+        viewer_page.navigate(f"{base_url}/index_models.html")
+        wait_for(
+            viewer_page,
+            """
+const hook = window.__hbdsModelsTest;
+const state = hook?.getRenderState?.();
+return hook?.getData?.()?.hypergraph?.class?.length > 0 && state && !state.frameScheduled ? state : null;
+""",
+            "Models viewer to load and settle",
+            timeout=35,
+        )
+        viewer_idle = viewer_page.evaluate(
+            js_async(
+                """
+const before = window.__hbdsModelsTest.getRenderState();
+await new Promise(resolve => setTimeout(resolve, 450));
+const after = window.__hbdsModelsTest.getRenderState();
+return { before, after };
+"""
+            )
+        )
+        if viewer_idle["after"]["completedRenderCount"] != viewer_idle["before"]["completedRenderCount"]:
+            raise BrowserRegressionError(f"Models renderer did not settle while idle: {viewer_idle}")
+        viewer_page.click("#view-toggle")
+        viewer_point = viewer_page.evaluate(
+            """
+(() => {
+  const rect = document.querySelector('#container').getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+})()
+"""
+        )
+        viewer_page.dispatch_mouse("mousePressed", viewer_point["x"], viewer_point["y"], buttons=1)
+        viewer_page.dispatch_mouse("mouseMoved", viewer_point["x"] + 60, viewer_point["y"] + 20, buttons=1)
+        wait_for(
+            viewer_page,
+            "return window.__hbdsModelsTest.getRenderState().controlsInteracting === true;",
+            "Models controls interaction to start",
+        )
+        viewer_page.evaluate("window.dispatchEvent(new Event('blur')); true")
+        viewer_page.dispatch_mouse("mouseReleased", viewer_point["x"] + 60, viewer_point["y"] + 20, buttons=0)
+        viewer_settled = wait_for(
+            viewer_page,
+            """
+const state = window.__hbdsModelsTest.getRenderState();
+return !state.controlsInteracting && !state.frameScheduled ? state : null;
+""",
+            "Models controls to settle after interrupted gesture",
+        )
+        time.sleep(0.35)
+        viewer_stable = viewer_page.evaluate("window.__hbdsModelsTest.getRenderState()")
+        if viewer_stable["completedRenderCount"] != viewer_settled["completedRenderCount"]:
+            raise BrowserRegressionError(f"Models renderer remained active after blur: {viewer_stable}")
+        assert_browser_has_no_significant_errors(viewer_page, "Models render scheduler")
+        print(
+            "PASS demand-driven rendering "
+            f"images={len(loaded_images)} texture_cleanup={memory_result['cleanupCounts']} "
+            f"mobile_canvas={mobile_pixels['width']}x{mobile_pixels['height']} "
+            f"editor_frames={stable_wheel['completedRenderCount']} viewer_frames={viewer_stable['completedRenderCount']}"
+        )
+    finally:
+        if viewer_page is not None:
+            viewer_page.close()
+        page.close()
+
+
+def run_builtin_visual_regressions(base_url: str, debug_port: int) -> None:
+    page = BrowserPage(create_target(debug_port))
+    try:
+        page.navigate(dynamic_layout_url(base_url, models_path="models/", debug=False))
+        wait_for_page_ready(page, "built-in label regression page")
+        immediate = page.evaluate(
+            "window.__hbdsDynamicTest.runImmediateLabelLoadRegression()",
+            timeout=45,
+        )
+        if not immediate.get("valid"):
+            raise BrowserRegressionError(f"Immediate label regression failed: {immediate.get('errors')}")
+        satellite = page.evaluate(
+            "window.__hbdsDynamicTest.runSatelliteFontZoomRegression()",
+            timeout=60,
+        )
+        if not satellite.get("valid"):
+            raise BrowserRegressionError(f"Satellite font regression failed: {satellite.get('errors')}")
+        page.navigate(dynamic_layout_url(base_url, models_path="test_models/", debug=False))
+        wait_for_page_ready(page, "built-in scenario regression page")
+        scenarios = page.evaluate(
+            "window.__hbdsDynamicTest.runScenarioSuite()",
+            timeout=180,
+        )
+        if not scenarios.get("valid"):
+            raise BrowserRegressionError(f"Scenario suite failed: {scenarios.get('failures')}")
+        assert_browser_has_no_significant_errors(page, "Built-in visual regressions")
+        print(
+            "PASS built-in visual regressions "
+            f"immediate_labels scenarios={scenarios['passed']}/{scenarios['total']} "
+            f"elapsed={scenarios['elapsedMs']}ms"
+        )
+    finally:
+        page.close()
 
 
 def run_font_policy_ui_regression(base_url: str, debug_port: int) -> None:
@@ -828,10 +1156,10 @@ def run_font_policy_ui_regression(base_url: str, debug_port: int) -> None:
         page.close()
 
 
-def run_ai_support_ui_regression(base_url: str, debug_port: int) -> None:
+def run_ai_support_ui_regression(base_url: str, debug_port: int, model_name: str) -> None:
     page = BrowserPage(create_target(debug_port))
     try:
-        page.navigate(dynamic_layout_url(base_url))
+        page.navigate(dynamic_layout_url(base_url, shared_model=model_name))
         wait_for_page_ready(page, "AI support regression page")
         initial = page.evaluate(
             """
@@ -1181,7 +1509,7 @@ return (() => {
             timeout=10,
             interval=0.25,
         )
-        if not isinstance(version_state, dict) or version_state.get("text") != "v1.0" or version_state.get("visible") is not True:
+        if not isinstance(version_state, dict) or version_state.get("text") != "v1.1" or version_state.get("visible") is not True:
             raise BrowserRegressionError(f"Shell app version display invalid: {version_state}")
         help_state = wait_for(
             page,
@@ -2407,7 +2735,9 @@ def main() -> int:
         browser_process = launch_browser(debug_port)
         wait_for_browser(debug_port, browser_process)
         run_shell_menu_version_regression(base_url, debug_port)
-        run_ai_support_ui_regression(base_url, debug_port)
+        run_render_scheduler_regression(base_url, debug_port)
+        run_builtin_visual_regressions(base_url, debug_port)
+        run_ai_support_ui_regression(base_url, debug_port, TEMP_MODEL_NAME)
         run_font_policy_ui_regression(base_url, debug_port)
         run_human_and_car_second_page_selection_regression(base_url, debug_port)
         run_regression(base_url, debug_port, loaded_model)

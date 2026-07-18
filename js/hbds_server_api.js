@@ -622,6 +622,7 @@ async function attemptApiRequest(apiBase, path, options, timeoutMs) {
 function getApiBaseCandidates(value) {
   const configuredBase = normalizeApiBase(value);
   if (configuredBase) return [configuredBase];
+  if (discoveredApiBase !== null) return [normalizeApiBase(discoveredApiBase)];
 
   const bases = [];
   const addBase = base => {
@@ -629,7 +630,6 @@ function getApiBaseCandidates(value) {
     if (!bases.includes(clean)) bases.push(clean);
   };
 
-  if (discoveredApiBase !== null) addBase(discoveredApiBase);
   if (canUseSameOriginApi()) addBase('');
 
   const fallbackBases = getLocalServerFallbackBases();

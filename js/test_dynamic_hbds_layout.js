@@ -39,8 +39,8 @@ import {
   normalizeFontSettings,
   getFontSettingsForTextType,
   getFitQualityMetrics
-} from './hbds_model.js?v=font-types-20260531a';
-import { recalculateAllLinks } from './hbds_class_link.js?v=font-types-20260531a';
+} from './hbds_model.js?v=semantic-v1-20260718a';
+import { recalculateAllLinks } from './hbds_class_link.js?v=perf-hardening-20260718a';
 import {
   applyAiModel,
   applyServerModelOperations,
@@ -67,7 +67,7 @@ import {
   modelFileNameFromValue,
   modelNameFromValue,
   serverModelValue
-} from './hbds_server_api.js?v=server-api-20260531d';
+} from './hbds_server_api.js?v=server-api-20260718a';
 import {
   collaborationWorkStatusDecision,
   coalesceDraftOperations,
@@ -114,9 +114,15 @@ import {
   validateAiRequestConfig,
   validateManualHbdsModelResponse
 } from './hbds_ai_support.js?v=ai-support-20260531i';
+import { executeFunctorQuery } from './hbds_functors.js?v=semantic-v1-20260718a';
+import { validateSemanticProfiles } from './hbds_semantic_profiles.js?v=semantic-v1-20260718a';
 
 let scene, camera, renderer, labelRenderer, orbitControls, dragControls, diagramGroup;
 const draggableObjects = [];
+let scheduledRenderFrame = null;
+let orbitAnimationFrame = null;
+let orbitRenderPending = false;
+let completedRenderCount = 0;
 
 let selectedElementId = null;
 let selectedParentHyperclassId = null;
@@ -638,10 +644,36 @@ function hasFitMetadata(model) {
   return Boolean(fit && (fit.distance > 0 || fit.fitHeightDistance > 0 || fit.fitWidthDistance > 0));
 }
 
-function renderOnce() {
+function renderNow() {
+  if (scheduledRenderFrame !== null) {
+    cancelAnimationFrame(scheduledRenderFrame);
+    scheduledRenderFrame = null;
+  }
   if (!renderer || !scene || !camera || !labelRenderer) return;
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
+  completedRenderCount += 1;
+}
+
+function renderOnce() {
+  if (!renderer || !scene || !camera || !labelRenderer || scheduledRenderFrame !== null) return;
+  scheduledRenderFrame = requestAnimationFrame(() => {
+    scheduledRenderFrame = null;
+    renderNow();
+  });
+}
+
+function continueOrbitAnimation() {
+  if (!orbitControls || orbitAnimationFrame !== null) return;
+  orbitAnimationFrame = requestAnimationFrame(() => {
+    orbitAnimationFrame = null;
+    const hadPendingChange = orbitRenderPending;
+    orbitRenderPending = false;
+    const controlsChanged = Boolean(orbitControls?.update?.());
+    if (hadPendingChange || controlsChanged) renderNow();
+    orbitRenderPending = false;
+    if (controlsChanged) continueOrbitAnimation();
+  });
 }
 
 function getCanvasSize() {
@@ -659,7 +691,7 @@ function resizeRenderers() {
   camera.updateProjectionMatrix();
   renderer.setSize(size.width, size.height);
   labelRenderer.setSize(size.width, size.height);
-  renderOnce();
+  renderNow();
   updateOverview();
 }
 
@@ -2200,6 +2232,7 @@ async function setDebugMode(enabled, options = {}) {
     addLog(`Debug ${debugModeEnabled ? 'enabled' : 'disabled'} for ${DEBUG_UI_NAME}`);
     showToast(`Debug ${debugModeEnabled ? 'on' : 'off'}`);
   }
+  if (debugModeEnabled) updateRenderDiagnostics();
   return true;
 }
 
@@ -2273,6 +2306,103 @@ function updateStats() {
   updateStatBox('stat-attribute-count', 'stat-attribute-label', countAttributes(), 'attribute', 'attributes');
   updateStatBox('stat-link-count', 'stat-link-label', links().length, 'link', 'links');
   document.body.classList.toggle('has-model', allNodes.length > 0 || Boolean(canvasTitleOverride));
+}
+
+function semanticCollections(model = getData()) {
+  const hypergraph = model?.hypergraph || {};
+  return {
+    objects: Array.isArray(hypergraph.object) ? hypergraph.object : [],
+    objectLinks: Array.isArray(hypergraph.objectLink) ? hypergraph.objectLink : [],
+    memberships: Array.isArray(hypergraph.membership) ? hypergraph.membership : [],
+    inheritances: Array.isArray(hypergraph.inheritance) ? hypergraph.inheritance : []
+  };
+}
+
+function hasSemanticLayer(model = getData()) {
+  const hypergraph = model?.hypergraph || {};
+  return model?.metadata?.semanticVersion != null
+    || ['object', 'objectLink', 'membership', 'inheritance'].some(key => Array.isArray(hypergraph[key]));
+}
+
+function setSemanticSelectOptions(select, items, valueForItem, labelForItem, emptyLabel) {
+  if (!select) return;
+  const previousValue = select.value;
+  select.innerHTML = '';
+  if (emptyLabel) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = emptyLabel;
+    select.appendChild(option);
+  }
+  items.forEach(item => {
+    const option = document.createElement('option');
+    option.value = valueForItem(item);
+    option.textContent = labelForItem(item);
+    select.appendChild(option);
+  });
+  if ([...select.options].some(option => option.value === previousValue)) select.value = previousValue;
+}
+
+function updateSemanticWorkbench() {
+  const section = $('semantic-layer-section');
+  if (!section) return;
+  const model = getData();
+  const enabled = hasSemanticLayer(model);
+  section.hidden = !enabled;
+  if (!enabled) return;
+
+  const semantic = semanticCollections(model);
+  setText('stat-object-count', semantic.objects.length);
+  setText('stat-object-link-count', semantic.objectLinks.length);
+  setText('stat-membership-count', semantic.memberships.length);
+  setText('stat-inheritance-count', semantic.inheritances.length);
+  setSemanticSelectOptions(
+    $('semantic-start-object-select'),
+    [...semantic.objects].sort((left, right) => String(left?.name || left?.id).localeCompare(String(right?.name || right?.id))),
+    item => String(item?.id || ''),
+    item => String(item?.name || item?.id || 'Unnamed object'),
+    semantic.objects.length ? null : 'No objects'
+  );
+  setSemanticSelectOptions(
+    $('semantic-class-link-select'),
+    [...links()].sort((left, right) => String(left?.name || left?.id).localeCompare(String(right?.name || right?.id))),
+    item => String(item?.id || ''),
+    item => String(item?.name || item?.rendering?.labelText || item?.id || 'Unnamed link'),
+    'Any class link'
+  );
+
+  const profileValidation = validateSemanticProfiles(model);
+  const profileStatus = $('semantic-profile-status');
+  if (profileStatus) {
+    if (profileValidation.skipped) profileStatus.textContent = 'Core';
+    else if (!profileValidation.valid) profileStatus.textContent = `${profileValidation.errors.length} profile error${profileValidation.errors.length === 1 ? '' : 's'}`;
+    else profileStatus.textContent = profileValidation.enabledProfiles.join(', ') || 'Core';
+  }
+}
+
+function runSemanticQuery() {
+  const startObjectId = $('semantic-start-object-select')?.value || '';
+  const kind = $('semantic-functor-select')?.value || 'direct';
+  const linkId = $('semantic-class-link-select')?.value || '';
+  const resultElement = $('semantic-query-result');
+  if (!startObjectId) {
+    if (resultElement) resultElement.textContent = 'No start object';
+    return { valid: false, objectIds: [], errors: ['No start object'] };
+  }
+  const step = { kind };
+  if (linkId) step.linkId = linkId;
+  const result = executeFunctorQuery(getData(), { startObjectIds: [startObjectId], steps: [step] });
+  if (resultElement) {
+    if (!result.valid) {
+      const errors = result.diagnostics.filter(item => item.severity === 'error').map(item => item.message);
+      resultElement.textContent = errors.join('; ') || 'Query invalid';
+    } else if (!result.objectIds.length) {
+      resultElement.textContent = 'No matches';
+    } else {
+      resultElement.textContent = result.objects.map(item => item?.name || item?.id).join(', ');
+    }
+  }
+  return result;
 }
 
 function updateStatBox(valueId, labelId, count, singular, plural) {
@@ -2554,7 +2684,8 @@ async function triggerCollaborationStatusForTest(kind = 'sync', durationMs = 100
 function updateValidationStatus() {
   const status = $('validation-status');
   const nodeCount = nodes().length;
-  const result = validateData(getData());
+  const model = getData();
+  const result = validateData(model);
   if (!status) return;
   status.className = VALIDATION_STATUS_BASE_CLASS;
   status.hidden = true;
@@ -3129,12 +3260,14 @@ function updateInterface(options = {}) {
     updateLinkBuilderStatus();
     renderModelTree();
     updateModeControls();
+    updateSemanticWorkbench();
     updateCanvasTitle();
     updateSaveStatus();
     return;
   }
   updateSmartMenusFromData();
   updateStats();
+  updateSemanticWorkbench();
   updateValidationStatus();
   updateSelectedCard();
   updateLinkBuilderStatus();
@@ -3314,7 +3447,7 @@ function getLiveSnapshotMetrics() {
 }
 
 function liveCanvasDataUrl() {
-  renderOnce();
+  renderNow();
   return renderer.domElement.toDataURL('image/png');
 }
 
@@ -3553,7 +3686,7 @@ function drawSnapshotElement(canvasContext, element, containerRect) {
 }
 
 function buildManualLiveSnapshotPngDataUrl(metrics) {
-  renderOnce();
+  renderNow();
   const canvas = document.createElement('canvas');
   canvas.width = metrics.pixelWidth;
   canvas.height = metrics.pixelHeight;
@@ -3577,7 +3710,7 @@ function buildManualLiveSnapshotPngDataUrl(metrics) {
 
 function renderLiveSnapshotToCanvas(targetWidth, targetHeight) {
   const metrics = getLiveSnapshotMetrics();
-  renderOnce();
+  renderNow();
   const canvas = document.createElement('canvas');
   canvas.width = Math.max(1, Math.round(targetWidth));
   canvas.height = Math.max(1, Math.round(targetHeight));
@@ -4689,12 +4822,17 @@ function resolveDraftSelection(draft) {
 function summarizeModel(model) {
   const modelNodes = Array.isArray(model?.hypergraph?.class) ? model.hypergraph.class : [];
   const modelLinks = Array.isArray(model?.hypergraph?.link) ? model.hypergraph.link : [];
+  const semantic = semanticCollections(model);
   return {
     nodes: modelNodes.length,
     classes: modelNodes.filter(node => node?.type !== 'hyperclass').length,
     hyperclasses: modelNodes.filter(node => node?.type === 'hyperclass').length,
     links: modelLinks.length,
-    attributes: modelNodes.reduce((total, node) => total + (Array.isArray(node?.attributes) ? node.attributes.length : 0), 0)
+    attributes: modelNodes.reduce((total, node) => total + (Array.isArray(node?.attributes) ? node.attributes.length : 0), 0),
+    objects: semantic.objects.length,
+    objectLinks: semantic.objectLinks.length,
+    memberships: semantic.memberships.length,
+    inheritances: semantic.inheritances.length
   };
 }
 
@@ -5802,6 +5940,23 @@ function mergeModelSnapshots(baseModel, leftModel, rightModel) {
     conflicts,
     'link'
   );
+  for (const [collectionName, label] of [
+    ['object', 'object'],
+    ['objectLink', 'object link'],
+    ['membership', 'membership'],
+    ['inheritance', 'inheritance']
+  ]) {
+    const collectionWasPresent = [baseModel, leftModel, rightModel]
+      .some(model => Array.isArray(model?.hypergraph?.[collectionName]));
+    if (!collectionWasPresent) continue;
+    merged.hypergraph[collectionName] = mergeElementArray(
+      baseModel?.hypergraph?.[collectionName] || [],
+      leftModel?.hypergraph?.[collectionName] || [],
+      rightModel?.hypergraph?.[collectionName] || [],
+      conflicts,
+      label
+    );
+  }
   return { model: merged, conflicts };
 }
 
@@ -8153,7 +8308,7 @@ function updateOverview() {
 
 function sampleRendererPixels(step = 28) {
   if (!renderer) return null;
-  renderOnce();
+  renderNow();
   const gl = renderer.getContext();
   const canvas = renderer.domElement;
   if (!gl || !canvas?.width || !canvas?.height) return null;
@@ -8205,7 +8360,11 @@ function installDebugHooks() {
         nodes: nodes().length,
         links: links().length,
         attributes: countAttributes(),
-        hyperclasses: nodes().filter(node => node.type === 'hyperclass').length
+        hyperclasses: nodes().filter(node => node.type === 'hyperclass').length,
+        objects: semanticCollections().objects.length,
+        objectLinks: semanticCollections().objectLinks.length,
+        memberships: semanticCollections().memberships.length,
+        inheritances: semanticCollections().inheritances.length
       },
       selectedElementId,
       selectedLinkSourceId,
@@ -8220,6 +8379,7 @@ function installDebugHooks() {
       collaborationStatus: getCollaborationStatusState(),
       canvasInteractionActive: isCanvasInteractionActive(),
       validation: validateData(getData()),
+      semanticProfiles: validateSemanticProfiles(getData()),
       aiSupport: getAiSupportStateForDebug(),
       canvas: renderer ? {
         width: renderer.domElement.width,
@@ -8233,16 +8393,46 @@ function installDebugHooks() {
         fov: camera.fov,
         aspect: camera.aspect
       } : null,
+      render: {
+        completedRenderCount,
+        frameScheduled: scheduledRenderFrame !== null,
+        orbitFrameScheduled: orbitAnimationFrame !== null,
+        orbitRenderPending
+      },
       layout: getLayoutSettings()
     }),
     setEditMode: mode => {
       setEditMode(mode);
       return editMode;
     },
+    runSemanticQuery: query => executeFunctorQuery(getData(), query),
     triggerCollaborationStatusForTest,
     getLinkHubMetrics: collectLinkHubMetrics,
     getLabelMetrics: collectLabelMetrics,
     getFitQuality: () => getFitQualityMetrics(ctx()),
+    getRenderState: () => ({
+      completedRenderCount,
+      frameScheduled: scheduledRenderFrame !== null,
+      orbitFrameScheduled: orbitAnimationFrame !== null,
+      orbitRenderPending
+    }),
+    getRendererMemory: () => renderer ? { ...renderer.info.memory } : null,
+    getClassBodyStates: () => {
+      const states = [];
+      diagramGroup?.traverse(object => {
+        if (!object.userData?.isHbdsClass) return;
+        states.push({
+          id: object.userData.hbdsId,
+          bodyType: object.userData.classBodyType || 'rectangle',
+          imageState: object.userData.classBodyImageState || null,
+          visualCount: object.children.filter(child => child.userData?.isClassBodyVisual).length
+        });
+      });
+      return states;
+    },
+    runScenarioSuite,
+    runImmediateLabelLoadRegression,
+    runSatelliteFontZoomRegression,
     sampleRendererPixels
   };
 }
@@ -8544,7 +8734,8 @@ function segmentIntersectsWorldBox(start, end, box) {
   return Math.min(start.y, end.y) < box.max.y && Math.max(start.y, end.y) > box.min.y;
 }
 
-function updateRenderDiagnostics() {
+function updateRenderDiagnostics(options = {}) {
+  if (!debugModeEnabled && options.force !== true) return;
   let diagnostics = $('render-diagnostics');
   if (!diagnostics) {
     diagnostics = document.createElement('output');
@@ -9393,7 +9584,8 @@ async function populateModelSelect() {
   availableModels = await listAvailableModels({
     manifestPath: TEST_MODEL_MANIFEST,
     modelsPath: TEST_MODEL_ROOT,
-    hiddenValues: TEST_MODEL_HIDDEN_VALUES
+    hiddenValues: TEST_MODEL_HIDDEN_VALUES,
+    discover: false
   });
   select.innerHTML = '';
 
@@ -9675,6 +9867,33 @@ async function runScenarioSuite() {
           failures.push(`${label}: ${validation.errors.join('; ')}`);
           continue;
         }
+        const profileValidation = validateSemanticProfiles(getData());
+        if (!profileValidation.valid) {
+          failures.push(`${label}: ${profileValidation.errors.join('; ')}`);
+          continue;
+        }
+        const semantic = semanticCollections(getData());
+        if (semantic.objects.length) {
+          const semanticQuery = executeFunctorQuery(getData(), {
+            startObjectIds: [semantic.objects[0].id],
+            steps: []
+          });
+          if (!semanticQuery.valid) {
+            failures.push(`${label}: ${semanticQuery.diagnostics.map(item => item.message).join('; ')}`);
+            continue;
+          }
+        }
+        const semanticExamples = getData()?.metadata?.semanticExamples?.functorQueries;
+        if (Array.isArray(semanticExamples)) {
+          const failedExample = semanticExamples.find(example => {
+            const result = executeFunctorQuery(getData(), example?.query || {});
+            return !result.valid || JSON.stringify(result.objectIds) !== JSON.stringify(example?.expectedObjectIds || []);
+          });
+          if (failedExample) {
+            failures.push(`${label}: semantic functor example ${failedExample.id || '(unnamed)'} failed`);
+            continue;
+          }
+        }
         if (stats.classes + stats.hyperclasses <= 0) {
           failures.push(`${label}: rendered no class-like elements`);
           continue;
@@ -9726,6 +9945,7 @@ async function runScenarioSuite() {
     addLog(`Scenario suite passed (${passed}/${availableModels.length} in ${elapsedMs}ms)`);
     setStatus(`Scenario suite: ${passed}/${availableModels.length} passed`, 'ok');
   }
+  return { valid: failures.length === 0, passed, total: availableModels.length, failures, elapsedMs };
 }
 
 function nextAnimationFrame() {
@@ -9804,7 +10024,7 @@ async function runImmediateLabelLoadRegression() {
     result.errors.forEach(error => addLog(`Immediate label failure: ${error}`));
     setStatus(`Immediate label load regression failed: ${result.errors.length}`, 'warn');
   }
-  updateRenderDiagnostics();
+  updateRenderDiagnostics({ force: true });
   return { ...result, stats };
 }
 
@@ -9856,7 +10076,7 @@ async function runSatelliteFontZoomRegression() {
     addLog(`Satellite font zoom regression passed (${summary})`);
     setStatus('Satellite font zoom regression passed', 'ok');
   }
-  updateRenderDiagnostics();
+  updateRenderDiagnostics({ force: true });
   return { valid: errors.length === 0, errors, samples };
 }
 
@@ -10102,7 +10322,7 @@ function setupDrag() {
     requestAnimationFrame(() => {
       dragFramePending = false;
       recalculateAllLinks();
-      renderOnce();
+      renderNow();
       updateOverview();
     });
   };
@@ -10211,6 +10431,7 @@ function bindUi() {
   $('apply-json-button').addEventListener('click', () => runAction(handleApplyJson, 'json.apply'));
   $('reset-model-button').addEventListener('click', () => runAction(handleResetModel, 'model.reset'));
   $('run-scenario-suite-button')?.addEventListener('click', () => runAction(runScenarioSuite, 'scenarioSuite.run'));
+  $('run-semantic-query-button')?.addEventListener('click', () => runAction(runSemanticQuery, 'semantic.query'));
   $('ai-provider-select')?.addEventListener('change', () => runAction(handleAiProviderChange, 'ai.providerChange'));
   $('ai-api-key-toggle')?.addEventListener('click', handleAiKeyToggle);
   $('ai-api-key-input')?.addEventListener('input', handleAiConnectionInput);
@@ -10373,8 +10594,14 @@ async function init() {
   orbitControls.enableDamping = true;
   orbitControls.dampingFactor = 0.08;
   orbitControls.addEventListener('change', () => {
-    updateSceneLabelScales(ctx());
+    updateSceneLabelScales({ ...ctx(), renderOnce: null });
     updateOverview();
+    orbitRenderPending = true;
+    continueOrbitAnimation();
+  });
+  orbitControls.addEventListener('start', () => {
+    orbitRenderPending = true;
+    continueOrbitAnimation();
   });
   $('view-toggle').checked = false;
 
@@ -10425,16 +10652,6 @@ async function init() {
     setTimeout(() => runAction(runImmediateLabelLoadRegression), 0);
   }
 
-  if (!params.has('sharedModel')) {
-    requestAnimationFrame(animate);
-  }
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  if (orbitControls?.update?.()) {
-    renderOnce();
-  }
 }
 
 init().catch(error => {

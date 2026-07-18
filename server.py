@@ -9,10 +9,12 @@ import datetime as _dt
 import errno
 import hashlib
 import html
+import ipaddress
 import json
 import os
 import queue
 import shutil
+import socket
 import sys
 import tempfile
 import threading
@@ -33,6 +35,40 @@ def env_int(name: str, default: int) -> int:
         return default
 
 
+def is_loopback_bind_host(host: str) -> bool:
+    clean_host = str(host or "").strip().split("%", 1)[0]
+    if not clean_host:
+        return False
+    try:
+        address = ipaddress.ip_address(clean_host)
+        if address.is_loopback:
+            return True
+        return bool(address.version == 6 and address.ipv4_mapped and address.ipv4_mapped.is_loopback)
+    except ValueError:
+        try:
+            resolved = socket.getaddrinfo(clean_host, None, type=socket.SOCK_STREAM)
+        except socket.gaierror:
+            return False
+        addresses = {
+            ipaddress.ip_address(item[4][0].split("%", 1)[0])
+            for item in resolved
+        }
+        return bool(addresses) and all(
+            address.is_loopback
+            or bool(address.version == 6 and address.ipv4_mapped and address.ipv4_mapped.is_loopback)
+            for address in addresses
+        )
+
+
+def connected_bind_requires_remote_acknowledgement(
+    host: str,
+    *,
+    static_only: bool,
+    allow_remote: bool,
+) -> bool:
+    return not static_only and not allow_remote and not is_loopback_bind_host(host)
+
+
 ROOT_DIR = Path(__file__).resolve().parent
 MODELS_DIR = (ROOT_DIR / "models").resolve()
 TEST_MODELS_DIR = (ROOT_DIR / "test_models").resolve()
@@ -45,6 +81,8 @@ SERVER_STDERR_LOG_PATH = ROOT_DIR / ".codex_server_err.log"
 SERVER_ACCESS_LOG_PATH = ROOT_DIR / ".codex_server_access.log"
 MAX_JSON_BYTES = 5 * 1024 * 1024
 MAX_AI_REQUEST_BYTES = env_int("HBDS_AI_REQUEST_MAX_BYTES", 512 * 1024)
+MAX_AI_RESPONSE_BYTES = env_int("HBDS_AI_RESPONSE_MAX_BYTES", 8 * 1024 * 1024)
+MAX_AI_ERROR_BYTES = env_int("HBDS_AI_ERROR_MAX_BYTES", 64 * 1024)
 AI_PROVIDER_TIMEOUT_SECONDS = env_int("HBDS_AI_TIMEOUT_SECONDS", 60)
 HBDS_AI_PROMPT_TEMPLATE_VERSION = "hbds-ai-prompt-v1"
 MAX_DEBUG_BATCH_EVENTS = 100
@@ -70,6 +108,36 @@ PROTECTED_MODEL_FILE_NAMES = {
     "hyperclass_mail_carrier_with_links.json",
     "models.json",
     "transportation_links.json",
+}
+PUBLIC_ROOT_FILES = {
+    "index.html",
+    "index_models.html",
+    "test_dynamic_hbds_layout.html",
+}
+PUBLIC_STATIC_EXTENSIONS = {
+    "css": {".css"},
+    "js": {".js"},
+    "icons": {".json", ".png", ".svg"},
+    "images": {".avif", ".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"},
+    "pictures": {".avif", ".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"},
+    "models": {".json"},
+    "schemas": {".json"},
+    "test_models": {".json"},
+}
+SECURITY_HEADERS = {
+    "Content-Security-Policy": (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: blob: https:; "
+        "connect-src 'self' http://127.0.0.1:* http://localhost:*; "
+        "font-src 'self' data:; object-src 'none'; base-uri 'self'; "
+        "frame-ancestors 'self'; form-action 'self'; worker-src 'self' blob:"
+    ),
+    "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
+    "Referrer-Policy": "no-referrer",
+    "X-Frame-Options": "SAMEORIGIN",
+    "X-Permitted-Cross-Domain-Policies": "none",
 }
 
 AI_PROVIDER_DEFINITIONS = [
@@ -302,6 +370,53 @@ def debug_event_payload(event_type: str, client_id: str, ui_name: str = "", **de
     }
 
 
+def public_static_request_path(path: str) -> str | None:
+    """Return a canonical public path or None when the repository path is private."""
+    raw_path = urlparse(path).path
+    try:
+        decoded_path = unquote(raw_path, errors="strict")
+    except UnicodeDecodeError:
+        return None
+    if decoded_path == "/":
+        return "/index.html"
+    if not decoded_path.startswith("/") or decoded_path.endswith("/"):
+        return None
+    if "\\" in decoded_path or any(ord(char) < 32 for char in decoded_path):
+        return None
+
+    parts = decoded_path[1:].split("/")
+    if not parts or any(
+        not part
+        or part in {".", ".."}
+        or part.startswith(".")
+        or ":" in part
+        or "?" in part
+        or "#" in part
+        for part in parts
+    ):
+        return None
+
+    if len(parts) == 1:
+        if parts[0] not in PUBLIC_ROOT_FILES:
+            return None
+        public_base = ROOT_DIR
+    else:
+        public_base = (ROOT_DIR / parts[0]).resolve()
+        allowed_extensions = PUBLIC_STATIC_EXTENSIONS.get(parts[0])
+        if not allowed_extensions or Path(parts[-1]).suffix.lower() not in allowed_extensions:
+            return None
+
+    try:
+        public_base.relative_to(ROOT_DIR)
+        requested = (ROOT_DIR.joinpath(*parts)).resolve()
+        requested.relative_to(public_base)
+    except (OSError, ValueError):
+        return None
+    if requested.is_dir():
+        return None
+    return "/" + "/".join(parts)
+
+
 def missing_icon_svg(path: str) -> bytes:
     stem = Path(unquote(urlparse(path).path)).stem
     label = " ".join(stem.replace("_", " ").replace("-", " ").split()) or "Icon"
@@ -499,6 +614,9 @@ def prepare_ai_model_for_save(model: dict, operation_mode: str, *, save_as_new: 
 def validate_model_payload(payload: object) -> dict | None:
     if not isinstance(payload, dict):
         return error_payload("invalid_model", "Model JSON must be an object")
+    semantic_version = payload.get("metadata", {}).get("semanticVersion") if isinstance(payload.get("metadata"), dict) else None
+    if semantic_version is not None and semantic_version != 1:
+        return error_payload("invalid_model", "metadata.semanticVersion must be 1 when provided")
     hypergraph = payload.get("hypergraph")
     if not isinstance(hypergraph, dict):
         return error_payload("invalid_model", "Model JSON must contain hypergraph")
@@ -513,9 +631,20 @@ def validate_model_payload(payload: object) -> dict | None:
         return error_payload("invalid_model", "Model hypergraph.class must be an array")
     if not isinstance(links, list):
         return error_payload("invalid_model", "Model hypergraph.link must be an array")
+    semantic_collections: dict[str, list] = {}
+    for collection_name in ("object", "objectLink", "membership", "inheritance"):
+        collection = hypergraph.get(collection_name, [])
+        if not isinstance(collection, list):
+            return error_payload(
+                "invalid_model",
+                f"Model hypergraph.{collection_name} must be an array when provided",
+            )
+        semantic_collections[collection_name] = collection
 
     seen_ids: dict[str, list[str]] = {}
     class_ids: set[str] = set()
+    class_types: dict[str, str] = {}
+    attribute_ids_by_class: dict[str, set[str]] = {}
 
     def clean_id(value: object) -> str:
         return str(value).strip() if value is not None else ""
@@ -538,10 +667,12 @@ def validate_model_payload(payload: object) -> dict | None:
             return validation_error
         node_id = clean_id(node.get("id"))
         class_ids.add(node_id)
+        class_types[node_id] = clean_id(node.get("type"))
 
         attributes = node.get("attributes", [])
         if not isinstance(attributes, list):
             return error_payload("invalid_model", f"class {node_id} attributes must be an array")
+        attribute_ids_by_class[node_id] = set()
         for attr_index, attribute in enumerate(attributes):
             attr_owner = f"class[{node_id}].attributes[{attr_index}]"
             if not isinstance(attribute, dict):
@@ -549,6 +680,7 @@ def validate_model_payload(payload: object) -> dict | None:
             validation_error = register_id(attribute.get("id"), attr_owner)
             if validation_error:
                 return validation_error
+            attribute_ids_by_class[node_id].add(clean_id(attribute.get("id")))
 
         parent_id = clean_id(node.get("parentClassId"))
         if parent_id:
@@ -564,6 +696,7 @@ def validate_model_payload(payload: object) -> dict | None:
                 return error_payload("invalid_model", f"class {node_id} children[{child_index}] must be a non-empty id")
             child_refs.append((node_id, child_ref))
 
+    links_by_id: dict[str, dict] = {}
     for link_index, link in enumerate(links):
         owner = f"link[{link_index}]"
         if not isinstance(link, dict):
@@ -572,12 +705,227 @@ def validate_model_payload(payload: object) -> dict | None:
         if validation_error:
             return validation_error
         link_id = clean_id(link.get("id"))
+        links_by_id[link_id] = link
         source_id = clean_id(link.get("sourceClassId"))
         target_id = clean_id(link.get("targetClassId"))
         if not source_id or source_id not in class_ids:
             return error_payload("invalid_model", f"link {link_id} sourceClassId must reference an existing class")
         if not target_id or target_id not in class_ids:
             return error_payload("invalid_model", f"link {link_id} targetClassId must reference an existing class")
+
+    semantic_memberships: dict[str, set[str]] = {}
+    membership_pairs: set[tuple[str, str]] = set()
+    for membership_index, membership in enumerate(semantic_collections["membership"]):
+        owner = f"membership[{membership_index}]"
+        if not isinstance(membership, dict):
+            return error_payload("invalid_model", f"{owner} must be an object")
+        validation_error = register_id(membership.get("id"), owner)
+        if validation_error:
+            return validation_error
+        member_id = clean_id(membership.get("classId", membership.get("memberClassId")))
+        hyperclass_id = clean_id(membership.get("hyperclassId"))
+        if member_id not in class_ids:
+            return error_payload("invalid_model", f"{owner} classId must reference an existing class")
+        if hyperclass_id not in class_ids or class_types.get(hyperclass_id) != "hyperclass":
+            return error_payload("invalid_model", f"{owner} hyperclassId must reference an existing hyperclass")
+        if member_id == hyperclass_id:
+            return error_payload("invalid_model", f"{owner} cannot make a hyperclass a member of itself")
+        pair = (member_id, hyperclass_id)
+        if pair in membership_pairs:
+            return error_payload("invalid_model", f"Duplicate semantic membership {member_id} -> {hyperclass_id}")
+        membership_pairs.add(pair)
+        semantic_memberships.setdefault(member_id, set()).add(hyperclass_id)
+
+    active_memberships: set[str] = set()
+    resolved_memberships: set[str] = set()
+
+    def validate_membership_acyclic(class_id: str) -> bool:
+        if class_id in resolved_memberships:
+            return True
+        if class_id in active_memberships:
+            return False
+        active_memberships.add(class_id)
+        for hyperclass_id in semantic_memberships.get(class_id, set()):
+            if not validate_membership_acyclic(hyperclass_id):
+                return False
+        active_memberships.remove(class_id)
+        resolved_memberships.add(class_id)
+        return True
+
+    for class_id in sorted(class_ids):
+        if not validate_membership_acyclic(class_id):
+            return error_payload("invalid_model", "Semantic memberships must not contain cycles")
+
+    inheritance_parents: dict[str, set[str]] = {}
+    inheritance_pairs: set[tuple[str, str]] = set()
+    for inheritance_index, inheritance in enumerate(semantic_collections["inheritance"]):
+        owner = f"inheritance[{inheritance_index}]"
+        if not isinstance(inheritance, dict):
+            return error_payload("invalid_model", f"{owner} must be an object")
+        validation_error = register_id(inheritance.get("id"), owner)
+        if validation_error:
+            return validation_error
+        subclass_id = clean_id(inheritance.get("subClassId"))
+        superclass_id = clean_id(inheritance.get("superClassId"))
+        if subclass_id not in class_ids or class_types.get(subclass_id) == "hyperclass":
+            return error_payload("invalid_model", f"{owner} subClassId must reference an existing regular class")
+        if superclass_id not in class_ids or class_types.get(superclass_id) == "hyperclass":
+            return error_payload("invalid_model", f"{owner} superClassId must reference an existing regular class")
+        if subclass_id == superclass_id:
+            return error_payload("invalid_model", f"{owner} cannot make a class inherit from itself")
+        pair = (subclass_id, superclass_id)
+        if pair in inheritance_pairs:
+            return error_payload("invalid_model", f"Duplicate inheritance {subclass_id} -> {superclass_id}")
+        inheritance_pairs.add(pair)
+        inheritance_parents.setdefault(subclass_id, set()).add(superclass_id)
+
+    active_inheritance: set[str] = set()
+    resolved_inheritance: set[str] = set()
+
+    def validate_inheritance_acyclic(class_id: str) -> bool:
+        if class_id in resolved_inheritance:
+            return True
+        if class_id in active_inheritance:
+            return False
+        active_inheritance.add(class_id)
+        for parent_id in inheritance_parents.get(class_id, set()):
+            if not validate_inheritance_acyclic(parent_id):
+                return False
+        active_inheritance.remove(class_id)
+        resolved_inheritance.add(class_id)
+        return True
+
+    for class_id in sorted(class_ids):
+        if not validate_inheritance_acyclic(class_id):
+            return error_payload("invalid_model", "Semantic inheritance must not contain cycles")
+
+    semantic_ancestors_cache: dict[str, set[str]] = {}
+
+    def semantic_ancestors(class_id: str) -> set[str]:
+        if class_id in semantic_ancestors_cache:
+            return semantic_ancestors_cache[class_id]
+        ancestors: set[str] = set()
+        for parent_id in inheritance_parents.get(class_id, set()):
+            ancestors.add(parent_id)
+            ancestors.update(semantic_ancestors(parent_id))
+        semantic_ancestors_cache[class_id] = ancestors
+        return ancestors
+
+    def effective_attribute_ids(class_id: str) -> set[str]:
+        result = set(attribute_ids_by_class.get(class_id, set()))
+        for ancestor_id in semantic_ancestors(class_id):
+            result.update(attribute_ids_by_class.get(ancestor_id, set()))
+        return result
+
+    def semantic_classifications(class_id: str) -> set[str]:
+        classifications: set[str] = set()
+        pending = [class_id]
+        visited: set[str] = set()
+        while pending:
+            candidate_id = pending.pop()
+            if candidate_id in visited:
+                continue
+            visited.add(candidate_id)
+            related_ids = set(semantic_ancestors(candidate_id))
+            related_ids.update(semantic_memberships.get(candidate_id, set()))
+            for related_id in related_ids:
+                if related_id != class_id:
+                    classifications.add(related_id)
+                if related_id not in visited:
+                    pending.append(related_id)
+        return classifications
+
+    objects_by_id: dict[str, dict] = {}
+    for object_index, object_value in enumerate(semantic_collections["object"]):
+        owner = f"object[{object_index}]"
+        if not isinstance(object_value, dict):
+            return error_payload("invalid_model", f"{owner} must be an object")
+        validation_error = register_id(object_value.get("id"), owner)
+        if validation_error:
+            return validation_error
+        object_id = clean_id(object_value.get("id"))
+        class_id = clean_id(object_value.get("classId"))
+        if class_id not in class_ids or class_types.get(class_id) == "hyperclass":
+            return error_payload("invalid_model", f"object {object_id} classId must reference an existing non-hyperclass")
+        objects_by_id[object_id] = object_value
+        valid_attribute_ids = effective_attribute_ids(class_id)
+        attribute_values = object_value.get("attributeValues", object_value.get("values", []))
+        if attribute_values is None:
+            attribute_values = []
+        if isinstance(attribute_values, dict):
+            attribute_values = [
+                {"attributeId": attribute_id, "value": value}
+                for attribute_id, value in attribute_values.items()
+            ]
+        if not isinstance(attribute_values, list):
+            return error_payload("invalid_model", f"object {object_id} attributeValues must be an array")
+        seen_attribute_values: set[str] = set()
+        for value_index, attribute_value in enumerate(attribute_values):
+            if not isinstance(attribute_value, dict):
+                return error_payload(
+                    "invalid_model",
+                    f"object {object_id} attributeValues[{value_index}] must be an object",
+                )
+            attribute_id = clean_id(attribute_value.get("attributeId"))
+            if attribute_id not in valid_attribute_ids:
+                return error_payload(
+                    "invalid_model",
+                    f"object {object_id} attributeId {attribute_id} must reference an effective class attribute",
+                )
+            if attribute_id in seen_attribute_values:
+                return error_payload("invalid_model", f"object {object_id} has duplicate attributeId {attribute_id}")
+            seen_attribute_values.add(attribute_id)
+        object_attributes = object_value.get("attributes")
+        if object_attributes is not None:
+            if not isinstance(object_attributes, list):
+                return error_payload("invalid_model", f"object {object_id} attributes must be an array")
+            seen_object_attributes: set[str] = set()
+            for value_index, attribute_value in enumerate(object_attributes):
+                if not isinstance(attribute_value, dict):
+                    return error_payload(
+                        "invalid_model",
+                        f"object {object_id} attributes[{value_index}] must be an object",
+                    )
+                attribute_id = clean_id(attribute_value.get("attributeId"))
+                if attribute_id not in valid_attribute_ids:
+                    return error_payload(
+                        "invalid_model",
+                        f"object {object_id} attributeId {attribute_id} must reference an effective class attribute",
+                    )
+                if attribute_id in seen_object_attributes:
+                    return error_payload("invalid_model", f"object {object_id} has duplicate attributeId {attribute_id}")
+                seen_object_attributes.add(attribute_id)
+
+    def object_matches_class(object_value: dict, required_class_id: str) -> bool:
+        object_class_id = clean_id(object_value.get("classId"))
+        return object_class_id == required_class_id or required_class_id in semantic_classifications(object_class_id)
+
+    for object_link_index, object_link in enumerate(semantic_collections["objectLink"]):
+        owner = f"objectLink[{object_link_index}]"
+        if not isinstance(object_link, dict):
+            return error_payload("invalid_model", f"{owner} must be an object")
+        validation_error = register_id(object_link.get("id"), owner)
+        if validation_error:
+            return validation_error
+        object_link_id = clean_id(object_link.get("id"))
+        link_id = clean_id(object_link.get("classLinkId", object_link.get("linkId")))
+        link = links_by_id.get(link_id)
+        if not link:
+            return error_payload("invalid_model", f"objectLink {object_link_id} classLinkId must reference an existing link")
+        source_object_id = clean_id(object_link.get("sourceObjectId"))
+        target_object_id = clean_id(object_link.get("targetObjectId"))
+        source_object = objects_by_id.get(source_object_id)
+        target_object = objects_by_id.get(target_object_id)
+        if not source_object:
+            return error_payload("invalid_model", f"objectLink {object_link_id} sourceObjectId must reference an existing object")
+        if not target_object:
+            return error_payload("invalid_model", f"objectLink {object_link_id} targetObjectId must reference an existing object")
+        if source_object_id == target_object_id and link.get("allowSelfLink") is False:
+            return error_payload("invalid_model", f"objectLink {object_link_id} uses a link that disallows self-links")
+        if not object_matches_class(source_object, clean_id(link.get("sourceClassId"))):
+            return error_payload("invalid_model", f"objectLink {object_link_id} source object is incompatible with its link")
+        if not object_matches_class(target_object, clean_id(link.get("targetClassId"))):
+            return error_payload("invalid_model", f"objectLink {object_link_id} target object is incompatible with its link")
 
     for entity_id, owners in sorted(seen_ids.items()):
         if len(owners) > 1:
@@ -664,6 +1012,12 @@ def build_hbds_ai_prompt(payload: dict) -> str:
         "- Valid lineStyle values are solid, dashed, dotted, thick, and thin.",
         "- Position objects must include numeric x, y, and z values.",
         "- Every class, hyperclass, attribute, and link must have a stable unique id.",
+        "- For the optional semantic object layer, set metadata.semanticVersion = 1 and use hypergraph.object, objectLink, membership, and inheritance arrays.",
+        "- Semantic objects use id, classId, and attributeValues entries with attributeId and value.",
+        "- Object links use id, classLinkId, sourceObjectId, and targetObjectId.",
+        "- Semantic memberships use id, classId, and hyperclassId; they are independent of visual parentClassId containment.",
+        "- Semantic inheritance uses id, subClassId, and superClassId and must be acyclic.",
+        "- Optional semantic profiles are enabled only through metadata.semanticProfiles.",
         "- Use metadata.layout.algorithm = \"none\" or metadata.layout.layout = \"none\".",
         "- Optional metadata.font may include size, family, bold, italic, underline, classSize, hyperclassSize, attributeSize, and linkSize; per-type sizes override the overall size for that text category.",
         "- Even with layout set to none, calculate explicit positions for every class and hyperclass so the model opens well-positioned in the HBDS renderer.",
@@ -780,11 +1134,171 @@ def ai_provider_call_enabled(provider: dict, payload: dict) -> bool:
     return ai_user_key_present(provider, payload)
 
 
+def ai_private_provider_urls_enabled() -> bool:
+    return os.environ.get("HBDS_AI_ALLOW_PRIVATE_URLS", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def ai_provider_request_options(provider: dict) -> dict:
+    allow_private = ai_private_provider_urls_enabled()
+    return {
+        "allow_loopback": provider.get("id") == "ollama" or allow_private,
+        "allow_private": allow_private,
+    }
+
+
+def validate_ai_provider_url(
+    url: str,
+    *,
+    allow_loopback: bool = False,
+    allow_private: bool = False,
+) -> None:
+    """Reject non-HTTP and unsafe provider destinations before opening a socket."""
+    try:
+        parsed = urlparse(url)
+        port = parsed.port
+    except ValueError as exc:
+        raise OperationError(
+            "ai_provider_invalid_url",
+            "AI provider URL is invalid.",
+            HTTPStatus.BAD_REQUEST,
+        ) from exc
+    if (
+        parsed.scheme.lower() not in {"http", "https"}
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise OperationError(
+            "ai_provider_invalid_url",
+            "AI provider URL must be an HTTP(S) URL without credentials, query parameters, or fragments.",
+            HTTPStatus.BAD_REQUEST,
+        )
+
+    hostname = parsed.hostname.rstrip(".").lower()
+    try:
+        addresses = {ipaddress.ip_address(hostname)}
+    except ValueError:
+        try:
+            resolved = socket.getaddrinfo(
+                hostname,
+                port or (443 if parsed.scheme.lower() == "https" else 80),
+                type=socket.SOCK_STREAM,
+            )
+        except socket.gaierror as exc:
+            raise OperationError(
+                "ai_provider_invalid_url",
+                "AI provider hostname could not be resolved.",
+                HTTPStatus.BAD_REQUEST,
+            ) from exc
+        addresses = {ipaddress.ip_address(item[4][0].split("%", 1)[0]) for item in resolved}
+
+    if parsed.scheme.lower() == "http" and any(not address.is_loopback for address in addresses):
+        raise OperationError(
+            "ai_provider_invalid_url",
+            "Plain HTTP AI provider URLs are allowed only on the loopback interface.",
+            HTTPStatus.BAD_REQUEST,
+        )
+
+    for address in addresses:
+        if address.is_unspecified or address.is_multicast or address.is_link_local or address.is_reserved:
+            raise OperationError(
+                "ai_provider_invalid_url",
+                "AI provider URL resolves to a prohibited network address.",
+                HTTPStatus.BAD_REQUEST,
+            )
+        if address.is_loopback:
+            if allow_loopback:
+                continue
+            raise OperationError(
+                "ai_provider_invalid_url",
+                "AI provider loopback URLs are not allowed for this provider.",
+                HTTPStatus.BAD_REQUEST,
+            )
+        if address.is_private and not allow_private:
+            raise OperationError(
+                "ai_provider_invalid_url",
+                "AI provider private-network URLs require explicit server opt-in.",
+                HTTPStatus.BAD_REQUEST,
+            )
+
+
+class ValidatedAiRedirectHandler(urlrequest.HTTPRedirectHandler):
+    def __init__(self, *, allow_loopback: bool, allow_private: bool):
+        super().__init__()
+        self.allow_loopback = allow_loopback
+        self.allow_private = allow_private
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        validate_ai_provider_url(
+            newurl,
+            allow_loopback=self.allow_loopback,
+            allow_private=self.allow_private,
+        )
+        old_url = urlparse(req.full_url)
+        new_url = urlparse(newurl)
+        old_origin = (old_url.scheme.lower(), old_url.hostname, old_url.port or (443 if old_url.scheme == "https" else 80))
+        new_origin = (new_url.scheme.lower(), new_url.hostname, new_url.port or (443 if new_url.scheme == "https" else 80))
+        if old_origin != new_origin:
+            raise OperationError(
+                "ai_provider_redirect_blocked",
+                "AI provider redirected to a different origin.",
+                HTTPStatus.BAD_GATEWAY,
+            )
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def open_ai_provider_request(
+    request: urlrequest.Request,
+    *,
+    timeout: int,
+    allow_loopback: bool,
+    allow_private: bool,
+):
+    validate_ai_provider_url(
+        request.full_url,
+        allow_loopback=allow_loopback,
+        allow_private=allow_private,
+    )
+    opener = urlrequest.build_opener(
+        ValidatedAiRedirectHandler(allow_loopback=allow_loopback, allow_private=allow_private)
+    )
+    return opener.open(request, timeout=timeout)
+
+
+def read_ai_provider_response(response) -> str:
+    limit = max(1024, MAX_AI_RESPONSE_BYTES)
+    content_length = response.headers.get("Content-Length", "")
+    try:
+        declared_length = int(content_length)
+    except (TypeError, ValueError):
+        declared_length = 0
+    if declared_length > limit:
+        raise OperationError(
+            "ai_provider_response_too_large",
+            "AI provider response exceeded the configured size limit.",
+            HTTPStatus.BAD_GATEWAY,
+        )
+    body = response.read(limit + 1)
+    if len(body) > limit:
+        raise OperationError(
+            "ai_provider_response_too_large",
+            "AI provider response exceeded the configured size limit.",
+            HTTPStatus.BAD_GATEWAY,
+        )
+    return body.decode("utf-8", errors="replace")
+
+
 def provider_http_error_message(exc: urlerror.HTTPError) -> tuple[str, dict]:
     details = {"providerStatus": exc.code}
     body = ""
     try:
-        body = exc.read().decode("utf-8", errors="replace").strip()
+        limit = max(1024, MAX_AI_ERROR_BYTES)
+        body_bytes = exc.read(limit + 1)
+        body = body_bytes[:limit].decode("utf-8", errors="replace").strip()
+        if len(body_bytes) > limit:
+            details["providerErrorTruncated"] = True
     except Exception:
         body = ""
 
@@ -812,7 +1326,15 @@ def provider_http_error_message(exc: urlerror.HTTPError) -> tuple[str, dict]:
     return message, details
 
 
-def json_post(url: str, payload: dict, headers: dict, timeout: int = AI_PROVIDER_TIMEOUT_SECONDS) -> dict:
+def json_post(
+    url: str,
+    payload: dict,
+    headers: dict,
+    timeout: int = AI_PROVIDER_TIMEOUT_SECONDS,
+    *,
+    allow_loopback: bool = False,
+    allow_private: bool = False,
+) -> dict:
     data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     request = urlrequest.Request(
         url,
@@ -825,8 +1347,13 @@ def json_post(url: str, payload: dict, headers: dict, timeout: int = AI_PROVIDER
         method="POST",
     )
     try:
-        with urlrequest.urlopen(request, timeout=timeout) as response:
-            body = response.read().decode("utf-8", errors="replace")
+        with open_ai_provider_request(
+            request,
+            timeout=timeout,
+            allow_loopback=allow_loopback,
+            allow_private=allow_private,
+        ) as response:
+            body = read_ai_provider_response(response)
     except urlerror.HTTPError as exc:
         message, details = provider_http_error_message(exc)
         raise OperationError("ai_provider_error", message, HTTPStatus.BAD_GATEWAY, **details) from exc
@@ -840,7 +1367,14 @@ def json_post(url: str, payload: dict, headers: dict, timeout: int = AI_PROVIDER
         raise OperationError("ai_provider_invalid_response", "AI provider returned non-JSON response", HTTPStatus.BAD_GATEWAY) from exc
 
 
-def json_get(url: str, headers: dict, timeout: int = AI_PROVIDER_TIMEOUT_SECONDS) -> dict:
+def json_get(
+    url: str,
+    headers: dict,
+    timeout: int = AI_PROVIDER_TIMEOUT_SECONDS,
+    *,
+    allow_loopback: bool = False,
+    allow_private: bool = False,
+) -> dict:
     request = urlrequest.Request(
         url,
         headers={
@@ -850,8 +1384,13 @@ def json_get(url: str, headers: dict, timeout: int = AI_PROVIDER_TIMEOUT_SECONDS
         method="GET",
     )
     try:
-        with urlrequest.urlopen(request, timeout=timeout) as response:
-            body = response.read().decode("utf-8", errors="replace")
+        with open_ai_provider_request(
+            request,
+            timeout=timeout,
+            allow_loopback=allow_loopback,
+            allow_private=allow_private,
+        ) as response:
+            body = read_ai_provider_response(response)
     except urlerror.HTTPError as exc:
         message, details = provider_http_error_message(exc)
         raise OperationError("ai_provider_error", message, HTTPStatus.BAD_GATEWAY, **details) from exc
@@ -960,7 +1499,12 @@ def validate_openai_compatible_connection(provider: dict, payload: dict) -> dict
     if not model:
         raise OperationError("ai_provider_model_required", "AI provider model is required", HTTPStatus.BAD_REQUEST)
     headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
-    json_get(f"{base_url}/v1/models/{quote(model, safe='')}", headers, timeout=20)
+    json_get(
+        f"{base_url}/v1/models/{quote(model, safe='')}",
+        headers,
+        timeout=20,
+        **ai_provider_request_options(provider),
+    )
     return {
         "providerId": provider.get("id"),
         "modelName": model,
@@ -1005,7 +1549,12 @@ def validate_ollama_connection(provider: dict, payload: dict) -> dict:
         raise OperationError("ai_provider_config_required", "Base URL is required for this AI provider", HTTPStatus.BAD_REQUEST)
     if not model:
         raise OperationError("ai_provider_model_required", "AI provider model is required", HTTPStatus.BAD_REQUEST)
-    data = json_get(f"{base_url}/api/tags", {}, timeout=8)
+    data = json_get(
+        f"{base_url}/api/tags",
+        {},
+        timeout=8,
+        **ai_provider_request_options(provider),
+    )
     models = data.get("models") if isinstance(data, dict) else None
     names = {
         str(item.get("name") or "").split(":", 1)[0]
@@ -1072,7 +1621,12 @@ def call_openai_compatible_provider(provider: dict, payload: dict, prompt: str) 
         body["reasoning_effort"] = reasoning_effort
     if not is_openai_reasoning_model and not reasoning_effort:
         body["temperature"] = 0.2
-    response = json_post(f"{base_url}/v1/chat/completions", body, headers)
+    response = json_post(
+        f"{base_url}/v1/chat/completions",
+        body,
+        headers,
+        **ai_provider_request_options(provider),
+    )
     choices = response.get("choices")
     if not isinstance(choices, list) or not choices:
         raise OperationError("ai_provider_invalid_response", "AI provider response did not include choices", HTTPStatus.BAD_GATEWAY)
@@ -1131,6 +1685,7 @@ def call_ollama_provider(provider: dict, payload: dict, prompt: str) -> str:
             ],
         },
         {},
+        **ai_provider_request_options(provider),
     )
     message = response.get("message")
     content = message.get("content") if isinstance(message, dict) else response.get("response")
@@ -1426,10 +1981,44 @@ def apply_delete_class_operation(model: dict, operation: dict) -> None:
     if index < 0:
         raise OperationError("operation_conflict", "Class no longer exists", HTTPStatus.CONFLICT, targetId=target_id)
     del model["hypergraph"]["class"][index]
+    removed_link_ids = {
+        str(link.get("id"))
+        for link in model["hypergraph"]["link"]
+        if ids_equal(link.get("sourceClassId"), target_id) or ids_equal(link.get("targetClassId"), target_id)
+    }
     model["hypergraph"]["link"] = [
         link for link in model["hypergraph"]["link"]
         if not ids_equal(link.get("sourceClassId"), target_id) and not ids_equal(link.get("targetClassId"), target_id)
     ]
+    removed_object_ids = {
+        str(item.get("id"))
+        for item in model["hypergraph"].get("object", [])
+        if ids_equal(item.get("classId"), target_id)
+    }
+    if "object" in model["hypergraph"]:
+        model["hypergraph"]["object"] = [
+            item for item in model["hypergraph"]["object"]
+            if not ids_equal(item.get("classId"), target_id)
+        ]
+    if "objectLink" in model["hypergraph"]:
+        model["hypergraph"]["objectLink"] = [
+            item for item in model["hypergraph"]["objectLink"]
+            if str(item.get("sourceObjectId")) not in removed_object_ids
+            and str(item.get("targetObjectId")) not in removed_object_ids
+            and str(item.get("classLinkId", item.get("linkId"))) not in removed_link_ids
+        ]
+    if "membership" in model["hypergraph"]:
+        model["hypergraph"]["membership"] = [
+            item for item in model["hypergraph"]["membership"]
+            if not ids_equal(item.get("classId", item.get("memberClassId")), target_id)
+            and not ids_equal(item.get("hyperclassId"), target_id)
+        ]
+    if "inheritance" in model["hypergraph"]:
+        model["hypergraph"]["inheritance"] = [
+            item for item in model["hypergraph"]["inheritance"]
+            if not ids_equal(item.get("subClassId"), target_id)
+            and not ids_equal(item.get("superClassId"), target_id)
+        ]
     for node in model["hypergraph"]["class"]:
         if ids_equal(node.get("parentClassId"), target_id):
             node["parentClassId"] = None
@@ -1468,6 +2057,11 @@ def apply_delete_link_operation(model: dict, operation: dict) -> None:
     if index < 0:
         raise OperationError("operation_conflict", "Link no longer exists", HTTPStatus.CONFLICT, targetId=target_id)
     del model["hypergraph"]["link"][index]
+    if "objectLink" in model["hypergraph"]:
+        model["hypergraph"]["objectLink"] = [
+            item for item in model["hypergraph"]["objectLink"]
+            if not ids_equal(item.get("classLinkId", item.get("linkId")), target_id)
+        ]
 
 
 def ensure_link_references_exist(model: dict, link: dict) -> None:
@@ -1662,7 +2256,7 @@ def openapi_spec(host: str) -> dict:
         "openapi": "3.0.3",
         "info": {
             "title": "HBDS Graphic Simulator API",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "description": "Local API for HBDS model listing, loading, and saving.",
         },
         "servers": [{"url": server_url}],
@@ -2624,6 +3218,7 @@ def openapi_spec(host: str) -> dict:
 
 class HBDSLocalServer(ThreadingHTTPServer):
     daemon_threads = True
+    request_queue_size = 128
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -2831,7 +3426,7 @@ class HBDSLocalServer(ThreadingHTTPServer):
 
 
 class HBDSRequestHandler(SimpleHTTPRequestHandler):
-    server_version = "HBDSLocalServer/1.0"
+    server_version = "HBDSLocalServer/1.1"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT_DIR), **kwargs)
@@ -2855,6 +3450,8 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, If-Match, X-Client-Id, X-Client-Name")
         self.send_header("X-Content-Type-Options", "nosniff")
+        for header, value in SECURITY_HEADERS.items():
+            self.send_header(header, value)
         static_path = urlparse(self.path).path
         if static_path == "/" or static_path.endswith((".html", ".js", ".css")):
             self.send_header("Cache-Control", "no-store, max-age=0")
@@ -2862,8 +3459,20 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
         super().end_headers()
 
     def do_OPTIONS(self) -> None:
+        if urlparse(self.path).path.startswith("/api/") and not self.api_requests_enabled():
+            self.api_disabled()
+            return
         self.send_response(HTTPStatus.NO_CONTENT)
         self.end_headers()
+
+    def api_requests_enabled(self) -> bool:
+        return bool(getattr(self.server, "api_enabled", True))
+
+    def api_disabled(self) -> None:
+        self.json_error(HTTPStatus.NOT_FOUND, "api_disabled", "API endpoints are disabled in static-only mode")
+
+    def reject_private_static_path(self) -> None:
+        self.send_error(HTTPStatus.NOT_FOUND, "File not found")
 
     def serve_favicon(self, path: str) -> bool:
         if path != "/favicon.ico":
@@ -2900,19 +3509,39 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         path = urlparse(self.path).path
         if path.startswith("/api/"):
+            if not self.api_requests_enabled():
+                self.api_disabled()
+                return
             self.handle_api_get(path)
             return
-        if path == "/":
-            self.path = "/index.html"
         if self.serve_favicon(path):
             return
-        if self.serve_missing_icon(path):
+        public_path = public_static_request_path(self.path)
+        if public_path is None:
+            self.reject_private_static_path()
+            return
+        self.path = public_path
+        if self.serve_missing_icon(public_path):
             return
         super().do_GET()
+
+    def do_HEAD(self) -> None:
+        path = urlparse(self.path).path
+        if self.serve_favicon(path):
+            return
+        public_path = public_static_request_path(self.path)
+        if public_path is None:
+            self.reject_private_static_path()
+            return
+        self.path = public_path
+        super().do_HEAD()
 
     def do_POST(self) -> None:
         path = urlparse(self.path).path
         if path.startswith("/api/"):
+            if not self.api_requests_enabled():
+                self.api_disabled()
+                return
             self.handle_api_post(path)
             return
         self.json_error(HTTPStatus.METHOD_NOT_ALLOWED, "method_not_allowed", "POST is only allowed for API endpoints")
@@ -2920,6 +3549,9 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
     def do_DELETE(self) -> None:
         path = urlparse(self.path).path
         if path.startswith("/api/"):
+            if not self.api_requests_enabled():
+                self.api_disabled()
+                return
             self.handle_api_delete(path)
             return
         self.json_error(HTTPStatus.METHOD_NOT_ALLOWED, "method_not_allowed", "DELETE is only allowed for API endpoints")
@@ -4229,13 +4861,35 @@ def main() -> int:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8010)
     parser.add_argument("--quiet", action="store_true")
+    parser.add_argument("--static-only", action="store_true", help="Serve public UI assets without enabling model APIs")
+    parser.add_argument(
+        "--allow-remote",
+        action="store_true",
+        help="Acknowledge that connected mode has no authentication before binding beyond loopback",
+    )
     args = parser.parse_args()
 
-    visible_stdout = reset_startup_logs()
-    refresh_model_manifests()
+    if connected_bind_requires_remote_acknowledgement(
+        args.host,
+        static_only=args.static_only,
+        allow_remote=args.allow_remote,
+    ):
+        parser.error(
+            "connected mode has no authentication and refuses non-loopback binds without --allow-remote; "
+            "use --static-only for read-only remote serving"
+        )
+
+    visible_stdout = sys.stdout if args.static_only else reset_startup_logs()
+    if not args.static_only:
+        refresh_model_manifests()
     httpd = HBDSLocalServer((args.host, args.port), HBDSRequestHandler)
-    httpd.quiet = args.quiet
+    httpd.quiet = args.quiet or args.static_only
+    httpd.api_enabled = not args.static_only
     print_startup_message(f"Serving HBDS on http://{args.host}:{args.port}", visible_stdout)
+    if args.static_only:
+        print_startup_message("Static-only mode: API endpoints are disabled", visible_stdout)
+    elif not is_loopback_bind_host(args.host):
+        print_startup_message("WARNING: remote connected mode is enabled without authentication", visible_stdout)
     print_startup_message("Open http://127.0.0.1:%d/index.html" % args.port, visible_stdout)
     try:
         httpd.serve_forever()

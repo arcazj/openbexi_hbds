@@ -8,6 +8,10 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 TEST_MODELS_DIR = ROOT / "test_models"
 MANIFEST_NAME = "test_models_manifest.json"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from server import validate_model_payload
 
 
 def load_json(path: Path):
@@ -116,6 +120,23 @@ def validate_model_ids(path: Path, data: dict, seen_globally: dict[str, list[str
         if target not in class_ids:
             errors.append(f"{path.name}: link {link_id or link_index} targetClassId '{target}' does not match a class id")
 
+    for collection_name in ("object", "objectLink", "membership", "inheritance"):
+        collection = hypergraph.get(collection_name, [])
+        if not isinstance(collection, list):
+            errors.append(f"{path.name}: hypergraph.{collection_name} must be an array when provided")
+            continue
+        for entity_index, entity in enumerate(collection):
+            if not isinstance(entity, dict):
+                errors.append(f"{path.name}: {collection_name}[{entity_index}] must be an object")
+                continue
+            errors.extend(add_id(
+                seen_by_file,
+                seen_globally,
+                entity.get("id"),
+                f"{collection_name}[{entity_index}]",
+                path.name,
+            ))
+
     for entity_id, owners in sorted(seen_by_file.items()):
         if len(owners) > 1:
             errors.append(f"{path.name}: duplicate local id '{entity_id}' used by {', '.join(owners)}")
@@ -145,6 +166,9 @@ def main() -> int:
             continue
         errors.extend(validate_metadata(path, data))
         errors.extend(validate_model_ids(path, data, seen_globally))
+        contract_error = validate_model_payload(data)
+        if contract_error:
+            errors.append(f"{path.name}: {contract_error['message']}")
 
     errors.extend(validate_global_ids(seen_globally))
     if errors:

@@ -191,13 +191,37 @@ export function buildSelectedSubgraph(model, selectedIds = new Set()) {
   const links = allLinks
     .filter(link => included.has(String(sourceId(link))) && included.has(String(targetId(link))))
     .map(cloneValue);
+  const includedLinkIds = new Set(links.map(link => String(link.id)));
+  const objects = (Array.isArray(hypergraph.object) ? hypergraph.object : [])
+    .filter(item => included.has(String(item?.classId)))
+    .map(cloneValue);
+  const includedObjectIds = new Set(objects.map(item => String(item.id)));
+  const objectLinks = (Array.isArray(hypergraph.objectLink) ? hypergraph.objectLink : [])
+    .filter(item => includedLinkIds.has(String(item?.classLinkId ?? item?.linkId))
+      && includedObjectIds.has(String(item?.sourceObjectId))
+      && includedObjectIds.has(String(item?.targetObjectId)))
+    .map(cloneValue);
+  const memberships = (Array.isArray(hypergraph.membership) ? hypergraph.membership : [])
+    .filter(item => included.has(String(item?.classId ?? item?.memberClassId))
+      && included.has(String(item?.hyperclassId)))
+    .map(cloneValue);
+  const inheritances = (Array.isArray(hypergraph.inheritance) ? hypergraph.inheritance : [])
+    .filter(item => included.has(String(item?.subClassId)) && included.has(String(item?.superClassId)))
+    .map(cloneValue);
+
+  const semanticCollections = {};
+  if (Array.isArray(hypergraph.object)) semanticCollections.object = objects;
+  if (Array.isArray(hypergraph.objectLink)) semanticCollections.objectLink = objectLinks;
+  if (Array.isArray(hypergraph.membership)) semanticCollections.membership = memberships;
+  if (Array.isArray(hypergraph.inheritance)) semanticCollections.inheritance = inheritances;
 
   return {
     ...(data.metadata ? { metadata: cloneValue(data.metadata) } : {}),
     hypergraph: {
       ...(hypergraph.metadata ? { metadata: cloneValue(hypergraph.metadata) } : {}),
       class: nodes,
-      link: links
+      link: links,
+      ...semanticCollections
     }
   };
 }

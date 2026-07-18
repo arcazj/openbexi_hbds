@@ -382,7 +382,7 @@
     </header>
 
     <main class="frame-wrap">
-      <iframe id="view-frame" title="HBDS Models view" src="index_models.html?embeddedShell=1&appVersion=ai-preview-guide-20260531a"></iframe>
+      <iframe id="view-frame" title="HBDS Models view" src="index_models.html?embeddedShell=1&appVersion=perf-hardening-20260718a"></iframe>
     </main>
   </div>
 
@@ -475,21 +475,21 @@
     const appVersion = document.getElementById('app-version');
     const viewButtons = Array.from(document.querySelectorAll('.mode-button[data-view]'));
     const helpSections = Array.from(document.querySelectorAll('.help-section'));
-    const HBDS_APP_VERSION = '1.0';
+    const HBDS_APP_VERSION = '1.1';
     let activeView = 'models';
     let serverConnectionState = 'not_connected';
     let serverConnectionPollTimer = null;
     const views = {
       models: {
-        src: 'index_models.html?embeddedShell=1&appVersion=ai-preview-guide-20260531a',
+        src: 'index_models.html?embeddedShell=1&appVersion=perf-hardening-20260718a',
         title: 'HBDS Models view'
       },
       edit: {
-        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=models/&manifestPath=models/models_manifest.json&appVersion=ai-preview-guide-20260531a',
+        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=models/&manifestPath=models/models_manifest.json&appVersion=perf-hardening-20260718a',
         title: 'HBDS Edit view'
       },
       tests: {
-        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=test_models/&manifestPath=test_models/test_models_manifest.json&appVersion=ai-preview-guide-20260531a',
+        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=test_models/&manifestPath=test_models/test_models_manifest.json&appVersion=perf-hardening-20260718a',
         title: 'HBDS Tests view'
       }
     };
@@ -523,7 +523,7 @@
     async function refreshServerConnectionState(options = {}) {
       if (options.showConnecting === true) setServerConnectionState('connecting');
       try {
-        const api = await import('./js/hbds_server_api.js?v=server-api-20260531d');
+        const api = await import('./js/hbds_server_api.js?v=server-api-20260718a');
         const result = await api.checkServerConnection({ timeoutMs: 1600 });
         setServerConnectionState(result.ok ? 'connected' : 'not_connected');
       } catch {

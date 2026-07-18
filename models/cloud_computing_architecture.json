@@ -1,0 +1,1228 @@
+{
+  "$schema": "https://openbexi.local/hbds/model/v1",
+  "metadata": {
+    "id": "cloud_computing_architecture",
+    "name": "Cloud Computing Architecture",
+    "description": "HBDS model converted from a cloud computing architecture diagram showing cloud services, internet connectivity, network devices, and end-user devices.",
+    "purpose": "Reference model for representing a cloud computing architecture image as HBDS classes, hyperclasses, attributes, and links.",
+    "version": "1.0.0",
+    "source": "image-conversion",
+    "sourceImage": "ai-chat-attachment-11548642946265864593.png",
+    "regressionTags": [
+      "model",
+      "cloud-computing",
+      "architecture",
+      "image-conversion"
+    ],
+    "layout": {
+      "algorithm": "grid",
+      "fit": {
+        "padding": 1.08,
+        "fitHeightDistance": 14.1396,
+        "fitWidthDistance": 27.838,
+        "distance": 27.9082,
+        "diagramWidth": 33.64,
+        "diagramHeight": 12.21,
+        "diagramDepth": 0.13,
+        "radius": 17.8938,
+        "center": {
+          "x": -0.405,
+          "y": 0,
+          "z": 0.065
+        },
+        "cameraAspect": 1.3994,
+        "cameraFov": 50,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 16
+      }
+    },
+    "sceneSettings": {
+      "background": "#ffffff",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "font": {
+      "size": 32,
+      "family": "Arial, sans-serif",
+      "bold": true,
+      "italic": false,
+      "underline": false,
+      "classSize": 37,
+      "hyperclassSize": 59,
+      "attributeSize": 37,
+      "linkSize": 13
+    },
+    "updated": "2026-05-31"
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "cca_cloud_computing",
+        "name": "Cloud Computing",
+        "type": "hyperclass",
+        "description": "Cloud-hosted service environment shown inside the cloud boundary.",
+        "position": {
+          "x": -10.89,
+          "y": 1.9749999999999996,
+          "z": 0
+        },
+        "size": {
+          "width": 12.670000000000002,
+          "height": 8.260000000000002
+        },
+        "children": [
+          "cca_application",
+          "cca_storage_data",
+          "cca_servers",
+          "cca_virtual_desktop",
+          "cca_software_platform"
+        ],
+        "attributes": [
+          {
+            "id": "cca_attr_cloud_role",
+            "name": "role",
+            "value": "Hosts shared application, data, compute, desktop, and platform services"
+          },
+          {
+            "id": "cca_attr_cloud_boundary",
+            "name": "boundary",
+            "value": "Cloud service provider environment"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#0c4a6e",
+            "cornerRadius": 0.24,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.09,
+            "opacity": 0.72
+          },
+          "textColor": "#082f49",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#0c4a6e",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_application",
+        "name": "Application",
+        "type": "class",
+        "description": "Cloud-hosted business or user-facing application.",
+        "parentClassId": "cca_cloud_computing",
+        "position": {
+          "x": -14.475000000000003,
+          "y": 4.33,
+          "z": 0
+        },
+        "size": {
+          "width": 3.4,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_application_role",
+            "name": "role",
+            "value": "Runs software delivered from the cloud"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#bfdbfe",
+            "borderColor": "#1d4ed8",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#1d4ed8",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_storage_data",
+        "name": "Storage Data",
+        "type": "class",
+        "description": "Cloud storage service for persistent data.",
+        "parentClassId": "cca_cloud_computing",
+        "position": {
+          "x": -8.265000000000002,
+          "y": 1.7999999999999998,
+          "z": 0
+        },
+        "size": {
+          "width": 3.5,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_storage_role",
+            "name": "role",
+            "value": "Stores and retrieves cloud data"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#bae6fd",
+            "borderColor": "#0369a1",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#0369a1",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_servers",
+        "name": "Servers",
+        "type": "class",
+        "description": "Compute servers backing cloud workloads.",
+        "parentClassId": "cca_cloud_computing",
+        "position": {
+          "x": -8.265000000000002,
+          "y": 4.33,
+          "z": 0
+        },
+        "size": {
+          "width": 3.1,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_servers_role",
+            "name": "role",
+            "value": "Provides compute capacity"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fde68a",
+            "borderColor": "#b45309",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#b45309",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_virtual_desktop",
+        "name": "Virtual Desktop",
+        "type": "class",
+        "description": "Desktop environment delivered from the cloud.",
+        "parentClassId": "cca_cloud_computing",
+        "position": {
+          "x": -14.475000000000003,
+          "y": -0.7300000000000004,
+          "z": 0
+        },
+        "size": {
+          "width": 4,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_virtual_desktop_role",
+            "name": "role",
+            "value": "Provides remote desktop sessions"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#bbf7d0",
+            "borderColor": "#15803d",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#15803d",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_software_platform",
+        "name": "Software Platform",
+        "type": "class",
+        "description": "Platform services used to deploy and run software.",
+        "parentClassId": "cca_cloud_computing",
+        "position": {
+          "x": -14.475000000000003,
+          "y": 1.7999999999999998,
+          "z": 0
+        },
+        "size": {
+          "width": 4.2,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_platform_role",
+            "name": "role",
+            "value": "Provides runtime and deployment platform services"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e9d5ff",
+            "borderColor": "#7e22ce",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#7e22ce",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_internet",
+        "name": "Internet",
+        "type": "class",
+        "description": "Network path between the cloud and local customer network devices.",
+        "position": {
+          "x": 14.615000000000002,
+          "y": 1.9749999999999996,
+          "z": 0
+        },
+        "size": {
+          "width": 2.8,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_internet_role",
+            "name": "role",
+            "value": "Carries traffic between cloud and end-user network"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e2e8f0",
+            "borderColor": "#334155",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#334155",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_router",
+        "name": "Router",
+        "type": "class",
+        "description": "Routes traffic between internet and wireless or local devices.",
+        "position": {
+          "x": -10.89,
+          "y": -5.23,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_router_role",
+            "name": "role",
+            "value": "Routes internet traffic to mobile, laptop, and printer"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fed7aa",
+            "borderColor": "#c2410c",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#c2410c",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_switch",
+        "name": "Switch",
+        "type": "class",
+        "description": "Local network switch distributing traffic to desktop computers.",
+        "position": {
+          "x": 4.330000000000002,
+          "y": -5.23,
+          "z": 0
+        },
+        "size": {
+          "width": 2.7,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_switch_role",
+            "name": "role",
+            "value": "Connects wired desktop clients"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#a5f3fc",
+            "borderColor": "#0e7490",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#0e7490",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_end_user",
+        "name": "End User",
+        "type": "hyperclass",
+        "description": "End-user access environment shown under the router and switch.",
+        "position": {
+          "x": 4.330000000000002,
+          "y": 1.9749999999999996,
+          "z": 0
+        },
+        "size": {
+          "width": 10.15,
+          "height": 8.260000000000002
+        },
+        "children": [
+          "cca_mobile",
+          "cca_laptop",
+          "cca_printer",
+          "cca_desktop_1",
+          "cca_desktop_2",
+          "cca_desktop_3"
+        ],
+        "attributes": [
+          {
+            "id": "cca_attr_end_user_role",
+            "name": "role",
+            "value": "Consumes cloud services through client devices"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#f8fafc",
+            "borderColor": "#334155",
+            "cornerRadius": 0.24,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.09,
+            "opacity": 0.72
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#334155",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_mobile",
+        "name": "Mobile",
+        "type": "class",
+        "description": "Mobile client device.",
+        "parentClassId": "cca_end_user",
+        "position": {
+          "x": 1.1550000000000016,
+          "y": -0.7300000000000004,
+          "z": 0
+        },
+        "size": {
+          "width": 2.3,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_mobile_kind",
+            "name": "deviceType",
+            "value": "mobile"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#ddd6fe",
+            "borderColor": "#6d28d9",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#6d28d9",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_laptop",
+        "name": "Laptop",
+        "type": "class",
+        "description": "Laptop client device.",
+        "parentClassId": "cca_end_user",
+        "position": {
+          "x": 6.105,
+          "y": 1.7999999999999998,
+          "z": 0
+        },
+        "size": {
+          "width": 2.3,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_laptop_kind",
+            "name": "deviceType",
+            "value": "laptop"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#ddd6fe",
+            "borderColor": "#6d28d9",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#6d28d9",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_printer",
+        "name": "Printer",
+        "type": "class",
+        "description": "Printer connected through the local network.",
+        "parentClassId": "cca_end_user",
+        "position": {
+          "x": 6.105,
+          "y": -0.7300000000000004,
+          "z": 0
+        },
+        "size": {
+          "width": 2.3,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_printer_kind",
+            "name": "deviceType",
+            "value": "printer"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#ddd6fe",
+            "borderColor": "#6d28d9",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#6d28d9",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_desktop_1",
+        "name": "Desktop 1",
+        "type": "class",
+        "description": "Desktop client connected through the switch.",
+        "parentClassId": "cca_end_user",
+        "position": {
+          "x": 1.1550000000000016,
+          "y": 4.33,
+          "z": 0
+        },
+        "size": {
+          "width": 2.5,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_desktop_1_kind",
+            "name": "deviceType",
+            "value": "desktop"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#bbf7d0",
+            "borderColor": "#047857",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#047857",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_desktop_2",
+        "name": "Desktop 2",
+        "type": "class",
+        "description": "Desktop client connected through the switch.",
+        "parentClassId": "cca_end_user",
+        "position": {
+          "x": 6.105,
+          "y": 4.33,
+          "z": 0
+        },
+        "size": {
+          "width": 2.5,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_desktop_2_kind",
+            "name": "deviceType",
+            "value": "desktop"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#bbf7d0",
+            "borderColor": "#047857",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#047857",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      },
+      {
+        "id": "cca_desktop_3",
+        "name": "Desktop 3",
+        "type": "class",
+        "description": "Desktop client connected through the switch.",
+        "parentClassId": "cca_end_user",
+        "position": {
+          "x": 1.1550000000000016,
+          "y": 1.7999999999999998,
+          "z": 0
+        },
+        "size": {
+          "width": 2.5,
+          "height": 1.75
+        },
+        "attributes": [
+          {
+            "id": "cca_attr_desktop_3_kind",
+            "name": "deviceType",
+            "value": "desktop"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#bbf7d0",
+            "borderColor": "#047857",
+            "cornerRadius": 0.12,
+            "material": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "emissiveIntensity": 0,
+            "borderWidth": 0.1,
+            "opacity": 1
+          },
+          "textColor": "#0f172a",
+          "attributes": {
+            "checkboxMaterial": "flat",
+            "metalness": 0,
+            "roughness": 1,
+            "checkboxColor": "#047857",
+            "font": {
+              "bold": true,
+              "family": "Arial, sans-serif"
+            }
+          },
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          }
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "cca_link_cloud_hosts_application",
+        "name": "hosts",
+        "sourceClassId": "cca_cloud_computing",
+        "targetClassId": "cca_application",
+        "type": "composition",
+        "rendering": {
+          "labelText": "cca_link_cloud_hosts_application",
+          "orthogonalStyle": "auto",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "lineColor": "#111827",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_cloud_hosts_storage",
+        "name": "stores",
+        "sourceClassId": "cca_cloud_computing",
+        "targetClassId": "cca_storage_data",
+        "type": "composition",
+        "rendering": {
+          "labelText": "cca_link_cloud_hosts_storage",
+          "orthogonalStyle": "auto",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "lineColor": "#111827",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_cloud_runs_servers",
+        "name": "runs",
+        "sourceClassId": "cca_cloud_computing",
+        "targetClassId": "cca_servers",
+        "type": "composition",
+        "rendering": {
+          "labelText": "cca_link_cloud_runs_servers",
+          "orthogonalStyle": "auto",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "lineColor": "#111827",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_cloud_provides_virtual_desktop",
+        "name": "provides",
+        "sourceClassId": "cca_cloud_computing",
+        "targetClassId": "cca_virtual_desktop",
+        "type": "composition",
+        "rendering": {
+          "labelText": "cca_link_cloud_provides_virtual_desktop",
+          "orthogonalStyle": "auto",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "lineColor": "#111827",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_cloud_provides_platform",
+        "name": "provides",
+        "sourceClassId": "cca_cloud_computing",
+        "targetClassId": "cca_software_platform",
+        "type": "composition",
+        "rendering": {
+          "labelText": "cca_link_cloud_provides_platform",
+          "orthogonalStyle": "auto",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "lineColor": "#111827",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_cloud_to_internet",
+        "name": "connects through",
+        "sourceClassId": "cca_cloud_computing",
+        "targetClassId": "cca_internet",
+        "type": "network",
+        "rendering": {
+          "labelText": "cca_link_cloud_to_internet",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_internet_to_router",
+        "name": "internet access",
+        "sourceClassId": "cca_internet",
+        "targetClassId": "cca_router",
+        "type": "network",
+        "rendering": {
+          "labelText": "cca_link_internet_to_router",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_internet_to_switch",
+        "name": "internet access",
+        "sourceClassId": "cca_internet",
+        "targetClassId": "cca_switch",
+        "type": "network",
+        "rendering": {
+          "labelText": "cca_link_internet_to_switch",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_router_to_mobile",
+        "name": "serves",
+        "sourceClassId": "cca_router",
+        "targetClassId": "cca_mobile",
+        "type": "access",
+        "rendering": {
+          "labelText": "cca_link_router_to_mobile",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_router_to_laptop",
+        "name": "serves",
+        "sourceClassId": "cca_router",
+        "targetClassId": "cca_laptop",
+        "type": "access",
+        "rendering": {
+          "labelText": "cca_link_router_to_laptop",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_router_to_printer",
+        "name": "serves",
+        "sourceClassId": "cca_router",
+        "targetClassId": "cca_printer",
+        "type": "access",
+        "rendering": {
+          "labelText": "cca_link_router_to_printer",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_switch_to_desktop_1",
+        "name": "serves",
+        "sourceClassId": "cca_switch",
+        "targetClassId": "cca_desktop_1",
+        "type": "access",
+        "rendering": {
+          "labelText": "cca_link_switch_to_desktop_1",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_switch_to_desktop_2",
+        "name": "serves",
+        "sourceClassId": "cca_switch",
+        "targetClassId": "cca_desktop_2",
+        "type": "access",
+        "rendering": {
+          "labelText": "cca_link_switch_to_desktop_2",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_switch_to_desktop_3",
+        "name": "serves",
+        "sourceClassId": "cca_switch",
+        "targetClassId": "cca_desktop_3",
+        "type": "access",
+        "rendering": {
+          "labelText": "cca_link_switch_to_desktop_3",
+          "orthogonalStyle": "vertical",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      },
+      {
+        "id": "cca_link_end_user_consumes_cloud",
+        "name": "uses",
+        "sourceClassId": "cca_end_user",
+        "targetClassId": "cca_cloud_computing",
+        "type": "consumer",
+        "rendering": {
+          "labelText": "cca_link_end_user_consumes_cloud",
+          "orthogonalStyle": "auto",
+          "lineColor": "#111827",
+          "lineWidth": 0.075,
+          "labelVisible": true,
+          "font": {
+            "bold": true,
+            "family": "Arial, sans-serif"
+          },
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        },
+        "allowSelfLink": true
+      }
+    ]
+  }
+}

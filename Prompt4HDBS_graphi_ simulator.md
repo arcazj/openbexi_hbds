@@ -40,7 +40,7 @@ The HBDS Graphic Simulator is a browser-based visual simulator for hypergraph-ba
 
 The main runtime modes are:
 
-- Static browser mode, where HTML and JSON files can be opened directly for simple viewing.
+- Static-only server mode, started with `server.py --static-only`, where public UI and model assets can be viewed without enabling API routes or exposing private repository files.
 - Connected server mode, where `server.py` provides model listing, loading, saving, deletion, drafts, operations, AI support APIs, OpenAPI documentation, and server-sent events.
 
 The main user-facing workspaces are:

@@ -70,6 +70,46 @@ const helpers = await import(moduleUrl);
 }
 
 {
+  const model = {
+    metadata: { semanticVersion: 1 },
+    hypergraph: {
+      class: [
+        { id: 'semantic_hyper', type: 'hyperclass', children: ['semantic_base', 'semantic_child'] },
+        { id: 'semantic_base', type: 'class', parentClassId: 'semantic_hyper' },
+        { id: 'semantic_child', type: 'class', parentClassId: 'semantic_hyper' },
+        { id: 'semantic_outside', type: 'class' }
+      ],
+      link: [
+        { id: 'semantic_link', sourceClassId: 'semantic_child', targetClassId: 'semantic_base' },
+        { id: 'semantic_outside_link', sourceClassId: 'semantic_child', targetClassId: 'semantic_outside' }
+      ],
+      object: [
+        { id: 'semantic_object_child', classId: 'semantic_child' },
+        { id: 'semantic_object_base', classId: 'semantic_base' },
+        { id: 'semantic_object_outside', classId: 'semantic_outside' }
+      ],
+      objectLink: [
+        { id: 'semantic_object_link', classLinkId: 'semantic_link', sourceObjectId: 'semantic_object_child', targetObjectId: 'semantic_object_base' },
+        { id: 'semantic_object_link_outside', classLinkId: 'semantic_outside_link', sourceObjectId: 'semantic_object_child', targetObjectId: 'semantic_object_outside' }
+      ],
+      membership: [
+        { id: 'semantic_membership', classId: 'semantic_child', hyperclassId: 'semantic_hyper' },
+        { id: 'semantic_membership_outside', classId: 'semantic_outside', hyperclassId: 'semantic_hyper' }
+      ],
+      inheritance: [
+        { id: 'semantic_inheritance', subClassId: 'semantic_child', superClassId: 'semantic_base' },
+        { id: 'semantic_inheritance_outside', subClassId: 'semantic_child', superClassId: 'semantic_outside' }
+      ]
+    }
+  };
+  const subgraph = helpers.buildSelectedSubgraph(model, new Set(['semantic_hyper']));
+  assert.deepEqual(subgraph.hypergraph.object.map(item => item.id), ['semantic_object_child', 'semantic_object_base']);
+  assert.deepEqual(subgraph.hypergraph.objectLink.map(item => item.id), ['semantic_object_link']);
+  assert.deepEqual(subgraph.hypergraph.membership.map(item => item.id), ['semantic_membership']);
+  assert.deepEqual(subgraph.hypergraph.inheritance.map(item => item.id), ['semantic_inheritance']);
+}
+
+{
   assert.deepEqual(helpers.routePresetPatch('horizontal').orthogonalStyle, 'horizontal');
   assert.equal(helpers.routePresetFromRendering({ orthogonalStyle: 'vertical' }), 'vertical');
   assert.equal(helpers.routePresetFromRendering(helpers.routePresetPatch('direct')), 'direct');

@@ -1,0 +1,428 @@
+{
+  "$schema": "https://openbexi.local/hbds/model/v2",
+  "metadata": {
+    "id": "sem35_fixture",
+    "name": "Semantics 035 Object Layer Functors Profiles",
+    "purpose": "Regression fixture for the semantic object layer, class memberships, inheritance, deterministic functors, and all optional semantic profiles.",
+    "semanticVersion": 1,
+    "semanticProfiles": [
+      "units",
+      "temporal",
+      "geospatial",
+      "fuzzy",
+      "prototype"
+    ],
+    "preserveLayout": true,
+    "layout": {
+      "algorithm": "none",
+      "fit": { "padding": 1.18 }
+    },
+    "font": {
+      "size": 18,
+      "family": "Arial, sans-serif",
+      "bold": false,
+      "italic": false,
+      "underline": false,
+      "classSize": 20,
+      "hyperclassSize": 22,
+      "attributeSize": 14,
+      "linkSize": 15
+    },
+    "sceneSettings": {
+      "background": "#F8FAFC",
+      "ambient": 0.8,
+      "front": 0.16,
+      "sources": [
+        {
+          "intensity": 0.16,
+          "direction": { "x": -5, "y": 7, "z": 13 }
+        },
+        {
+          "intensity": 0.1,
+          "direction": { "x": 7, "y": -5, "z": 10 }
+        }
+      ]
+    },
+    "semanticExamples": {
+      "functorQueries": [
+        {
+          "id": "sem35_query_direct",
+          "query": {
+            "startObjectIds": ["sem35_obj_relay_one"],
+            "steps": [
+              { "kind": "direct", "classLinkId": "sem35_link_connects" }
+            ]
+          },
+          "expectedObjectIds": ["sem35_obj_site_a"]
+        },
+        {
+          "id": "sem35_query_inverse",
+          "query": {
+            "startObjectIds": ["sem35_obj_site_a"],
+            "steps": [
+              { "kind": "inverse", "classLinkId": "sem35_link_connects" }
+            ]
+          },
+          "expectedObjectIds": ["sem35_obj_relay_one"]
+        },
+        {
+          "id": "sem35_query_homogeneous",
+          "query": {
+            "startObjectIds": ["sem35_obj_site_a"],
+            "steps": [
+              { "kind": "homogeneous", "classLinkId": "sem35_link_peers", "direction": "both" }
+            ]
+          },
+          "expectedObjectIds": ["sem35_obj_site_b"]
+        },
+        {
+          "id": "sem35_query_composed",
+          "query": {
+            "startObjectIds": ["sem35_obj_scenario"],
+            "steps": [
+              { "kind": "direct", "classLinkId": "sem35_link_selects" },
+              { "kind": "direct", "classLinkId": "sem35_link_connects" }
+            ]
+          },
+          "expectedObjectIds": ["sem35_obj_site_a"]
+        }
+      ]
+    },
+    "regressionTags": [
+      "semantics",
+      "objects",
+      "functors",
+      "profiles",
+      "inheritance",
+      "membership"
+    ]
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "sem35_hc_operations",
+        "name": "Operations",
+        "type": "hyperclass",
+        "position": { "x": -3.5, "y": 0, "z": 0 },
+        "size": { "width": 10.5, "height": 7.5 },
+        "attributes": [
+          { "id": "sem35_hc_operations_attr_scope", "name": "runtime semantics" }
+        ],
+        "children": [
+          "sem35_class_entity",
+          "sem35_class_relay",
+          "sem35_class_control_site",
+          "sem35_class_scenario"
+        ],
+        "rendering": {
+          "class": {
+            "color": "#E2E8F0",
+            "borderColor": "#475569",
+            "material": "flat",
+            "opacity": 0.34
+          }
+        }
+      },
+      {
+        "id": "sem35_hc_located_entities",
+        "name": "Located Entities",
+        "type": "hyperclass",
+        "position": { "x": 4.75, "y": 0, "z": 0 },
+        "size": { "width": 4, "height": 3.4 },
+        "attributes": [
+          { "id": "sem35_hc_located_attr_membership", "name": "multiple membership" }
+        ],
+        "children": [],
+        "rendering": {
+          "class": {
+            "color": "#DCFCE7",
+            "borderColor": "#15803D",
+            "material": "flat",
+            "opacity": 0.4
+          }
+        }
+      },
+      {
+        "id": "sem35_class_entity",
+        "name": "Entity",
+        "type": "roundedRectangle",
+        "parentClassId": "sem35_hc_operations",
+        "position": { "x": -5.75, "y": 1.8, "z": 0.08 },
+        "size": { "width": 3.7, "height": 1.55 },
+        "attributes": [
+          { "id": "sem35_entity_attr_external_id", "name": "externalId" },
+          { "id": "sem35_entity_attr_name", "name": "displayName" }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#FEF3C7",
+            "borderColor": "#B45309",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "sem35_class_relay",
+        "name": "Relay",
+        "type": "roundedRectangle",
+        "parentClassId": "sem35_hc_operations",
+        "position": { "x": -1.15, "y": 1.8, "z": 0.08 },
+        "size": { "width": 3.9, "height": 2.55 },
+        "attributes": [
+          { "id": "sem35_relay_attr_mass", "name": "mass" },
+          { "id": "sem35_relay_attr_window", "name": "serviceWindow" },
+          { "id": "sem35_relay_attr_position", "name": "position" },
+          { "id": "sem35_relay_attr_readiness", "name": "readiness" }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#DBEAFE",
+            "borderColor": "#1D4ED8",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "sem35_class_control_site",
+        "name": "Control Site",
+        "type": "roundedRectangle",
+        "parentClassId": "sem35_hc_operations",
+        "position": { "x": -5.75, "y": -1.9, "z": 0.08 },
+        "size": { "width": 3.7, "height": 1.9 },
+        "attributes": [
+          { "id": "sem35_site_attr_code", "name": "siteCode" },
+          { "id": "sem35_site_attr_position", "name": "position" }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#FFE4E6",
+            "borderColor": "#BE123C",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "sem35_class_scenario",
+        "name": "Scenario",
+        "type": "roundedRectangle",
+        "parentClassId": "sem35_hc_operations",
+        "position": { "x": -1.15, "y": -1.9, "z": 0.08 },
+        "size": { "width": 3.9, "height": 1.9 },
+        "attributes": [
+          { "id": "sem35_scenario_attr_code", "name": "scenarioCode" },
+          { "id": "sem35_scenario_attr_window", "name": "activeWindow" }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#F3E8FF",
+            "borderColor": "#7E22CE",
+            "material": "flat"
+          }
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "sem35_link_selects",
+        "sourceClassId": "sem35_class_scenario",
+        "targetClassId": "sem35_class_relay",
+        "name": "selects",
+        "rendering": {
+          "labelText": "selects",
+          "lineColor": "#6B21A8",
+          "lineWidth": 0.025,
+          "lineStyle": "solid",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        }
+      },
+      {
+        "id": "sem35_link_connects",
+        "sourceClassId": "sem35_class_relay",
+        "targetClassId": "sem35_class_control_site",
+        "name": "connects to",
+        "rendering": {
+          "labelText": "connects to",
+          "lineColor": "#0369A1",
+          "lineWidth": 0.025,
+          "lineStyle": "solid",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        }
+      },
+      {
+        "id": "sem35_link_peers",
+        "sourceClassId": "sem35_class_control_site",
+        "targetClassId": "sem35_class_control_site",
+        "name": "peers with",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "peers with",
+          "lineColor": "#BE123C",
+          "lineWidth": 0.025,
+          "lineStyle": "dashed",
+          "arrowType": "double-chevron",
+          "arrowDirection": "bidirectional"
+        }
+      }
+    ],
+    "object": [
+      {
+        "id": "sem35_obj_relay_template",
+        "classId": "sem35_class_relay",
+        "name": "Relay Template",
+        "isPrototype": true,
+        "attributeValues": [
+          { "attributeId": "sem35_entity_attr_external_id", "value": "RELAY-TEMPLATE" },
+          { "attributeId": "sem35_entity_attr_name", "value": "Reference Relay" },
+          {
+            "attributeId": "sem35_relay_attr_mass",
+            "value": { "semanticType": "unit", "value": 240, "unit": "kg", "dimension": "mass" }
+          },
+          {
+            "attributeId": "sem35_relay_attr_window",
+            "value": {
+              "semanticType": "temporal",
+              "start": "2026-01-01T00:00:00Z",
+              "end": "2030-12-31T23:59:59Z"
+            }
+          },
+          {
+            "attributeId": "sem35_relay_attr_position",
+            "value": { "semanticType": "geospatial", "latitude": 0, "longitude": 0, "altitude": 550000 }
+          },
+          {
+            "attributeId": "sem35_relay_attr_readiness",
+            "value": { "semanticType": "fuzzy", "memberships": { "ready": 0.96, "degraded": 0.04 } }
+          }
+        ]
+      },
+      {
+        "id": "sem35_obj_relay_one",
+        "classId": "sem35_class_relay",
+        "name": "Relay One",
+        "prototypeId": "sem35_obj_relay_template",
+        "overrides": {
+          "sem35_entity_attr_external_id": "RELAY-ONE",
+          "sem35_relay_attr_mass": 255
+        },
+        "attributeValues": [
+          { "attributeId": "sem35_entity_attr_external_id", "value": "RELAY-ONE" },
+          { "attributeId": "sem35_entity_attr_name", "value": "Relay One" },
+          {
+            "attributeId": "sem35_relay_attr_mass",
+            "value": { "semanticType": "unit", "value": 255, "unit": "kg", "dimension": "mass" }
+          }
+        ]
+      },
+      {
+        "id": "sem35_obj_site_a",
+        "classId": "sem35_class_control_site",
+        "name": "Control Site A",
+        "attributeValues": [
+          { "attributeId": "sem35_entity_attr_external_id", "value": "SITE-A" },
+          { "attributeId": "sem35_entity_attr_name", "value": "Control Site A" },
+          { "attributeId": "sem35_site_attr_code", "value": "A" },
+          {
+            "attributeId": "sem35_site_attr_position",
+            "value": { "semanticType": "geospatial", "latitude": 49.6919, "longitude": 6.3341, "altitude": 300 }
+          }
+        ]
+      },
+      {
+        "id": "sem35_obj_site_b",
+        "classId": "sem35_class_control_site",
+        "name": "Control Site B",
+        "attributeValues": [
+          { "attributeId": "sem35_entity_attr_external_id", "value": "SITE-B" },
+          { "attributeId": "sem35_entity_attr_name", "value": "Control Site B" },
+          { "attributeId": "sem35_site_attr_code", "value": "B" },
+          {
+            "attributeId": "sem35_site_attr_position",
+            "value": { "semanticType": "geospatial", "latitude": 38.9171, "longitude": -77.2222, "altitude": 140 }
+          }
+        ]
+      },
+      {
+        "id": "sem35_obj_scenario",
+        "classId": "sem35_class_scenario",
+        "name": "Regression Scenario",
+        "attributeValues": [
+          { "attributeId": "sem35_scenario_attr_code", "value": "SEM-035" },
+          {
+            "attributeId": "sem35_scenario_attr_window",
+            "value": {
+              "semanticType": "temporal",
+              "start": "2026-07-18T12:00:00Z",
+              "end": "2026-07-18T13:00:00Z"
+            }
+          }
+        ]
+      }
+    ],
+    "objectLink": [
+      {
+        "id": "sem35_object_link_scenario_relay",
+        "classLinkId": "sem35_link_selects",
+        "sourceObjectId": "sem35_obj_scenario",
+        "targetObjectId": "sem35_obj_relay_one"
+      },
+      {
+        "id": "sem35_object_link_relay_site_a",
+        "classLinkId": "sem35_link_connects",
+        "sourceObjectId": "sem35_obj_relay_one",
+        "targetObjectId": "sem35_obj_site_a"
+      },
+      {
+        "id": "sem35_object_link_site_a_b",
+        "classLinkId": "sem35_link_peers",
+        "sourceObjectId": "sem35_obj_site_a",
+        "targetObjectId": "sem35_obj_site_b"
+      }
+    ],
+    "membership": [
+      {
+        "id": "sem35_membership_entity_operations",
+        "classId": "sem35_class_entity",
+        "hyperclassId": "sem35_hc_operations"
+      },
+      {
+        "id": "sem35_membership_relay_operations",
+        "classId": "sem35_class_relay",
+        "hyperclassId": "sem35_hc_operations"
+      },
+      {
+        "id": "sem35_membership_relay_located",
+        "classId": "sem35_class_relay",
+        "hyperclassId": "sem35_hc_located_entities"
+      },
+      {
+        "id": "sem35_membership_site_operations",
+        "classId": "sem35_class_control_site",
+        "hyperclassId": "sem35_hc_operations"
+      },
+      {
+        "id": "sem35_membership_site_located",
+        "classId": "sem35_class_control_site",
+        "hyperclassId": "sem35_hc_located_entities"
+      },
+      {
+        "id": "sem35_membership_scenario_operations",
+        "classId": "sem35_class_scenario",
+        "hyperclassId": "sem35_hc_operations"
+      }
+    ],
+    "inheritance": [
+      {
+        "id": "sem35_inheritance_relay_entity",
+        "subClassId": "sem35_class_relay",
+        "superClassId": "sem35_class_entity"
+      },
+      {
+        "id": "sem35_inheritance_site_entity",
+        "subClassId": "sem35_class_control_site",
+        "superClassId": "sem35_class_entity"
+      }
+    ]
+  }
+}

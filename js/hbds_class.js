@@ -181,7 +181,7 @@ function normalizeClassSurfaceMaterial(value) {
     return 'metallic';
 }
 
-export function createClass(classData) {
+export function createClass(classData, lifecycle = {}) {
     const defaults = {
         size: {width: 1, height: 2},
         rendering: {
@@ -238,7 +238,7 @@ export function createClass(classData) {
     border.name = 'class-border';
     border.raycast = () => {};
     classMesh.add(border);
-    applyClassBodyRendering(classMesh, border, bodyRendering, cfg.class, sz, classColor, classOpacity);
+    applyClassBodyRendering(classMesh, border, bodyRendering, cfg.class, sz, classColor, classOpacity, lifecycle);
 
     const titleObj = createIconTitleLabel(classData, {
         className: 'label class-label',
@@ -386,7 +386,7 @@ function createClassHitMaterial() {
     });
 }
 
-function applyClassBodyRendering(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity) {
+function applyClassBodyRendering(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity, lifecycle) {
     classMesh.userData.classBodyType = bodyRendering.bodyType;
     classMesh.userData.classBodyShapeType = bodyRendering.shapeType;
     classMesh.userData.classBodyImageSrc = bodyRendering.imageSrc;
@@ -398,7 +398,7 @@ function applyClassBodyRendering(classMesh, border, bodyRendering, classCfg, siz
     }
 
     if (bodyRendering.bodyType === 'image') {
-        installImageClassBody(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity);
+        installImageClassBody(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity, lifecycle);
     }
 }
 
@@ -431,13 +431,17 @@ function installShapeClassBody(classMesh, border, bodyRendering, classCfg, size,
     classMesh.add(visual);
 }
 
-function installImageClassBody(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity) {
+function installImageClassBody(classMesh, border, bodyRendering, classCfg, size, classColor, classOpacity, lifecycle = {}) {
     classMesh.userData.classBodyImageState = 'loading';
     const loader = new THREE.TextureLoader();
     loader.setCrossOrigin?.('anonymous');
     loader.load(
         bodyRendering.imageSrc,
         texture => {
+            if (lifecycle.isActive?.() === false) {
+                texture.dispose?.();
+                return;
+            }
             classMesh.userData.classBodyImageState = 'loaded';
             activateTransparentClassHitBody(classMesh, border);
             texture.colorSpace = THREE.SRGBColorSpace ?? texture.colorSpace;
@@ -454,10 +458,13 @@ function installImageClassBody(classMesh, border, bodyRendering, classCfg, size,
             visual.position.z = 0.004;
             visual.raycast = () => {};
             classMesh.add(visual);
+            lifecycle.onAsyncVisualChange?.({state: 'loaded', classMesh});
         },
         undefined,
         () => {
+            if (lifecycle.isActive?.() === false) return;
             classMesh.userData.classBodyImageState = 'failed';
+            lifecycle.onAsyncVisualChange?.({state: 'failed', classMesh});
         }
     );
 }

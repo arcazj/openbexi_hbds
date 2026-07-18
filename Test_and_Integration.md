@@ -100,7 +100,7 @@ Static mode verifies that the browser UI can be served without the Python API.
 Start a static server:
 
 ```powershell
-py -m http.server 8000
+py server.py --static-only --port 8000
 ```
 
 Open:
@@ -116,8 +116,13 @@ Validate:
 * The connection indicator shows not connected.
 * Models can be viewed if JSON assets are served.
 * Browser console has no fatal module-loading errors.
+* `/api/health` returns `404` because API routes are disabled.
+* private paths such as `/server.py`, `/.git/HEAD`, `/AI_KEY/`, `/models/.backups/`, and directory listings return `404` for both `GET` and `HEAD`.
+* responses include the documented content security, frame, referrer, permissions, and content-type headers.
 
 Stop the static server with `Ctrl+C`.
+
+Do not substitute `py -m http.server` from the repository root. That command does not enforce the application's public-file allowlist.
 
 ## 5. Connected Server Mode
 
@@ -150,7 +155,7 @@ Expected debug output:
 
 Validate:
 
-* The shell menu shows app version `v1.0`.
+* The shell menu shows app version `v1.1`.
 * The connection indicator turns green/connected.
 * Stopping the server turns the indicator red/not connected after polling catches up.
 * Restarting the server reconnects the UI.
@@ -1075,17 +1080,28 @@ Run collaboration draft helper tests:
 node scripts\collaboration_drafts_test.mjs
 ```
 
-Run the browser-level collaboration regression:
+Run semantic object-layer, functor, and optional-profile conformance tests:
+
+```powershell
+node scripts\hbds_semantics_test.mjs
+node scripts\hbds_functors_test.mjs
+node scripts\hbds_semantic_profiles_test.mjs
+```
+
+These suites require pure-v1 normalization stability, semantic reference/cycle checks, multiple inheritance and membership behavior, deterministic direct/inverse/homogeneous/composed traversal, and opt-in units/temporal/geospatial/fuzzy/prototype validation. They also load the committed semantic model and test fixture.
+
+Run the full browser-level regression:
 
 ```powershell
 py scripts\collaboration_browser_regression.py
 ```
 
-This opens real headless Edge/Chrome clients with `debug=1`, verifies second-page `human_and_car_links.json` model-selection latency during collaboration, then verifies a temporary server model for real draft publishing, sequential real-time `Remote operations` list updates, remote operation rendering for class, link, layout, font, scene, view, movement, rendering, parent, attribute, create, and delete updates, merge behavior, collaboration performance diagnostics, absence of normal-update wait/status dialogs, and the non-blocking long-work canvas progress indicator.
+This opens real headless Edge/Chrome clients. Rendering checks run with debug diagnostics disabled so pixel sampling cannot mask idle-scheduler defects. The suite verifies delayed image-body invalidation, bounded texture memory, editor and Models-view idle settlement, orbit damping, interrupted gestures, a nonblank mobile canvas, all Tests-view scenarios including semantic reference/profile validation, immediate label loading, satellite font zoom, second-page `human_and_car_links.json` selection latency, AI workflows, and a temporary server model for live drafts, remote operations, merge behavior, and collaboration performance.
 
 Automated collaboration coverage:
 
-* shell menu displays app version `v1.0`
+* shell menu displays app version `v1.1`
+* the temporary same-origin server remains available during concurrent asset loading, event streaming, and draft polling without fallback connection errors
 * Help includes the comprehensive user guide with AI, model delete, rollback, collaboration, and Edit/Tests save-location guidance
 * AI Support panel collapsed by default, pink section styling, provider-dependent credential UI, provider-specific model combo, custom model fallback, reasoning effort payload, and ChatGPT Pro / Manual no-key workflow
 * manual ChatGPT workflow prepares a prompt, exposes copy/open/paste/validate controls, rejects Markdown-fenced responses, and enables Apply only for strict valid HBDS JSON
@@ -1306,6 +1322,9 @@ Before release:
 * run `node scripts\productivity_helpers_test.mjs`
 * run `node scripts\ai_support_test.mjs`
 * run `node scripts\collaboration_drafts_test.mjs`
+* run `node scripts\hbds_semantics_test.mjs`
+* run `node scripts\hbds_functors_test.mjs`
+* run `node scripts\hbds_semantic_profiles_test.mjs`
 * run `py scripts\collaboration_browser_regression.py`
 * run JavaScript syntax checks for all `js/*.js` modules
 * run immediate label load and satellite font zoom browser regressions

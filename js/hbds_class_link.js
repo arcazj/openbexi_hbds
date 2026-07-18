@@ -1373,7 +1373,7 @@ export function updateLinkFontSizes(camera, renderer) {
     const rendering = label.parent?.userData?.linkData?.rendering || {};
     const collisionWidthWorld = rendering.labelCollisionWidth ?? Math.max(0.85, String(label.userData?.text || label.element.textContent || '').length * 0.12);
     const availableWidthPx = Math.max(42, collisionWidthWorld * pixelsPerWorldUnit);
-    const minSize = Math.min(preferredSize, Math.max(MIN_READABLE_LINK_FONT_SIZE, preferredSize * 0.75));
+    const minSize = Math.min(preferredSize, Math.max(MIN_READABLE_LINK_FONT_SIZE, preferredSize * 0.68));
     const preferredScale = Math.max(1, preferredSize / DEFAULT_LINK_FONT_SETTINGS.size);
     const distanceSize = THREE.MathUtils.clamp((120 * preferredScale) / d, minSize, Math.max(18, preferredSize));
     const fitSize = getFontSizeForTextWidth(label.userData?.text || label.element.textContent || '', availableWidthPx, 2);

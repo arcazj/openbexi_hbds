@@ -1,10 +1,48 @@
 ﻿import * as THREE from 'three';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=font-types-20260531a';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=font-types-20260531a';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=font-types-20260531a';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=font-types-20260531a';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=perf-hardening-20260718a';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=perf-hardening-20260718a';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=perf-hardening-20260718a';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=perf-hardening-20260718a';
 import { initModelOverview as initModelOverviewPanel, updateModelOverview as updateModelOverviewPanel } from './hbds_model_overview.js?v=overview-module-20260530a';
+import {
+  normalizeSemanticModel,
+  normalizeObjectData,
+  normalizeObjectLinkData,
+  normalizeMembershipData,
+  normalizeInheritanceData,
+  validateSemanticModel
+} from './hbds_semantics.js?v=semantic-v1-20260718a';
+import { validateSemanticProfiles } from './hbds_semantic_profiles.js?v=semantic-v1-20260718a';
 export { drawOverviewHyperclasses, drawOverviewClasses, drawOverviewLinks, updateOverviewViewport } from './hbds_model_overview.js?v=overview-module-20260530a';
+export {
+  HBDS_SEMANTIC_VERSION,
+  HBDS_SEMANTICS_VERSION,
+  hasSemanticLayer,
+  normalizeAttributeValue,
+  normalizeObjectData,
+  normalizeObjectLinkData,
+  normalizeMembershipData,
+  normalizeInheritanceData,
+  normalizeSemanticModel,
+  buildSemanticIndex,
+  getClassAncestors,
+  getEffectiveClassAttributes,
+  getEffectiveClassMemberships,
+  getEffectiveHyperclassMemberships,
+  getEffectiveHyperclassIds,
+  getEffectiveClassLinks,
+  validateSemanticModel
+} from './hbds_semantics.js?v=semantic-v1-20260718a';
+export {
+  SEMANTIC_PROFILE_IDS,
+  resolveEnabledSemanticProfiles,
+  validateUnitSemanticValue,
+  validateTemporalSemanticValue,
+  validateGeospatialSemanticValue,
+  validateFuzzySemanticValue,
+  validatePrototypeSemanticValue,
+  validateSemanticProfiles
+} from './hbds_semantic_profiles.js?v=semantic-v1-20260718a';
 
 export const DEFAULT_SCENE_SETTINGS = {
   background: '#eef2f6',
@@ -37,8 +75,39 @@ const SMALL_MODEL_FIT_PADDING = 1.35;
 const SAVED_VIEW_FIT_MODE = 'userView';
 
 let data = { hypergraph: { class: [], link: [] } };
-const history=[];
-const modelRuntime={ classById:new Map(), linkGroups:[], diagramGroup:null, draggableObjects:[] };
+const modelRuntime={ classById:new Map(), linkGroups:[], diagramGroup:null, draggableObjects:[], sceneGeneration:0 };
+
+function disposeDiagramResources(root) {
+  const disposedGeometries=new Set();
+  const disposedMaterials=new Set();
+  const disposedTextures=new Set();
+  const disposeTexture=value=>{
+    if(!value) return;
+    if(value.isTexture===true){
+      if(!disposedTextures.has(value)){
+        disposedTextures.add(value);
+        value.dispose?.();
+      }
+      return;
+    }
+    if(Array.isArray(value)) value.forEach(disposeTexture);
+  };
+  root?.traverse(object=>{
+    if(object.geometry&&!disposedGeometries.has(object.geometry)){
+      disposedGeometries.add(object.geometry);
+      object.geometry.dispose?.();
+    }
+    const materials=Array.isArray(object.material)?object.material:[object.material];
+    materials.filter(Boolean).forEach(material=>{
+      if(disposedMaterials.has(material)) return;
+      disposedMaterials.add(material);
+      Object.values(material).forEach(disposeTexture);
+      Object.values(material.uniforms||{}).forEach(uniform=>disposeTexture(uniform?.value));
+      material.dispose?.();
+    });
+    if(object.isCSS2DObject) object.element?.remove?.();
+  });
+}
 const GRID_GAP_X = 1.15;
 const GRID_GAP_Y = 0.78;
 const ROOT_GAP_X = 2.6;
@@ -141,11 +210,11 @@ export function normalizeData(inputData){
     ? normalizedLegacyLinks
     : (Array.isArray(m.hypergraph.link)?m.hypergraph.link:[]);
   const ids=new Set(); const byId=new Map();
-  m.hypergraph.class=m.hypergraph.class.map((n,i)=>{let x=clone(n||{}); if(x.type==='hyperclass') x=normalizeHyperclassData(x); else x=normalizeClassData(x); x.id=x.id??nextId('node'); while(ids.has(x.id)) x.id=nextId('node'); ids.add(x.id); x.name=x.name||`Node ${i+1}`; x.attributes=Array.isArray(x.attributes)?x.attributes:[]; if(x.type==='hyperclass') x.children=Array.isArray(x.children)?x.children:[]; byId.set(x.id,x); return x;});
+  m.hypergraph.class=m.hypergraph.class.map((n,i)=>{let x=n||{}; if(x.type==='hyperclass') x=normalizeHyperclassData(x); else x=normalizeClassData(x); x.id=x.id??nextId('node'); while(ids.has(x.id)) x.id=nextId('node'); ids.add(x.id); x.name=x.name||`Node ${i+1}`; x.attributes=Array.isArray(x.attributes)?x.attributes:[]; if(x.type==='hyperclass') x.children=Array.isArray(x.children)?x.children:[]; byId.set(x.id,x); return x;});
   for(const n of m.hypergraph.class){ if(n.parentClassId && (!byId.has(n.parentClassId)||byId.get(n.parentClassId).type!=='hyperclass')) n.parentClassId=null; }
   for(const h of m.hypergraph.class.filter(n=>n.type==='hyperclass')){ h.children=(h.children||[]).filter(id=>byId.has(id)); for(const cid of h.children){byId.get(cid).parentClassId=h.id;} }
   m.hypergraph.link=m.hypergraph.link.map(l=>normalizeLinkData(l)).filter(l=>l.sourceClassId&&l.targetClassId&&byId.has(l.sourceClassId)&&byId.has(l.targetClassId));
-  return m;
+  return normalizeSemanticModel(m);
 }
 export function normalizeModelMetadata(metadata={}){
   const source=metadata&&typeof metadata==='object'?metadata:{};
@@ -379,6 +448,12 @@ export function validateData(currentData=data){
     if(!byId.has(l.targetClassId)) e.push(`missing link target ${l.targetClassId}`);
     validateLinkRendering(l,w);
   }
+  const semanticValidation=validateSemanticModel(currentData);
+  e.push(...semanticValidation.errors);
+  w.push(...semanticValidation.warnings);
+  const profileValidation=validateSemanticProfiles(currentData);
+  e.push(...profileValidation.errors);
+  w.push(...profileValidation.warnings);
   return {valid:e.length===0,errors:e,warnings:w};
 }
 function validateLinkRendering(link,warnings){
@@ -435,9 +510,15 @@ function isAllowedClassImageSource(value){
   const normalized=clean.replace(/\\/g,'/').replace(/^\.\//,'');
   return normalized.toLowerCase().startsWith('images/')&&/\.png(?:[?#].*)?$/i.test(normalized);
 }
-export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; const modelFont=getFontSettings(); const classFont=getFontSettingsForTextType(modelFont,'class'); const hyperclassFont=getFontSettingsForTextType(modelFont,'hyperclass'); const attributeFont=getFontSettingsForTextType(modelFont,'attribute'); const linkFont=getFontSettingsForTextType(modelFont,'link'); clearClassLabelRegistry(); clearHyperclassLabelRegistry(); clearLinkRegistry(); if(diagramGroup){scene?.remove(diagramGroup); diagramGroup.traverse(o=>{if(o.geometry) o.geometry.dispose?.(); if(o.material) o.material.dispose?.(); if(o.isCSS2DObject) o.element?.remove?.();});}
+export function refreshSceneFromData(context){ if(!context) return; const {scene,setDiagramGroup,diagramGroup,setDragControls,dragControls,draggableObjects=[]}=context; const sceneGeneration=++modelRuntime.sceneGeneration; const modelFont=getFontSettings(); const classFont=getFontSettingsForTextType(modelFont,'class'); const hyperclassFont=getFontSettingsForTextType(modelFont,'hyperclass'); const attributeFont=getFontSettingsForTextType(modelFont,'attribute'); const linkFont=getFontSettingsForTextType(modelFont,'link'); clearClassLabelRegistry(); clearHyperclassLabelRegistry(); clearLinkRegistry(); if(diagramGroup){scene?.remove(diagramGroup); disposeDiagramResources(diagramGroup);}
   if(dragControls){dragControls.dispose(); setDragControls?.(null);} const dg=new THREE.Group(); scene?.add(dg); setDiagramGroup?.(dg); modelRuntime.diagramGroup=dg; modelRuntime.classById.clear(); modelRuntime.linkGroups=[];
-  for(const cd of data.hypergraph.class){ const titleFont=cd.type==='hyperclass'?hyperclassFont:classFont; const renderData={...cd,modelFont:titleFont,modelTitleFont:titleFont,modelAttributeFont:attributeFont}; const r=cd.type==='hyperclass'?createHyperClass(null,renderData):createClassMesh(renderData); const m=r.classMesh; m.visible=cd.visible!==false&&cd.rendering?.visible!==false; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true,isLocked:cd.locked===true}; dg.add(m); modelRuntime.classById.set(cd.id,m);}
+  const classLifecycle={
+    isActive:()=>modelRuntime.sceneGeneration===sceneGeneration,
+    onAsyncVisualChange:()=>{
+      if(modelRuntime.sceneGeneration===sceneGeneration) context.renderOnce?.();
+    }
+  };
+  for(const cd of data.hypergraph.class){ const titleFont=cd.type==='hyperclass'?hyperclassFont:classFont; const renderData={...cd,modelFont:titleFont,modelTitleFont:titleFont,modelAttributeFont:attributeFont}; const r=cd.type==='hyperclass'?createHyperClass(null,renderData):createClassMesh(renderData,classLifecycle); const m=r.classMesh; m.visible=cd.visible!==false&&cd.rendering?.visible!==false; m.userData={...m.userData,hbdsId:cd.id,modelData:clone(cd),isClassLike:true,isHyperClass:cd.type==='hyperclass',isHbdsClass:true,isLocked:cd.locked===true}; dg.add(m); modelRuntime.classById.set(cd.id,m);}
   for(const cd of data.hypergraph.class){
     const node=modelRuntime.classById.get(cd.id);
     if(!node) continue;
@@ -756,28 +837,90 @@ export function setupCanvasPanControls(context){
   host.addEventListener('pointerup', stopPan);
   host.addEventListener('pointercancel', stopPan);
 }
-export function commitDataChange(operationName, updater, options={}){ const before=clone(data); const result=updater(data); data=normalizeData(data); const v=validateData(data); if(!v.valid && options.rollbackOnError!==false){ data=before; throw new Error(`Invalid data after ${operationName}: ${v.errors.join('; ')}`);} if(options.refresh!==false) refreshSceneFromData(options.context); if(options.optimizeLayout===true) updateLayoutFromData(options.context); if(options.saveHistory!==false) history.push({operationName,before,after:clone(data)}); return result; }
+function ensureSemanticCollections(model){
+  model.metadata=model.metadata||{};
+  model.metadata.semanticVersion=1;
+  model.hypergraph=model.hypergraph||{};
+  for(const key of ['object','objectLink','membership','inheritance']){
+    if(!Array.isArray(model.hypergraph[key])) model.hypergraph[key]=[];
+  }
+  return model.hypergraph;
+}
+function removeSemanticDependenciesForClasses(model,classIds,removedClassLinkIds=new Set()){
+  const hg=model?.hypergraph||{};
+  const ids=new Set([...classIds].map(String));
+  const linkIds=new Set([...removedClassLinkIds].map(String));
+  const removedObjectIds=new Set(
+    (Array.isArray(hg.object)?hg.object:[])
+      .filter(item=>ids.has(String(item?.classId)))
+      .map(item=>String(item.id))
+  );
+  if(Array.isArray(hg.object)) hg.object=hg.object.filter(item=>!ids.has(String(item?.classId)));
+  if(Array.isArray(hg.objectLink)){
+    hg.objectLink=hg.objectLink.filter(item=>
+      !removedObjectIds.has(String(item?.sourceObjectId))
+      && !removedObjectIds.has(String(item?.targetObjectId))
+      && !linkIds.has(String(item?.classLinkId??item?.linkId))
+    );
+  }
+  if(Array.isArray(hg.membership)){
+    hg.membership=hg.membership.filter(item=>
+      !ids.has(String(item?.classId??item?.memberClassId))
+      && !ids.has(String(item?.hyperclassId))
+    );
+  }
+  if(Array.isArray(hg.inheritance)){
+    hg.inheritance=hg.inheritance.filter(item=>
+      !ids.has(String(item?.subClassId))
+      && !ids.has(String(item?.superClassId))
+    );
+  }
+}
+function removeObjectLinksForClassLinkIds(model,classLinkIds){
+  const hg=model?.hypergraph||{};
+  if(!Array.isArray(hg.objectLink)) return;
+  const ids=new Set([...classLinkIds].map(String));
+  hg.objectLink=hg.objectLink.filter(item=>!ids.has(String(item?.classLinkId??item?.linkId)));
+}
+export function commitDataChange(operationName, updater, options={}){ const before=clone(data); const result=updater(data); data=normalizeData(data); const v=validateData(data); if(!v.valid && options.rollbackOnError!==false){ data=before; throw new Error(`Invalid data after ${operationName}: ${v.errors.join('; ')}`);} if(options.refresh!==false) refreshSceneFromData(options.context); if(options.optimizeLayout===true) updateLayoutFromData(options.context); return result; }
 export function setData(nextData, options={}){ data=normalizeData(nextData); const v=validateData(data); if(!v.valid) throw new Error(v.errors.join('; ')); if(options.refresh!==false) refreshSceneFromData(options.context); applyDataMetadataToContext(options.context); return getData(); }
 export function resetData(options={}){ return setData({metadata:{layout:DEFAULT_LAYOUT_SETTINGS,sceneSettings:DEFAULT_SCENE_SETTINGS,font:DEFAULT_FONT_SETTINGS},hypergraph:{class:[],link:[]}},options); }
 export function readClass(id){return data.hypergraph.class.find(c=>c.id===id)||null;} export const readHyperclass=readClass;
 export function createClass(input,options={}){ return commitDataChange('createClass',d=>{ const c=createClassData(input); d.hypergraph.class.push(c); if(c.parentClassId) addChildToHyperclass(c.parentClassId,c.id,{...options,refresh:false,saveHistory:false}); return c;},options); }
 export function updateClass(id,patch,options={}){ return commitDataChange('updateClass',d=>{ const i=d.hypergraph.class.findIndex(c=>c.id===id&&c.type!=='hyperclass'); if(i<0) throw new Error('class not found'); d.hypergraph.class[i]=updateClassData(d.hypergraph.class[i],patch); return d.hypergraph.class[i];},options); }
-export function deleteLinksForNode(id,options={}){ return commitDataChange('deleteLinksForNode',d=>{ d.hypergraph.link=d.hypergraph.link.filter(l=>l.sourceClassId!==id&&l.targetClassId!==id);},options); }
-export function deleteClass(id,options={}){ return commitDataChange('deleteClass',d=>{ const node=d.hypergraph.class.find(c=>c.id===id); if(!node) return false; d.hypergraph.class=d.hypergraph.class.filter(c=>c.id!==id); d.hypergraph.class.filter(c=>c.type==='hyperclass').forEach(h=>h.children=removeChildData(h,id).children); d.hypergraph.link=d.hypergraph.link.filter(l=>l.sourceClassId!==id&&l.targetClassId!==id); return true;},options); }
+export function deleteLinksForNode(id,options={}){ return commitDataChange('deleteLinksForNode',d=>{ const removedIds=new Set(d.hypergraph.link.filter(l=>l.sourceClassId===id||l.targetClassId===id).map(l=>l.id)); d.hypergraph.link=d.hypergraph.link.filter(l=>l.sourceClassId!==id&&l.targetClassId!==id); removeObjectLinksForClassLinkIds(d,removedIds);},options); }
+export function deleteClass(id,options={}){ return commitDataChange('deleteClass',d=>{ const node=d.hypergraph.class.find(c=>c.id===id); if(!node) return false; const removedLinkIds=new Set(d.hypergraph.link.filter(l=>l.sourceClassId===id||l.targetClassId===id).map(l=>l.id)); d.hypergraph.class=d.hypergraph.class.filter(c=>c.id!==id); d.hypergraph.class.filter(c=>c.type==='hyperclass').forEach(h=>h.children=removeChildData(h,id).children); d.hypergraph.link=d.hypergraph.link.filter(l=>l.sourceClassId!==id&&l.targetClassId!==id); removeSemanticDependenciesForClasses(d,new Set([id]),removedLinkIds); return true;},options); }
 export function createHyperclass(input,options={}){ return commitDataChange('createHyperclass',d=>{ const h=createHyperclassData(input); d.hypergraph.class.push(h); if(h.parentClassId) addChildToHyperclass(h.parentClassId,h.id,{...options,refresh:false,saveHistory:false}); return h;},options); }
 export function updateHyperclass(id,patch,options={}){ return commitDataChange('updateHyperclass',d=>{ const i=d.hypergraph.class.findIndex(c=>c.id===id&&c.type==='hyperclass'); if(i<0) throw new Error('hyperclass not found'); d.hypergraph.class[i]=updateHyperclassData(d.hypergraph.class[i],patch); return d.hypergraph.class[i];},options); }
-export function deleteHyperclass(id,options={cascade:true}){ return commitDataChange('deleteHyperclass',d=>{ const ids=new Set([id]); if(options.cascade!==false){ let changed=true; while(changed){changed=false; for(const c of d.hypergraph.class){ if(c.parentClassId&&ids.has(c.parentClassId)&&!ids.has(c.id)){ids.add(c.id);changed=true;}} } d.hypergraph.class=d.hypergraph.class.filter(c=>!ids.has(c.id)); } else d.hypergraph.class=d.hypergraph.class.filter(c=>c.id!==id).map(c=>c.parentClassId===id?{...c,parentClassId:null}:c); d.hypergraph.link=d.hypergraph.link.filter(l=>!ids.has(l.sourceClassId)&&!ids.has(l.targetClassId)); d.hypergraph.class.filter(c=>c.type==='hyperclass').forEach(h=>h.children=(h.children||[]).filter(cid=>!ids.has(cid))); return true;},options); }
+export function deleteHyperclass(id,options={cascade:true}){ return commitDataChange('deleteHyperclass',d=>{ const ids=new Set([id]); if(options.cascade!==false){ let changed=true; while(changed){changed=false; for(const c of d.hypergraph.class){ if(c.parentClassId&&ids.has(c.parentClassId)&&!ids.has(c.id)){ids.add(c.id);changed=true;}} } d.hypergraph.class=d.hypergraph.class.filter(c=>!ids.has(c.id)); } else d.hypergraph.class=d.hypergraph.class.filter(c=>c.id!==id).map(c=>c.parentClassId===id?{...c,parentClassId:null}:c); const removedLinkIds=new Set(d.hypergraph.link.filter(l=>ids.has(l.sourceClassId)||ids.has(l.targetClassId)).map(l=>l.id)); d.hypergraph.link=d.hypergraph.link.filter(l=>!ids.has(l.sourceClassId)&&!ids.has(l.targetClassId)); d.hypergraph.class.filter(c=>c.type==='hyperclass').forEach(h=>h.children=(h.children||[]).filter(cid=>!ids.has(cid))); removeSemanticDependenciesForClasses(d,ids,removedLinkIds); return true;},options); }
 export function addChildToHyperclass(parentId,childId,options={}){ return commitDataChange('addChild',d=>{ const p=d.hypergraph.class.find(c=>c.id===parentId&&c.type==='hyperclass'); const c=d.hypergraph.class.find(c=>c.id===childId); if(!p||!c) throw new Error('invalid parent/child'); p.children=addChildData(p,childId).children; c.parentClassId=parentId; },options);}
 export function removeChildFromHyperclass(parentId,childId,options={}){ return commitDataChange('removeChild',d=>{ const p=d.hypergraph.class.find(c=>c.id===parentId&&c.type==='hyperclass'); const c=d.hypergraph.class.find(c=>c.id===childId); if(!p||!c) return false; p.children=removeChildData(p,childId).children; if(c.parentClassId===parentId) c.parentClassId=null; return true;},options);}
 export const moveChildToHyperclass=(cid,pid,options={})=>commitDataChange('moveChild',d=>{const c=d.hypergraph.class.find(n=>n.id===cid); if(!c) throw new Error('child not found'); d.hypergraph.class.filter(n=>n.type==='hyperclass').forEach(h=>h.children=(h.children||[]).filter(x=>x!==cid)); if(pid){const p=d.hypergraph.class.find(n=>n.id===pid&&n.type==='hyperclass'); if(!p) throw new Error('parent not hyperclass'); p.children.push(cid); c.parentClassId=pid;} else c.parentClassId=null;},options);
 export function readAttributes(ownerId){return readClass(ownerId)?.attributes||[];}
 export function createAttribute(ownerId,attributeInput,options={}){ return commitDataChange('createAttribute',d=>{ const o=d.hypergraph.class.find(c=>c.id===ownerId); if(!o) throw new Error('owner not found'); o.attributes=o.attributes||[]; if(o.attributes.length&&typeof o.attributes[0]==='string') o.attributes.push(attributeInput?.name||String(attributeInput)); else o.attributes.push(typeof attributeInput==='string'?attributeInput:{id:attributeInput?.id||nextId('att'),name:attributeInput?.name||'attribute'}); },options);}
 export const updateAttribute=(ownerId,key,patch,options={})=>commitDataChange('updateAttribute',d=>{const o=d.hypergraph.class.find(c=>c.id===ownerId); if(!o) throw new Error('owner not found'); const i=typeof key==='number'?key:o.attributes.findIndex(a=>typeof a==='string'?a===key:a.name===key||a.id===key); if(i<0) throw new Error('attribute not found'); const current=o.attributes[i]; if(typeof current==='string'){ if(patch&&typeof patch==='object'){ const keys=Object.keys(patch).filter(k=>k!=='name'); o.attributes[i]=keys.length?{...patch,name:patch.name??current}:{name:patch.name??current}; } else o.attributes[i]=patch?.name||patch; } else o.attributes[i]={...current,...(typeof patch==='string'?{name:patch}:patch)};},options);
-export const deleteAttribute=(ownerId,key,options={})=>commitDataChange('deleteAttribute',d=>{const o=d.hypergraph.class.find(c=>c.id===ownerId); if(!o) throw new Error('owner not found'); const i=typeof key==='number'?key:o.attributes.findIndex(a=>typeof a==='string'?a===key:a.name===key||a.id===key); if(i>=0) o.attributes.splice(i,1);},options);
+export const deleteAttribute=(ownerId,key,options={})=>commitDataChange('deleteAttribute',d=>{const o=d.hypergraph.class.find(c=>c.id===ownerId); if(!o) throw new Error('owner not found'); const i=typeof key==='number'?key:o.attributes.findIndex(a=>typeof a==='string'?a===key:a.name===key||a.id===key); if(i>=0){const attributeId=typeof o.attributes[i]==='object'?o.attributes[i]?.id:null; o.attributes.splice(i,1); if(attributeId&&Array.isArray(d.hypergraph.object)){for(const item of d.hypergraph.object){if(Array.isArray(item.attributeValues)) item.attributeValues=item.attributeValues.filter(value=>value?.attributeId!==attributeId);}}}},options);
 export const readLink=(idOrPred)=>typeof idOrPred==='function'?data.hypergraph.link.find(idOrPred)||null:data.hypergraph.link.find(l=>l.id===idOrPred)||null;
 export const createLink=(input,options={})=>commitDataChange('createLink',d=>{const l=createLinkData(input); const byId=new Map(d.hypergraph.class.map(c=>[c.id,c])); const v=validateLinkData(l,byId); if(!v.valid) throw new Error(v.errors.join('; ')); d.hypergraph.link.push(l); return l;},options);
 export const updateLink=(idOrPred,patch,options={})=>commitDataChange('updateLink',d=>{const i=d.hypergraph.link.findIndex(l=>typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred); if(i<0) throw new Error('link not found'); d.hypergraph.link[i]=updateLinkData(d.hypergraph.link[i],patch);},options);
-export const deleteLink=(idOrPred,options={})=>commitDataChange('deleteLink',d=>{d.hypergraph.link=d.hypergraph.link.filter(l=>!(typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred||(idOrPred?.sourceClassId===l.sourceClassId&&idOrPred?.targetClassId===l.targetClassId)));},options);
+export const deleteLink=(idOrPred,options={})=>commitDataChange('deleteLink',d=>{const shouldDelete=l=>typeof idOrPred==='function'?idOrPred(l):l.id===idOrPred||(idOrPred?.sourceClassId===l.sourceClassId&&idOrPred?.targetClassId===l.targetClassId); const removedIds=new Set(d.hypergraph.link.filter(shouldDelete).map(l=>l.id)); d.hypergraph.link=d.hypergraph.link.filter(l=>!shouldDelete(l)); removeObjectLinksForClassLinkIds(d,removedIds);},options);
+
+export const readObject=id=>Array.isArray(data.hypergraph.object)?data.hypergraph.object.find(item=>item.id===id)||null:null;
+export function createObject(input={},options={}){return commitDataChange('createObject',d=>{const hg=ensureSemanticCollections(d); const item=normalizeObjectData({...input,id:input.id||nextId('object')}); hg.object.push(item); return item;},options);}
+export function updateObject(id,patch={},options={}){return commitDataChange('updateObject',d=>{const hg=ensureSemanticCollections(d); const index=hg.object.findIndex(item=>item.id===id); if(index<0) throw new Error('object not found'); hg.object[index]=normalizeObjectData({...hg.object[index],...patch,id}); return hg.object[index];},options);}
+export function deleteObject(id,options={}){return commitDataChange('deleteObject',d=>{const hg=ensureSemanticCollections(d); const before=hg.object.length; hg.object=hg.object.filter(item=>item.id!==id); hg.objectLink=hg.objectLink.filter(item=>item.sourceObjectId!==id&&item.targetObjectId!==id); return hg.object.length!==before;},options);}
+export const readObjectLink=id=>Array.isArray(data.hypergraph.objectLink)?data.hypergraph.objectLink.find(item=>item.id===id)||null:null;
+export function createObjectLink(input={},options={}){return commitDataChange('createObjectLink',d=>{const hg=ensureSemanticCollections(d); const item=normalizeObjectLinkData({...input,id:input.id||nextId('object_link')}); hg.objectLink.push(item); return item;},options);}
+export function updateObjectLink(id,patch={},options={}){return commitDataChange('updateObjectLink',d=>{const hg=ensureSemanticCollections(d); const index=hg.objectLink.findIndex(item=>item.id===id); if(index<0) throw new Error('object link not found'); hg.objectLink[index]=normalizeObjectLinkData({...hg.objectLink[index],...patch,id}); return hg.objectLink[index];},options);}
+export function deleteObjectLink(id,options={}){return commitDataChange('deleteObjectLink',d=>{const hg=ensureSemanticCollections(d); const before=hg.objectLink.length; hg.objectLink=hg.objectLink.filter(item=>item.id!==id); return hg.objectLink.length!==before;},options);}
+export const readMembership=id=>Array.isArray(data.hypergraph.membership)?data.hypergraph.membership.find(item=>item.id===id)||null:null;
+export function createMembership(input={},options={}){return commitDataChange('createMembership',d=>{const hg=ensureSemanticCollections(d); const item=normalizeMembershipData({...input,id:input.id||nextId('membership')}); hg.membership.push(item); return item;},options);}
+export function updateMembership(id,patch={},options={}){return commitDataChange('updateMembership',d=>{const hg=ensureSemanticCollections(d); const index=hg.membership.findIndex(item=>item.id===id); if(index<0) throw new Error('membership not found'); hg.membership[index]=normalizeMembershipData({...hg.membership[index],...patch,id}); return hg.membership[index];},options);}
+export function deleteMembership(id,options={}){return commitDataChange('deleteMembership',d=>{const hg=ensureSemanticCollections(d); const before=hg.membership.length; hg.membership=hg.membership.filter(item=>item.id!==id); return hg.membership.length!==before;},options);}
+export const readInheritance=id=>Array.isArray(data.hypergraph.inheritance)?data.hypergraph.inheritance.find(item=>item.id===id)||null:null;
+export function createInheritance(input={},options={}){return commitDataChange('createInheritance',d=>{const hg=ensureSemanticCollections(d); const item=normalizeInheritanceData({...input,id:input.id||nextId('inheritance')}); hg.inheritance.push(item); return item;},options);}
+export function updateInheritance(id,patch={},options={}){return commitDataChange('updateInheritance',d=>{const hg=ensureSemanticCollections(d); const index=hg.inheritance.findIndex(item=>item.id===id); if(index<0) throw new Error('inheritance not found'); hg.inheritance[index]=normalizeInheritanceData({...hg.inheritance[index],...patch,id}); return hg.inheritance[index];},options);}
+export function deleteInheritance(id,options={}){return commitDataChange('deleteInheritance',d=>{const hg=ensureSemanticCollections(d); const before=hg.inheritance.length; hg.inheritance=hg.inheritance.filter(item=>item.id!==id); return hg.inheritance.length!==before;},options);}
 export async function loadModelData(modelName, options={}){
   const value=String(modelName||'').trim();
   const allowedBasePath=options.allowedBasePath==null?null:normalizeModelDirectoryPath(options.allowedBasePath);

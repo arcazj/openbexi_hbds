@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-import json, sys
+import json
+import sys
 from pathlib import Path
 
 def box(node):
@@ -15,9 +16,9 @@ def contained(child,parent):
     return cx1>=px1 and cx2<=px2 and cy1>=py1 and cy2<=py2
 
 def validate(path):
-    d=json.loads(Path(path).read_text())
+    d=json.loads(Path(path).read_text(encoding='utf-8'))
     classes=d['hypergraph']['class']
-    rels=d['hypergraph'].get('relationship',[])
+    rels=d['hypergraph'].get('link',[])
     ids=[c['id'] for c in classes]
     assert len(ids)==len(set(ids)), 'Duplicate node IDs'
     rid=[r['id'] for r in rels]
@@ -49,7 +50,8 @@ def validate(path):
         assert r['sourceClassId'] in by, f"Missing source {r['id']}"
         assert r['targetClassId'] in by, f"Missing target {r['id']}"
     layout=d.get('metadata',{}).get('layout',{})
-    assert layout.get('mode') in {'grid','Grid','radial','Radial'}, 'Layout mode must be grid or radial'
+    layout_mode=layout.get('mode',layout.get('algorithm'))
+    assert str(layout_mode).lower() in {'grid','radial'}, 'Layout mode must be grid or radial'
     print(f'OK: {path}')
 
 if __name__=='__main__':

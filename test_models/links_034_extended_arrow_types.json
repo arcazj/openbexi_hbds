@@ -1,0 +1,1193 @@
+{
+  "metadata": {
+    "id": "links_034_extended_arrow_types",
+    "name": "Links 034 Extended Arrow Types",
+    "purpose": "Regression model covering expanded HBDS link arrow types, directions, line styles, colors, and label sizing.",
+    "preserveLayout": true,
+    "layout": {
+      "algorithm": "none",
+      "fit": {
+        "padding": 1.16,
+        "fitHeightDistance": 24.0355,
+        "fitWidthDistance": 15.5544,
+        "distance": 24.0993,
+        "diagramWidth": 17.5,
+        "diagramHeight": 19.324,
+        "diagramDepth": 0.11,
+        "radius": 13.0353,
+        "center": {
+          "x": 0.2,
+          "y": -1.298,
+          "z": 0.055
+        },
+        "cameraAspect": 1.3994,
+        "cameraFov": 50,
+        "mode": "userView",
+        "savedView": true,
+        "subjectCount": 26
+      }
+    },
+    "regressionTags": [
+      "links",
+      "arrow-types",
+      "rendering",
+      "collaboration"
+    ],
+    "sceneSettings": {
+      "background": "#f8fafc",
+      "ambient": 0,
+      "front": 0,
+      "sources": [
+        {
+          "intensity": 1,
+          "direction": {
+            "x": -5.734,
+            "y": 7,
+            "z": 14.937
+          }
+        },
+        {
+          "intensity": 0.6,
+          "direction": {
+            "x": 0,
+            "y": 11.314,
+            "z": 11.314
+          }
+        }
+      ]
+    },
+    "font": {
+      "size": 60,
+      "family": "Arial, sans-serif",
+      "bold": true,
+      "italic": false,
+      "underline": false,
+      "classSize": 54,
+      "hyperclassSize": 39,
+      "attributeSize": 43,
+      "linkSize": 30
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "arrow34_source_01",
+        "name": "Source 01",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_01_attr",
+            "name": "arrowType",
+            "value": "triangle"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_01",
+        "name": "Target 01",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": 8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_01_attr",
+            "name": "direction",
+            "value": "source-to-target"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_02",
+        "name": "Source 02",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": 6.45,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_02_attr",
+            "name": "arrowType",
+            "value": "outline"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_02",
+        "name": "Target 02",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": 6.45,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_02_attr",
+            "name": "direction",
+            "value": "source-to-target"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_03",
+        "name": "Source 03",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": 4.9,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_03_attr",
+            "name": "arrowType",
+            "value": "chevron"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_03",
+        "name": "Target 03",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": 4.9,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_03_attr",
+            "name": "direction",
+            "value": "source-to-target"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_04",
+        "name": "Source 04",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": 3.35,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_04_attr",
+            "name": "arrowType",
+            "value": "double-chevron"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_04",
+        "name": "Target 04",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": 3.35,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_04_attr",
+            "name": "direction",
+            "value": "bidirectional"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_05",
+        "name": "Source 05",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": 1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_05_attr",
+            "name": "arrowType",
+            "value": "triple-chevron"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_05",
+        "name": "Target 05",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": 1.8,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_05_attr",
+            "name": "direction",
+            "value": "source-to-target"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_06",
+        "name": "Source 06",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": 0.25,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_06_attr",
+            "name": "arrowType",
+            "value": "filled-triangle"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_06",
+        "name": "Target 06",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": 0.25,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_06_attr",
+            "name": "direction",
+            "value": "target-to-source"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_07",
+        "name": "Source 07",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": -1.3,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_07_attr",
+            "name": "arrowType",
+            "value": "hollow-triangle"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_07",
+        "name": "Target 07",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": -1.3,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_07_attr",
+            "name": "direction",
+            "value": "source-to-target"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_08",
+        "name": "Source 08",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": -2.85,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_08_attr",
+            "name": "arrowType",
+            "value": "dotted"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_08",
+        "name": "Target 08",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": -2.85,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_08_attr",
+            "name": "direction",
+            "value": "source-to-target"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_09",
+        "name": "Source 09",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": -4.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_09_attr",
+            "name": "arrowType",
+            "value": "bar-arrow"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_09",
+        "name": "Target 09",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": -4.4,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_09_attr",
+            "name": "direction",
+            "value": "source-to-target"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_10",
+        "name": "Source 10",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": -5.95,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_10_attr",
+            "name": "arrowType",
+            "value": "double-bar-arrow"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_10",
+        "name": "Target 10",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": -5.95,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_10_attr",
+            "name": "direction",
+            "value": "bidirectional"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_11",
+        "name": "Source 11",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": -7.5,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_11_attr",
+            "name": "arrowType",
+            "value": "cone"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_11",
+        "name": "Target 11",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": -7.5,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_11_attr",
+            "name": "direction",
+            "value": "source-to-target"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_12",
+        "name": "Source 12",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": -9.05,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_12_attr",
+            "name": "arrowType",
+            "value": "diamond"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_12",
+        "name": "Target 12",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": -9.05,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_12_attr",
+            "name": "direction",
+            "value": "target-to-source"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_source_13",
+        "name": "Source 13",
+        "type": "class",
+        "position": {
+          "x": -7.5,
+          "y": -10.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_source_13_attr",
+            "name": "arrowType",
+            "value": "none"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#e0f2fe",
+            "borderColor": "#075985",
+            "material": "flat"
+          }
+        }
+      },
+      {
+        "id": "arrow34_target_13",
+        "name": "Target 13",
+        "type": "class",
+        "position": {
+          "x": 7.5,
+          "y": -10.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.1,
+          "height": 0.72
+        },
+        "attributes": [
+          {
+            "id": "arrow34_target_13_attr",
+            "name": "direction",
+            "value": "none"
+          }
+        ],
+        "rendering": {
+          "class": {
+            "color": "#fef3c7",
+            "borderColor": "#92400e",
+            "material": "flat"
+          }
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "arrow34_link_01_triangle",
+        "name": "Default filled arrow",
+        "sourceClassId": "arrow34_source_01",
+        "targetClassId": "arrow34_target_01",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Default filled arrow",
+          "labelFontSize": 11,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#2563eb",
+          "lineWidth": 2.4,
+          "lineStyle": "solid",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#1d4ed8",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_02_outline",
+        "name": "Outline arrow",
+        "sourceClassId": "arrow34_source_02",
+        "targetClassId": "arrow34_target_02",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Outline arrow",
+          "labelFontSize": 12,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#0f766e",
+          "lineWidth": 2.4,
+          "lineStyle": "dashed",
+          "arrowType": "outline",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#0f766e",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_03_chevron",
+        "name": "Single chevron",
+        "sourceClassId": "arrow34_source_03",
+        "targetClassId": "arrow34_target_03",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Single chevron",
+          "labelFontSize": 13,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#7c3aed",
+          "lineWidth": 2.4,
+          "lineStyle": "dotted",
+          "arrowType": "chevron",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#6d28d9",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_04_double_chevron",
+        "name": "Double chevron",
+        "sourceClassId": "arrow34_source_04",
+        "targetClassId": "arrow34_target_04",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Double chevron",
+          "labelFontSize": 14,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#c2410c",
+          "lineWidth": 2.4,
+          "lineStyle": "thick",
+          "arrowType": "double-chevron",
+          "arrowDirection": "bidirectional",
+          "arrowColor": "#9a3412",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_05_triple_chevron",
+        "name": "Triple chevron",
+        "sourceClassId": "arrow34_source_05",
+        "targetClassId": "arrow34_target_05",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Triple chevron",
+          "labelFontSize": 15,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#be123c",
+          "lineWidth": 1.4,
+          "lineStyle": "thin",
+          "arrowType": "triple-chevron",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#9f1239",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_06_filled_triangle",
+        "name": "Filled triangle reverse",
+        "sourceClassId": "arrow34_source_06",
+        "targetClassId": "arrow34_target_06",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Filled triangle reverse",
+          "labelFontSize": 16,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#047857",
+          "lineWidth": 2.4,
+          "lineStyle": "solid",
+          "arrowType": "filled-triangle",
+          "arrowDirection": "target-to-source",
+          "arrowColor": "#065f46",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_07_hollow_triangle",
+        "name": "Hollow triangle",
+        "sourceClassId": "arrow34_source_07",
+        "targetClassId": "arrow34_target_07",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Hollow triangle",
+          "labelFontSize": 17,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#4338ca",
+          "lineWidth": 2.4,
+          "lineStyle": "dashed",
+          "arrowType": "hollow-triangle",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#3730a3",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_08_dotted",
+        "name": "Dotted arrow head",
+        "sourceClassId": "arrow34_source_08",
+        "targetClassId": "arrow34_target_08",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Dotted arrow head",
+          "labelFontSize": 18,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#0891b2",
+          "lineWidth": 2.4,
+          "lineStyle": "dotted",
+          "arrowType": "dotted",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#0e7490",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_09_bar_arrow",
+        "name": "Bar plus arrow",
+        "sourceClassId": "arrow34_source_09",
+        "targetClassId": "arrow34_target_09",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Bar plus arrow",
+          "labelFontSize": 19,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#92400e",
+          "lineWidth": 2.4,
+          "lineStyle": "solid",
+          "arrowType": "bar-arrow",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#78350f",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_10_double_bar_arrow",
+        "name": "Double bar arrow",
+        "sourceClassId": "arrow34_source_10",
+        "targetClassId": "arrow34_target_10",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Double bar arrow",
+          "labelFontSize": 20,
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#a21caf",
+          "lineWidth": 2.4,
+          "lineStyle": "thick",
+          "arrowType": "double-bar-arrow",
+          "arrowDirection": "bidirectional",
+          "arrowColor": "#86198f",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_11_cone",
+        "name": "Legacy cone",
+        "sourceClassId": "arrow34_source_11",
+        "targetClassId": "arrow34_target_11",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Legacy cone",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#374151",
+          "lineWidth": 2.4,
+          "lineStyle": "solid",
+          "arrowType": "cone",
+          "arrowDirection": "source-to-target",
+          "arrowColor": "#111827",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      },
+      {
+        "id": "arrow34_link_12_diamond",
+        "name": "Legacy diamond reverse",
+        "sourceClassId": "arrow34_source_12",
+        "targetClassId": "arrow34_target_12",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Legacy diamond reverse",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#b45309",
+          "lineWidth": 2.4,
+          "lineStyle": "dashed",
+          "arrowType": "diamond",
+          "arrowDirection": "target-to-source",
+          "arrowColor": "#92400e",
+          "arrowheadVisibility": true,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left",
+          "arrowheadType": "diamond"
+        }
+      },
+      {
+        "id": "arrow34_link_13_none",
+        "name": "Plain association",
+        "sourceClassId": "arrow34_source_13",
+        "targetClassId": "arrow34_target_13",
+        "type": "visual-regression",
+        "allowSelfLink": true,
+        "rendering": {
+          "labelText": "Plain association",
+          "orthogonalStyle": "horizontal",
+          "lineColor": "#64748b",
+          "lineWidth": 2.4,
+          "lineStyle": "solid",
+          "arrowType": "none",
+          "arrowDirection": "none",
+          "arrowColor": "#64748b",
+          "arrowheadVisibility": false,
+          "arrowheadSize": 0.22,
+          "arrowheadScale": 0.95,
+          "maxArrowheadSize": 0.24,
+          "labelColor": "#111827",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "labelPositionAlongPath": 0.5,
+          "labelOffsetFromPath": 0.2,
+          "labelPlacement": "path",
+          "sourcePortSide": "right",
+          "targetPortSide": "left"
+        }
+      }
+    ]
+  }
+}

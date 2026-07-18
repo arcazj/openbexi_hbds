@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Lab</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=ai-preview-guide-20260531a">
+  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=perf-hardening-20260718a">
   <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -108,6 +108,28 @@
       </select>
       <label class="toggle-row" for="view-toggle"><span>Enable 3-D View</span><input type="checkbox" id="view-toggle"></label>
       <div id="model-summary" class="section-meta">Blank workspace</div>
+    </section>
+
+    <section id="semantic-layer-section" class="control-group" data-section="semantic-layer" hidden>
+      <div class="section-title">Semantic Layer <span id="semantic-profile-status" class="section-meta">Core</span></div>
+      <div class="stats-grid semantic-stats" aria-label="Semantic model statistics">
+        <div class="stat"><span class="stat-value" id="stat-object-count">0</span><span class="stat-label">objects</span></div>
+        <div class="stat"><span class="stat-value" id="stat-object-link-count">0</span><span class="stat-label">object links</span></div>
+        <div class="stat"><span class="stat-value" id="stat-membership-count">0</span><span class="stat-label">memberships</span></div>
+        <div class="stat"><span class="stat-value" id="stat-inheritance-count">0</span><span class="stat-label">inheritance</span></div>
+      </div>
+      <label for="semantic-start-object-select">Start Object</label>
+      <select id="semantic-start-object-select"></select>
+      <label for="semantic-functor-select">Functor</label>
+      <select id="semantic-functor-select">
+        <option value="direct">Direct</option>
+        <option value="inverse">Inverse</option>
+        <option value="homogeneous">Homogeneous</option>
+      </select>
+      <label for="semantic-class-link-select">Class Link</label>
+      <select id="semantic-class-link-select"></select>
+      <button id="run-semantic-query-button" type="button">Run Query</button>
+      <div id="semantic-query-result" class="section-meta" aria-live="polite">No query result</div>
     </section>
 
     <section class="control-group" data-section="ai-support">
@@ -350,6 +372,6 @@
     </div>
   </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=font-types-20260531a"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=semantic-v1-20260718a"></script>
 </body>
 </html>

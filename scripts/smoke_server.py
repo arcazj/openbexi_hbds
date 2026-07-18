@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import queue
@@ -61,7 +62,27 @@ def request_json(
     return json.loads(text) if text.strip() else {}
 
 
-def start_server(port: int) -> subprocess.Popen:
+def request_http(
+    base_url: str,
+    path: str,
+    *,
+    method: str = "GET",
+    read_body: bool = True,
+) -> tuple[int, dict[str, str], bytes]:
+    request = urllib.request.Request(f"{base_url}{path}", method=method)
+    try:
+        with urllib.request.urlopen(request, timeout=3) as response:
+            body = response.read() if read_body else b""
+            return response.status, dict(response.headers.items()), body
+    except urllib.error.HTTPError as error:
+        try:
+            body = error.read() if read_body else b""
+            return error.code, dict(error.headers.items()), body
+        finally:
+            error.close()
+
+
+def start_server(port: int, *, static_only: bool = False, quiet: bool = True) -> subprocess.Popen:
     command = [
         sys.executable,
         str(ROOT_DIR / "server.py"),
@@ -69,8 +90,11 @@ def start_server(port: int) -> subprocess.Popen:
         "127.0.0.1",
         "--port",
         str(port),
-        "--quiet",
     ]
+    if quiet:
+        command.append("--quiet")
+    if static_only:
+        command.append("--static-only")
     return subprocess.Popen(
         command,
         cwd=str(ROOT_DIR),
@@ -284,10 +308,282 @@ def wait_for_event(events: queue.Queue, event_type: str, timeout: float = 5) -> 
     raise AssertionError(f"Timed out waiting for {event_type}; last event was {last_event}")
 
 
+def assert_operation_error(callback, expected_code: str) -> None:
+    hbds_server = import_hbds_server()
+    try:
+        callback()
+    except hbds_server.OperationError as error:
+        assert_ok(error.code == expected_code, f"Expected {expected_code}, got {error.code}")
+        return
+    raise AssertionError(f"Expected {expected_code}")
+
+
+def assert_ai_transport_guards() -> None:
+    hbds_server = import_hbds_server()
+    hbds_server.validate_ai_provider_url("https://93.184.216.34/v1")
+    hbds_server.validate_ai_provider_url("http://127.0.0.1:11434/api/tags", allow_loopback=True)
+    hbds_server.validate_ai_provider_url("https://10.0.0.1/v1", allow_private=True)
+
+    invalid_urls = (
+        "file:///tmp/provider.json",
+        "https://user:password@93.184.216.34/v1",
+        "https://93.184.216.34/v1?token=value",
+        "https://93.184.216.34/v1#fragment",
+        "http://93.184.216.34/v1",
+        "https://127.0.0.1:11434/v1",
+        "https://10.0.0.1/v1",
+        "https://169.254.169.254/latest/meta-data",
+    )
+    for url in invalid_urls:
+        assert_operation_error(
+            lambda candidate=url: hbds_server.validate_ai_provider_url(candidate),
+            "ai_provider_invalid_url",
+        )
+    redirect_handler = hbds_server.ValidatedAiRedirectHandler(allow_loopback=False, allow_private=False)
+    redirect_request = urllib.request.Request("https://93.184.216.34/v1/models")
+    assert_operation_error(
+        lambda: redirect_handler.redirect_request(
+            redirect_request,
+            None,
+            302,
+            "Found",
+            {},
+            "https://8.8.8.8/v1/models",
+        ),
+        "ai_provider_redirect_blocked",
+    )
+
+    class FakeResponse:
+        def __init__(self, body: bytes, content_length: int | None = None):
+            self.headers = {}
+            if content_length is not None:
+                self.headers["Content-Length"] = str(content_length)
+            self.stream = io.BytesIO(body)
+
+        def read(self, size: int = -1) -> bytes:
+            return self.stream.read(size)
+
+    original_limit = hbds_server.MAX_AI_RESPONSE_BYTES
+    hbds_server.MAX_AI_RESPONSE_BYTES = 1024
+    try:
+        exact = hbds_server.read_ai_provider_response(FakeResponse(b"x" * 1024, 1024))
+        assert_ok(len(exact) == 1024, "AI response at the byte limit was rejected")
+        assert_operation_error(
+            lambda: hbds_server.read_ai_provider_response(FakeResponse(b"x" * 1025)),
+            "ai_provider_response_too_large",
+        )
+        assert_operation_error(
+            lambda: hbds_server.read_ai_provider_response(FakeResponse(b"", 1025)),
+            "ai_provider_response_too_large",
+        )
+    finally:
+        hbds_server.MAX_AI_RESPONSE_BYTES = original_limit
+
+
+def assert_remote_bind_guard() -> None:
+    hbds_server = import_hbds_server()
+    for host in ("127.0.0.1", "127.0.0.2", "::1", "localhost"):
+        assert_ok(hbds_server.is_loopback_bind_host(host), f"Loopback host {host} was classified as remote")
+    for host in ("", "0.0.0.0", "::", "192.168.1.20"):
+        assert_ok(not hbds_server.is_loopback_bind_host(host), f"Remote host {host!r} was classified as loopback")
+        assert_ok(
+            hbds_server.connected_bind_requires_remote_acknowledgement(
+                host,
+                static_only=False,
+                allow_remote=False,
+            ),
+            f"Connected remote bind {host!r} did not require acknowledgement",
+        )
+        assert_ok(
+            not hbds_server.connected_bind_requires_remote_acknowledgement(
+                host,
+                static_only=True,
+                allow_remote=False,
+            ),
+            f"Static-only remote bind {host!r} incorrectly required acknowledgement",
+        )
+        assert_ok(
+            not hbds_server.connected_bind_requires_remote_acknowledgement(
+                host,
+                static_only=False,
+                allow_remote=True,
+            ),
+            f"Acknowledged remote bind {host!r} was rejected",
+        )
+
+    rejected = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT_DIR / "server.py"),
+            "--host",
+            "0.0.0.0",
+            "--port",
+            str(get_free_port()),
+            "--quiet",
+        ],
+        cwd=str(ROOT_DIR),
+        capture_output=True,
+        text=True,
+        timeout=5,
+        check=False,
+    )
+    assert_ok(rejected.returncode == 2, "Unacknowledged connected remote bind was not rejected by the CLI")
+    assert_ok("--allow-remote" in rejected.stderr, "Remote bind refusal did not explain the acknowledgement flag")
+
+
+def assert_security_headers(headers: dict[str, str], path: str) -> None:
+    normalized = {name.lower(): value for name, value in headers.items()}
+    assert_ok(normalized.get("x-content-type-options") == "nosniff", f"nosniff missing for {path}")
+    assert_ok(normalized.get("x-frame-options") == "SAMEORIGIN", f"frame protection missing for {path}")
+    assert_ok(normalized.get("referrer-policy") == "no-referrer", f"referrer policy missing for {path}")
+    assert_ok("camera=()" in normalized.get("permissions-policy", ""), f"permissions policy missing for {path}")
+    csp = normalized.get("content-security-policy", "")
+    assert_ok("object-src 'none'" in csp, f"CSP object protection missing for {path}")
+    assert_ok("https://unpkg.com" in csp, f"CSP blocks Three.js for {path}")
+    assert_ok("https://cdn.jsdelivr.net" in csp, f"CSP blocks API documentation assets for {path}")
+
+
+def assert_hardened_static_surface(base_url: str) -> None:
+    allowed_paths = (
+        "/",
+        "/index.html",
+        "/index_models.html",
+        "/test_dynamic_hbds_layout.html",
+        "/css/style.css",
+        "/js/hbds_model.js",
+        "/icons/models.png",
+        "/icons/generated_icons_manifest.json",
+        "/images/class_car.png",
+        "/pictures/HBDS_LAB.png",
+        "/models/models_manifest.json",
+        "/models/human.json",
+        "/schemas/hbds-structural-diagram-profile-v1.schema.json",
+        "/schemas/hbds-semantic-profile-v2.schema.json",
+        "/test_models/test_models_manifest.json",
+        "/test_models/layout_001_single_class_few_attributes.json",
+    )
+    for path in allowed_paths:
+        status, headers, body = request_http(base_url, path)
+        assert_ok(status == 200, f"Allowed static path {path} returned {status}")
+        assert_ok(bool(body), f"Allowed static path {path} returned an empty body")
+        assert_security_headers(headers, path)
+        head_status, head_headers, _ = request_http(base_url, path, method="HEAD", read_body=False)
+        assert_ok(head_status == 200, f"HEAD for allowed static path {path} returned {head_status}")
+        assert_security_headers(head_headers, path)
+
+    icon_status, icon_headers, icon_body = request_http(base_url, "/icons/_missing_smoke_icon.svg")
+    assert_ok(icon_status == 200 and b"<svg" in icon_body, "Missing public SVG icon fallback failed")
+    assert_security_headers(icon_headers, "/icons/_missing_smoke_icon.svg")
+
+    favicon_status, favicon_headers, _ = request_http(base_url, "/favicon.ico")
+    assert_ok(favicon_status == 204, f"Favicon request returned {favicon_status}")
+    assert_security_headers(favicon_headers, "/favicon.ico")
+
+    denied_paths = (
+        "/AI_KEY/",
+        "/AI_KEY/nonexistent.key",
+        "/.git/HEAD",
+        "/.git/config",
+        "/.codex_server_access.log",
+        "/debug_logs/",
+        "/debug_logs/nonexistent.jsonl",
+        "/models/.backups/",
+        "/models/.backups/nonexistent.bak.json",
+        "/test_models/.backups/",
+        "/models/validate_satellite_models.py",
+        "/server.py",
+        "/scripts/smoke_server.py",
+        "/src/",
+        "/target/",
+        "/doc/",
+        "/README.md",
+        "/Roadmap.md",
+        "/LICENSE.txt",
+        "/css/",
+        "/icons/",
+        "/models",
+        "/models/",
+        "/test_models/",
+        "/models/%2ebackups/nonexistent.bak.json",
+        "/models/%2e%2e/server.py",
+        "/js/%2e%2e/server.py",
+        "/js/%5c..%5cserver.py",
+        "/%2e%2e/server.py",
+        "/models/human.json/",
+    )
+    for path in denied_paths:
+        for method in ("GET", "HEAD"):
+            status, headers, body = request_http(base_url, path, method=method, read_body=False)
+            assert_ok(status == 404, f"Sensitive path {method} {path} returned {status}")
+            assert_ok(body == b"", f"Sensitive path {method} {path} body should not be read")
+            assert_security_headers(headers, path)
+
+
+def wait_for_static_server(base_url: str, process: subprocess.Popen) -> None:
+    last_status = None
+    for _ in range(60):
+        if process.poll() is not None:
+            stdout, stderr = process.communicate(timeout=1)
+            raise AssertionError(f"Static server exited early with {process.returncode}\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}")
+        try:
+            status, _, _ = request_http(base_url, "/")
+            last_status = status
+            if status == 200:
+                return
+        except Exception:
+            pass
+        time.sleep(0.1)
+    raise AssertionError(f"Static server did not become ready; last status was {last_status}")
+
+
+def assert_static_only_mode() -> None:
+    watched_paths = (
+        MODELS_DIR / "models_manifest.json",
+        TEST_MODELS_DIR / "test_models_manifest.json",
+        ROOT_DIR / ".codex_server_out.log",
+        ROOT_DIR / ".codex_server_err.log",
+        ROOT_DIR / ".codex_server_access.log",
+    )
+
+    def file_metadata(path: Path) -> tuple[bool, int, int]:
+        if not path.exists():
+            return False, 0, 0
+        stat = path.stat()
+        return True, stat.st_mtime_ns, stat.st_size
+
+    before = {path: file_metadata(path) for path in watched_paths}
+    port = get_free_port()
+    base_url = f"http://127.0.0.1:{port}"
+    process = start_server(port, static_only=True, quiet=False)
+    try:
+        wait_for_static_server(base_url, process)
+        root_status, _, root_body = request_http(base_url, "/")
+        assert_ok(root_status == 200 and bool(root_body), "Static-only mode did not serve the UI")
+        for method in ("GET", "POST", "DELETE", "OPTIONS"):
+            status, _, _ = request_http(base_url, "/api/health", method=method, read_body=False)
+            assert_ok(status == 404, f"Static-only mode allowed {method} /api/health")
+    finally:
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
+    after = {path: file_metadata(path) for path in watched_paths}
+    assert_ok(after == before, "Static-only mode modified a manifest or repository log file")
+
+
 def main() -> int:
     cleanup_smoke_model(refresh_manifests=True)
     assert_manifest_generation_helpers()
     print("PASS manifest generator")
+
+    assert_ai_transport_guards()
+    print("PASS AI transport guards")
+
+    assert_remote_bind_guard()
+    print("PASS remote bind guard")
 
     prepare_manifest_smoke_files()
     port = get_free_port()
@@ -296,6 +592,9 @@ def main() -> int:
     try:
         wait_for_health(base_url, process)
         print("PASS health")
+
+        assert_hardened_static_surface(base_url)
+        print("PASS hardened static surface")
 
         assert_startup_manifest_sync()
         print("PASS manifest startup sync")
@@ -370,6 +669,23 @@ def main() -> int:
             expected=(400,),
         )
         assert_ok(missing_key_connection.get("error", {}).get("code") == "ai_backend_disabled", "AI connection without server config or key should be blocked")
+        unsafe_provider_connection = request_json(
+            base_url,
+            "/api/ai/connection",
+            method="POST",
+            payload={
+                "providerId": "custom-openai",
+                "modelName": "smoke-model",
+                "baseUrl": "file:///tmp/provider.json",
+                "apiKey": "smoke-transient-key",
+            },
+            expected=(400,),
+        )
+        assert_ok(
+            unsafe_provider_connection.get("error", {}).get("code") == "ai_provider_invalid_url",
+            "Unsafe AI provider URL was not rejected",
+        )
+        assert_ok("smoke-transient-key" not in json.dumps(unsafe_provider_connection), "Unsafe URL response leaked a transient key")
         manual_connection = request_json(
             base_url,
             "/api/ai/connection",
@@ -497,6 +813,66 @@ def main() -> int:
             expected=(400,),
         )
         assert_ok(missing_link_target.get("error", {}).get("code") == "invalid_model", "Broken link endpoint was accepted")
+        semantic_payload = minimal_model_payload("semantic object layer")
+        semantic_payload["metadata"]["semanticVersion"] = 1
+        semantic_payload["hypergraph"] = {
+            "class": [
+                {"id": "semantic_entity", "type": "hyperclass", "attributes": []},
+                {"id": "semantic_source", "type": "class", "attributes": [{"id": "semantic_label", "name": "label"}]},
+                {"id": "semantic_target", "type": "class", "attributes": []},
+            ],
+            "link": [
+                {"id": "semantic_relates", "sourceClassId": "semantic_entity", "targetClassId": "semantic_target"}
+            ],
+            "membership": [
+                {"id": "semantic_source_membership", "classId": "semantic_source", "hyperclassId": "semantic_entity"}
+            ],
+            "inheritance": [],
+            "object": [
+                {
+                    "id": "semantic_source_1",
+                    "classId": "semantic_source",
+                    "attributeValues": [{"attributeId": "semantic_label", "value": "Source"}],
+                },
+                {"id": "semantic_target_1", "classId": "semantic_target", "attributeValues": []},
+            ],
+            "objectLink": [
+                {
+                    "id": "semantic_relates_1",
+                    "classLinkId": "semantic_relates",
+                    "sourceObjectId": "semantic_source_1",
+                    "targetObjectId": "semantic_target_1",
+                }
+            ],
+        }
+        semantic_saved = request_json(
+            base_url,
+            f"/api/models/{SMOKE_MODEL_NAME}",
+            method="POST",
+            payload=semantic_payload,
+        )
+        assert_ok(semantic_saved.get("ok") is True, "Semantic model was not saved")
+        semantic_reloaded = request_json(base_url, f"/api/models/{SMOKE_MODEL_NAME}")
+        semantic_hypergraph = semantic_reloaded.get("model", {}).get("hypergraph", {})
+        assert_ok(len(semantic_hypergraph.get("object", [])) == 2, "Semantic objects were not preserved")
+        assert_ok(len(semantic_hypergraph.get("objectLink", [])) == 1, "Semantic object links were not preserved")
+        invalid_semantic_payload = json.loads(json.dumps(semantic_payload))
+        invalid_semantic_payload["hypergraph"]["objectLink"][0]["targetObjectId"] = "missing_object"
+        invalid_semantic = request_json(
+            base_url,
+            f"/api/models/{SMOKE_MODEL_NAME}",
+            method="POST",
+            payload=invalid_semantic_payload,
+            expected=(400,),
+        )
+        assert_ok(invalid_semantic.get("error", {}).get("code") == "invalid_model", "Broken semantic object link was accepted")
+        semantic_deleted = request_json(
+            base_url,
+            f"/api/models/{SMOKE_MODEL_NAME}",
+            method="DELETE",
+            payload={"clientId": "smoke"},
+        )
+        assert_ok(semantic_deleted.get("deleted") == SMOKE_MODEL_NAME, "Semantic smoke model cleanup failed")
         print("PASS validation")
 
         saved_model = json.loads(json.dumps(model_payload))
@@ -813,6 +1189,8 @@ def main() -> int:
 
     assert_disconnected(base_url)
     print("PASS disconnected")
+    assert_static_only_mode()
+    print("PASS static-only mode")
     return 0
 
 

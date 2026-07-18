@@ -47,12 +47,12 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {updateLabelFontSizes} from './js/hbds_class.js?v=label-readability-20260531c';
-    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=label-readability-20260531c';
-    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=label-readability-20260531c';
-    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=label-readability-20260531c';
-    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=label-readability-20260531c';
-    import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260531b';
+    import {updateLabelFontSizes} from './js/hbds_class.js?v=perf-hardening-20260718a';
+    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=perf-hardening-20260718a';
+    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=perf-hardening-20260718a';
+    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=perf-hardening-20260718a';
+    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=semantic-v1-20260718a';
+    import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260718a';
 
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {
         document.body.classList.add('embedded-shell-menu');
@@ -92,6 +92,10 @@
     let canvasLoadProgressTimer = null;
     let canvasLoadProgressInterval = null;
     let canvasLoadProgressToken = 0;
+    let renderFrameId = null;
+    let renderPendingWhileHidden = false;
+    let orbitControlsInteracting = false;
+    let completedRenderCount = 0;
 
     function readStoredDebugMode() {
         if (urlRequestsDebugMode()) return true;
@@ -216,6 +220,10 @@
 
         orbitControls = new OrbitControls(camera, css2DRenderer.domElement);
         orbitControls.enableRotate = false;
+        orbitControls.addEventListener('start', () => {
+            orbitControlsInteracting = true;
+            renderOnce();
+        });
         orbitControls.addEventListener('change', () => {
             updateLabelFontSizes(camera, renderer);
             updateHyperClassLabelFontSizes(camera, renderer);
@@ -224,8 +232,14 @@
             renderOnce();
             updateModelOverview(getModelContext());
         });
+        orbitControls.addEventListener('end', () => {
+            orbitControlsInteracting = false;
+            renderOnce();
+        });
 
         window.addEventListener('resize', onResize);
+        window.addEventListener('blur', handleWindowBlur);
+        document.addEventListener('visibilitychange', handleDocumentVisibilityChange);
         installDebugUserActionTracking();
         installModelDebugHooks();
         syncDebugControls();
@@ -401,7 +415,8 @@
             try {
                 const models = await listAvailableModels({
                     manifestPath: 'models/models_manifest.json',
-                    modelsPath: 'models/'
+                    modelsPath: 'models/',
+                    discover: false
                 });
                 if (!models.length) {
                     setLoadStatus('Load status: no models found', 'warn');
@@ -975,9 +990,53 @@
     }
 
 
-    function renderOnce() {
+    function renderSceneNow() {
+        if (!renderer || !css2DRenderer || !scene || !camera) return;
         renderer.render(scene, camera);
         css2DRenderer.render(scene, camera);
+        completedRenderCount += 1;
+    }
+
+    function runRenderFrame() {
+        renderFrameId = null;
+        if (document.hidden) {
+            renderPendingWhileHidden = true;
+            return;
+        }
+
+        renderPendingWhileHidden = false;
+        const controlsChanged = Boolean(orbitControls?.enabled && orbitControls.update());
+        renderSceneNow();
+
+        if (orbitControls?.enabled && (orbitControlsInteracting || controlsChanged || orbitControls.autoRotate)) {
+            renderOnce();
+        }
+    }
+
+    function renderOnce() {
+        renderPendingWhileHidden = true;
+        if (document.hidden || renderFrameId !== null) return;
+        renderFrameId = requestAnimationFrame(runRenderFrame);
+    }
+
+    function handleDocumentVisibilityChange() {
+        if (document.hidden) {
+            orbitControlsInteracting = false;
+            if (renderFrameId !== null) {
+                cancelAnimationFrame(renderFrameId);
+                renderFrameId = null;
+            }
+            renderPendingWhileHidden = true;
+            return;
+        }
+
+        if (renderPendingWhileHidden || (orbitControls?.enabled && (orbitControlsInteracting || orbitControls.autoRotate))) {
+            renderOnce();
+        }
+    }
+
+    function handleWindowBlur() {
+        orbitControlsInteracting = false;
     }
 
     function getModelContext() {
@@ -1035,7 +1094,13 @@
                 layout: getLayoutSettings()
             }),
             getLabelMetrics: collectModelLabelMetrics,
-            getFitQuality: () => getFitQualityMetrics(getModelContext())
+            getFitQuality: () => getFitQualityMetrics(getModelContext()),
+            getRenderState: () => ({
+                completedRenderCount,
+                frameScheduled: renderFrameId !== null,
+                pendingWhileHidden: renderPendingWhileHidden,
+                controlsInteracting: orbitControlsInteracting
+            })
         };
     }
 
@@ -1348,6 +1413,7 @@
                 ev.object.position.z = ev.object.userData.dragStartZ;
             }
             recalculateAllLinks();
+            renderOnce();
             updateModelOverview(getModelContext());
         });
 
@@ -1413,16 +1479,8 @@
         orbitControls.update();
     }
 
-    function animate() {
-        requestAnimationFrame(animate);
-
-        if (orbitControls.enabled) orbitControls.update();
-        renderOnce();
-    }
-
     /* ---------- START ---------- */
     init().catch(error => console.error(error));
-    animate();
 </script>
 </body>
 </html>

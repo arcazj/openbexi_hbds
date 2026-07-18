@@ -41,5 +41,9 @@ build/
 /debug_logs/
 __pycache__/
 /.codex_server_*.log
+/.codex_previews/
+/.tmp-collab-browser-profile-*/
 /.tools/
 /AI_KEY/
+/models/.backups/
+/test_models/.backups/

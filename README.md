@@ -16,6 +16,8 @@ This README is the main entry point for setup, features, server mode, API endpoi
 
 * [Test_and_Integration.md](Test_and_Integration.md) - authoritative validation and integration checklist, including smoke tests, model validators, AI helper tests, JavaScript syntax checks, Maven tests through the repo-local wrapper, browser regressions, manual workflows, and expected pass/fail reporting.
 * [Prompt4HDBS_graphi_ simulator.md](Prompt4HDBS_graphi_%20simulator.md) - reverse-engineering and phased implementation prompt for covering the full HBDS Graphic Simulator capability set.
+* [HBDS source and documentation catalog](doc/README.md) - historical PDF inventory, provenance and license status, duplicate/missing chapter notes, glossary, tutorial, support matrix, and profile documentation.
+* [HBDS Structural Diagram Profile v1](doc/HBDS_STRUCTURAL_DIAGRAM_PROFILE_V1.md) - normative current diagram contract, with [v1 and additive v2 JSON Schemas](schemas/README.md) and validated examples.
 
 Generated preview caches may contain third-party Markdown under hidden directories such as `.codex_previews/`; those files are not project documentation.
 
@@ -44,6 +46,9 @@ This week the project added a larger local-server workflow and collaboration sur
 * **Modeling productivity tools**: selected nodes can be duplicated, copied, pasted, exported as a subgraph, and edited with bulk attribute and link route helpers.
 * **Detailed remote changes**: `Remote changes vs mine` reports class/hyperclass movement, attributes, links, rendering properties, route changes, and per-change timestamps.
 * **Per-change timestamp history**: older remote changes keep their first-seen time when later remote updates arrive.
+* **Opt-in semantic layer**: `metadata.semanticVersion: 1` adds objects, object links, explicit multi-hyperclass membership, multiple inheritance, inherited attributes, and effective class-link roles without changing v1 visual containment.
+* **Functor workbench**: semantic models expose direct, inverse, and homogeneous object-link queries in the editor; the runtime API also supports bounded composed queries with deterministic paths.
+* **Optional semantic profiles**: units, temporal, geospatial, fuzzy, and prototype annotations have separate opt-in validators and focused conformance suites.
 * **Models view cleanup**: Models mode is read-focused and keeps model selection, 3-D view, fit, zoom, and overview behavior without edit/save controls.
 * **Editing cleanup**: attribute deletion has a dedicated button, and selected link deletion now uses explicit link text.
 * **Tool wrappers**: repo-local `mvn.cmd`, `mvn.ps1`, `rg.cmd`, and `rg.ps1` wrappers are available when global Maven or ripgrep is not installed.
@@ -65,6 +70,8 @@ This week the project added a larger local-server workflow and collaboration sur
 * **Model deletion**: delete the selected saved model from Edit or Tests, with a backup retained under `.backups/`.
 * **Live collaboration UI**: see other connected users, inspect their live draft, review remote differences, and choose how to resolve save conflicts.
 * **Local model API**: load, save, draft, stream, and merge model changes through the Python backend.
+* **Semantic object model**: create and validate object instances, object links, semantic memberships, and inheritance while keeping `parentClassId` visual-only.
+* **Semantic queries and profiles**: traverse object links with direct, inverse, homogeneous, or composed functors and validate optional domain annotations.
 * **Dynamic layout test page**: use `test_dynamic_hbds_layout.html` to add, delete, link, test, and export model elements during development.
 
 ## Built With
@@ -82,14 +89,15 @@ The simulator must be served from a local web server. Opening `index.html` direc
 Use a modern browser and one of the following local server options:
 
 * Python 3
-* Any static file server that serves this repository root
+* Node.js for the JavaScript helper and syntax checks
+* Edge or Chrome for the browser regression suite
 
 ### Run Static Mode
 
 ```sh
 git clone https://github.com/arcazj/openbexi_hbds.git
 cd openbexi_hbds
-python -m http.server 8000
+python server.py --static-only --port 8000
 ```
 
 Then open:
@@ -97,13 +105,15 @@ Then open:
 * Main shell: `http://localhost:8000/`
 * Dynamic layout test page: `http://localhost:8000/test_dynamic_hbds_layout.html`
 
-On systems where `python` points to Python 2, use:
+On Windows, or on systems where `python` is not the Python 3 command, use:
 
 ```sh
-python3 -m http.server 8000
+py server.py --static-only --port 8000
 ```
 
-Static mode can view and edit in the browser, but server save/load, API docs, connection status, and collaboration require `server.py`.
+Static-only mode serves only the public HTML, JavaScript, CSS, image, icon, and model assets. API routes, model writes, AI calls, debug ingestion, and collaboration are disabled. Private repository paths, dotfiles, logs, backups, source files, and directory listings return `404`.
+
+Do not use `python -m http.server` from the repository root. It has no public-file boundary and can expose local files that are not part of the application.
 
 ### Run Connected Server Mode
 
@@ -126,6 +136,14 @@ http://127.0.0.1:8010/index.html
 ```
 
 When overwriting an existing model, the server writes a timestamped backup under the matching `.backups/` directory before replacing the file.
+
+### Security Boundary
+
+Connected mode is intended for a trusted local workstation and binds to `127.0.0.1` by default. It does not currently provide user authentication or authorization. Non-loopback connected binds are refused unless `--allow-remote` is supplied; that flag acknowledges the risk but does not add authentication. Do not expose connected mode through a shared network or reverse proxy without adding those controls.
+
+The server restricts its static surface to public application assets and adds browser security headers. AI provider responses are size-limited, redirects are revalidated, unsafe URL schemes and credential-bearing URLs are rejected, public providers require HTTPS, and loopback HTTP is reserved for local providers such as Ollama. Private-network AI endpoints require explicit server opt-in with `HBDS_AI_ALLOW_PRIVATE_URLS=1` and must use HTTPS.
+
+Relevant AI transport limits are `HBDS_AI_REQUEST_MAX_BYTES` (default 512 KiB), `HBDS_AI_RESPONSE_MAX_BYTES` (default 8 MiB), `HBDS_AI_ERROR_MAX_BYTES` (default 64 KiB), and `HBDS_AI_TIMEOUT_SECONDS` (default 60 seconds).
 
 ## Workspaces
 
@@ -243,11 +261,14 @@ py scripts/smoke_server.py
 
 The smoke test starts a temporary server port and verifies:
 
+* the public static allowlist, security headers, traversal denial, and private-file denial
+* read-only static mode with every API route disabled
 * health and disconnected states
 * OpenAPI generation
 * link rendering schema for arrow type, arrow direction, line style, line color, arrow color, and label font size
 * model font settings with overall, per-type, element-level, and reset-all inheritance behavior
 * AI provider metadata, prompt preparation, AI apply, AI rollback, and AI-created model deletion
+* AI destination, redirect, timeout, request-size, response-size, and error-size guards
 * automatic manifest generation
 * model list/load/save
 * revision conflict handling
@@ -289,11 +310,13 @@ Get-Content -Raw js/hbds_ai_support.js | node --input-type=module --check
 Get-Content -Raw js/hbds_model_productivity.js | node --input-type=module --check
 ```
 
-Run the browser collaboration and AI UI regression:
+Run the full real-browser regression:
 
 ```sh
 python scripts/collaboration_browser_regression.py
 ```
+
+This covers demand-driven rendering and idle settlement, delayed image textures and GPU cleanup, desktop/mobile canvas sizing, all test-model scenarios, label/font zoom policies, shell navigation, AI workflows, and live collaboration.
 
 Run Java tests through the repo-local Maven wrapper:
 

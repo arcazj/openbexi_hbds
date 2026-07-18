@@ -1,6 +1,11 @@
 {
   "models": [
     {
+      "value": "models/_collab_browser_13880.json",
+      "label": "collab browser 13880",
+      "description": "collab browser 13880"
+    },
+    {
       "value": "models/AI_Models_World.json",
       "label": "AI Models World",
       "description": "AI Models World"
@@ -19,6 +24,11 @@
       "value": "models/complex_hyperclass_mail_Carrier_with_links.json",
       "label": "complex hyperclass mail Carrier with links",
       "description": "complex hyperclass mail Carrier with links"
+    },
+    {
+      "value": "models/hbds_semantic_object_layer_example.json",
+      "label": "hbds semantic object layer example",
+      "description": "hbds semantic object layer example"
     },
     {
       "value": "models/human.json",
@@ -64,6 +74,11 @@
       "value": "models/satellite_world_simple_structure.json",
       "label": "satellite world simple structure",
       "description": "satellite world simple structure"
+    },
+    {
+      "value": "models/satellite_world_simple_structure_v2.json",
+      "label": "satellite world simple structure v2",
+      "description": "satellite world simple structure v2"
     },
     {
       "value": "models/transportation_links.json",
