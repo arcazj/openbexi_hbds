@@ -3,8 +3,8 @@
   "metadata": {
     "id": "satellite_world_simple_structure",
     "name": "Satellite World Simple Structure",
-    "version": "2026.09.26-space-data",
-    "description": "Compact structure of the local space catalog, orbital data, lifecycle records, spacecraft profiles and display assets.",
+    "version": "2026.09.26-decay-and-metadata-audit",
+    "description": "Source-audited space catalog structure with explicit recorded decay, independent lifecycle and observation status, orbital elements, snapshot coverage, refresh health and unverified spacecraft profiles.",
     "purpose": "Model the observed fields and relationships in data/space/json with explicit source mappings.",
     "regressionTags": [
       "model",
@@ -13,7 +13,10 @@
       "hyperclass",
       "lifecycle",
       "omm",
-      "tle"
+      "tle",
+      "decay-record",
+      "metadata-audit",
+      "source-conflicts"
     ],
     "preserveLayout": true,
     "layout": {
@@ -90,7 +93,8 @@
       },
       "refresh": {
         "path": "**/*.meta.json",
-        "records": "root metadata objects"
+        "records": "root metadata objects",
+        "count": 6
       }
     },
     "sourceNotes": [
@@ -99,7 +103,13 @@
       "Hyperclasses group the diagram visually, without asserting v2 inheritance or membership.",
       "GP metadata reports a failed refresh and degraded source status; diagram generation does not establish freshness.",
       "Profile samples can contain placeholders; display association requires a curated mapping.",
-      "Tracking lifecycle, observation, and element availability are independent statuses."
+      "Tracking lifecycle, observation, and element availability are independent statuses.",
+      "The decayed feed covers 7,636 payload records, while tracked history has 35,570 decayed objects across several object types.",
+      "Decay feed counts.objects=7,478 counts name buckets; 43 buckets contain multiple distinct NORAD identities.",
+      "Fifty launch-date sidecar values disagree with the tracked catalog; original values are preserved.",
+      "OneWeb profile NORAD 44072 resolves to PRISMA; OneWeb and Starlink V1 profile launch dates disagree with catalog dates. Profile joins remain unverified.",
+      "TLE is a deprecated compatibility dataset. Configured debris GP groups have not been verified; tracked metadata uses active GP scope.",
+      "Source data audit and deliberate simplifications are documented in doc/SATELLITE_MODEL_SOURCES.md and doc/SPACE_DATA_AUDIT.json."
     ]
   },
   "hypergraph": {
@@ -112,6 +122,7 @@
         "children": [
           "satellite_world_simple_structure_space_object",
           "satellite_world_simple_structure_lifecycle",
+          "satellite_world_simple_structure_decay",
           "satellite_world_simple_structure_tracking"
         ],
         "position": {
@@ -121,7 +132,7 @@
         },
         "size": {
           "width": 6.1,
-          "height": 8.6
+          "height": 11.2
         },
         "rendering": {
           "class": {
@@ -137,13 +148,14 @@
       },
       {
         "id": "satellite_world_simple_structure_hc_orbits",
-        "name": "Orbit / Data Sources",
+        "name": "Orbit / Provenance",
         "type": "hyperclass",
         "attributes": [],
         "children": [
           "satellite_world_simple_structure_elements",
           "satellite_world_simple_structure_orbit_summary",
-          "satellite_world_simple_structure_snapshot"
+          "satellite_world_simple_structure_snapshot",
+          "satellite_world_simple_structure_refresh"
         ],
         "position": {
           "x": 0.0,
@@ -152,7 +164,7 @@
         },
         "size": {
           "width": 6.1,
-          "height": 8.6
+          "height": 11.2
         },
         "rendering": {
           "class": {
@@ -183,7 +195,7 @@
         },
         "size": {
           "width": 6.1,
-          "height": 8.6
+          "height": 11.2
         },
         "rendering": {
           "class": {
@@ -205,14 +217,17 @@
         "attributes": [
           {
             "id": "satellite_world_simple_structure_space_object_norad",
-            "name": "NORAD catalog ID",
-            "type": "string",
-            "description": "Normalize catalog IDs as strings; preserve extended identifiers.",
+            "name": "NORAD / Alpha-5 IDs",
+            "type": "object",
+            "description": "Use normalized positive decimal NORAD IDs as join keys; retain the optional Alpha-5 representation as an alias, not a second object identity.",
             "sourceFields": [
               "tracked:norad_id",
               "satcat:NORAD_CAT_ID",
               "gp:norad_id",
-              "tle:norad_id"
+              "tle:norad_id",
+              "tracked:provider_catalog_id",
+              "launches:norad_id",
+              "tracked:alpha5_id"
             ]
           },
           {
@@ -222,7 +237,8 @@
             "description": "Internal obx:norad identifier; distinct from SATCAT OBJECT_ID.",
             "sourceFields": [
               "tracked:object_id",
-              "gp:object_id"
+              "gp:object_id",
+              "launches:object_id"
             ]
           },
           {
@@ -232,7 +248,9 @@
             "description": "tracked:international_designator; satcat:OBJECT_ID",
             "sourceFields": [
               "tracked:international_designator",
-              "satcat:OBJECT_ID"
+              "satcat:OBJECT_ID",
+              "gp:international_designator",
+              "launches:international_designator"
             ]
           },
           {
@@ -242,7 +260,14 @@
             "description": "tracked:name; satcat:OBJECT_NAME",
             "sourceFields": [
               "tracked:name",
-              "satcat:OBJECT_NAME"
+              "satcat:OBJECT_NAME",
+              "tracked:satellite_name",
+              "gp:name",
+              "gp:satellite_name",
+              "tle:satellite_name",
+              "launches:name",
+              "launches:satellite_name",
+              "launch_dates:name"
             ]
           },
           {
@@ -252,7 +277,9 @@
             "description": "Tracked taxonomy: PAYLOAD, DEBRIS, ROCKET_BODY, MISSION_RELATED, UNKNOWN; not all objects are satellites.",
             "sourceFields": [
               "tracked:object_type",
-              "satcat:OBJECT_TYPE"
+              "satcat:OBJECT_TYPE",
+              "gp:object_type",
+              "launches:object_type"
             ]
           },
           {
@@ -262,7 +289,8 @@
             "description": "tracked:owner_code; satcat:OWNER",
             "sourceFields": [
               "tracked:owner_code",
-              "satcat:OWNER"
+              "satcat:OWNER",
+              "tracked:owner"
             ]
           },
           {
@@ -272,13 +300,25 @@
             "description": "Nullable radar cross-section in square metres, not physical object size.",
             "sourceFields": [
               "tracked:rcs_m2",
-              "satcat:RCS"
+              "satcat:RCS",
+              "tracked:rcs_status"
             ]
+          },
+          {
+            "id": "satellite_world_simple_structure_space_object_feed_tags",
+            "name": "Feed / group tag",
+            "type": "string",
+            "sourceFields": [
+              "tracked:company",
+              "gp:company",
+              "tle:company"
+            ],
+            "description": "company can be ACTIVE: this is a source tag, not a verified operator company."
           }
         ],
         "position": {
           "x": -8.15,
-          "y": 2.6,
+          "y": 3.9,
           "z": 0
         },
         "size": {
@@ -299,7 +339,7 @@
       },
       {
         "id": "satellite_world_simple_structure_lifecycle",
-        "name": "Launch / Lifecycle",
+        "name": "Launch Record",
         "type": "class",
         "parentClassId": "satellite_world_simple_structure_hc_catalog",
         "attributes": [
@@ -311,19 +351,22 @@
             "sourceFields": [
               "launches:norad_id",
               "launch_dates:norad_id",
-              "decayed:NORAD_CAT_ID"
+              "tracked:norad_id",
+              "satcat:NORAD_CAT_ID"
             ]
           },
           {
             "id": "satellite_world_simple_structure_lifecycle_launch",
             "name": "Launch date",
             "type": "string",
-            "description": "tracked:launch_date; launches:launch_date; launch_dates:launch_date; decayed:LAUNCH_DATE",
+            "description": "Retain source-specific dates: 50 launch-date sidecar values disagree with tracked/SATCAT dates. Never merge by precedence without provenance.",
             "sourceFields": [
               "tracked:launch_date",
               "launches:launch_date",
               "launch_dates:launch_date",
-              "decayed:LAUNCH_DATE"
+              "satcat:LAUNCH_DATE",
+              "gp:launch_date",
+              "tle:launch_date"
             ]
           },
           {
@@ -334,44 +377,43 @@
             "sourceFields": [
               "tracked:launch_site",
               "launches:launch_site",
-              "decayed:LAUNCH_SITE"
+              "satcat:LAUNCH_SITE",
+              "gp:launch_site"
             ]
           },
           {
-            "id": "satellite_world_simple_structure_lifecycle_decay",
-            "name": "Decay date",
+            "id": "satellite_world_simple_structure_lifecycle_designator",
+            "name": "Intl designator",
             "type": "string",
-            "description": "Nullable date; a missing date does not establish an active operational status.",
             "sourceFields": [
-              "tracked:decay_date",
-              "launches:decay_date",
-              "decayed:DECAY_DATE"
-            ]
+              "launches:international_designator",
+              "satcat:OBJECT_ID"
+            ],
+            "description": "launches:international_designator; satcat:OBJECT_ID"
           },
           {
-            "id": "satellite_world_simple_structure_lifecycle_lifecycle",
-            "name": "Lifecycle status",
+            "id": "satellite_world_simple_structure_lifecycle_source",
+            "name": "Record source",
             "type": "string",
-            "description": "tracked:lifecycle_status; launches:lifecycle_status",
             "sourceFields": [
-              "tracked:lifecycle_status",
-              "launches:lifecycle_status"
-            ]
+              "launches:source"
+            ],
+            "description": "launches:source"
           },
           {
-            "id": "satellite_world_simple_structure_lifecycle_operational",
-            "name": "Operational status",
-            "type": "string",
-            "description": "tracked:operational_status; launches:operational_status",
+            "id": "satellite_world_simple_structure_lifecycle_details",
+            "name": "Details / orbit flag",
+            "type": "object",
             "sourceFields": [
-              "tracked:operational_status",
-              "launches:operational_status"
-            ]
+              "launches:details_only",
+              "launches:orbit_available"
+            ],
+            "description": "A launch record may have details only; its existence does not prove that orbital elements are available."
           }
         ],
         "position": {
           "x": -8.15,
-          "y": 0.0,
+          "y": 1.2999999999999998,
           "z": 0
         },
         "size": {
@@ -416,11 +458,13 @@
           },
           {
             "id": "satellite_world_simple_structure_tracking_available",
-            "name": "Current elements",
-            "type": "boolean",
+            "name": "Elements / reference",
+            "type": "object",
             "description": "tracked:has_current_elements",
             "sourceFields": [
-              "tracked:has_current_elements"
+              "tracked:has_current_elements",
+              "tracked:element_reference",
+              "tracked:orbit_available"
             ]
           },
           {
@@ -458,11 +502,37 @@
             "sourceFields": [
               "tracked:unavailable_reason"
             ]
+          },
+          {
+            "id": "satellite_world_simple_structure_tracking_lifecycle",
+            "name": "Lifecycle status",
+            "type": "string",
+            "sourceFields": [
+              "tracked:lifecycle_status",
+              "launches:lifecycle_status",
+              "gp:lifecycle_status"
+            ],
+            "description": "tracked:lifecycle_status; launches:lifecycle_status; gp:lifecycle_status"
+          },
+          {
+            "id": "satellite_world_simple_structure_tracking_operational",
+            "name": "Operational / data status",
+            "type": "object",
+            "sourceFields": [
+              "tracked:operational_status",
+              "tracked:ops_status_code",
+              "tracked:data_status_code",
+              "satcat:OPS_STATUS_CODE",
+              "satcat:DATA_STATUS_CODE",
+              "gp:operational_status",
+              "launches:operational_status"
+            ],
+            "description": "tracked:operational_status; tracked:ops_status_code; tracked:data_status_code; satcat:OPS_STATUS_CODE; satcat:DATA_STATUS_CODE; gp:operational_status; launches:operational_status"
           }
         ],
         "position": {
           "x": -8.15,
-          "y": -2.6,
+          "y": -3.900000000000001,
           "z": 0
         },
         "size": {
@@ -504,7 +574,8 @@
             "description": "gp:source_format; gp:element_set.format",
             "sourceFields": [
               "gp:source_format",
-              "gp:element_set.format"
+              "gp:element_set.format",
+              "gp:element_set.source"
             ]
           },
           {
@@ -560,7 +631,8 @@
             "description": "GP snapshot has null TLE lines; OMM and TLE are alternative source representations.",
             "sourceFields": [
               "tle:tle_line1",
-              "gp:tle_line1"
+              "gp:tle_line1",
+              "gp:element_set.line1"
             ]
           },
           {
@@ -570,13 +642,14 @@
             "description": "tle:tle_line2; gp:tle_line2",
             "sourceFields": [
               "tle:tle_line2",
-              "gp:tle_line2"
+              "gp:tle_line2",
+              "gp:element_set.line2"
             ]
           }
         ],
         "position": {
           "x": -1.55,
-          "y": 2.6,
+          "y": 3.9,
           "z": 0
         },
         "size": {
@@ -609,7 +682,10 @@
             "sourceFields": [
               "tracked:orbit_class",
               "gp:orbit_class",
-              "tle:orbit_class"
+              "tle:orbit_class",
+              "tracked:type",
+              "gp:type",
+              "tle:type"
             ]
           },
           {
@@ -629,7 +705,8 @@
             "sourceFields": [
               "tracked:satcat_orbit_summary.inclination_deg",
               "gp:inclination_deg",
-              "tle:inclination_deg"
+              "tle:inclination_deg",
+              "satcat:INCLINATION"
             ]
           },
           {
@@ -660,7 +737,8 @@
             "sourceFields": [
               "tracked:satcat_orbit_summary.period_min",
               "gp:period_min",
-              "tle:period_min"
+              "tle:period_min",
+              "satcat:PERIOD"
             ]
           },
           {
@@ -671,7 +749,8 @@
             "sourceFields": [
               "tracked:satcat_orbit_summary.perigee_km",
               "gp:perigee_km",
-              "tle:perigee_km"
+              "tle:perigee_km",
+              "satcat:PERIGEE"
             ]
           },
           {
@@ -682,13 +761,30 @@
             "sourceFields": [
               "tracked:satcat_orbit_summary.apogee_km",
               "gp:apogee_km",
-              "tle:apogee_km"
+              "tle:apogee_km",
+              "satcat:APOGEE"
             ]
+          },
+          {
+            "id": "satellite_world_simple_structure_orbit_summary_geometry",
+            "name": "Axis / altitude / frame",
+            "type": "object",
+            "sourceFields": [
+              "gp:semi_major_axis_km",
+              "tle:semi_major_axis_km",
+              "gp:estimated_altitude_km",
+              "tle:estimated_altitude_km",
+              "tracked:orbit_center",
+              "tracked:orbit_type",
+              "satcat:ORBIT_CENTER",
+              "satcat:ORBIT_TYPE"
+            ],
+            "description": "Distances explicitly suffixed _km use kilometres. The source orbit center/type codes remain separate from the derived orbit class."
           }
         ],
         "position": {
           "x": -1.55,
-          "y": 0.0,
+          "y": 1.2999999999999998,
           "z": 0
         },
         "size": {
@@ -714,87 +810,115 @@
         "parentClassId": "satellite_world_simple_structure_hc_orbits",
         "attributes": [
           {
-            "id": "satellite_world_simple_structure_snapshot_revision",
-            "name": "Catalog revision",
-            "type": "string",
-            "description": "tracked:@manifest.catalog_revision; refresh:catalog_revision",
-            "sourceFields": [
-              "tracked:@manifest.catalog_revision",
-              "refresh:catalog_revision"
-            ]
-          },
-          {
-            "id": "satellite_world_simple_structure_snapshot_schema",
-            "name": "Schema version",
-            "type": "string",
-            "description": "tracked:@manifest.schema_version; refresh:schema_version",
+            "id": "satellite_world_simple_structure_snapshot_revisions",
+            "name": "Schema / revisions",
+            "type": "object",
             "sourceFields": [
               "tracked:@manifest.schema_version",
-              "refresh:schema_version"
-            ]
+              "tracked:@manifest.catalog_revision",
+              "tracked:@manifest.coverage_revision",
+              "refresh:schema_version",
+              "refresh:catalog_revision",
+              "refresh:coverage_revision",
+              "refresh:dataset_hash",
+              "refresh:input_revision",
+              "tracked:@chunk.schema_version"
+            ],
+            "description": "Reported dataset/composite revisions are not automatically byte checksums of exported files."
           },
           {
-            "id": "satellite_world_simple_structure_snapshot_generated",
-            "name": "Generated / fetched at",
-            "type": "string",
-            "description": "tracked:@manifest.generated_at; refresh:fetched_at",
-            "sourceFields": [
-              "tracked:@manifest.generated_at",
-              "refresh:fetched_at"
-            ]
-          },
-          {
-            "id": "satellite_world_simple_structure_snapshot_status",
-            "name": "Last refresh status",
-            "type": "string",
-            "description": "refresh:last_status",
-            "sourceFields": [
-              "refresh:last_status"
-            ]
-          },
-          {
-            "id": "satellite_world_simple_structure_snapshot_provider",
-            "name": "Provider / sources",
+            "id": "satellite_world_simple_structure_snapshot_provenance",
+            "name": "Source lineage",
             "type": "object",
-            "description": "tracked:@manifest.provenance; refresh:source_urls",
             "sourceFields": [
               "tracked:@manifest.provenance",
-              "refresh:source_urls"
-            ]
+              "tracked:source",
+              "refresh:provider",
+              "refresh:source",
+              "refresh:source_url",
+              "refresh:source_urls",
+              "refresh:source_satcat_revision",
+              "refresh:source_gp_revision",
+              "refresh:source_gp_groups",
+              "refresh:last_reconciled_catalog_revision"
+            ],
+            "description": "tracked:@manifest.provenance; tracked:source; refresh:provider; refresh:source; refresh:source_url; refresh:source_urls; refresh:source_satcat_revision; refresh:source_gp_revision; refresh:source_gp_groups; refresh:last_reconciled_catalog_revision"
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_scope",
+            "name": "Current / history scope",
+            "type": "object",
+            "sourceFields": [
+              "tracked:@manifest.catalog_kind",
+              "tracked:@manifest.default_membership",
+              "tracked:@manifest.scope",
+              "tracked:@chunk.scope",
+              "tracked:@chunk.object_type"
+            ],
+            "description": "CURRENT/HISTORICAL are chunk scopes. Historical here contains decayed records, not a time-series event log; both scopes have catalog_membership_status PRESENT."
           },
           {
             "id": "satellite_world_simple_structure_snapshot_coverage",
-            "name": "Coverage counts",
+            "name": "Coverage / invariants",
             "type": "object",
-            "description": "tracked:@manifest.counts; tracked:@manifest.coverage",
             "sourceFields": [
               "tracked:@manifest.counts",
-              "tracked:@manifest.coverage"
-            ]
+              "tracked:@manifest.coverage",
+              "tracked:@manifest.invariants",
+              "refresh:coverage"
+            ],
+            "description": "tracked:@manifest.counts; tracked:@manifest.coverage; tracked:@manifest.invariants; refresh:coverage"
           },
           {
             "id": "satellite_world_simple_structure_snapshot_chunks",
-            "name": "Current / history chunks",
-            "type": "array",
-            "description": "tracked:@manifest.chunks; tracked:@manifest.history_chunks",
+            "name": "Chunks / quarantine",
+            "type": "object",
             "sourceFields": [
               "tracked:@manifest.chunks",
-              "tracked:@manifest.history_chunks"
-            ]
+              "tracked:@manifest.history_chunks",
+              "tracked:@manifest.quarantine",
+              "refresh:quarantine",
+              "refresh:quarantine_truncated"
+            ],
+            "description": "The supplied quarantine has zero rows; no rejected-record schema is invented."
           },
           {
-            "id": "satellite_world_simple_structure_snapshot_quarantine",
-            "name": "Quarantine manifest",
+            "id": "satellite_world_simple_structure_snapshot_boundary",
+            "name": "Provider scope limits",
             "type": "object",
-            "description": "tracked:@manifest.quarantine",
             "sourceFields": [
-              "tracked:@manifest.quarantine"
-            ]
+              "tracked:@manifest.provider_completeness_claim",
+              "tracked:@manifest.scientific_boundary",
+              "refresh:provider_completeness_claim"
+            ],
+            "description": "tracked:@manifest.provider_completeness_claim; tracked:@manifest.scientific_boundary; refresh:provider_completeness_claim"
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_taxonomy",
+            "name": "Taxonomy / identity rules",
+            "type": "object",
+            "sourceFields": [
+              "tracked:@manifest.taxonomy"
+            ],
+            "description": "tracked:@manifest.taxonomy"
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_times",
+            "name": "Build / newest dates",
+            "type": "object",
+            "sourceFields": [
+              "tracked:@manifest.generated_at",
+              "refresh:built_at",
+              "refresh:newest_confirmed_decay_date",
+              "refresh:newest_launch_date",
+              "refresh:newest_orbital_epoch"
+            ],
+            "description": "tracked:@manifest.generated_at; refresh:built_at; refresh:newest_confirmed_decay_date; refresh:newest_launch_date; refresh:newest_orbital_epoch"
           }
         ],
         "position": {
           "x": -1.55,
-          "y": -2.6,
+          "y": -1.3000000000000003,
           "z": 0
         },
         "size": {
@@ -825,14 +949,20 @@
             "type": "string",
             "description": "profiles:name",
             "sourceFields": [
-              "profiles:name"
+              "profiles:name",
+              "profiles:meta.type",
+              "profiles:meta.description",
+              "profiles:meta.smuid",
+              "profiles:meta.scid",
+              "profiles:meta.sduid",
+              "profiles:meta.modDate"
             ]
           },
           {
             "id": "satellite_world_simple_structure_profile_identity",
             "name": "Catalog ID / designator",
             "type": "object",
-            "description": "Some profiles use 0 or placeholders; join to a catalog object only after verifying a real identifier.",
+            "description": "Unverified references: the OneWeb profile ID 44072 resolves to PRISMA, and OneWeb / Starlink V1 launch dates conflict with catalog dates. Matching a numeric ID alone is insufficient.",
             "sourceFields": [
               "profiles:meta.norad_id",
               "profiles:meta.cospar_id"
@@ -864,7 +994,8 @@
             "type": "string",
             "description": "profiles:meta.launch_vehicle",
             "sourceFields": [
-              "profiles:meta.launch_vehicle"
+              "profiles:meta.launch_vehicle",
+              "profiles:meta.launch_date"
             ]
           },
           {
@@ -899,11 +1030,21 @@
             "sourceFields": [
               "profiles:footprints"
             ]
+          },
+          {
+            "id": "satellite_world_simple_structure_profile_lifetime",
+            "name": "Lifetime / inclination",
+            "type": "object",
+            "sourceFields": [
+              "profiles:meta.expected_lifetime_yrs",
+              "profiles:meta.inclined_orbit_operation"
+            ],
+            "description": "Profile parameters are example/representative declarations, not verified catalog facts."
           }
         ],
         "position": {
           "x": 5.05,
-          "y": 2.6,
+          "y": 3.9,
           "z": 0
         },
         "size": {
@@ -967,7 +1108,7 @@
         ],
         "position": {
           "x": 5.05,
-          "y": 0.0,
+          "y": 1.2999999999999998,
           "z": 0
         },
         "size": {
@@ -1007,7 +1148,8 @@
             "type": "string",
             "description": "display:displayName",
             "sourceFields": [
-              "display:displayName"
+              "display:displayName",
+              "display:description"
             ]
           },
           {
@@ -1016,7 +1158,8 @@
             "type": "string",
             "description": "display:type",
             "sourceFields": [
-              "display:type"
+              "display:type",
+              "display:@document.schemaVersion"
             ]
           },
           {
@@ -1025,7 +1168,8 @@
             "type": "object",
             "description": "display:files",
             "sourceFields": [
-              "display:files"
+              "display:files",
+              "display:@document.basePath"
             ]
           },
           {
@@ -1049,7 +1193,7 @@
         ],
         "position": {
           "x": 5.05,
-          "y": -2.6,
+          "y": -1.3000000000000003,
           "z": 0
         },
         "size": {
@@ -1067,6 +1211,238 @@
           },
           "textColor": "#172033"
         }
+      },
+      {
+        "id": "satellite_world_simple_structure_decay",
+        "name": "Decay Record",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_catalog",
+        "attributes": [
+          {
+            "id": "satellite_world_simple_structure_decay_norad",
+            "name": "NORAD catalog ID",
+            "type": "string",
+            "sourceFields": [
+              "decayed:NORAD_CAT_ID",
+              "tracked:norad_id",
+              "satcat:NORAD_CAT_ID"
+            ],
+            "description": "Join by positive decimal NORAD ID, never by the object-name bucket."
+          },
+          {
+            "id": "satellite_world_simple_structure_decay_name",
+            "name": "Recorded object name",
+            "type": "string",
+            "sourceFields": [
+              "decayed:OBJECT_NAME"
+            ],
+            "description": "decayed:OBJECT_NAME"
+          },
+          {
+            "id": "satellite_world_simple_structure_decay_designator",
+            "name": "Intl designator",
+            "type": "string",
+            "sourceFields": [
+              "decayed:OBJECT_ID"
+            ],
+            "description": "decayed:OBJECT_ID"
+          },
+          {
+            "id": "satellite_world_simple_structure_decay_kind",
+            "name": "Recorded object type",
+            "type": "string",
+            "sourceFields": [
+              "decayed:OBJECT_TYPE",
+              "tracked:object_type",
+              "satcat:OBJECT_TYPE"
+            ],
+            "description": "decayed.json has PAY payloads only; tracked/SATCAT decay dates also cover debris, rocket bodies and unknown types."
+          },
+          {
+            "id": "satellite_world_simple_structure_decay_date",
+            "name": "Recorded decay date",
+            "type": "string",
+            "sourceFields": [
+              "decayed:DECAY_DATE",
+              "tracked:decay_date",
+              "satcat:DECAY_DATE",
+              "launches:decay_date",
+              "gp:decay_date"
+            ],
+            "description": "Only nonempty recorded dates form a decay record. This is not a forecast, a timed reentry event, or evidence that all historical objects are in decayed.json."
+          },
+          {
+            "id": "satellite_world_simple_structure_decay_launch",
+            "name": "Recorded launch date",
+            "type": "string",
+            "sourceFields": [
+              "decayed:LAUNCH_DATE"
+            ],
+            "description": "decayed:LAUNCH_DATE"
+          },
+          {
+            "id": "satellite_world_simple_structure_decay_site",
+            "name": "Recorded launch site",
+            "type": "string",
+            "sourceFields": [
+              "decayed:LAUNCH_SITE"
+            ],
+            "description": "decayed:LAUNCH_SITE"
+          }
+        ],
+        "position": {
+          "x": -8.15,
+          "y": -1.3000000000000003,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2
+        },
+        "rendering": {
+          "class": {
+            "color": "#93C5FD",
+            "borderColor": "#1D4ED8",
+            "borderWidth": 0.025,
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
+          },
+          "textColor": "#172033"
+        },
+        "sourceSelection": {
+          "decayed": "all records",
+          "tracked": "records with nonempty decay_date",
+          "satcat": "rows with nonempty DECAY_DATE",
+          "launches": "records with nonempty decay_date",
+          "gp": "records with nonempty decay_date"
+        }
+      },
+      {
+        "id": "satellite_world_simple_structure_refresh",
+        "name": "Refresh Status",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_orbits",
+        "attributes": [
+          {
+            "id": "satellite_world_simple_structure_refresh_attempt",
+            "name": "Last attempt / success",
+            "type": "object",
+            "sourceFields": [
+              "refresh:last_attempt_at",
+              "refresh:last_success_at"
+            ],
+            "description": "An attempt timestamp does not establish a successful refresh."
+          },
+          {
+            "id": "satellite_world_simple_structure_refresh_times",
+            "name": "Fetch / reconcile times",
+            "type": "object",
+            "sourceFields": [
+              "refresh:fetched_at",
+              "refresh:retrieval_timestamp",
+              "refresh:last_reconciled_at",
+              "refresh:last_local_enrichment_at",
+              "refresh:revalidated_at"
+            ],
+            "description": "refresh:fetched_at; refresh:retrieval_timestamp; refresh:last_reconciled_at; refresh:last_local_enrichment_at; refresh:revalidated_at"
+          },
+          {
+            "id": "satellite_world_simple_structure_refresh_result",
+            "name": "Last status / error",
+            "type": "object",
+            "sourceFields": [
+              "refresh:last_status",
+              "refresh:last_error"
+            ],
+            "description": "refresh:last_status; refresh:last_error"
+          },
+          {
+            "id": "satellite_world_simple_structure_refresh_health",
+            "name": "Source health / partial",
+            "type": "object",
+            "sourceFields": [
+              "refresh:source_status",
+              "refresh:partial_update",
+              "refresh:satcat_refresh"
+            ],
+            "description": "refresh:source_status; refresh:partial_update; refresh:satcat_refresh"
+          },
+          {
+            "id": "satellite_world_simple_structure_refresh_scope",
+            "name": "Requested / verified scope",
+            "type": "object",
+            "sourceFields": [
+              "refresh:source_groups",
+              "refresh:catalog_source_groups",
+              "refresh:source_scope",
+              "refresh:source_scope_verified"
+            ],
+            "description": "Configured debris groups are not verified coverage. Last-known-good GP catalog groups contain active only."
+          },
+          {
+            "id": "satellite_world_simple_structure_refresh_format",
+            "name": "Format / compatibility",
+            "type": "object",
+            "sourceFields": [
+              "refresh:dataset_format",
+              "refresh:source_format",
+              "refresh:parser_version",
+              "refresh:deprecated_compatibility"
+            ],
+            "description": "TLE metadata declares deprecated_compatibility=true; GP is the OMM source."
+          },
+          {
+            "id": "satellite_world_simple_structure_refresh_counts",
+            "name": "Reconcile counters",
+            "type": "object",
+            "sourceFields": [
+              "refresh:mode",
+              "refresh:counts"
+            ],
+            "description": "Retained_history counts in a derived feed are not tracked historical chunk counts. Decay counts.objects is the number of name buckets, not distinct NORAD IDs."
+          },
+          {
+            "id": "satellite_world_simple_structure_refresh_tags",
+            "name": "Tag enrichment",
+            "type": "object",
+            "sourceFields": [
+              "refresh:tag_enrichment",
+              "refresh:last_tag_metadata_refresh_at"
+            ],
+            "description": "refresh:tag_enrichment; refresh:last_tag_metadata_refresh_at"
+          },
+          {
+            "id": "satellite_world_simple_structure_refresh_transport",
+            "name": "Retrieval / rate policy",
+            "type": "object",
+            "sourceFields": [
+              "refresh:urls",
+              "refresh:celestrak_min_refresh_hours"
+            ],
+            "description": "refresh:urls; refresh:celestrak_min_refresh_hours"
+          }
+        ],
+        "position": {
+          "x": -1.55,
+          "y": -3.900000000000001,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2
+        },
+        "rendering": {
+          "class": {
+            "color": "#86EFAC",
+            "borderColor": "#15803D",
+            "borderWidth": 0.025,
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
+          },
+          "textColor": "#172033"
+        }
       }
     ],
     "link": [
@@ -1074,8 +1450,8 @@
         "id": "satellite_world_simple_structure_link_space_object_lifecycle",
         "sourceClassId": "satellite_world_simple_structure_space_object",
         "targetClassId": "satellite_world_simple_structure_lifecycle",
-        "name": "has lifecycle",
-        "description": "Join normalized NORAD catalog IDs; launch/decay feeds can cover different snapshots.",
+        "name": "has launch record",
+        "description": "Observed NORAD joins: each feed has at most one row per ID in this snapshot; 50 launch-date sidecar values conflict with the tracked date. Across source revisions, retain multiple assertions.",
         "rendering": {
           "lineColor": "#475569",
           "lineWidth": 0.022,
@@ -1092,7 +1468,18 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "has lifecycle"
+          "labelText": "has launch record"
+        },
+        "sourceEvidence": {
+          "kind": "NORAD join",
+          "sourceFields": [
+            "tracked:norad_id",
+            "launches:norad_id",
+            "launch_dates:norad_id"
+          ],
+          "cardinality": "0..1 record per source snapshot; multiple source assertions",
+          "joinRule": "Positive decimal NORAD IDs as strings; preserve conflicting dates with their source.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
@@ -1118,6 +1505,17 @@
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
           "labelText": "has tracking state"
+        },
+        "sourceEvidence": {
+          "kind": "record projection",
+          "sourceFields": [
+            "tracked:norad_id",
+            "tracked:catalog_membership_status",
+            "tracked:observation_status"
+          ],
+          "cardinality": "1 state projection per tracked record",
+          "joinRule": "Fields coexist in the same tracked record.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
@@ -1143,6 +1541,17 @@
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
           "labelText": "has elements"
+        },
+        "sourceEvidence": {
+          "kind": "optional NORAD join",
+          "sourceFields": [
+            "tracked:element_reference",
+            "gp:norad_id",
+            "tle:norad_id"
+          ],
+          "cardinality": "0..1 row per orbital feed snapshot",
+          "joinRule": "Use element_reference for current GP availability; same-ID GP rows for decayed objects do not enable propagation.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
@@ -1168,6 +1577,17 @@
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
           "labelText": "describes orbit"
+        },
+        "sourceEvidence": {
+          "kind": "record projection",
+          "sourceFields": [
+            "gp:element_set",
+            "gp:inclination_deg",
+            "tle:inclination_deg"
+          ],
+          "cardinality": "0..1 summary per source record",
+          "joinRule": "Orbital element and summary fields coexist within GP or TLE records.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
@@ -1192,7 +1612,19 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "has summary"
+          "labelText": "has summary",
+          "labelOffsetFromPath": 0.65,
+          "labelCollisionHeight": 0.7
+        },
+        "sourceEvidence": {
+          "kind": "record projection",
+          "sourceFields": [
+            "tracked:norad_id",
+            "tracked:satcat_orbit_summary"
+          ],
+          "cardinality": "0..1 summary per source record",
+          "joinRule": "Read the embedded SATCAT summary; it is not itself propagatable orbital elements.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
@@ -1218,6 +1650,17 @@
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
           "labelText": "catalogs"
+        },
+        "sourceEvidence": {
+          "kind": "manifest containment",
+          "sourceFields": [
+            "tracked:@manifest.chunks[].path",
+            "tracked:@manifest.history_chunks[].path",
+            "tracked:norad_id"
+          ],
+          "cardinality": "0..N records in each manifest snapshot",
+          "joinRule": "Resolve chunk paths and records arrays. Every accepted ID occurs once across this snapshot.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
@@ -1243,13 +1686,25 @@
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
           "labelText": "records source"
+        },
+        "sourceEvidence": {
+          "kind": "dataset provenance",
+          "sourceFields": [
+            "refresh:dataset_hash",
+            "refresh:source_format",
+            "refresh:source_urls",
+            "gp:element_set.source"
+          ],
+          "cardinality": "0..N orbital records per source dataset",
+          "joinRule": "Pair GP/TLE files with their named sidecars; no dataset foreign-key field is present on every orbital row.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
         "id": "satellite_world_simple_structure_link_tracking_snapshot",
         "sourceClassId": "satellite_world_simple_structure_tracking",
         "targetClassId": "satellite_world_simple_structure_snapshot",
-        "name": "belongs to snapshot",
+        "name": "snapshot scope",
         "description": "Manifest scope distinguishes current and historical chunks.",
         "rendering": {
           "lineColor": "#475569",
@@ -1267,15 +1722,29 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "belongs to snapshot"
+          "labelText": "snapshot scope",
+          "labelPlacement": "path",
+          "labelPositionAlongPath": 0.15,
+          "labelOffsetFromPath": 0.5
+        },
+        "sourceEvidence": {
+          "kind": "containing-file provenance",
+          "sourceFields": [
+            "tracked:@manifest.scope",
+            "tracked:@manifest.chunks[].scope",
+            "tracked:@manifest.history_chunks[].scope"
+          ],
+          "cardinality": "1 containing tracked snapshot per state projection",
+          "joinRule": "Scope comes from the owning chunk descriptor, independently of the record membership status.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
         "id": "satellite_world_simple_structure_link_profile_space_object",
         "sourceClassId": "satellite_world_simple_structure_profile",
         "targetClassId": "satellite_world_simple_structure_space_object",
-        "name": "may identify",
-        "description": "Optional verified NORAD ID join; zero and placeholder IDs cannot establish a match.",
+        "name": "unverified identity",
+        "description": "Unverified references: the OneWeb profile ID 44072 resolves to PRISMA, and OneWeb / Starlink V1 launch dates conflict with catalog dates. Matching a numeric ID alone is insufficient.",
         "rendering": {
           "lineColor": "#475569",
           "lineWidth": 0.022,
@@ -1292,7 +1761,19 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "may identify"
+          "labelText": "unverified identity"
+        },
+        "sourceEvidence": {
+          "kind": "unverified cross-file reference",
+          "sourceFields": [
+            "profiles:meta.norad_id",
+            "profiles:meta.cospar_id",
+            "tracked:norad_id",
+            "tracked:international_designator"
+          ],
+          "cardinality": "0..1 candidate by ID; not a verified association",
+          "joinRule": "Reject zero/placeholders and independently compare identity/date evidence; OneWeb and Starlink V1 contain conflicts.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
@@ -1318,6 +1799,15 @@
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
           "labelText": "contains payload"
+        },
+        "sourceEvidence": {
+          "kind": "nested object",
+          "sourceFields": [
+            "profiles:payload"
+          ],
+          "cardinality": "0..1 nested payload object per profile",
+          "joinRule": "Read payload directly; preserve empty objects and placeholder band definitions.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       },
       {
@@ -1343,6 +1833,128 @@
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
           "labelText": "can use asset"
+        },
+        "sourceEvidence": {
+          "kind": "inferred presentation association",
+          "sourceFields": [
+            "profiles:name",
+            "display:id",
+            "display:displayName"
+          ],
+          "cardinality": "Unspecified; requires a curated mapping",
+          "joinRule": "No foreign key links profiles to display assets; do not infer identity from a similar name.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
+        }
+      },
+      {
+        "id": "satellite_world_simple_structure_link_space_object_decay",
+        "sourceClassId": "satellite_world_simple_structure_space_object",
+        "targetClassId": "satellite_world_simple_structure_decay",
+        "name": "recorded decay",
+        "description": "Per snapshot: one object has zero or one recorded decay date; one record refers to one NORAD identity. The same assertion may appear in several sources; do not count them as repeated physical decay events.",
+        "rendering": {
+          "lineColor": "#475569",
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
+          "arrowType": "triangle",
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "recorded decay"
+        },
+        "sourceEvidence": {
+          "kind": "NORAD join with date filter",
+          "sourceFields": [
+            "tracked:norad_id",
+            "tracked:decay_date",
+            "satcat:NORAD_CAT_ID",
+            "satcat:DECAY_DATE",
+            "decayed:NORAD_CAT_ID",
+            "decayed:DECAY_DATE"
+          ],
+          "cardinality": "0..1 nonempty decay-date assertion per object per source snapshot",
+          "joinRule": "Multiple feeds can repeat one assertion. Decayed.json is the payload subset; include other object types from tracked/SATCAT.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
+        }
+      },
+      {
+        "id": "satellite_world_simple_structure_link_decay_snapshot",
+        "sourceClassId": "satellite_world_simple_structure_decay",
+        "targetClassId": "satellite_world_simple_structure_snapshot",
+        "name": "reported in",
+        "description": "A decay assertion belongs to a source snapshot. Decayed feed: 7,636 payloads; tracked history: 35,570 objects. Preserve source-specific provenance.",
+        "rendering": {
+          "lineColor": "#475569",
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
+          "arrowType": "triangle",
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "reported in"
+        },
+        "sourceEvidence": {
+          "kind": "containing-file provenance",
+          "sourceFields": [
+            "tracked:@manifest.history_chunks[].path",
+            "refresh:catalog_revision",
+            "refresh:newest_confirmed_decay_date"
+          ],
+          "cardinality": "1 source snapshot per assertion; an assertion can be repeated across sources",
+          "joinRule": "Retain the owning file and revision; a grouping name is not an identity or event sequence.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
+        }
+      },
+      {
+        "id": "satellite_world_simple_structure_link_snapshot_refresh",
+        "sourceClassId": "satellite_world_simple_structure_snapshot",
+        "targetClassId": "satellite_world_simple_structure_refresh",
+        "name": "has refresh status",
+        "description": "Each supplied dataset sidecar describes its latest attempt/result; there is no array of previous refresh events.",
+        "rendering": {
+          "lineColor": "#475569",
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
+          "arrowType": "triangle",
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "has refresh status"
+        },
+        "sourceEvidence": {
+          "kind": "dataset sidecar convention",
+          "sourceFields": [
+            "refresh:last_attempt_at",
+            "refresh:last_success_at",
+            "refresh:last_status"
+          ],
+          "cardinality": "0..1 latest sidecar per dataset",
+          "joinRule": "Pair files with named metadata sidecars; no refresh-history records are supplied.",
+          "scope": "Observed supplied snapshots; not a universal HBDS constraint."
         }
       }
     ]

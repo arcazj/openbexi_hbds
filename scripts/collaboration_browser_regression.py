@@ -1678,6 +1678,12 @@ def run_satellite_model_regression(base_url: str, debug_port: int) -> None:
                 raise BrowserRegressionError(f"Satellite classes were lost on load: {model_name}")
             if state["counts"]["links"] != len(source["hypergraph"]["link"]):
                 raise BrowserRegressionError(f"Satellite links were lost on load: {model_name}")
+            if model_name == "satellite_world_simple_structure.json":
+                decay_visible = page.evaluate(
+                    "window.__hbdsDynamicTest.getLabelMetrics().some(label => label.visible && label.text.includes('Decay Record'))"
+                )
+                if not decay_visible:
+                    raise BrowserRegressionError("The recorded-decay class must be visible in the diagram")
             screenshot_dir = os.environ.get("HBDS_SCREENSHOT_DIR")
             if screenshot_dir:
                 destination = Path(screenshot_dir)
@@ -1707,6 +1713,20 @@ def run_satellite_model_regression(base_url: str, debug_port: int) -> None:
                 raise BrowserRegressionError(f"Satellite edit or links not persisted: {model_name}")
             if saved["metadata"].get("sourceDatasets") != source["metadata"].get("sourceDatasets"):
                 raise BrowserRegressionError("Satellite source mapping was lost on save")
+            saved_nodes = {item["id"]: item for item in saved["hypergraph"]["class"]}
+            for original in source["hypergraph"]["class"]:
+                persisted = saved_nodes[original["id"]]
+                if persisted.get("sourceSelection") != original.get("sourceSelection"):
+                    raise BrowserRegressionError("Source record filters were lost on save")
+                attributes = {item["id"]: item for item in persisted.get("attributes", []) if isinstance(item, dict)}
+                for attribute in original.get("attributes", []):
+                    if isinstance(attribute, dict) and "sourceFields" in attribute:
+                        if attributes.get(attribute["id"], {}).get("sourceFields") != attribute["sourceFields"]:
+                            raise BrowserRegressionError("Attribute source fields were lost on save")
+            saved_links = {item["id"]: item for item in saved["hypergraph"]["link"]}
+            for original in source["hypergraph"]["link"]:
+                if saved_links[original["id"]].get("sourceEvidence") != original.get("sourceEvidence"):
+                    raise BrowserRegressionError("Relationship evidence was lost on save")
             page.navigate(dynamic_layout_url(base_url, temporary_name, debug=False))
             wait_for_page_ready(page, f"{model_name} reload")
             wait_for_model_loaded(page, temporary_name, "saved satellite copy load")

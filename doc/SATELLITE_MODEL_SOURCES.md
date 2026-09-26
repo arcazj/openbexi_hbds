@@ -7,20 +7,22 @@ The Models and Edit workspaces include two satellite models:
 
 The other existing models remain available. Only `satellite_world_complete_structure.json` and `satellite_world_simple_structure_v2.json` were removed.
 
-The simple model describes data structures with 9 classes, 3 visual hyperclasses, and 11 links. Individual catalog records stay in the source datasets. The diagram loads without those datasets; it does not import them or propagate satellite orbits.
+The simple model describes data structures with 11 classes, 3 visual hyperclasses, and 14 links. A deeper audit of all 32 source files added explicit **Decay Record** and **Refresh Status** classes. The [audit findings and complete file coverage](SPACE_DATA_AUDIT.md) explain the redesign, conflicts, join rules, metadata semantics and deliberate omissions. Individual catalog records stay in the source datasets. The diagram loads without those datasets; it does not import them or propagate satellite orbits.
 
 ## Source Mapping
 
-Each attribute carries `sourceFields`. The prefix identifies an entry in `metadata.sourceDatasets`; the remaining path is relative to that dataset's record selector. `tracked:@manifest` addresses the tracked manifest itself. Other `tracked` fields address records in its current and historical chunks. Grouped attributes combine related source fields for a compact diagram.
+Each attribute carries `sourceFields`. The prefix identifies an entry in `metadata.sourceDatasets`; the remaining path is relative to that dataset's record selector. `tracked:@manifest` addresses the tracked manifest; `tracked:@chunk` addresses chunk wrapper metadata; `display:@document` addresses asset-document metadata. Other paths address selected records. Grouped attributes retain related source fields and nested containers for a compact diagram. Every link has `sourceEvidence` describing its fields, relationship kind, join rule and observed cardinality. These extensions document provenance; they do not implement database joins.
 
 | Class | Sources | Main fields |
 | --- | --- | --- |
-| Space Object | `satcat.csv`, tracked chunks, GP and TLE | NORAD ID, internal object ID, international designator, object type, owner, radar cross-section |
-| Launch / Lifecycle | Tracked chunks, `launches/launches.json`, `decayed/decayed.json`, `tle/satellite_launch_dates.json` | Launch and decay dates, launch site, lifecycle and operational status |
-| Tracking State | Tracked chunks | Catalog membership, observation status, current-element availability, propagation status, metadata-only status |
+| Space Object | `satcat.csv`, tracked chunks, GP and TLE | NORAD/Alpha-5 IDs, internal object ID, international designator, object type, owner, radar cross-section, feed tags |
+| Launch Record | Tracked chunks, SATCAT, launches, launch-date sidecar, GP and TLE | Source-specific launch dates, site, identity and details/orbit flags; conflicting dates retain provenance |
+| Decay Record | `decayed/decayed.json` and nonempty tracked/SATCAT, launches and GP decay dates | Identity, object type, recorded decay date, recorded launch information; broader tracked coverage includes debris and rocket bodies |
+| Tracking State | Tracked chunks, SATCAT, GP and launches | Independent lifecycle, operational, catalog membership, observation, element-availability and propagation statuses, element references |
 | Orbital Elements | `gp/GP.json`, `tle/TLE.json` | OMM object, epoch, frame, time scale, propagation theory, TLE lines |
 | Orbit Summary | Tracked chunks, GP and TLE | Orbit class, classification source, inclination, eccentricity, mean motion, period, perigee, apogee |
-| Dataset Snapshot | `tracked/TRACKED.manifest.json`, `*.meta.json` sidecars | Revisions, timestamps, refresh status, provenance, coverage, chunks, quarantine |
+| Dataset Snapshot | Tracked manifest, chunk wrappers and metadata sidecars | Revisions, lineage, current/history scope, coverage, invariants, taxonomy, chunks, quarantine, newest dates and scientific boundary |
+| Refresh Status | All six metadata sidecars | Attempt/success/fetch/reconcile times, status/error, source health, requested/verified scope, compatibility, counters, enrichment and retrieval details |
 | Spacecraft Profile | `satellites/*.json` | Identity, bus, manufacturer, mass, launch vehicle, profile orbit, attitude, footprints |
 | Payload Profile | Nested `payload` in spacecraft profiles | Transponders, beams, bandwidth, polarization, frequency bands |
 | Display Asset | `display_satellite_models.json` | Asset ID, display name, format, files, textures, tags |
@@ -35,12 +37,18 @@ The inspected snapshots contain 70,661 tracked records (35,091 current and 35,57
 - The GP snapshot uses OMM; its TLE fields are null. The separate TLE feed supplies line pairs. SATCAT summaries can exist without propagatable elements.
 - The GP metadata reports a failed refresh and degraded status. The model records the local structure and does not assert that all sources are current.
 - Profile files include examples, templates, zero IDs, and placeholders. Dashed links denote a conditional catalog join and a curated display association; neither establishes a verified foreign key from every profile.
+- Decay is visible as a recorded assertion, not a prediction or reentry event. The standalone feed has 7,636 payload records; tracked history has 35,570 decayed objects of several types. Name buckets are not identities.
+- Fifty launch-date sidecar values conflict with tracked dates. The OneWeb profile ID resolves to PRISMA; OneWeb and Starlink V1 profile dates conflict with catalog dates. Source data remains unchanged and profile joins stay unverified.
+- `CURRENT`/`HISTORICAL` partition scope is independent of catalog membership: every supplied tracked record is `PRESENT`. Historical chunks are not a time-series event history.
+- Only `physical_size_estimate` and `rcs_size` are omitted from visible source mappings; both are null throughout the tracked records. Detailed OMM, beam, contour, retrieval and reconciliation fields are grouped in object attributes.
 - `rcs_m2` is radar cross-section, not physical size. Empty or missing source values remain unknown.
 - Hyperclasses provide visual grouping under structural profile v1. They do not assert executable inheritance or semantic membership.
 
 ## Validation
 
-Run `py -3.9 -B scripts/check_project.py` for model, helper, server, and browser checks. The browser suite loads both satellite models and tests editing, saving, and reloading temporary copies. It also exercises the existing test fixtures, which remain in `test_models/`.
+Run `py -3.9 -B scripts/check_project.py` for model, helper, server, and browser checks. The browser suite checks that Decay Record is visible, loads both satellite models, and tests editing, saving, and reloading temporary copies, including preservation of source mappings, record filters and relationship evidence. It also exercises the existing test fixtures, which remain in `test_models/`.
+
+Run `py -3.9 -B tools/audit_space_data.py --output doc/SPACE_DATA_AUDIT.json` to repeat the source audit. It reads every file, verifies chunk hashes/sizes/counts and tracked aggregate counts, checks attribute and relationship field references, and reports joins, conflicts and unmapped fields. The [JSON report](SPACE_DATA_AUDIT.json) records the inspected local snapshot and should be regenerated after source data changes.
 
 For focused satellite loading, saving, zoom, and visual checks, run `py -3.9 -B scripts/check_project.py --browser-only --browser-suite satellite`.
 
