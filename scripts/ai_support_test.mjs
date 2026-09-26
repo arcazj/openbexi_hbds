@@ -7,6 +7,11 @@ const moduleUrl = `data:text/javascript;base64,${Buffer.from(source).toString('b
 const {
   AI_PROVIDER_DEFINITIONS,
   AI_CUSTOM_MODEL_VALUE,
+  loadAiProviderDefinitions,
+  aiModelFingerprint,
+  buildAiChangeReview,
+  applyAiSelectedChanges,
+  constrainAiModelProposal,
   buildAiPromptRequestPayload,
   credentialStateForProvider,
   defaultModelForProvider,
@@ -23,6 +28,8 @@ const {
   validateAiRequestConfig,
   validateManualHbdsModelResponse
 } = await import(moduleUrl);
+
+await loadAiProviderDefinitions(async () => ({ ok: true, json: async () => JSON.parse(readFileSync(new URL('../js/hbds_ai_providers.json', import.meta.url), 'utf8')) }));
 
 const providers = mergeProviderCapabilities([
   { id: 'openai', configuredOnServer: true },
@@ -173,5 +180,57 @@ assert.equal(validateManualHbdsModelResponse({
     link: []
   }
 }).valid, false);
+
+const original = {
+  metadata: { name: 'Original', revision: 'r1' },
+  hypergraph: {
+    class: [
+      { id: 'a', type: 'class', name: 'A', attributes: [{ id: 'attr_a', name: 'old' }], position: { x: 1, y: 2, z: 3 } },
+      { id: 'b', type: 'class', name: 'B', attributes: [], position: { x: 5, y: 6, z: 7 } }
+    ],
+    link: [{ id: 'ab', name: 'connects', sourceClassId: 'a', targetClassId: 'b' }],
+    object: [{ id: 'oa', classId: 'a', attributeValues: [] }]
+  }
+};
+const proposal = structuredClone(original);
+proposal.metadata.name = 'Improved';
+proposal.metadata.revision = 'provider-invented';
+proposal.hypergraph.class[0].name = 'Better A';
+proposal.hypergraph.class[0].position.x = 999;
+proposal.hypergraph.class[0].attributes.push({ id: 'new_attr', name: 'new' });
+proposal.hypergraph.class[1].name = 'Unrelated change';
+proposal.hypergraph.object[0].attributeValues = [{ attributeId: 'attr_a', value: 7 }];
+const focused = constrainAiModelProposal(proposal, original, 'improve-selection', ['a']);
+assert.deepEqual(focused.hypergraph.class[0].position, original.hypergraph.class[0].position);
+assert.deepEqual(focused.hypergraph.class[1], original.hypergraph.class[1]);
+assert.deepEqual(focused.hypergraph.object, original.hypergraph.object);
+assert.deepEqual(focused.metadata, original.metadata);
+assert.equal(focused.hypergraph.class[0].name, 'Better A');
+const review = buildAiChangeReview(original, focused);
+assert.equal(review.length, 2);
+const attributeAddition = review.find(change => change.collection === 'attribute');
+const selectivelyApplied = applyAiSelectedChanges(original, review, [attributeAddition.key]);
+assert.equal(selectivelyApplied.hypergraph.class[0].name, 'A');
+assert.equal(selectivelyApplied.hypergraph.class[0].attributes.length, 2);
+assert.deepEqual(original.hypergraph.class[0].attributes, [{ id: 'attr_a', name: 'old' }]);
+const allChanges = buildAiChangeReview(original, proposal);
+assert.equal(allChanges.some(change => change.field === 'revision'), false);
+assert.ok(allChanges.some(change => change.collection === 'object'));
+const deleteProposal = structuredClone(original);
+deleteProposal.hypergraph.class.pop();
+deleteProposal.hypergraph.link = [];
+const deletions = buildAiChangeReview(original, deleteProposal);
+assert.equal(deletions.every(change => change.destructive), true);
+const partialDeletion = applyAiSelectedChanges(original, deletions, [deletions.find(change => change.collection === 'class').key]);
+assert.equal(validateManualHbdsModelResponse(partialDeletion).valid, false, 'dangling links must block partial approval');
+assert.equal(validateManualHbdsModelResponse(applyAiSelectedChanges(original, deletions, deletions.map(change => change.key))).valid, true);
+assert.equal(aiModelFingerprint({ a: 1, b: 2 }), aiModelFingerprint({ b: 2, a: 1 }));
+assert.equal(providerSupportsReasoningEffort(openai, 'unknown-future-model'), false);
+assert.equal(providerSupportsReasoningEffort(openai, 'gpt-4.1'), false);
+assert.equal(parseManualAiResponseText(JSON.stringify({ explanation: 'Explained', model: manualModel })).model.hypergraph.class[0].id, 'manual_a');
+assert.equal(parseManualAiResponseText('{"explanation":"Explained"}').model, null);
+const selectedPayload = buildAiPromptRequestPayload({ operationMode: 'improve-selection', selectionIds: ['a'], requestText: 'Improve A' }, original);
+assert.deepEqual(selectedPayload.selectionIds, ['a']);
+assert.equal(validateAiRequestConfig({ operationMode: 'explain-selection', requestText: 'Explain' }, manual).valid, false);
 
 console.log('AI support helper tests passed.');

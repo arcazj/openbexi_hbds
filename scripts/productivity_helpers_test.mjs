@@ -35,6 +35,36 @@ const helpers = await import(moduleUrl);
 }
 
 {
+  const model = {
+    hypergraph: {
+      class: [{
+        id: 'asset', type: 'class', name: 'Asset',
+        attributes: [{ id: 'name', name: 'Name', value: 'original', rendering: { color: 'blue' } }, 'legacy']
+      }],
+      link: [{ id: 'asset_copy' }],
+      object: [{ id: 'name_copy' }],
+      objectLink: [{ id: 'name_copy_2' }],
+      membership: [{ id: 'membership_id' }],
+      inheritance: [{ id: 'inheritance_id' }]
+    }
+  };
+  const original = structuredClone(model);
+  for (let copy = 0; copy < 2; copy += 1) {
+    const taken = helpers.collectModelIds(model);
+    const { nodes } = helpers.cloneNodesForPaste([model.hypergraph.class[0]], taken);
+    assert.equal(taken.has(nodes[0].id), false);
+    assert.equal(taken.has(nodes[0].attributes[0].id), false);
+    assert.notEqual(nodes[0].id, nodes[0].attributes[0].id);
+    assert.equal(nodes[0].attributes[0].value, 'original');
+    assert.deepEqual(nodes[0].attributes[0].rendering, { color: 'blue' });
+    assert.equal(nodes[0].attributes[1], 'legacy');
+    model.hypergraph.class.push(...nodes);
+  }
+  assert.deepEqual(model.hypergraph.class[0], original.hypergraph.class[0]);
+  assert.equal(helpers.collectModelIds(model).size, 11);
+}
+
+{
   const parsed = helpers.parseBulkAttributeNames('status\nOwner\nstatus\nregion', [{ name: 'owner' }]);
   assert.deepEqual(parsed.names, ['status', 'region']);
   assert.deepEqual(parsed.duplicates, ['Owner', 'status']);

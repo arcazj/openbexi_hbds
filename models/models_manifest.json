@@ -1,11 +1,6 @@
 {
   "models": [
     {
-      "value": "models/_collab_browser_13880.json",
-      "label": "collab browser 13880",
-      "description": "collab browser 13880"
-    },
-    {
       "value": "models/AI_Models_World.json",
       "label": "AI Models World",
       "description": "AI Models World"
@@ -14,6 +9,11 @@
       "value": "models/bridge_road_links.json",
       "label": "bridge road links",
       "description": "bridge road links"
+    },
+    {
+      "value": "models/cloud_computing_architecture.json",
+      "label": "cloud computing architecture",
+      "description": "cloud computing architecture"
     },
     {
       "value": "models/complex_hyperclass_mail_Carrier_with_links.json",

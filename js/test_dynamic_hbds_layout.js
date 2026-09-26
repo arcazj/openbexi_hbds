@@ -53,7 +53,9 @@ import {
   listServerDrafts,
   listServerModels,
   listAiProviders,
+  discoverAiModels,
   loadServerModel,
+  loadScopedModel,
   prepareAiPrompt,
   publishServerDraft,
   recordClientUserAction,
@@ -67,7 +69,7 @@ import {
   modelFileNameFromValue,
   modelNameFromValue,
   serverModelValue
-} from './hbds_server_api.js?v=server-api-20260718a';
+} from './hbds_server_api.js?v=server-api-20260926';
 import {
   collaborationWorkStatusDecision,
   coalesceDraftOperations,
@@ -87,6 +89,7 @@ import { bindFloatingPanel, clampFloatingPanel } from './hbds_floating_panel.js?
 import {
   buildSelectedSubgraph,
   cloneNodesForPaste,
+  collectModelIds,
   makeUniqueId,
   moveArrayItem,
   parseBulkAttributeNames,
@@ -99,6 +102,12 @@ import {
   AI_OPERATION_MODES,
   AI_PROVIDER_DEFINITIONS,
   buildAiPromptRequestPayload,
+  loadAiProviderDefinitions,
+  modelOptionById,
+  constrainAiModelProposal,
+  aiModelFingerprint,
+  buildAiChangeReview,
+  applyAiSelectedChanges,
   credentialStateForProvider,
   defaultModelForProvider,
   defaultReasoningEffortForModel,
@@ -113,7 +122,7 @@ import {
   sanitizeAiConfigForDiagnostics,
   validateAiRequestConfig,
   validateManualHbdsModelResponse
-} from './hbds_ai_support.js?v=ai-support-20260531i';
+} from './hbds_ai_support.js?v=ai-support-20260926';
 import { executeFunctorQuery } from './hbds_functors.js?v=semantic-v1-20260718a';
 import { validateSemanticProfiles } from './hbds_semantic_profiles.js?v=semantic-v1-20260718a';
 
@@ -229,9 +238,14 @@ let commandPaletteOpen = false;
 let commandPaletteActiveIndex = 0;
 let commandPaletteVisibleCommands = [];
 let aiProviders = AI_PROVIDER_DEFINITIONS;
-let aiServerCapabilities = { enabled: false, promptTemplateVersion: 'hbds-ai-prompt-v1' };
+let aiServerCapabilities = { enabled: false, promptTemplateVersion: 'hbds-ai-prompt-v2' };
 let aiRequestController = null;
 let aiResultModel = null;
+let aiRequestContext = null;
+let aiReview = null;
+let aiPreviewFingerprint = '';
+let aiDiscoveryController = null;
+let aiMutationPending = false;
 let aiConnectionState = 'disconnected';
 let aiConnectionValidationTimer = null;
 let aiConnectionValidationController = null;
@@ -1318,7 +1332,9 @@ function getAiSupportConfig() {
     apiKey: $('ai-api-key-input')?.value || '',
     baseUrl: $('ai-base-url-input')?.value || '',
     modelName: getSelectedAiModelName(provider),
-    reasoningEffort: $('ai-reasoning-select')?.value || '',
+    reasoningEffort: providerSupportsReasoningEffort(provider, getSelectedAiModelName(provider)) ? ($('ai-reasoning-select')?.value || '') : '',
+    outputMode: provider?.id === 'custom-openai' ? ($('ai-output-mode-select')?.value || 'auto') : 'auto',
+    selectionIds: selectedLinkId ? [String(selectedLinkId)] : (selectedAttributeKey && selectedAttributeOwnerId ? [String(selectedAttributeOwnerId)] : selectedNodesForProductivity().map(node => String(node.id))),
     operationMode: getAiOperationMode().id,
     requestText: $('ai-request-input')?.value || ''
   };
@@ -1396,6 +1412,16 @@ function updateAiSupportUi(options = {}) {
   const reasoningSelect = $('ai-reasoning-select');
   const showReasoning = !manualMode && providerSupportsReasoningEffort(provider, modelName);
   if (reasoningField) reasoningField.hidden = !showReasoning;
+  if (reasoningSelect) {
+    const efforts = modelOptionById(provider, modelName)?.reasoningEfforts || [];
+    const previous = reasoningSelect.value;
+    reasoningSelect.replaceChildren(...efforts.map(effort => new Option(effort, effort)));
+    reasoningSelect.value = efforts.includes(previous) ? previous : defaultReasoningEffortForModel(provider, modelName);
+  }
+  const outputModeField = $('ai-output-mode-field');
+  if (outputModeField) outputModeField.hidden = provider.id !== 'custom-openai';
+  const refreshModelsButton = $('ai-refresh-models-button');
+  if (refreshModelsButton) { refreshModelsButton.hidden = manualMode; refreshModelsButton.disabled = Boolean(aiDiscoveryController); }
   if (showReasoning && reasoningSelect && (options.resetProviderFields || !reasoningSelect.value)) {
     reasoningSelect.value = defaultReasoningEffortForModel(provider, modelName);
   }
@@ -1409,27 +1435,27 @@ function updateAiSupportUi(options = {}) {
   const testButton = $('ai-test-connection-button');
   if (testButton) testButton.hidden = manualMode;
   const sendButton = $('ai-send-request-button');
-  if (sendButton) sendButton.textContent = manualMode ? 'Generate Prompt' : 'Send Request';
+  if (sendButton) { sendButton.textContent = manualMode ? 'Generate Prompt' : 'Send Request'; sendButton.disabled = Boolean(aiRequestController) || aiMutationPending; }
   const copyPromptButton = $('ai-copy-prompt-button');
   if (copyPromptButton) copyPromptButton.disabled = !manualMode || !String($('ai-result-preview')?.value || '').trim();
 
   const summary = $('ai-feature-summary');
   if (summary) {
     const scope = manualMode
-      ? 'ChatGPT Pro manual mode. The app prepares an HBDS prompt; you copy it to ChatGPT and paste JSON back here.'
+      ? 'ChatGPT manual mode. The app prepares an HBDS prompt; you copy it to ChatGPT and paste JSON back here.'
       : (aiServerCapabilities.enabled
       ? 'AI backend enabled. Requests are HBDS-scoped and server-enhanced before provider use.'
       : (credential.showKeyField
         ? 'Enter a provider key to validate and use a transient server-side AI connection. Keys stay in memory.'
         : 'AI backend disabled. This UI prepares HBDS-scoped prompts only; no AI provider call is made.'));
-    summary.textContent = `${scope} Template: ${aiServerCapabilities.promptTemplateVersion || 'hbds-ai-prompt-v1'}.`;
+    summary.textContent = `${scope} Template: ${aiServerCapabilities.promptTemplateVersion || 'hbds-ai-prompt-v2'}.`;
   }
 
   const hasResult = Boolean(($('ai-result-preview')?.value || '').trim()) || Boolean(($('ai-manual-response-input')?.value || '').trim()) || Boolean(aiResultModel);
   const applyButton = $('ai-apply-result-button');
-  if (applyButton) applyButton.disabled = !hasApplyableAiModelResponse(aiResultModel);
+  if (applyButton) applyButton.disabled = aiMutationPending || !hasApplyableAiModelResponse(aiResultModel);
   const rollbackButton = $('ai-rollback-result-button');
-  if (rollbackButton) rollbackButton.disabled = !aiRollbackSnapshot?.model;
+  if (rollbackButton) rollbackButton.disabled = aiMutationPending || Boolean(aiRequestController) || !aiRollbackSnapshot?.model;
   const discardButton = $('ai-discard-result-button');
   if (discardButton) discardButton.disabled = !hasResult;
   const cancelButton = $('ai-cancel-request-button');
@@ -1451,7 +1477,7 @@ function updateAiSupportUi(options = {}) {
 async function refreshAiProviderCapabilities(options = {}) {
   const result = await listAiProviders({ timeoutMs: 2500, skipDebugLog: true });
   if (!result.ok) {
-    aiServerCapabilities = { enabled: false, promptTemplateVersion: 'hbds-ai-prompt-v1' };
+    aiServerCapabilities = { enabled: false, promptTemplateVersion: 'hbds-ai-prompt-v2' };
     aiProviders = AI_PROVIDER_DEFINITIONS;
     populateAiProviderSelect();
     updateAiSupportUi({ keepStatus: true });
@@ -1462,10 +1488,13 @@ async function refreshAiProviderCapabilities(options = {}) {
   const data = result.data || {};
   aiServerCapabilities = {
     enabled: Boolean(data.enabled),
-    promptTemplateVersion: data.promptTemplateVersion || 'hbds-ai-prompt-v1',
+    promptTemplateVersion: data.promptTemplateVersion || 'hbds-ai-prompt-v2',
     requestMaxBytes: Number(data.requestMaxBytes || 0)
   };
-  aiProviders = mergeProviderCapabilities(data.providers, AI_PROVIDER_DEFINITIONS);
+  aiProviders = mergeProviderCapabilities(data.providers, AI_PROVIDER_DEFINITIONS).map(provider => {
+    const previous = aiProviders.find(item => item.id === provider.id);
+    return previous?.modelsDiscovered ? { ...provider, models: previous.models, modelsDiscovered: true } : provider;
+  });
   populateAiProviderSelect();
   updateAiSupportUi();
 }
@@ -1480,6 +1509,7 @@ function shouldAutoValidateAiConnection(provider, config = getAiSupportConfig())
 }
 
 function cancelAiConnectionValidation() {
+  aiConnectionValidationSequence += 1;
   if (aiConnectionValidationTimer) {
     clearTimeout(aiConnectionValidationTimer);
     aiConnectionValidationTimer = null;
@@ -1525,14 +1555,16 @@ async function validateCurrentAiConnection(options = {}) {
   const sequence = ++aiConnectionValidationSequence;
   aiConnectionValidationController?.abort?.();
   aiConnectionValidationController = new AbortController();
+  const controller = aiConnectionValidationController;
   setAiStatus('Validating AI connection...', 'warn', 'testing');
   try {
     await refreshAiProviderCapabilities({ silent: true });
+    if (sequence !== aiConnectionValidationSequence || controller.signal.aborted) return false;
     const refreshedProvider = getSelectedAiProvider();
     const refreshedConfig = getAiSupportConfig();
     const result = await validateAiConnection(getAiConnectionPayload(refreshedConfig), {
       timeoutMs: 20000,
-      signal: aiConnectionValidationController.signal,
+      signal: controller.signal,
       skipDebugLog: true
     });
     if (sequence !== aiConnectionValidationSequence) return false;
@@ -1550,7 +1582,7 @@ async function validateCurrentAiConnection(options = {}) {
     return true;
   } catch (error) {
     const aborted = error?.name === 'AbortError' || /aborted|abort/i.test(error?.message || '');
-    if (!aborted) {
+    if (!aborted && sequence === aiConnectionValidationSequence) {
       aiConnectionValidationSignature = '';
       setAiStatus(error?.message || 'AI provider connection failed', 'error', 'error');
     }
@@ -1561,6 +1593,7 @@ async function validateCurrentAiConnection(options = {}) {
 }
 
 async function initializeAiSupport() {
+  try { await loadAiProviderDefinitions(); } catch { /* The server catalog or manual fallback remains usable. */ }
   populateAiProviderSelect();
   updateAiSupportUi({ resetProviderFields: true });
   await refreshAiProviderCapabilities({ silent: true });
@@ -1568,6 +1601,12 @@ async function initializeAiSupport() {
 }
 
 function handleAiProviderChange() {
+  handleAiCancelRequest();
+  aiDiscoveryController?.abort();
+  aiDiscoveryController = null;
+  aiRequestContext = null;
+  aiReview = null;
+  aiPreviewFingerprint = '';
   aiResultModel = null;
   aiConnectionValidationSignature = '';
   cancelAiConnectionValidation();
@@ -1607,58 +1646,103 @@ async function handleAiTestConnection() {
   await validateCurrentAiConnection({ force: true });
 }
 
-function aiRequestCurrentModelForMode() {
-  return getAiOperationMode().requiresCurrentModel ? cloneValue(getData()) : null;
+function aiValidation(model) {
+  const results = [validateManualHbdsModelResponse(model), validateData(model), validateSemanticProfiles(model)];
+  const errors = [...new Set(results.flatMap(result => (result.errors || []).map(error => typeof error === 'string' ? error : error.message)))];
+  return { valid: errors.length === 0, errors };
+}
+
+function captureAiRequestContext(config = getAiSupportConfig()) {
+  return { model: cloneValue(getData()), selectValue: $('test-model-select')?.value || '',
+    operationMode: config.operationMode, selectionIds: [...config.selectionIds] };
+}
+
+function aiResultIsCurrent() {
+  if (!aiRequestContext) return false;
+  const expected = aiPreviewFingerprint || aiModelFingerprint(aiRequestContext.model);
+  return ($('test-model-select')?.value || '') === aiRequestContext.selectValue && aiModelFingerprint(getData()) === expected;
+}
+
+function acceptAiModel(model) {
+  if (!hasApplyableAiModelResponse(model)) return false;
+  const context = aiRequestContext || (aiRequestContext = captureAiRequestContext());
+  const normalized = constrainAiModelProposal(normalizeAiHbdsModelResponse(model), context.model, context.operationMode, context.selectionIds);
+  const validation = aiValidation(normalized);
+  if (!validation.valid) throw new Error(`AI model validation failed: ${validation.errors[0]}`);
+  aiResultModel = normalized;
+  return true;
+}
+
+async function handleAiRefreshModels() {
+  if (aiDiscoveryController) return;
+  const config = getAiSupportConfig();
+  const controller = new AbortController();
+  aiDiscoveryController = controller;
+  updateAiSupportUi({ keepStatus: true });
+  setAiStatus('Refreshing available models...', 'warn', 'testing');
+  try {
+    const result = await discoverAiModels(getAiConnectionPayload(config), { signal: controller.signal });
+    if (controller.signal.aborted || getSelectedAiProvider()?.id !== config.providerId) return;
+    if (!result.ok) throw new Error(result.error?.message || 'Could not refresh models');
+    const provider = getSelectedAiProvider();
+    provider.models = result.data.models || [];
+    provider.modelsDiscovered = true;
+    populateAiModelSelect(provider, { modelName: config.modelName });
+    setAiStatus(`${provider.models.length} available models loaded. The selected model is unchanged; unknown models use provider defaults.`, 'ok', 'configured');
+  } catch (error) {
+    if (!controller.signal.aborted) setAiStatus(error.message, 'error', 'error');
+  } finally {
+    if (aiDiscoveryController === controller) aiDiscoveryController = null;
+    updateAiSupportUi({ keepStatus: true });
+  }
 }
 
 async function handleAiSendRequest() {
+  if (aiRequestController || aiMutationPending) return;
   const provider = getSelectedAiProvider();
   const manualMode = isManualWorkflowProvider(provider);
   const config = getAiSupportConfig();
   const validation = validateAiRequestConfig(config, provider, { serverEnabled: Boolean(aiServerCapabilities.enabled) });
+  if (config.operationMode === 'repair') config.validationFindings = aiValidation(getData()).errors;
   if (!validation.valid) {
     setAiStatus(validation.errors[0], 'error', 'error');
     showToast(validation.errors[0]);
     return;
   }
-  aiRequestController = new AbortController();
+  const controller = new AbortController();
+  aiRequestController = controller;
+  const requestContext = captureAiRequestContext(config);
+  aiRequestContext = requestContext;
+  aiReview = null;
+  aiPreviewFingerprint = '';
   aiResultModel = null;
-  if (manualMode) {
-    const manualResponse = $('ai-manual-response-input');
-    if (manualResponse) manualResponse.value = '';
-  }
+  if (manualMode && $('ai-manual-response-input')) $('ai-manual-response-input').value = '';
   updateAiSupportUi({ keepStatus: true });
   setAiStatus(manualMode ? 'Preparing manual ChatGPT prompt...' : 'Preparing HBDS AI prompt...', 'warn', 'testing');
   try {
-    const payload = buildAiPromptRequestPayload(config, aiRequestCurrentModelForMode());
+    const payload = buildAiPromptRequestPayload(config, requestContext.model);
     const providerCallExpected = !manualMode && shouldAutoValidateAiConnection(provider, config);
     const result = await prepareAiPrompt(payload, {
-      timeoutMs: providerCallExpected ? 70000 : 12000,
-      signal: aiRequestController.signal,
-      skipDebugLog: true
+      timeoutMs: providerCallExpected ? 70000 : 12000, signal: controller.signal, skipDebugLog: true
     });
-    if (!result.ok) {
-      throw new Error(result.error?.message || 'AI prompt request failed');
-    }
+    if (controller.signal.aborted || aiRequestController !== controller || aiRequestContext !== requestContext) return;
+    if (!result.ok) throw Object.assign(new Error(result.error?.message || 'AI prompt request failed'), { code: result.error?.code });
     const data = result.data || {};
     const preview = $('ai-result-preview');
     if (preview) preview.value = data.providerResponse || data.enhancedPrompt || data.message || '';
-    const normalizedModel = normalizeAiHbdsModelResponse(data.model);
-    aiResultModel = hasApplyableAiModelResponse(normalizedModel) ? normalizedModel : null;
+    if (data.validation?.valid === false) throw new Error(data.message || data.validation.errors[0]);
+    if (config.operationMode !== 'explain-selection') acceptAiModel(data.model);
     const message = manualMode
       ? 'Manual prompt prepared. Copy it to ChatGPT, then paste JSON back for validation.'
-      : (data.message || (data.aiCallEnabled
-      ? 'AI provider response received'
-      : (data.enabled
-        ? 'HBDS prompt prepared; provider call is not implemented in this build'
-        : 'HBDS prompt prepared; AI backend disabled so no provider call was made')));
+      : (data.message || 'AI response received. Review it before applying changes.');
     setAiStatus(message, (manualMode || data.aiCallEnabled) ? 'ok' : 'warn', data.aiCallEnabled ? 'connected' : 'configured');
-    addLog(`AI support: ${message}`);
+    addLog('AI response received');
   } catch (error) {
-    const aborted = error?.name === 'AbortError' || /aborted|abort/i.test(error?.message || '');
+    if (aiRequestController !== controller) return;
+    const aborted = controller.signal.aborted || error?.code === 'canceled';
     setAiStatus(aborted ? 'AI request canceled' : (error?.message || 'AI request failed'), aborted ? 'warn' : 'error', aborted ? 'configured' : 'error');
   } finally {
-    aiRequestController = null;
+    if (aiRequestController === controller) aiRequestController = null;
     updateAiSupportUi({ keepStatus: true });
   }
 }
@@ -1707,31 +1791,26 @@ async function handleAiPasteResponse() {
 }
 
 function handleAiValidateManualResponse() {
-  const text = $('ai-manual-response-input')?.value || '';
-  const parsed = parseManualAiResponseText(text);
-  if (!parsed.valid) {
-    aiResultModel = null;
-    setAiStatus(parsed.errors[0], 'error', 'error');
-    updateAiSupportUi({ keepStatus: true });
-    return;
+  aiResultModel = null;
+  aiReview = null;
+  const parsed = parseManualAiResponseText($('ai-manual-response-input')?.value || '');
+  try {
+    if (!parsed.valid) throw new Error(parsed.errors[0]);
+    if (!aiRequestContext) aiRequestContext = captureAiRequestContext();
+    if (aiRequestContext.operationMode === 'explain-selection') {
+      if (!parsed.explanation) throw new Error('The AI response needs an explanation');
+      if ($('ai-result-preview')) $('ai-result-preview').value = parsed.explanation;
+      setAiStatus('Explanation ready. The model is unchanged.', 'ok', 'configured');
+    } else if (aiRequestContext.operationMode === 'validate' && !parsed.model && parsed.explanation) {
+      if ($('ai-result-preview')) $('ai-result-preview').value = parsed.explanation;
+      setAiStatus('Validation findings ready. No model changes proposed.', 'ok', 'configured');
+    } else {
+      if (!acceptAiModel(parsed.model)) throw new Error('AI response must include an HBDS model');
+      setAiStatus('Valid HBDS JSON response. Apply is now available.', 'ok', 'configured');
+    }
+  } catch (error) {
+    setAiStatus(error.message, 'error', 'error');
   }
-  const normalizedModel = normalizeAiHbdsModelResponse(parsed.model);
-  const structuralValidation = validateManualHbdsModelResponse(normalizedModel);
-  if (!structuralValidation.valid) {
-    aiResultModel = null;
-    setAiStatus(`AI response validation failed: ${structuralValidation.errors[0]}`, 'error', 'error');
-    updateAiSupportUi({ keepStatus: true });
-    return;
-  }
-  const validation = validateData(normalizedModel);
-  if (!validation.valid) {
-    aiResultModel = null;
-    setAiStatus(`AI model validation failed: ${validation.errors[0]}`, 'error', 'error');
-    updateAiSupportUi({ keepStatus: true });
-    return;
-  }
-  aiResultModel = normalizedModel;
-  setAiStatus('Valid HBDS JSON response. Apply is now available.', 'ok', 'configured');
   updateAiSupportUi({ keepStatus: true });
 }
 
@@ -1753,145 +1832,91 @@ function aiSuggestedModelName(model = aiResultModel) {
   return metadata.name || metadata.id || 'AI Model';
 }
 
-function mapById(items = []) {
-  return new Map((Array.isArray(items) ? items : [])
-    .filter(item => item && typeof item === 'object' && item.id != null)
-    .map(item => [String(item.id), item]));
-}
-
-function summarizeEntityDiff(beforeItems = [], afterItems = [], label = 'item') {
-  const before = mapById(beforeItems);
-  const after = mapById(afterItems);
-  const added = [];
-  const removed = [];
-  const renamed = [];
-  const modified = [];
-  after.forEach((item, id) => {
-    const previous = before.get(id);
-    if (!previous) {
-      added.push(`${label} ${item.name || id}`);
-      return;
-    }
-    if (String(previous.name || '') !== String(item.name || '')) {
-      renamed.push(`${label} ${previous.name || id} -> ${item.name || id}`);
-    } else if (!valuesEqual(previous, item)) {
-      modified.push(`${label} ${item.name || id}`);
-    }
-  });
-  before.forEach((item, id) => {
-    if (!after.has(id)) removed.push(`${label} ${item.name || id}`);
-  });
-  return { added, removed, renamed, modified };
-}
-
-function attributesForDiff(model = {}) {
-  const result = [];
-  (model.hypergraph?.class || []).forEach(node => {
-    (node.attributes || []).forEach((attribute, index) => {
-      if (!attribute || typeof attribute !== 'object') return;
-      result.push({
-        ...attribute,
-        id: `${node.id}::${attribute.id || attribute.name || index}`,
-        name: `${node.name || node.id}.${attribute.name || attribute.id || index}`
-      });
-    });
-  });
-  return result;
-}
-
-function buildAiModelDiff(beforeModel = {}, afterModel = {}) {
-  const classDiff = summarizeEntityDiff(beforeModel.hypergraph?.class || [], afterModel.hypergraph?.class || [], 'class');
-  const attributeDiff = summarizeEntityDiff(attributesForDiff(beforeModel), attributesForDiff(afterModel), 'attribute');
-  const linkDiff = summarizeEntityDiff(beforeModel.hypergraph?.link || [], afterModel.hypergraph?.link || [], 'link');
-  const metadataChanged = !valuesEqual(beforeModel.metadata || {}, afterModel.metadata || {});
-  const sections = { classes: classDiff, attributes: attributeDiff, links: linkDiff };
-  const totals = Object.values(sections).reduce((acc, diff) => {
-    acc.added += diff.added.length;
-    acc.removed += diff.removed.length;
-    acc.renamed += diff.renamed.length;
-    acc.modified += diff.modified.length;
-    return acc;
-  }, { added: 0, removed: 0, renamed: 0, modified: metadataChanged ? 1 : 0 });
-  return {
-    ...sections,
-    metadataChanged,
-    totals,
-    destructive: totals.removed > 0 || totals.renamed > 0
-  };
-}
-
-function renderDiffList(title, items, options = {}) {
-  const section = document.createElement('section');
-  section.className = `ai-diff-section${options.warning ? ' ai-diff-warning' : ''}`;
-  const heading = document.createElement('h3');
-  heading.textContent = title;
-  section.appendChild(heading);
-  const list = document.createElement('ul');
-  const visibleItems = items.length ? items.slice(0, 12) : ['None'];
-  visibleItems.forEach(item => {
-    const entry = document.createElement('li');
-    entry.textContent = item;
-    list.appendChild(entry);
-  });
-  if (items.length > visibleItems.length) {
-    const entry = document.createElement('li');
-    entry.textContent = `... ${items.length - visibleItems.length} more`;
-    list.appendChild(entry);
+function updateAiReviewSelection() {
+  if (!aiReview) return;
+  const selected = [...document.querySelectorAll('#ai-diff-content input[data-change-key]:checked')].map(input => input.dataset.changeKey);
+  aiReview.selected = selected;
+  const destructive = aiReview.changes.some(change => selected.includes(change.key) && change.destructive);
+  const confirm = $('ai-destructive-confirm');
+  if (confirm) {
+    confirm.checked = false;
+    confirm.closest('label').hidden = !destructive;
   }
-  section.appendChild(list);
-  return section;
+  let message = `${selected.length} of ${aiReview.changes.length} changes selected`;
+  let valid = selected.length > 0;
+  try {
+    aiReview.model = applyAiSelectedChanges(aiReview.before, aiReview.changes, selected);
+    const validation = aiValidation(aiReview.model);
+    valid = valid && validation.valid;
+    if (!validation.valid) message += `. Include the related changes or deselect this change: ${validation.errors[0]}`;
+  } catch (error) { valid = false; message = error.message; }
+  aiReview.valid = valid;
+  const status = $('ai-diff-selection-status');
+  if (status) { status.textContent = message; status.classList.toggle('ai-diff-warning', !valid); }
+  for (const id of ['ai-diff-preview-button', 'ai-diff-apply-new-button', 'ai-diff-apply-save-button']) {
+    if ($(id)) $(id).disabled = !valid;
+  }
 }
 
 function openAiDiffModal() {
-  if (!hasApplyableAiModelResponse(aiResultModel)) {
-    setAiStatus('No valid HBDS model response is available to apply', 'error', 'error');
+  if (!hasApplyableAiModelResponse(aiResultModel)) return;
+  if (!aiResultIsCurrent()) {
+    setAiStatus('The model changed after this AI request. Send a new request before applying.', 'warn', 'configured');
     return;
   }
-  const beforeModel = cloneValue(getData());
-  const afterModel = cloneValue(aiResultModel);
-  const diff = buildAiModelDiff(beforeModel, afterModel);
-  const operationMode = getAiOperationMode().id;
+  const before = cloneValue(aiRequestContext.model);
+  const changes = buildAiChangeReview(before, aiResultModel);
+  const previousSelection = aiReview?.selected;
+  aiReview = { before, changes, selected: [], model: null, valid: false };
+  const operationMode = aiRequestContext.operationMode;
   aiDiffSaveMode = operationMode === 'generate' || !activeModelFileName() ? 'new' : 'same';
-
   const summary = $('ai-diff-summary');
   if (summary) {
-    summary.innerHTML = '';
-    [
-      ['Added', diff.totals.added],
-      ['Removed', diff.totals.removed],
-      ['Renamed', diff.totals.renamed],
-      ['Modified', diff.totals.modified]
-    ].forEach(([label, count]) => {
+    summary.replaceChildren(...['add', 'remove', 'update'].map(action => {
       const card = document.createElement('div');
-      card.textContent = `${label}: ${count}`;
-      summary.appendChild(card);
-    });
+      card.textContent = `${{ add: 'Added', remove: 'Removed', update: 'Modified' }[action]}: ${changes.filter(change => change.action === action).length}`;
+      return card;
+    }));
   }
   const content = $('ai-diff-content');
   if (content) {
-    content.innerHTML = '';
-    if (operationMode === 'validate') {
-      content.appendChild(renderDiffList('Validation Result', ['Review the AI response preview for detailed validation findings before saving.']));
-    }
-    content.append(
-      renderDiffList('Classes Added', diff.classes.added),
-      renderDiffList('Classes Removed', diff.classes.removed, { warning: true }),
-      renderDiffList('Classes Renamed', diff.classes.renamed, { warning: true }),
-      renderDiffList('Classes Modified', diff.classes.modified),
-      renderDiffList('Attributes Changed', [...diff.attributes.added, ...diff.attributes.removed, ...diff.attributes.renamed, ...diff.attributes.modified]),
-      renderDiffList('Links Changed', [...diff.links.added, ...diff.links.removed, ...diff.links.renamed, ...diff.links.modified]),
-      renderDiffList('Metadata', diff.metadataChanged ? ['Metadata changed'] : [])
-    );
+    content.replaceChildren(...changes.map(change => {
+      const section = document.createElement('section');
+      section.className = `ai-diff-section${change.destructive ? ' ai-diff-warning' : ''}`;
+      const label = document.createElement('label');
+      label.className = 'ai-change-choice';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.dataset.changeKey = change.key;
+      input.checked = previousSelection ? previousSelection.includes(change.key) : true;
+      input.addEventListener('change', updateAiReviewSelection);
+      const text = document.createElement('span');
+      text.textContent = `${change.action.toUpperCase()}: ${change.label}`;
+      label.append(input, text);
+      const details = document.createElement('details');
+      const heading = document.createElement('summary');
+      heading.textContent = 'Before / after';
+      const values = document.createElement('pre');
+      values.textContent = `Before: ${JSON.stringify(change.before ?? null, null, 2)}\nAfter: ${JSON.stringify(change.after ?? null, null, 2)}`;
+      details.append(heading, values);
+      section.append(label, details);
+      return section;
+    }));
   }
-  const destructiveConfirm = $('ai-destructive-confirm');
-  if (destructiveConfirm) {
-    destructiveConfirm.checked = !diff.destructive;
-    destructiveConfirm.closest('label').hidden = !diff.destructive;
-  }
-  const applySaveButton = $('ai-diff-apply-save-button');
-  if (applySaveButton) applySaveButton.textContent = aiDiffSaveMode === 'same' ? 'Apply and Save' : 'Apply and Save New';
-  const modal = $('ai-diff-modal');
-  if (modal) modal.hidden = false;
+  updateAiReviewSelection();
+  if ($('ai-diff-apply-save-button')) $('ai-diff-apply-save-button').textContent = aiDiffSaveMode === 'same' ? 'Apply and Save' : 'Apply and Save New';
+  if ($('ai-diff-modal')) $('ai-diff-modal').hidden = false;
+}
+
+function reviewedAiModel() {
+  if (!aiReview?.valid) throw new Error('Select a valid set of AI changes first');
+  if (!aiResultIsCurrent()) throw new Error('The model changed after this AI request. Send a new request before applying.');
+  const confirm = $('ai-destructive-confirm');
+  if (confirm && !confirm.closest('label')?.hidden && !confirm.checked) throw new Error('Confirm removed or renamed elements before applying');
+  const model = cloneValue(aiReview.model);
+  const validation = aiValidation(model);
+  if (!validation.valid) throw new Error(validation.errors[0]);
+  return model;
 }
 
 function closeAiDiffModal() {
@@ -1901,32 +1926,32 @@ function closeAiDiffModal() {
 
 async function previewAiResultOnCanvas() {
   if (!hasApplyableAiModelResponse(aiResultModel)) return;
-  const previewModel = cloneValue(aiResultModel);
-  aiRollbackSnapshot = {
+  let previewModel;
+  try { previewModel = reviewedAiModel(); }
+  catch (error) { setAiStatus(error.message, 'warn', 'configured'); return; }
+  if (!aiPreviewFingerprint) aiRollbackSnapshot = {
     model: cloneValue(getData()),
     scope: aiTargetScope(),
     modelName: activeModelFileName(),
     selectValue: $('test-model-select')?.value || '',
+    savedSnapshotKey,
+    localDraftDirty,
+    collaborationBaseModel: cloneValue(collaborationBaseModel),
+    requestContext: aiRequestContext,
     previewOnly: true
   };
   await setData(previewModel, { context: ctx(), refresh: false });
   syncCountersFromData();
-  const previewLayout = cloneValue(getLayoutSettings());
-  await optimizeAndRefreshLayout(ctx(), { algorithm: 'grid' });
-  setLayoutSettings({
-    ...getLayoutSettings(),
-    ...previewLayout,
-    algorithm: previewLayout.algorithm || 'none'
-  }, { applyContext: false });
-  applyModelLayoutSettings({ algorithm: previewLayout.algorithm || 'none' });
-  await refreshWorkspace('Previewed AI model on canvas with grid layout', {
+  await refreshWorkspace('Previewed selected AI changes on canvas', {
     refresh: true,
     optimize: false,
     fit: true,
     publishDraft: false
   });
   updateAiSupportUi({ keepStatus: true });
-  setAiStatus('Preview only, displayed with grid layout. Use Apply and Save to persist or Rollback AI Apply to restore.', 'warn', 'configured');
+  aiPreviewFingerprint = aiModelFingerprint(getData());
+  aiRollbackSnapshot.appliedFingerprint = aiPreviewFingerprint;
+  setAiStatus('Preview only. Use Apply and Save to persist or Rollback AI Apply to restore.', 'warn', 'configured');
   closeAiDiffModal();
 }
 
@@ -1934,10 +1959,14 @@ function handleAiCancelRequest() {
   aiRequestController?.abort?.();
   aiRequestController = null;
   updateAiSupportUi({ keepStatus: true });
-  setAiStatus('AI request canceled', 'warn', 'configured');
+  setAiStatus('AI request canceled locally. A provider request already sent may still finish and incur charges.', 'warn', 'configured');
 }
 
 function handleAiDiscardResult() {
+  handleAiCancelRequest();
+  aiRequestContext = null;
+  aiReview = null;
+  aiPreviewFingerprint = '';
   aiResultModel = null;
   const preview = $('ai-result-preview');
   if (preview) preview.value = '';
@@ -1955,27 +1984,24 @@ async function applyAiResultFromDiff(saveMode = aiDiffSaveMode) {
     setAiStatus('No valid HBDS model response is available to apply', 'error', 'error');
     return;
   }
-  const validation = validateData(aiResultModel);
-  if (!validation.valid) {
-    setAiStatus(`AI model validation failed: ${validation.errors[0]}`, 'error', 'error');
-    return;
-  }
-  const destructiveConfirm = $('ai-destructive-confirm');
-  if (destructiveConfirm && !destructiveConfirm.closest('label')?.hidden && !destructiveConfirm.checked) {
-    setAiStatus('Confirm destructive AI changes before applying', 'warn', 'configured');
-    return;
-  }
+  let selectedModel;
+  try { selectedModel = reviewedAiModel(); }
+  catch (error) { setAiStatus(error.message, 'warn', 'configured'); return; }
   if (!serverConnected) await refreshServerConnection();
   if (!serverConnected) {
     setAiStatus('Server is required to apply and save AI results', 'error', 'error');
     return;
   }
-
-  const previousModel = aiRollbackSnapshot?.previewOnly ? cloneValue(aiRollbackSnapshot.model) : cloneValue(getData());
-  const previousFileName = aiRollbackSnapshot?.previewOnly ? (aiRollbackSnapshot.modelName || '') : activeModelFileName();
-  const previousValue = aiRollbackSnapshot?.previewOnly ? (aiRollbackSnapshot.selectValue || '') : ($('test-model-select')?.value || '');
+  if (!aiResultIsCurrent()) {
+    setAiStatus('The model changed before the save. Send a new AI request.', 'warn', 'configured');
+    return;
+  }
+  const previousModel = cloneValue(aiRequestContext.model);
+  const previousFileName = activeModelFileName();
+  const previousValue = aiRequestContext.selectValue;
+  const visibleFingerprint = aiModelFingerprint(getData());
   const scope = aiTargetScope();
-  const operationMode = getAiOperationMode().id;
+  const operationMode = aiRequestContext.operationMode;
   const sameFile = saveMode === 'same' && previousFileName;
   const expectedRevision = previousModel?.metadata?.revision || previousModel?.metadata?.contentHash || '';
   const payload = {
@@ -1983,10 +2009,10 @@ async function applyAiResultFromDiff(saveMode = aiDiffSaveMode) {
     operationMode,
     saveMode: sameFile ? 'same' : 'new',
     modelName: sameFile ? previousFileName : '',
-    requestedName: aiSuggestedModelName(aiResultModel),
+    requestedName: aiSuggestedModelName(selectedModel),
     expectedRevision: sameFile ? expectedRevision : '',
     clientId: getServerClientId(),
-    model: aiResultModel
+    model: selectedModel
   };
   const result = await applyAiModel(payload, { timeoutMs: 15000, skipDebugLog: true });
   if (!result.ok) {
@@ -2006,10 +2032,24 @@ async function applyAiResultFromDiff(saveMode = aiDiffSaveMode) {
     modelName: sameFile ? savedName : previousFileName,
     selectValue: previousValue,
     appliedModelName: savedName,
-    appliedSelectValue: savedValue
+    appliedSelectValue: savedValue,
+    appliedRevision: saved.metadata?.revision || saved.model?.metadata?.revision || '',
+    appliedFingerprint: aiModelFingerprint(saved.model || selectedModel)
   };
-  await setData(saved.model || aiResultModel, { context: ctx(), refresh: false });
+  if (($('test-model-select')?.value || '') !== previousValue || aiModelFingerprint(getData()) !== visibleFingerprint) {
+    aiResultModel = null;
+    aiRequestContext = null;
+    aiReview = null;
+    aiPreviewFingerprint = '';
+    closeAiDiffModal();
+    setAiStatus(`AI changes saved to ${savedName}. Newer local edits were kept; reload or resolve the revision conflict before saving again.`, 'warn', 'configured');
+    return;
+  }
+  await setData(saved.model || selectedModel, { context: ctx(), refresh: false });
   aiResultModel = null;
+  aiRequestContext = null;
+  aiReview = null;
+  aiPreviewFingerprint = '';
   await populateModelSelect();
   ensureModelSelectOption(savedValue, labelFromModelFileName(savedName), `AI saved model: ${savedName}`);
   const select = $('test-model-select');
@@ -2019,6 +2059,7 @@ async function applyAiResultFromDiff(saveMode = aiDiffSaveMode) {
   localDraftDirty = false;
   markSavedState();
   await refreshWorkspace(`Applied AI model ${savedName}`, { refresh: true, optimize: false, fit: true, publishDraft: false });
+  aiRollbackSnapshot.appliedFingerprint = aiModelFingerprint(getData());
   await clearLocalServerDraft(saved.modelName || (scope === 'models' ? savedName : `${scope}/${savedName}`));
   await publishLocalPresenceDraft('Applied AI model');
   updateJsonPreviewFromData();
@@ -2034,22 +2075,33 @@ async function handleAiRollbackResult() {
     return;
   }
   const scope = aiRollbackSnapshot.scope || aiTargetScope();
+  const appliedSelection = aiRollbackSnapshot.previewOnly ? aiRollbackSnapshot.selectValue : aiRollbackSnapshot.appliedSelectValue;
+  if ((appliedSelection && ($('test-model-select')?.value || '') !== appliedSelection) || (aiRollbackSnapshot.appliedFingerprint && aiRollbackSnapshot.appliedFingerprint !== aiModelFingerprint(getData()))) {
+    setAiStatus('The model has newer local edits. Save or export them before rolling back AI changes.', 'warn', 'configured');
+    return;
+  }
   const modelName = aiRollbackSnapshot.modelName || activeModelFileName();
   let restoredModel = cloneValue(aiRollbackSnapshot.model);
   const rollbackIsNewFile = aiRollbackSnapshot.saveMode === 'new' && aiRollbackSnapshot.appliedModelName;
-  const rollbackMessage = rollbackIsNewFile
+  const previewOnly = aiRollbackSnapshot.previewOnly === true;
+  const expectedRevision = aiRollbackSnapshot.appliedRevision;
+  const rollbackMessage = previewOnly ? 'AI preview rolled back' : rollbackIsNewFile
     ? 'AI apply rolled back; new AI model deleted'
     : 'AI apply rolled back and saved';
-  if (rollbackIsNewFile && (serverConnected || await refreshServerConnection())) {
+  if (!previewOnly && !(serverConnected || await refreshServerConnection())) {
+    setAiStatus('Server is required to roll back a saved AI model', 'error', 'error');
+    return;
+  }
+  if (!previewOnly && rollbackIsNewFile && (serverConnected || await refreshServerConnection())) {
     const deleteResult = scope === 'models'
       ? await deleteServerModel(aiRollbackSnapshot.appliedModelName, {
-        body: { clientId: getServerClientId(), allowProtected: false },
+        body: { clientId: getServerClientId(), allowProtected: false, expectedRevision },
         timeoutMs: 10000,
         skipDebugLog: true
       })
       : await deleteScopedModel(aiRollbackSnapshot.appliedModelName, {
         scope,
-        body: { clientId: getServerClientId(), allowProtected: false },
+        body: { clientId: getServerClientId(), allowProtected: false, expectedRevision },
         timeoutMs: 10000,
         skipDebugLog: true
       });
@@ -2064,10 +2116,11 @@ async function handleAiRollbackResult() {
       $('test-model-select').value = aiRollbackSnapshot.selectValue;
     }
     await clearLocalServerDraft(deleteResult.data?.modelName || (scope === 'models' ? aiRollbackSnapshot.appliedModelName : `${scope}/${aiRollbackSnapshot.appliedModelName}`));
-  } else if (modelName && (serverConnected || await refreshServerConnection())) {
+  } else if (!previewOnly && modelName && (serverConnected || await refreshServerConnection())) {
     const result = await rollbackAiModel({
       scope,
       modelName,
+      expectedRevision,
       clientId: getServerClientId(),
       model: restoredModel
     }, { timeoutMs: 15000, skipDebugLog: true });
@@ -2090,21 +2143,48 @@ async function handleAiRollbackResult() {
   }
   await setData(restoredModel, { context: ctx(), refresh: false });
   syncCountersFromData();
-  collaborationBaseModel = cloneValue(getData());
-  localDraftDirty = false;
-  markSavedState();
+  if (previewOnly) {
+    collaborationBaseModel = cloneValue(aiRollbackSnapshot.collaborationBaseModel);
+    savedSnapshotKey = aiRollbackSnapshot.savedSnapshotKey;
+    localDraftDirty = aiRollbackSnapshot.localDraftDirty;
+  } else {
+    collaborationBaseModel = cloneValue(getData());
+    markSavedState();
+  }
   await refreshWorkspace('Rolled back AI apply', { refresh: true, optimize: false, fit: true, publishDraft: false });
-  await publishLocalPresenceDraft('Rolled back AI apply');
+  if (previewOnly && localDraftDirty) {
+    await publishLocalDraft('Restored edits after AI preview');
+  } else {
+    await publishLocalPresenceDraft('Rolled back AI apply');
+  }
+  if (previewOnly && aiRequestContext === aiRollbackSnapshot.requestContext) {
+    // Restoring through setData/fit normalizes view metadata. Use that restored
+    // baseline for the same reviewed request; subsequent edits are still checked.
+    aiRequestContext.model = cloneValue(getData());
+    aiReview = null;
+  }
   aiRollbackSnapshot = null;
+  aiPreviewFingerprint = '';
   updateJsonPreviewFromData();
   updateAiSupportUi({ keepStatus: true });
   setAiStatus(rollbackMessage, 'ok', 'configured');
 }
 
+async function runAiMutation(action) {
+  if (aiMutationPending || aiRequestController) return;
+  aiMutationPending = true;
+  updateAiSupportUi({ keepStatus: true });
+  try { await action(); }
+  finally {
+    aiMutationPending = false;
+    updateAiSupportUi({ keepStatus: true });
+  }
+}
+
 function getAiSupportStateForDebug() {
   return {
     serverEnabled: Boolean(aiServerCapabilities.enabled),
-    promptTemplateVersion: aiServerCapabilities.promptTemplateVersion || 'hbds-ai-prompt-v1',
+    promptTemplateVersion: aiServerCapabilities.promptTemplateVersion || 'hbds-ai-prompt-v2',
     providerCount: aiProviders.length,
     connectionState: aiConnectionState,
     config: sanitizeAiConfigForDiagnostics(getAiSupportConfig()),
@@ -9122,7 +9202,7 @@ async function pasteProductivityNodes(sourceNodes = copiedProductivityNodes, mes
     showToast('Copy or select nodes first');
     return;
   }
-  const existingIds = new Set(nodes().map(node => String(node.id)));
+  const existingIds = collectModelIds(getData());
   const cloned = cloneNodesForPaste(source, existingIds);
   if (!cloned.nodes.length) return;
   const model = getData();
@@ -9170,7 +9250,7 @@ async function handleBulkAddAttributes() {
   }
   const attrs = Array.isArray(owner.attributes) ? owner.attributes : [];
   const useStringAttributes = attrs.length > 0 && attrs.every(attribute => typeof attribute === 'string');
-  const existingAttributeIds = new Set(attrs.filter(attribute => attribute && typeof attribute === 'object' && attribute.id != null).map(attribute => String(attribute.id)));
+  const existingAttributeIds = collectModelIds(getData());
   parsed.names.forEach(name => {
     attrs.push(useStringAttributes
       ? name
@@ -9383,8 +9463,8 @@ async function handleSaveModel(options = {}) {
     });
     if (!result.ok) {
       const message = result.error?.message || 'Server save failed';
-      serverConnected = false;
-      addLog(`Test model save failed: ${message}`);
+      if (result.status !== 409) serverConnected = false;
+      addLog(`${result.status === 409 ? 'Save conflict' : 'Test model save failed'}: ${message}`);
       showToast(message);
       return;
     }
@@ -9780,8 +9860,11 @@ async function handleLoadModel(options = {}) {
   const loadedModel = await withCanvasLoadProgress(`Loading ${selectedLabel}`, async progress => {
     let model;
     progress.update(18, `Fetching ${selectedLabel}`);
-    if (isServerModelValue(value)) {
-      const result = await loadServerModel(modelNameFromValue(value), { timeoutMs: 6000 });
+    if (isServerModelValue(value) || (COLLABORATION_DRAFT_SCOPE && serverConnected)) {
+      const result = await loadScopedModel(modelNameFromValue(value), {
+        modelScope: COLLABORATION_DRAFT_SCOPE,
+        timeoutMs: 6000
+      });
       if (!isCurrentModelLoad(requestId, value)) return null;
       if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
       progress.update(48, `Rendering ${selectedLabel}`);
@@ -10439,7 +10522,13 @@ function bindUi() {
   $('ai-model-select')?.addEventListener('change', handleAiModelChange);
   $('ai-model-input')?.addEventListener('input', handleAiConnectionInput);
   $('ai-reasoning-select')?.addEventListener('change', handleAiConnectionInput);
-  $('ai-operation-select')?.addEventListener('change', () => updateAiSupportUi({ keepStatus: true }));
+  $('ai-operation-select')?.addEventListener('change', () => {
+    const mode = getAiOperationMode();
+    const defaults = { repair: 'Repair the validation errors while preserving existing IDs and positions.', 'explain-selection': 'Explain the selected entities and their relationships.', 'improve-selection': 'Improve names and attributes of the selected entities.' };
+    if ($('ai-request-input') && !$('ai-request-input').value.trim() && defaults[mode.id]) $('ai-request-input').value = defaults[mode.id];
+    updateAiSupportUi({ keepStatus: true });
+  });
+  $('ai-refresh-models-button')?.addEventListener('click', () => runAction(handleAiRefreshModels, 'ai.refreshModels'));
   $('ai-request-input')?.addEventListener('input', () => updateAiSupportUi({ keepStatus: true }));
   $('ai-test-connection-button')?.addEventListener('click', () => runAction(handleAiTestConnection, 'ai.testConnection'));
   $('ai-send-request-button')?.addEventListener('click', () => runAction(handleAiSendRequest, 'ai.sendRequest'));
@@ -10454,12 +10543,12 @@ function bindUi() {
   $('ai-cancel-request-button')?.addEventListener('click', handleAiCancelRequest);
   $('ai-discard-result-button')?.addEventListener('click', handleAiDiscardResult);
   $('ai-apply-result-button')?.addEventListener('click', () => runAction(handleAiApplyResult, 'ai.applyResult'));
-  $('ai-rollback-result-button')?.addEventListener('click', () => runAction(handleAiRollbackResult, 'ai.rollbackResult'));
+  $('ai-rollback-result-button')?.addEventListener('click', () => runAction(() => runAiMutation(handleAiRollbackResult), 'ai.rollbackResult'));
   $('ai-diff-close-button')?.addEventListener('click', closeAiDiffModal);
   $('ai-diff-cancel-button')?.addEventListener('click', closeAiDiffModal);
-  $('ai-diff-preview-button')?.addEventListener('click', () => runAction(previewAiResultOnCanvas, 'ai.previewResult'));
-  $('ai-diff-apply-save-button')?.addEventListener('click', () => runAction(() => applyAiResultFromDiff(aiDiffSaveMode), 'ai.applySave'));
-  $('ai-diff-apply-new-button')?.addEventListener('click', () => runAction(() => applyAiResultFromDiff('new'), 'ai.applySaveNew'));
+  $('ai-diff-preview-button')?.addEventListener('click', () => runAction(() => runAiMutation(previewAiResultOnCanvas), 'ai.previewResult'));
+  $('ai-diff-apply-save-button')?.addEventListener('click', () => runAction(() => runAiMutation(() => applyAiResultFromDiff(aiDiffSaveMode)), 'ai.applySave'));
+  $('ai-diff-apply-new-button')?.addEventListener('click', () => runAction(() => runAiMutation(() => applyAiResultFromDiff('new')), 'ai.applySaveNew'));
   $('ai-diff-modal')?.addEventListener('pointerdown', event => {
     if (event.target === $('ai-diff-modal')) closeAiDiffModal();
   });

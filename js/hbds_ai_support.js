@@ -1,4 +1,4 @@
-export const HBDS_AI_PROMPT_TEMPLATE_VERSION = 'hbds-ai-prompt-v1';
+export const HBDS_AI_PROMPT_TEMPLATE_VERSION = 'hbds-ai-prompt-v2';
 
 export const AI_OPERATION_MODES = [
   {
@@ -15,7 +15,10 @@ export const AI_OPERATION_MODES = [
     id: 'improve',
     label: 'Improve current model',
     requiresCurrentModel: true
-  }
+  },
+  { id: 'repair', label: 'Repair validation errors', requiresCurrentModel: true },
+  { id: 'explain-selection', label: 'Explain selection', requiresCurrentModel: true, requiresSelection: true },
+  { id: 'improve-selection', label: 'Improve selection', requiresCurrentModel: true, requiresSelection: true }
 ];
 
 export const AI_CUSTOM_MODEL_VALUE = '__custom__';
@@ -26,91 +29,33 @@ export const AI_REASONING_EFFORTS = [
   { id: 'low', label: 'low' },
   { id: 'medium', label: 'medium' },
   { id: 'high', label: 'high' },
-  { id: 'xhigh', label: 'xhigh' }
+  { id: 'xhigh', label: 'xhigh' },
+  { id: 'max', label: 'max' }
 ];
 
-export const AI_PROVIDER_DEFINITIONS = [
-  {
-    id: 'openai',
-    label: 'ChatGPT/OpenAI',
-    defaultModel: 'gpt-5.5',
-    models: [
-      { id: 'gpt-5.5', label: 'GPT-5.5', supportsReasoningEffort: true, defaultReasoningEffort: 'medium' },
-      { id: 'gpt-5.4', label: 'GPT-5.4', supportsReasoningEffort: true, defaultReasoningEffort: 'medium' },
-      { id: 'gpt-5.4-mini', label: 'GPT-5.4 Mini', supportsReasoningEffort: true, defaultReasoningEffort: 'low' },
-      { id: 'gpt-4.1', label: 'GPT-4.1', supportsReasoningEffort: false }
-    ],
-    requiresKey: true,
-    allowsUserKey: true,
-    requiresBaseUrl: false,
-    supportsCustomBaseUrl: false,
-    supportsJsonMode: true,
-    supportsReasoningEffort: true
-  },
-  {
-    id: AI_MANUAL_PROVIDER_ID,
-    label: 'ChatGPT Pro / Manual',
-    defaultModel: '',
-    models: [],
-    requiresKey: false,
-    allowsUserKey: false,
-    requiresBaseUrl: false,
-    supportsCustomBaseUrl: false,
-    supportsJsonMode: true,
-    manualWorkflow: true
-  },
-  {
-    id: 'anthropic',
-    label: 'Claude/Anthropic',
-    defaultModel: 'claude-3-5-sonnet-latest',
-    models: [
-      { id: 'claude-3-5-sonnet-latest', label: 'Claude 3.5 Sonnet' },
-      { id: 'claude-3-5-haiku-latest', label: 'Claude 3.5 Haiku' },
-      { id: 'claude-3-opus-latest', label: 'Claude 3 Opus' }
-    ],
-    requiresKey: true,
-    allowsUserKey: true,
-    requiresBaseUrl: false,
-    supportsCustomBaseUrl: false,
-    supportsJsonMode: true
-  },
-  {
-    id: 'ollama',
-    label: 'Local/Ollama',
-    defaultModel: 'llama3.1',
-    models: [
-      { id: 'llama3.1', label: 'Llama 3.1' },
-      { id: 'llama3.2', label: 'Llama 3.2' },
-      { id: 'qwen2.5', label: 'Qwen 2.5' },
-      { id: 'mistral', label: 'Mistral' }
-    ],
-    requiresKey: false,
-    allowsUserKey: false,
-    requiresBaseUrl: true,
-    defaultBaseUrl: 'http://127.0.0.1:11434',
-    supportsCustomBaseUrl: true,
-    supportsJsonMode: false
-  },
-  {
-    id: 'custom-openai',
-    label: 'Custom OpenAI-compatible',
-    defaultModel: '',
-    models: [],
-    supportsReasoningEffort: true,
-    requiresKey: false,
-    allowsUserKey: true,
-    requiresBaseUrl: true,
-    defaultBaseUrl: '',
-    supportsCustomBaseUrl: true,
-    supportsJsonMode: true
+// The catalog is shared with server.py. A manual fallback keeps static pages usable.
+export const AI_PROVIDER_DEFINITIONS = [{
+  id: AI_MANUAL_PROVIDER_ID, label: 'ChatGPT / Manual', defaultModel: '', models: [],
+  requiresKey: false, allowsUserKey: false, manualWorkflow: true
+}];
+
+export async function loadAiProviderDefinitions(fetcher = globalThis.fetch) {
+  const response = await fetcher('./js/hbds_ai_providers.json');
+  if (!response.ok) throw new Error('AI provider catalog could not be loaded');
+  const catalog = await response.json();
+  if (!Array.isArray(catalog.providers) || !catalog.providers.length) {
+    throw new Error('AI provider catalog is invalid');
   }
-];
+  AI_PROVIDER_DEFINITIONS.splice(0, AI_PROVIDER_DEFINITIONS.length, ...catalog.providers);
+  return AI_PROVIDER_DEFINITIONS;
+}
 
 function normalizeModelOption(option) {
   if (typeof option === 'string') {
     return { id: option, label: option, supportsReasoningEffort: false };
   }
   return {
+    ...option,
     id: String(option?.id || option?.value || '').trim(),
     label: String(option?.label || option?.id || option?.value || '').trim(),
     supportsReasoningEffort: Boolean(option?.supportsReasoningEffort),
@@ -129,10 +74,9 @@ export function isManualWorkflowProvider(provider = {}) {
 
 export function mergeProviderCapabilities(serverProviders = [], localProviders = AI_PROVIDER_DEFINITIONS) {
   const serverById = new Map((Array.isArray(serverProviders) ? serverProviders : []).map(provider => [provider.id, provider]));
-  return localProviders.map(provider => ({
-    ...provider,
-    ...(serverById.get(provider.id) || {})
-  }));
+  const merged = localProviders.map(provider => ({ ...provider, ...(serverById.get(provider.id) || {}) }));
+  const known = new Set(merged.map(provider => provider.id));
+  return [...merged, ...serverProviders.filter(provider => !known.has(provider.id))];
 }
 
 export function modelOptionsForProvider(provider = {}) {
@@ -147,7 +91,7 @@ export function modelOptionsForProvider(provider = {}) {
       options.push(option);
     });
   const defaultModel = String(provider.defaultModel || '').trim();
-  if (defaultModel && !seen.has(defaultModel)) {
+  if (defaultModel && !seen.has(defaultModel) && !provider.modelsDiscovered) {
     options.unshift({ id: defaultModel, label: defaultModel, supportsReasoningEffort: Boolean(provider.supportsReasoningEffort) });
   }
   return options;
@@ -167,7 +111,7 @@ export function defaultModelForProvider(provider = {}) {
 export function providerSupportsReasoningEffort(provider = {}, modelId = '') {
   const option = modelOptionById(provider, modelId);
   if (option) return Boolean(option.supportsReasoningEffort);
-  return Boolean(provider.supportsReasoningEffort);
+  return false;
 }
 
 export function defaultReasoningEffortForModel(provider = {}, modelId = '') {
@@ -223,6 +167,7 @@ export function sanitizeAiConfigForDiagnostics(config = {}) {
     modelName: String(config.modelName || ''),
     reasoningEffort: String(config.reasoningEffort || ''),
     baseUrl: String(config.baseUrl || ''),
+    outputMode: String(config.outputMode || 'auto'),
     operationMode: String(config.operationMode || ''),
     hasUserKey: Boolean(config.apiKey),
     apiKey: config.apiKey ? '[redacted]' : ''
@@ -237,6 +182,7 @@ export function buildAiPromptRequestPayload(config = {}, currentModel = null) {
     providerId: String(config.providerId || ''),
     modelName: String(config.modelName || ''),
     baseUrl: String(config.baseUrl || ''),
+    outputMode: String(config.outputMode || 'auto'),
     reasoningEffort: String(config.reasoningEffort || ''),
     operationMode: mode.id,
     requestText,
@@ -252,6 +198,8 @@ export function buildAiPromptRequestPayload(config = {}, currentModel = null) {
   }
   if (mode.requiresCurrentModel && currentModel) {
     payload.currentModel = currentModel;
+    payload.selectionIds = Array.isArray(config.selectionIds) ? config.selectionIds : [];
+    payload.validationFindings = Array.isArray(config.validationFindings) ? config.validationFindings : [];
   }
   return payload;
 }
@@ -261,6 +209,8 @@ export function validateAiRequestConfig(config = {}, provider = {}, options = {}
   const serverEnabled = options.serverEnabled !== false;
   const requestText = String(config.requestText || '').trim();
   if (!requestText) errors.push('HBDS request is required');
+  const mode = AI_OPERATION_MODES.find(item => item.id === config.operationMode);
+  if (mode?.requiresSelection && !config.selectionIds?.length) errors.push('Select classes or a link first');
   if (provider.requiresBaseUrl && !String(config.baseUrl || '').trim()) {
     errors.push('Base URL is required for this provider');
   }
@@ -269,12 +219,127 @@ export function validateAiRequestConfig(config = {}, provider = {}, options = {}
   }
   const reasoningEffort = String(config.reasoningEffort || '').trim();
   if (reasoningEffort && !AI_REASONING_EFFORTS.some(item => item.id === reasoningEffort)) {
-    errors.push('Reasoning effort must be none, low, medium, high, or xhigh');
+    errors.push('Unsupported reasoning effort');
   }
+  const efforts = modelOptionById(provider, config.modelName)?.reasoningEfforts || [];
+  if (reasoningEffort && !efforts.includes(reasoningEffort)) errors.push('Reasoning effort is not supported by this model');
   return {
     valid: errors.length === 0,
     errors
   };
+}
+
+export function constrainAiModelProposal(model, currentModel, operationMode, selectionIds = []) {
+  const proposed = clonePlainObject(model);
+  if (!currentModel || operationMode === 'generate' || !proposed?.hypergraph) return proposed;
+  const previousClasses = new Map((currentModel.hypergraph?.class || []).map(item => [String(item.id), item]));
+  (proposed.hypergraph.class || []).forEach(item => {
+    const previous = previousClasses.get(String(item.id));
+    if (previous?.position) item.position = clonePlainObject(previous.position);
+  });
+  if (operationMode !== 'improve-selection') return proposed;
+  const result = clonePlainObject(currentModel);
+  const selected = new Set(selectionIds);
+  for (const collection of ['class', 'link']) {
+    const byId = new Map((proposed.hypergraph[collection] || []).map(item => [String(item.id), item]));
+    result.hypergraph[collection] = (result.hypergraph[collection] || []).map(previous => {
+      if (!selected.has(String(previous.id)) || !byId.has(String(previous.id))) return previous;
+      const replacement = clonePlainObject(byId.get(String(previous.id)));
+      if (collection === 'class') {
+        for (const key of ['position', 'parentClassId', 'children', 'type']) {
+          if (Object.hasOwn(previous, key)) replacement[key] = clonePlainObject(previous[key]);
+          else delete replacement[key];
+        }
+      }
+      return replacement;
+    });
+  }
+  return result;
+}
+
+const AI_COLLECTIONS = ['class', 'link', 'object', 'objectLink', 'membership', 'inheritance'];
+const SERVER_METADATA_FIELDS = new Set(['revision', 'contentHash', 'modified', 'modifiedIso']);
+
+// Stable ordering avoids treating a provider's object-key ordering as an edit.
+export function aiModelFingerprint(value) {
+  function ordered(item) {
+    if (Array.isArray(item)) return item.map(ordered);
+    if (!item || typeof item !== 'object') return item;
+    return Object.fromEntries(Object.keys(item).sort().map(key => [key, ordered(item[key])]));
+  }
+  return JSON.stringify(ordered(value));
+}
+
+export function buildAiChangeReview(before = {}, after = {}) {
+  const changes = [];
+  const equal = (a, b) => aiModelFingerprint(a) === aiModelFingerprint(b);
+  const add = (target, oldValue, newValue, label) => {
+    if (equal(oldValue, newValue)) return;
+    const action = newValue === undefined ? 'remove' : oldValue === undefined ? 'add' : 'update';
+    changes.push({ ...target, key: String(changes.length), action, label,
+      before: clonePlainObject(oldValue), after: clonePlainObject(newValue),
+      destructive: action === 'remove' || (target.field === 'name' && oldValue !== undefined) });
+  };
+  const diffFields = (oldValue, newValue, target, label, ignored = new Set()) => {
+    for (const field of new Set([...Object.keys(oldValue || {}), ...Object.keys(newValue || {})])) {
+      if (!ignored.has(field)) add({ ...target, field }, oldValue?.[field], newValue?.[field], `${label}: ${field}`);
+    }
+  };
+  const diffEntities = (oldItems, newItems, collection, ownerId = '') => {
+    const oldMap = new Map((oldItems || []).map(item => [String(item.id), item]));
+    const newMap = new Map((newItems || []).map(item => [String(item.id), item]));
+    for (const id of new Set([...oldMap.keys(), ...newMap.keys()])) {
+      const previous = oldMap.get(id), next = newMap.get(id);
+      const target = { collection, ownerId, id };
+      const label = `${collection} ${previous?.name || next?.name || id}`;
+      if (!previous || !next) add(target, previous, next, label);
+      else if (collection === 'class') {
+        diffFields(previous, next, target, label, new Set(['id', 'attributes']));
+        diffEntities(previous.attributes, next.attributes, 'attribute', id);
+      } else {
+        diffFields(previous, next, target, label, new Set(['id']));
+      }
+    }
+  };
+  AI_COLLECTIONS.forEach(collection => diffEntities(before.hypergraph?.[collection], after.hypergraph?.[collection], collection));
+  diffFields(before.metadata, after.metadata, { collection: 'metadata' }, 'Metadata', SERVER_METADATA_FIELDS);
+  diffFields(before.hypergraph, after.hypergraph, { collection: 'hypergraph' }, 'Hypergraph', new Set(AI_COLLECTIONS));
+  diffFields(before, after, { collection: 'root' }, 'Model', new Set(['metadata', 'hypergraph']));
+  return changes;
+}
+
+export function applyAiSelectedChanges(before, changes, selectedKeys) {
+  const result = clonePlainObject(before);
+  result.metadata ||= {};
+  result.hypergraph ||= { class: [], link: [] };
+  const selected = new Set(selectedKeys);
+  for (const change of changes) {
+    if (!selected.has(change.key)) continue;
+    let target;
+    if (change.collection === 'root') target = result;
+    else if (change.collection === 'metadata') target = result.metadata;
+    else if (change.collection === 'hypergraph') target = result.hypergraph;
+    else {
+      let list;
+      if (change.collection === 'attribute') {
+        const owner = result.hypergraph.class.find(item => String(item.id) === change.ownerId);
+        if (!owner) throw new Error('The selected attribute change needs its class');
+        list = owner.attributes ||= [];
+      } else list = result.hypergraph[change.collection] ||= [];
+      const index = list.findIndex(item => String(item.id) === change.id);
+      if (!change.field) {
+        if (change.action === 'remove') { if (index >= 0) list.splice(index, 1); }
+        else if (index >= 0) list[index] = clonePlainObject(change.after);
+        else list.push(clonePlainObject(change.after));
+        continue;
+      }
+      target = list[index];
+      if (!target) throw new Error('A selected change needs an entity that was excluded');
+    }
+    if (change.action === 'remove') delete target[change.field];
+    else Object.defineProperty(target, change.field, { value: clonePlainObject(change.after), enumerable: true, writable: true, configurable: true });
+  }
+  return result;
 }
 
 export function hasApplyableAiModelResponse(value) {
@@ -376,7 +441,7 @@ export function parseManualAiResponseText(text = '') {
   if (!model || typeof model !== 'object' || Array.isArray(model)) {
     return { valid: false, errors: ['AI response must be one HBDS JSON object'], model: null };
   }
-  return { valid: true, errors: [], model };
+  return { valid: true, errors: [], model: model.model || model.correctedModel || (model.hypergraph ? model : null), explanation: String(model.explanation || '') };
 }
 
 export function validateManualHbdsModelResponse(model) {

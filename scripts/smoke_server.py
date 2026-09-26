@@ -17,6 +17,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -261,6 +262,74 @@ def assert_ok(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
+def assert_backup_history() -> None:
+    hbds_server = import_hbds_server()
+    fixed_time = hbds_server._dt.datetime.now(hbds_server._dt.timezone.utc)
+    with tempfile.TemporaryDirectory(prefix="hbds-backup-test-") as directory:
+        target = Path(directory) / "history.json"
+        original = minimal_model_payload("original")
+        updated = minimal_model_payload("updated")
+        latest = minimal_model_payload("latest")
+        with patch.object(hbds_server._dt, "datetime") as clock:
+            clock.now.return_value = fixed_time
+            hbds_server.write_model_payload(target, original)
+            first = hbds_server.write_model_payload(target, updated)
+            second = hbds_server.write_model_payload(target, latest)
+            assert_ok(first != second, "Rapid saves reused a backup filename")
+            backups = target.parent / ".backups"
+            assert_ok(json.loads((backups / first).read_text(encoding="utf-8")) == original, "Original backup was overwritten")
+            assert_ok(json.loads((backups / second).read_text(encoding="utf-8")) == updated, "Intermediate backup was lost")
+            deleted_first = hbds_server.backup_model_file(target, deleted=True)
+            target.write_text(json.dumps(updated), encoding="utf-8")
+            deleted_second = hbds_server.backup_model_file(target, deleted=True)
+            assert_ok(deleted_first != deleted_second, "Repeated deletes reused a backup filename")
+            assert_ok(json.loads(deleted_first.read_text(encoding="utf-8")) == latest, "Deleted model backup was overwritten")
+
+
+def assert_revision_guards(base_url: str) -> None:
+    for scope in ("models", "test_models"):
+        name = f"_revision_guard_{os.getpid()}.json"
+        endpoint = f"/api/models/{name}" if scope == "models" else f"/api/model-files/{scope}/{name}"
+        original = minimal_model_payload("original")
+        created = request_json(base_url, endpoint, method="POST", payload=original)
+        revision = created["metadata"]["revision"]
+        try:
+            missing = request_json(base_url, endpoint, method="POST", payload=original, expected=(409,))
+            assert_ok(missing["error"]["code"] == "missing_revision", f"{scope}: missing save revision was accepted")
+            changed = minimal_model_payload("collaborator update")
+            saved = request_json(base_url, endpoint, method="POST", payload=changed, headers={"If-Match": f'"{revision}"'})
+            current_revision = saved["metadata"]["revision"]
+            stale = request_json(base_url, endpoint, method="POST", payload=original, headers={"If-Match": revision}, expected=(409,))
+            assert_ok(stale["error"]["currentRevision"] == current_revision, f"{scope}: stale save did not report current revision")
+            for ai_path in ("/api/ai/apply", "/api/ai/rollback"):
+                payload = {"scope": scope, "modelName": name, "operationMode": "improve", "saveMode": "same", "model": original}
+                missing = request_json(base_url, ai_path, method="POST", payload=payload, expected=(409,))
+                assert_ok(missing["error"]["code"] == "missing_revision", f"{ai_path}: missing revision was accepted")
+                payload["expectedRevision"] = revision
+                stale = request_json(base_url, ai_path, method="POST", payload=payload, expected=(409,))
+                assert_ok(stale["error"]["code"] == "model_conflict", f"{ai_path}: stale revision was accepted")
+            unchanged = request_json(base_url, endpoint)
+            assert_ok(unchanged["model"]["metadata"]["name"] == "collaborator update", f"{scope}: a rejected write changed the model")
+            applied = request_json(base_url, "/api/ai/apply", method="POST", payload={
+                "scope": scope, "modelName": name, "operationMode": "improve", "saveMode": "same",
+                "model": minimal_model_payload("AI update"), "expectedRevision": current_revision,
+            })
+            applied_revision = applied["metadata"]["revision"]
+            rollback = request_json(base_url, "/api/ai/rollback", method="POST", payload={
+                "scope": scope, "modelName": name, "model": changed, "expectedRevision": applied_revision,
+            })
+            assert_ok(rollback["model"]["metadata"]["name"] == "collaborator update", f"{scope}: current rollback failed")
+            stale_delete = request_json(base_url, endpoint, method="DELETE", payload={"expectedRevision": applied_revision}, expected=(409,))
+            assert_ok(stale_delete["error"]["code"] == "model_conflict", f"{scope}: stale AI rollback delete was accepted")
+            request_json(base_url, endpoint, method="DELETE", payload={"expectedRevision": rollback["metadata"]["revision"]})
+            request_json(base_url, endpoint, expected=(404,))
+        finally:
+            request_json(base_url, endpoint, method="DELETE", expected=(200, 404))
+            backup_dir = (MODELS_DIR if scope == "models" else TEST_MODELS_DIR) / ".backups"
+            for backup in backup_dir.glob(f"{Path(name).stem}.*.bak.json"):
+                backup.unlink()
+
+
 def read_until_event(base_url: str, events: queue.Queue, target_type: str = "model.updated", query: str = "") -> None:
     request = urllib.request.Request(f"{base_url}/api/events{query}", headers={"Accept": "text/event-stream"})
     try:
@@ -446,6 +515,7 @@ def assert_security_headers(headers: dict[str, str], path: str) -> None:
 def assert_hardened_static_surface(base_url: str) -> None:
     allowed_paths = (
         "/",
+        "/functor_queries.html",
         "/index.html",
         "/index_models.html",
         "/test_dynamic_hbds_layout.html",
@@ -579,6 +649,9 @@ def main() -> int:
     assert_manifest_generation_helpers()
     print("PASS manifest generator")
 
+    assert_backup_history()
+    print("PASS backup history")
+
     assert_ai_transport_guards()
     print("PASS AI transport guards")
 
@@ -592,6 +665,9 @@ def main() -> int:
     try:
         wait_for_health(base_url, process)
         print("PASS health")
+
+        assert_revision_guards(base_url)
+        print("PASS scoped save and AI revision guards")
 
         assert_hardened_static_surface(base_url)
         print("PASS hardened static surface")
@@ -733,7 +809,7 @@ def main() -> int:
             base_url,
             "/api/ai/rollback",
             method="POST",
-            payload={"scope": "models", "modelName": ai_saved_name, "model": rollback_model},
+            payload={"scope": "models", "modelName": ai_saved_name, "model": rollback_model, "expectedRevision": ai_applied["metadata"]["revision"]},
         )
         assert_ok(rollback.get("saved") == ai_saved_name, "AI rollback did not save the same model file")
         delete_applied = request_json(

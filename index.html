@@ -420,13 +420,17 @@
             </ul>
             <h3>AI Support</h3>
             <ul>
-              <li>Open AI Support in Edit or Tests to generate a new HBDS model, validate the current model, or improve the current model.</li>
-              <li>Select ChatGPT/OpenAI, Claude/Anthropic, Local/Ollama, Custom OpenAI-compatible, or ChatGPT Pro / Manual. API keys entered in the UI are held in memory only and are not saved into model JSON.</li>
-              <li>ChatGPT Pro / Manual prepares a precise HBDS prompt for copy/paste into ChatGPT, then lets you paste the JSON response back for validation.</li>
+              <li>Open AI Support in Edit or Tests to generate, validate, improve, repair validation errors, explain a selection, or improve selected classes and links. Focused edits preserve unrelated entities and existing positions.</li>
+              <li>Select ChatGPT/OpenAI, Claude/Anthropic, Local/Ollama, Custom OpenAI-compatible, or ChatGPT / Manual. API keys entered in the UI are held in memory only and are not saved into model JSON.</li>
+              <li>ChatGPT / Manual prepares a precise HBDS prompt for copy/paste into ChatGPT, then lets you paste the JSON response back for validation.</li>
               <li>Valid AI responses must be plain JSON with <code>metadata</code>, <code>hypergraph.class</code>, <code>hypergraph.link</code>, valid IDs, valid link references, and usable positions.</li>
-              <li>Apply AI Result opens the AI Changes Preview window. Preview on Canvas shows a temporary grid-arranged preview, Apply and Save updates the current file when validating or improving, and Apply as New Model creates a new file.</li>
+              <li>Refresh Available Models checks the provider's model list without generating text. Keys stay in memory. Editing requests send the current model for context; provider charges may apply when you send a request.</li>
+              <li>Apply AI Result opens a review with a checkbox and before/after details for each change. Related changes must leave a valid model. Preview on Canvas shows the selected changes without saving, Apply and Save updates the current file, and Apply as New Model creates a new file.</li>
+              <li>If the model changes while an AI request is pending, send a new request before applying its result. Cancel stops waiting locally; an already-sent provider request may still finish and incur charges.</li>
               <li>Rollback AI Apply restores the previous saved model after same-file changes, or deletes the newly-created AI model after Apply as New Model.</li>
             </ul>
+            <h3>Licensing</h3>
+            <p>Free for individual noncommercial learning, coursework, hobbies, and independent research. Companies, government bodies, and other organizations need a separate paid commercial license, including for internal use. Earlier MIT and third-party permissions remain in effect. Read the <a href="./license.html" target="_blank" rel="noopener">licensing terms and contact details</a>.</p>
           </div>
         </details>
         <details class="help-section">

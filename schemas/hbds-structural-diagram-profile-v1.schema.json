@@ -1,0 +1,340 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openbexi.local/hbds/model/v1",
+  "title": "HBDS Structural Diagram Profile v1",
+  "description": "Current renderer-compatible HBDS structural diagram contract. Repository fixtures apply additional metadata and cross-file ID rules.",
+  "$ref": "#/$defs/modelCore",
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "vector3": {
+      "type": "object",
+      "properties": {
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "z": {"type": "number", "default": 0}
+      },
+      "required": ["x", "y"],
+      "additionalProperties": true
+    },
+    "size": {
+      "type": "object",
+      "properties": {
+        "width": {"type": "number", "exclusiveMinimum": 0},
+        "height": {"type": "number", "exclusiveMinimum": 0},
+        "depth": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "required": ["width", "height"],
+      "additionalProperties": true
+    },
+    "fontSettings": {
+      "type": "object",
+      "properties": {
+        "size": {"type": "number", "exclusiveMinimum": 0},
+        "fontSize": {"type": "number", "exclusiveMinimum": 0, "deprecated": true},
+        "labelFontSize": {"type": "number", "exclusiveMinimum": 0, "deprecated": true},
+        "family": {"type": "string"},
+        "fontFamily": {"type": "string", "deprecated": true},
+        "bold": {"type": "boolean"},
+        "italic": {"type": "boolean"},
+        "underline": {"type": "boolean"},
+        "classSize": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0
+        },
+        "hyperclassSize": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0
+        },
+        "attributeSize": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0
+        },
+        "linkSize": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["none", "grid", "hierarchy", "radial", "Grid"],
+          "description": "Grid is a preserved legacy spelling; new producers should emit grid."
+        },
+        "fit": {"type": "object", "additionalProperties": true}
+      },
+      "additionalProperties": true
+    },
+    "sceneSettings": {
+      "type": "object",
+      "properties": {
+        "background": {"type": "string"},
+        "ambient": {"type": "number", "minimum": 0},
+        "front": {"type": "number", "minimum": 0},
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "intensity": {"type": "number", "minimum": 0},
+              "direction": {"$ref": "#/$defs/vector3"}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "name": {"$ref": "#/$defs/nonEmptyString"},
+        "description": {"type": "string"},
+        "purpose": {"type": "string"},
+        "version": {"type": ["string", "number"]},
+        "regressionTags": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "preserveLayout": {"type": "boolean"},
+        "layout": {"$ref": "#/$defs/layout"},
+        "font": {"$ref": "#/$defs/fontSettings"},
+        "sceneSettings": {"$ref": "#/$defs/sceneSettings"}
+      },
+      "additionalProperties": true
+    },
+    "attributeObject": {
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "name": {"type": "string"},
+        "label": {"type": "string"},
+        "description": {"type": "string"},
+        "type": {"type": "string"},
+        "value": {},
+        "font": {"$ref": "#/$defs/fontSettings"},
+        "rendering": {"type": "object", "additionalProperties": true}
+      },
+      "required": ["id"],
+      "additionalProperties": true
+    },
+    "attribute": {
+      "oneOf": [
+        {"$ref": "#/$defs/attributeObject"},
+        {"type": "string", "description": "Legacy attribute form; object form is preferred."},
+        {"type": "number", "description": "Legacy scalar fixture form; object form is preferred."},
+        {"type": "boolean", "description": "Legacy scalar fixture form; object form is preferred."},
+        {"type": "null", "description": "Legacy empty placeholder accepted for compatibility; producers should omit it."}
+      ]
+    },
+    "classBodyRendering": {
+      "type": "object",
+      "properties": {
+        "bodyType": {
+          "type": "string",
+          "enum": ["rectangle", "image", "shape"]
+        },
+        "shapeType": {
+          "type": "string",
+          "enum": [
+            "roundedRectangle",
+            "rectangle",
+            "square",
+            "circle",
+            "ellipse",
+            "diamond",
+            "triangle",
+            "pentagon",
+            "hexagon",
+            "octagon",
+            "star",
+            "capsule",
+            "parallelogram",
+            "trapezoid",
+            "invertedTrapezoid",
+            "document",
+            "paperTape",
+            "predefinedProcess",
+            "manualInput",
+            "database",
+            "directAccessStorage",
+            "internalStorage",
+            "display",
+            "storedData",
+            "triangleDown",
+            "circlePlus",
+            "circleX",
+            "offPageConnector",
+            "braceLeft",
+            "braceRight",
+            "textLines",
+            "bracketedList",
+            "table",
+            "tableColumns",
+            "tableRows"
+          ]
+        },
+        "imageSrc": {"type": "string", "minLength": 1},
+        "imageFit": {"type": "string", "enum": ["contain", "cover"]},
+        "material": {
+          "type": "string",
+          "enum": ["metallic", "flat", "basic", "matte", "mat", "glossy", "shine", "shiny", "plastic", "glass", "transparent"]
+        },
+        "surfaceMaterial": {
+          "type": "string",
+          "enum": ["metallic", "flat", "basic", "matte", "mat", "glossy", "shine", "shiny", "plastic", "glass", "transparent"],
+          "deprecated": true
+        },
+        "color": {"type": "string"},
+        "borderColor": {"type": "string"},
+        "borderWidth": {"type": "number", "minimum": 0},
+        "cornerRadius": {"type": "number", "minimum": 0},
+        "opacity": {"type": "number", "minimum": 0, "maximum": 1},
+        "metalness": {"type": "number", "minimum": 0, "maximum": 1},
+        "roughness": {"type": "number", "minimum": 0, "maximum": 1},
+        "emissiveIntensity": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": true
+    },
+    "classRendering": {
+      "type": "object",
+      "properties": {
+        "class": {"$ref": "#/$defs/classBodyRendering"},
+        "font": {"$ref": "#/$defs/fontSettings"},
+        "attributes": {"type": "object", "additionalProperties": true},
+        "connections": {"type": "object", "additionalProperties": true},
+        "textColor": {"type": "string"},
+        "color": {"type": "string"},
+        "visible": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "classNode": {
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "type": {"type": "string"},
+        "attributes": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/attribute"}
+        },
+        "position": {"$ref": "#/$defs/vector3"},
+        "size": {"$ref": "#/$defs/size"},
+        "parentClassId": {
+          "oneOf": [
+            {"$ref": "#/$defs/identifier"},
+            {"type": "null"}
+          ],
+          "description": "Visual containment only; not inheritance, membership, typing, or prototype derivation."
+        },
+        "children": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/identifier"},
+          "uniqueItems": true,
+          "description": "Visual containment only."
+        },
+        "rendering": {"$ref": "#/$defs/classRendering"},
+        "visible": {"type": "boolean"},
+        "locked": {"type": "boolean"}
+      },
+      "required": ["id"],
+      "additionalProperties": true
+    },
+    "linkRendering": {
+      "type": "object",
+      "properties": {
+        "labelText": {"type": "string"},
+        "labelVisible": {"type": "boolean"},
+        "labelFontSize": {"type": "number", "exclusiveMinimum": 0},
+        "font": {"$ref": "#/$defs/fontSettings"},
+        "lineColor": {"type": "string"},
+        "lineWidth": {"type": "number", "exclusiveMinimum": 0},
+        "lineStyle": {"type": "string", "enum": ["solid", "dashed", "dotted", "thick", "thin"]},
+        "arrowType": {
+          "type": "string",
+          "enum": ["triangle", "outline", "chevron", "double-chevron", "triple-chevron", "filled-triangle", "hollow-triangle", "dotted", "bar-arrow", "double-bar-arrow", "cone", "diamond", "none"]
+        },
+        "arrowheadType": {"type": "string", "deprecated": true},
+        "arrowDirection": {"type": "string", "enum": ["source-to-target", "target-to-source", "bidirectional", "none"]},
+        "arrowColor": {"type": "string"},
+        "arrowheadVisibility": {"type": "boolean"},
+        "arrowheadSize": {"type": "number", "exclusiveMinimum": 0},
+        "arrowheadScale": {"type": "number", "exclusiveMinimum": 0},
+        "maxArrowheadSize": {"type": "number", "exclusiveMinimum": 0},
+        "labelColor": {"type": "string"},
+        "labelBackgroundColor": {"type": "string"},
+        "labelPositionAlongPath": {"type": "number", "minimum": 0, "maximum": 1},
+        "labelOffsetFromPath": {"type": "number"},
+        "orthogonalStyle": {"type": "string", "enum": ["auto", "horizontal", "vertical"]},
+        "sourcePortSide": {"type": "string", "enum": ["top", "right", "bottom", "left"]},
+        "targetPortSide": {"type": "string", "enum": ["top", "right", "bottom", "left"]},
+        "routePoints": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/vector3"}
+        },
+        "visible": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "link": {
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "type": {"type": "string"},
+        "sourceClassId": {"$ref": "#/$defs/identifier"},
+        "targetClassId": {"$ref": "#/$defs/identifier"},
+        "allowSelfLink": {"type": "boolean"},
+        "visible": {"type": "boolean"},
+        "attributes": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/attribute"}
+        },
+        "rendering": {"$ref": "#/$defs/linkRendering"}
+      },
+      "required": ["id", "sourceClassId", "targetClassId"],
+      "additionalProperties": true
+    },
+    "hypergraph": {
+      "type": "object",
+      "properties": {
+        "class": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/classNode"}
+        },
+        "link": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/link"}
+        }
+      },
+      "required": ["class", "link"],
+      "additionalProperties": true
+    },
+    "modelCore": {
+      "type": "object",
+      "properties": {
+        "$schema": {"type": "string"},
+        "metadata": {"$ref": "#/$defs/metadata"},
+        "hypergraph": {"$ref": "#/$defs/hypergraph"}
+      },
+      "required": ["hypergraph"],
+      "additionalProperties": true
+    }
+  }
+}

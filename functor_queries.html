@@ -1,0 +1,2454 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>HBDS Query Workbench</title>
+  <style>
+    :root {
+      --page: #f4f6f8;
+      --surface: #ffffff;
+      --surface-muted: #f8fafb;
+      --ink: #17212b;
+      --ink-soft: #52606d;
+      --ink-faint: #7b8794;
+      --line: #d9e0e7;
+      --line-strong: #c5ced8;
+      --blue: #245ec7;
+      --blue-soft: #eaf1fd;
+      --teal: #08766c;
+      --teal-soft: #e5f5f1;
+      --orange: #b45309;
+      --orange-soft: #fff4e5;
+      --red: #b42318;
+      --red-soft: #fdf0ef;
+      --focus: #7aa7ee;
+      --header-height: 64px;
+      --sidebar-width: 304px;
+      --shadow: 0 10px 30px rgba(23, 33, 43, 0.11);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select {
+      color: inherit;
+      font: inherit;
+      letter-spacing: 0;
+    }
+
+    button,
+    select {
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 55%, transparent);
+      outline-offset: 1px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .topbar {
+      align-items: center;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      height: var(--header-height);
+      justify-content: space-between;
+      padding: 0 22px;
+      position: relative;
+      z-index: 30;
+    }
+
+    .brand {
+      align-items: center;
+      display: flex;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      align-items: center;
+      background: var(--ink);
+      border-radius: 6px;
+      color: #fff;
+      display: inline-flex;
+      flex: 0 0 38px;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 14px;
+      font-weight: 800;
+      height: 38px;
+      justify-content: center;
+      width: 38px;
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 750;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .brand-subtitle {
+      color: var(--ink-soft);
+      font-size: 12px;
+      line-height: 1.2;
+      margin: 3px 0 0;
+    }
+
+    .topbar-meta {
+      align-items: center;
+      display: flex;
+      gap: 18px;
+    }
+
+    .header-stat {
+      border-left: 1px solid var(--line);
+      display: grid;
+      gap: 2px;
+      padding-left: 18px;
+    }
+
+    .header-stat-label {
+      color: var(--ink-faint);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .header-stat-value {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .source-status {
+      align-items: center;
+      display: inline-flex;
+      gap: 7px;
+    }
+
+    .status-dot {
+      background: var(--teal);
+      border-radius: 50%;
+      display: inline-block;
+      height: 8px;
+      width: 8px;
+    }
+
+    .status-dot.fallback {
+      background: var(--orange);
+    }
+
+    .mobile-tests-button {
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      display: none;
+      font-weight: 700;
+      gap: 8px;
+      height: 38px;
+      padding: 0 12px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      height: calc(100% - var(--header-height));
+      min-height: 0;
+    }
+
+    .scenario-panel {
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      position: relative;
+      z-index: 25;
+    }
+
+    .scenario-panel-header {
+      border-bottom: 1px solid var(--line);
+      padding: 18px 16px 14px;
+    }
+
+    .panel-title-row {
+      align-items: baseline;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 13px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 800;
+      margin: 0;
+      text-transform: uppercase;
+    }
+
+    .scenario-count {
+      color: var(--ink-faint);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-wrap::before {
+      color: var(--ink-faint);
+      content: "\2315";
+      font-size: 20px;
+      left: 11px;
+      line-height: 1;
+      position: absolute;
+      top: 10px;
+      transform: rotate(-20deg);
+    }
+
+    .scenario-search,
+    .result-filter {
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      height: 40px;
+      width: 100%;
+    }
+
+    .scenario-search {
+      padding: 0 12px 0 37px;
+    }
+
+    .scenario-category {
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      height: 38px;
+      margin-top: 10px;
+      padding: 0 32px 0 11px;
+      width: 100%;
+    }
+
+    .scenario-list {
+      flex: 1;
+      list-style: none;
+      margin: 0;
+      min-height: 0;
+      overflow: auto;
+      padding: 0;
+    }
+
+    .scenario-list-empty {
+      color: var(--ink-soft);
+      padding: 22px 18px;
+      text-align: center;
+    }
+
+    .scenario-button {
+      align-items: stretch;
+      background: var(--surface);
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 11px;
+      grid-template-columns: 36px minmax(0, 1fr);
+      min-height: 68px;
+      padding: 11px 16px;
+      text-align: left;
+      width: 100%;
+    }
+
+    .scenario-button:hover {
+      background: var(--surface-muted);
+    }
+
+    .scenario-button[aria-current="true"] {
+      background: var(--blue-soft);
+      box-shadow: inset 3px 0 0 var(--blue);
+    }
+
+    .scenario-code {
+      align-items: center;
+      align-self: center;
+      background: #edf0f3;
+      border-radius: 5px;
+      color: var(--ink-soft);
+      display: flex;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 10px;
+      font-weight: 800;
+      height: 32px;
+      justify-content: center;
+      text-transform: uppercase;
+      width: 36px;
+    }
+
+    .scenario-button[aria-current="true"] .scenario-code {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .scenario-list-copy {
+      align-self: center;
+      min-width: 0;
+    }
+
+    .scenario-list-name {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .scenario-list-category {
+      color: var(--ink-faint);
+      display: block;
+      font-size: 11px;
+      margin-top: 4px;
+      text-transform: capitalize;
+    }
+
+    .mobile-backdrop {
+      background: rgba(23, 33, 43, 0.42);
+      inset: var(--header-height) 0 0;
+      position: fixed;
+      z-index: 20;
+    }
+
+    .main {
+      min-width: 0;
+      overflow: auto;
+    }
+
+    .main-inner {
+      margin: 0 auto;
+      max-width: 1600px;
+      min-width: 0;
+      padding: 25px 28px 36px;
+    }
+
+    .scenario-overview {
+      align-items: start;
+      display: grid;
+      gap: 28px;
+      grid-template-columns: minmax(280px, 1fr) auto;
+      min-height: 100px;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 800;
+      margin: 0 0 7px;
+      text-transform: uppercase;
+    }
+
+    .scenario-title {
+      font-size: clamp(20px, 2.1vw, 28px);
+      font-weight: 760;
+      line-height: 1.15;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .scenario-purpose {
+      color: var(--ink-soft);
+      line-height: 1.5;
+      margin: 9px 0 0;
+      max-width: 780px;
+    }
+
+    .metric-strip {
+      align-items: stretch;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(74px, 1fr));
+      min-width: 380px;
+    }
+
+    .metric {
+      border-left: 1px solid var(--line);
+      display: grid;
+      gap: 4px;
+      min-height: 70px;
+      padding: 13px 15px;
+    }
+
+    .metric:first-child {
+      border-left: 0;
+    }
+
+    .metric-value {
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .metric-label {
+      color: var(--ink-faint);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .query-band {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      margin-top: 22px;
+    }
+
+    .query-band-header {
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      min-height: 51px;
+      padding: 8px 14px 8px 18px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 800;
+      margin: 0;
+      text-transform: uppercase;
+    }
+
+    .mode-switch,
+    .view-switch {
+      background: #edf0f3;
+      border-radius: 6px;
+      display: inline-grid;
+      gap: 2px;
+      grid-auto-flow: column;
+      padding: 3px;
+    }
+
+    .mode-button,
+    .view-button {
+      background: transparent;
+      border: 0;
+      border-radius: 4px;
+      color: var(--ink-soft);
+      font-size: 12px;
+      font-weight: 750;
+      height: 32px;
+      padding: 0 12px;
+      white-space: nowrap;
+    }
+
+    .mode-button[aria-selected="true"],
+    .view-button[aria-pressed="true"] {
+      background: var(--surface);
+      box-shadow: 0 1px 3px rgba(23, 33, 43, 0.16);
+      color: var(--ink);
+    }
+
+    .query-form {
+      align-items: end;
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(190px, 0.9fr) minmax(220px, 1.4fr) auto;
+      padding: 17px 18px 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .field-label {
+      color: var(--ink-soft);
+      font-size: 11px;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    .select-control {
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      height: 42px;
+      min-width: 0;
+      padding: 0 34px 0 11px;
+      width: 100%;
+    }
+
+    .parameter-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      min-width: 0;
+    }
+
+    .run-button {
+      align-items: center;
+      background: var(--blue);
+      border: 1px solid var(--blue);
+      border-radius: 6px;
+      color: #fff;
+      display: inline-flex;
+      font-weight: 800;
+      gap: 9px;
+      height: 42px;
+      justify-content: center;
+      min-width: 112px;
+      padding: 0 17px;
+    }
+
+    .run-button:hover:not(:disabled) {
+      background: #1e4fa9;
+    }
+
+    .run-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+    }
+
+    .query-description {
+      align-items: center;
+      background: var(--surface-muted);
+      border-top: 1px solid var(--line);
+      color: var(--ink-soft);
+      display: flex;
+      gap: 9px;
+      line-height: 1.4;
+      min-height: 41px;
+      padding: 9px 18px;
+    }
+
+    .description-indicator {
+      background: var(--teal);
+      border-radius: 50%;
+      flex: 0 0 7px;
+      height: 7px;
+      width: 7px;
+    }
+
+    .description-indicator.warning {
+      background: var(--orange);
+    }
+
+    .results-section {
+      margin-top: 24px;
+      min-width: 0;
+    }
+
+    .results-toolbar {
+      align-items: end;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      margin-bottom: 11px;
+    }
+
+    .results-heading-wrap {
+      min-width: 0;
+    }
+
+    .results-title {
+      font-size: 17px;
+      font-weight: 760;
+      margin: 0;
+    }
+
+    .results-meta {
+      color: var(--ink-faint);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .results-actions {
+      align-items: center;
+      display: flex;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .result-filter {
+      max-width: 230px;
+      padding: 0 11px;
+    }
+
+    .icon-button {
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      display: inline-flex;
+      font-size: 12px;
+      font-weight: 750;
+      gap: 7px;
+      height: 38px;
+      justify-content: center;
+      padding: 0 11px;
+      white-space: nowrap;
+    }
+
+    .icon-button:hover {
+      background: var(--surface-muted);
+    }
+
+    .result-frame {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      min-height: 270px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .table-scroll {
+      max-height: 520px;
+      overflow: auto;
+    }
+
+    .result-table {
+      border-collapse: collapse;
+      min-width: 720px;
+      width: 100%;
+    }
+
+    .result-table th {
+      background: var(--surface-muted);
+      border-bottom: 1px solid var(--line-strong);
+      color: var(--ink-soft);
+      font-size: 10px;
+      position: sticky;
+      text-align: left;
+      text-transform: uppercase;
+      top: 0;
+      z-index: 2;
+    }
+
+    .sort-button {
+      align-items: center;
+      background: transparent;
+      border: 0;
+      display: flex;
+      font-size: inherit;
+      font-weight: 800;
+      gap: 6px;
+      height: 39px;
+      justify-content: flex-start;
+      padding: 0 14px;
+      text-transform: inherit;
+      width: 100%;
+    }
+
+    .result-table td {
+      border-bottom: 1px solid var(--line);
+      line-height: 1.4;
+      max-width: 440px;
+      overflow-wrap: anywhere;
+      padding: 11px 14px;
+      vertical-align: top;
+    }
+
+    .result-table tbody tr:hover {
+      background: #fbfcfd;
+    }
+
+    .result-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .cell-code {
+      color: #334155;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 12px;
+    }
+
+    .json-output {
+      color: #dce6f2;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      margin: 0;
+      max-height: 520px;
+      min-height: 270px;
+      overflow: auto;
+      padding: 18px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #19242f;
+    }
+
+    .result-state {
+      align-items: center;
+      color: var(--ink-soft);
+      display: flex;
+      flex-direction: column;
+      inset: 0;
+      justify-content: center;
+      min-height: 268px;
+      padding: 30px;
+      position: absolute;
+      text-align: center;
+    }
+
+    .state-mark {
+      align-items: center;
+      background: var(--surface-muted);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      color: var(--ink-faint);
+      display: flex;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 17px;
+      font-weight: 800;
+      height: 44px;
+      justify-content: center;
+      margin-bottom: 12px;
+      width: 44px;
+    }
+
+    .result-state.error .state-mark {
+      background: var(--red-soft);
+      border-color: #f3c6c2;
+      color: var(--red);
+    }
+
+    .result-state-title {
+      color: var(--ink);
+      font-weight: 760;
+      margin: 0 0 5px;
+    }
+
+    .result-state-copy {
+      line-height: 1.45;
+      margin: 0;
+      max-width: 520px;
+    }
+
+    .toast {
+      background: var(--ink);
+      border-radius: 6px;
+      bottom: 22px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      left: 50%;
+      padding: 10px 14px;
+      position: fixed;
+      transform: translateX(-50%);
+      z-index: 60;
+    }
+
+    @media (max-width: 1100px) {
+      .scenario-overview {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-strip {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .query-form {
+        grid-template-columns: minmax(190px, 0.8fr) minmax(260px, 1.3fr);
+      }
+
+      .run-button {
+        grid-column: 1 / -1;
+        justify-self: end;
+      }
+    }
+
+    @media (max-width: 820px) {
+      body {
+        overflow: hidden;
+      }
+
+      .topbar {
+        padding: 0 14px;
+      }
+
+      .brand-subtitle,
+      .topbar-meta {
+        display: none;
+      }
+
+      .mobile-tests-button {
+        display: inline-flex;
+      }
+
+      .workspace {
+        display: block;
+      }
+
+      .scenario-panel {
+        bottom: 0;
+        box-shadow: var(--shadow);
+        left: 0;
+        position: fixed;
+        top: var(--header-height);
+        transform: translateX(-105%);
+        transition: transform 160ms ease;
+        width: min(332px, calc(100vw - 44px));
+      }
+
+      .scenario-panel.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        height: 100%;
+      }
+
+      .main-inner {
+        padding: 19px 18px 30px;
+      }
+
+      .results-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .results-actions {
+        flex-wrap: wrap;
+      }
+
+      .result-filter {
+        flex: 1 1 180px;
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .brand-title {
+        font-size: 14px;
+      }
+
+      .brand-mark {
+        flex-basis: 34px;
+        height: 34px;
+        width: 34px;
+      }
+
+      .scenario-overview {
+        gap: 18px;
+      }
+
+      .scenario-title {
+        font-size: 22px;
+      }
+
+      .metric-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .metric:nth-child(3) {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .metric:nth-child(4) {
+        border-top: 1px solid var(--line);
+      }
+
+      .query-band-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 9px;
+        padding: 12px;
+      }
+
+      .mode-switch {
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+      }
+
+      .mode-button {
+        min-width: 0;
+        padding: 0 7px;
+      }
+
+      .query-form {
+        display: flex;
+        flex-direction: column;
+        padding: 14px 12px 12px;
+      }
+
+      .field,
+      .parameter-grid,
+      .run-button {
+        width: 100%;
+      }
+
+      .parameter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .run-button {
+        justify-self: stretch;
+      }
+
+      .query-description {
+        padding: 10px 12px;
+      }
+
+      .results-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .result-filter {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .view-switch {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .view-button {
+        padding: 0 10px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">F()</span>
+      <div class="brand-copy">
+        <p class="brand-title">HBDS Query Workbench</p>
+        <p class="brand-subtitle">Test scenarios and semantic functors</p>
+      </div>
+    </div>
+    <div class="topbar-meta" aria-label="Data source status">
+      <div class="header-stat">
+        <span class="header-stat-label">Scenarios</span>
+        <span class="header-stat-value" id="header-scenario-count">0 loaded</span>
+      </div>
+      <div class="header-stat">
+        <span class="header-stat-label">Source</span>
+        <span class="header-stat-value source-status">
+          <span class="status-dot" id="source-dot"></span>
+          <span id="source-label">Loading</span>
+        </span>
+      </div>
+    </div>
+    <button class="mobile-tests-button" id="mobile-tests-button" type="button" aria-controls="scenario-panel" aria-expanded="false">
+      <span aria-hidden="true">&#9776;</span>
+      Tests
+    </button>
+  </header>
+
+  <div class="workspace">
+    <aside class="scenario-panel" id="scenario-panel" aria-label="Test scenarios">
+      <div class="scenario-panel-header">
+        <div class="panel-title-row">
+          <h2 class="panel-title">Test scenarios</h2>
+          <span class="scenario-count" id="scenario-count">0</span>
+        </div>
+        <div class="search-wrap">
+          <label for="scenario-search" hidden>Search test scenarios</label>
+          <input class="scenario-search" id="scenario-search" type="search" placeholder="Search tests" autocomplete="off">
+        </div>
+        <label for="scenario-category" hidden>Filter by category</label>
+        <select class="scenario-category" id="scenario-category">
+          <option value="">All categories</option>
+        </select>
+      </div>
+      <ul class="scenario-list" id="scenario-list"></ul>
+    </aside>
+    <div class="mobile-backdrop" id="mobile-backdrop" hidden></div>
+
+    <main class="main" id="main-content">
+      <div class="main-inner">
+        <section class="scenario-overview" aria-labelledby="scenario-title">
+          <div>
+            <p class="eyebrow" id="scenario-eyebrow">Selected test</p>
+            <h1 class="scenario-title" id="scenario-title">Loading scenarios</h1>
+            <p class="scenario-purpose" id="scenario-purpose">Loading the HBDS test manifest.</p>
+          </div>
+          <div class="metric-strip" aria-label="Selected test summary">
+            <div class="metric">
+              <span class="metric-value" id="metric-classes">-</span>
+              <span class="metric-label">Classes</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="metric-attributes">-</span>
+              <span class="metric-label">Attributes</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="metric-links">-</span>
+              <span class="metric-label">Relations</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="metric-objects">-</span>
+              <span class="metric-label">Objects</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="query-band" aria-labelledby="query-builder-title">
+          <div class="query-band-header">
+            <h2 class="section-title" id="query-builder-title">Query builder</h2>
+            <div class="mode-switch" role="tablist" aria-label="Query family">
+              <button class="mode-button" id="structural-mode" type="button" role="tab" aria-selected="true">Structural queries</button>
+              <button class="mode-button" id="semantic-mode" type="button" role="tab" aria-selected="false">Semantic functors</button>
+            </div>
+          </div>
+          <form class="query-form" id="query-form">
+            <label class="field" for="operation-select">
+              <span class="field-label">Operation</span>
+              <select class="select-control" id="operation-select"></select>
+            </label>
+            <div class="parameter-grid" id="parameter-grid"></div>
+            <button class="run-button" id="run-button" type="submit" disabled>
+              <span aria-hidden="true">&#9654;</span>
+              Run
+            </button>
+          </form>
+          <div class="query-description" id="query-description">
+            <span class="description-indicator" id="description-indicator"></span>
+            <span id="query-description-text">Preparing query operations.</span>
+          </div>
+        </section>
+
+        <section class="results-section" aria-labelledby="results-title">
+          <div class="results-toolbar">
+            <div class="results-heading-wrap">
+              <h2 class="results-title" id="results-title">Results</h2>
+              <div class="results-meta" id="results-meta" aria-live="polite">No query executed</div>
+            </div>
+            <div class="results-actions">
+              <label for="result-filter" hidden>Filter query results</label>
+              <input class="result-filter" id="result-filter" type="search" placeholder="Filter results" autocomplete="off">
+              <div class="view-switch" aria-label="Result view">
+                <button class="view-button" id="table-view-button" type="button" aria-pressed="true">Table</button>
+                <button class="view-button" id="json-view-button" type="button" aria-pressed="false">JSON</button>
+              </div>
+              <button class="icon-button" id="copy-button" type="button" title="Copy results">
+                <span aria-hidden="true">&#10697;</span>
+                Copy
+              </button>
+            </div>
+          </div>
+          <div class="result-frame" id="result-frame">
+            <div class="table-scroll" id="table-scroll" hidden>
+              <table class="result-table" id="result-table">
+                <thead id="result-head"></thead>
+                <tbody id="result-body"></tbody>
+              </table>
+            </div>
+            <pre class="json-output" id="json-output" hidden></pre>
+            <div class="result-state" id="result-state">
+              <div class="state-mark" aria-hidden="true">...</div>
+              <p class="result-state-title" id="result-state-title">Loading test scenarios</p>
+              <p class="result-state-copy" id="result-state-copy">The selected test will be ready shortly.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STRUCTURAL_OPERATIONS = [
+        { id: "classes", label: "List classes", description: "Returns every class definition, including its type, parent, and attribute count." },
+        { id: "attributes", label: "List attributes", description: "Returns attributes for all classes or for one selected class." },
+        { id: "relationships", label: "List relationships", description: "Returns class-level relationships with resolved source and target names." },
+        { id: "hyperclasses", label: "List hyperclasses", description: "Returns container classes and their declared child classes." },
+        { id: "objects", label: "List semantic objects", description: "Returns object-layer instances and their resolved class definitions." },
+        { id: "metadata", label: "Show metadata", description: "Returns the selected test's top-level metadata as structured fields." },
+        { id: "summary", label: "Model summary", description: "Returns structural and semantic element counts for the selected test." }
+      ];
+
+      var SEMANTIC_OPERATIONS = [
+        { id: "direct", label: "Direct functor", description: "Traverses object links from source objects to target objects." },
+        { id: "inverse", label: "Inverse functor", description: "Traverses object links from target objects back to source objects." },
+        { id: "homogeneous", label: "Homogeneous functor", description: "Traverses a same-class relationship in either direction." },
+        { id: "composed", label: "Composed functor", description: "Runs the ordered functor steps from a semantic query example." }
+      ];
+
+      var FALLBACK_SCENARIOS = [
+        {
+          value: "embedded:layout_003",
+          label: "layout 003 two classes attributes",
+          description: "Two classes, six attributes, and one relationship.",
+          model: {
+            metadata: {
+              name: "Layout 003 Two Classes Attributes",
+              purpose: "Validates two independent class bodies, attribute blocks, and one relationship.",
+              regressionTags: ["layout", "links"]
+            },
+            hypergraph: {
+              class: [
+                {
+                  id: "class_customer",
+                  name: "Customer",
+                  type: "roundedRectangle",
+                  parentClassId: null,
+                  attributes: [
+                    { id: "customer_name", name: "name" },
+                    { id: "customer_tier", name: "tier" },
+                    { id: "customer_region", name: "region" }
+                  ]
+                },
+                {
+                  id: "class_order",
+                  name: "Order",
+                  type: "roundedRectangle",
+                  parentClassId: null,
+                  attributes: [
+                    { id: "order_id", name: "orderId" },
+                    { id: "order_status", name: "status" },
+                    { id: "order_total", name: "total" }
+                  ]
+                }
+              ],
+              link: [
+                {
+                  id: "link_customer_order",
+                  sourceClassId: "class_customer",
+                  targetClassId: "class_order",
+                  name: "places"
+                }
+              ]
+            }
+          }
+        },
+        {
+          value: "embedded:semantics_035",
+          label: "semantics 035 object layer functors profiles",
+          description: "Semantic object layer with direct, inverse, homogeneous, and composed examples.",
+          model: {
+            metadata: {
+              id: "sem35_fixture",
+              name: "Semantics 035 Object Layer Functors Profiles",
+              purpose: "Regression fixture for classes, objects, deterministic functors, and semantic profiles.",
+              semanticVersion: 1,
+              semanticProfiles: ["units", "temporal", "geospatial", "fuzzy", "prototype"],
+              regressionTags: ["semantics", "objects", "functors"],
+              semanticExamples: {
+                functorQueries: [
+                  {
+                    id: "sem35_query_direct",
+                    query: {
+                      startObjectIds: ["obj_relay"],
+                      steps: [{ kind: "direct", classLinkId: "link_connects" }]
+                    },
+                    expectedObjectIds: ["obj_site_a"]
+                  },
+                  {
+                    id: "sem35_query_inverse",
+                    query: {
+                      startObjectIds: ["obj_site_a"],
+                      steps: [{ kind: "inverse", classLinkId: "link_connects" }]
+                    },
+                    expectedObjectIds: ["obj_relay"]
+                  },
+                  {
+                    id: "sem35_query_homogeneous",
+                    query: {
+                      startObjectIds: ["obj_site_a"],
+                      steps: [{ kind: "homogeneous", classLinkId: "link_peers", direction: "both" }]
+                    },
+                    expectedObjectIds: ["obj_site_b"]
+                  },
+                  {
+                    id: "sem35_query_composed",
+                    query: {
+                      startObjectIds: ["obj_scenario"],
+                      steps: [
+                        { kind: "direct", classLinkId: "link_selects" },
+                        { kind: "direct", classLinkId: "link_connects" }
+                      ]
+                    },
+                    expectedObjectIds: ["obj_site_a"]
+                  }
+                ]
+              }
+            },
+            hypergraph: {
+              class: [
+                {
+                  id: "hc_operations",
+                  name: "Operations",
+                  type: "hyperclass",
+                  children: ["class_relay", "class_site", "class_scenario"],
+                  attributes: [{ id: "operations_scope", name: "runtimeSemantics" }]
+                },
+                {
+                  id: "class_relay",
+                  name: "Relay",
+                  type: "roundedRectangle",
+                  parentClassId: "hc_operations",
+                  attributes: [
+                    { id: "relay_mass", name: "mass" },
+                    { id: "relay_readiness", name: "readiness" }
+                  ]
+                },
+                {
+                  id: "class_site",
+                  name: "Control Site",
+                  type: "roundedRectangle",
+                  parentClassId: "hc_operations",
+                  attributes: [
+                    { id: "site_code", name: "siteCode" },
+                    { id: "site_position", name: "position" }
+                  ]
+                },
+                {
+                  id: "class_scenario",
+                  name: "Scenario",
+                  type: "roundedRectangle",
+                  parentClassId: "hc_operations",
+                  attributes: [{ id: "scenario_code", name: "scenarioCode" }]
+                }
+              ],
+              link: [
+                { id: "link_selects", name: "selects", sourceClassId: "class_scenario", targetClassId: "class_relay" },
+                { id: "link_connects", name: "connects to", sourceClassId: "class_relay", targetClassId: "class_site" },
+                { id: "link_peers", name: "peers with", sourceClassId: "class_site", targetClassId: "class_site" }
+              ],
+              object: [
+                { id: "obj_relay", name: "Relay One", classId: "class_relay" },
+                { id: "obj_site_a", name: "Control Site A", classId: "class_site" },
+                { id: "obj_site_b", name: "Control Site B", classId: "class_site" },
+                { id: "obj_scenario", name: "Regression Scenario", classId: "class_scenario" }
+              ],
+              objectLink: [
+                { id: "ol_scenario_relay", classLinkId: "link_selects", sourceObjectId: "obj_scenario", targetObjectId: "obj_relay" },
+                { id: "ol_relay_site", classLinkId: "link_connects", sourceObjectId: "obj_relay", targetObjectId: "obj_site_a" },
+                { id: "ol_site_peers", classLinkId: "link_peers", sourceObjectId: "obj_site_a", targetObjectId: "obj_site_b" }
+              ]
+            }
+          }
+        },
+        {
+          value: "embedded:edge_020",
+          label: "edge 020 defaults empty attributes",
+          description: "Minimal edge-case fixture with empty attribute collections.",
+          model: {
+            metadata: {
+              name: "Edge 020 Defaults Empty Attributes",
+              purpose: "Validates safe defaults and empty attribute collections.",
+              regressionTags: ["edge", "defaults"]
+            },
+            hypergraph: {
+              class: [
+                { id: "class_empty", name: "Empty Class", type: "rectangle", attributes: [] }
+              ],
+              link: []
+            }
+          }
+        }
+      ];
+
+      var state = {
+        scenarios: [],
+        scenario: null,
+        model: null,
+        modelCache: new Map(),
+        source: "embedded",
+        mode: "structural",
+        operation: "classes",
+        classFilter: "",
+        semanticStart: "",
+        semanticLink: "",
+        composedExample: "",
+        rows: [],
+        columns: [],
+        resultTitle: "Results",
+        resultMeta: "No query executed",
+        resultFilter: "",
+        sortKey: "",
+        sortDirection: "asc",
+        view: "table",
+        loading: false,
+        error: "",
+        drawerOpen: false,
+        toastTimer: 0
+      };
+
+      var elements = {
+        headerScenarioCount: document.getElementById("header-scenario-count"),
+        sourceDot: document.getElementById("source-dot"),
+        sourceLabel: document.getElementById("source-label"),
+        scenarioPanel: document.getElementById("scenario-panel"),
+        scenarioCount: document.getElementById("scenario-count"),
+        scenarioSearch: document.getElementById("scenario-search"),
+        scenarioCategory: document.getElementById("scenario-category"),
+        scenarioList: document.getElementById("scenario-list"),
+        mobileTestsButton: document.getElementById("mobile-tests-button"),
+        mobileBackdrop: document.getElementById("mobile-backdrop"),
+        scenarioEyebrow: document.getElementById("scenario-eyebrow"),
+        scenarioTitle: document.getElementById("scenario-title"),
+        scenarioPurpose: document.getElementById("scenario-purpose"),
+        metricClasses: document.getElementById("metric-classes"),
+        metricAttributes: document.getElementById("metric-attributes"),
+        metricLinks: document.getElementById("metric-links"),
+        metricObjects: document.getElementById("metric-objects"),
+        structuralMode: document.getElementById("structural-mode"),
+        semanticMode: document.getElementById("semantic-mode"),
+        queryForm: document.getElementById("query-form"),
+        operationSelect: document.getElementById("operation-select"),
+        parameterGrid: document.getElementById("parameter-grid"),
+        runButton: document.getElementById("run-button"),
+        descriptionIndicator: document.getElementById("description-indicator"),
+        queryDescriptionText: document.getElementById("query-description-text"),
+        resultsTitle: document.getElementById("results-title"),
+        resultsMeta: document.getElementById("results-meta"),
+        resultFilter: document.getElementById("result-filter"),
+        tableViewButton: document.getElementById("table-view-button"),
+        jsonViewButton: document.getElementById("json-view-button"),
+        copyButton: document.getElementById("copy-button"),
+        tableScroll: document.getElementById("table-scroll"),
+        resultHead: document.getElementById("result-head"),
+        resultBody: document.getElementById("result-body"),
+        jsonOutput: document.getElementById("json-output"),
+        resultState: document.getElementById("result-state"),
+        resultStateTitle: document.getElementById("result-state-title"),
+        resultStateCopy: document.getElementById("result-state-copy"),
+        toast: document.getElementById("toast")
+      };
+
+      function arrayValue(root, singular, plural) {
+        var model = root && typeof root === "object" ? root : {};
+        var hypergraph = model.hypergraph && typeof model.hypergraph === "object" ? model.hypergraph : {};
+        var candidates = [
+          hypergraph[singular],
+          hypergraph[plural],
+          model[singular],
+          model[plural]
+        ];
+        for (var index = 0; index < candidates.length; index += 1) {
+          if (Array.isArray(candidates[index])) return candidates[index];
+        }
+        return [];
+      }
+
+      function classesOf(model) {
+        return arrayValue(model, "class", "classes").filter(function (item) {
+          return item && typeof item === "object";
+        });
+      }
+
+      function linksOf(model) {
+        return arrayValue(model, "link", "links").filter(function (item) {
+          return item && typeof item === "object";
+        });
+      }
+
+      function objectsOf(model) {
+        return arrayValue(model, "object", "objects").filter(function (item) {
+          return item && typeof item === "object";
+        });
+      }
+
+      function objectLinksOf(model) {
+        return arrayValue(model, "objectLink", "objectLinks").filter(function (item) {
+          return item && typeof item === "object";
+        });
+      }
+
+      function membershipsOf(model) {
+        return arrayValue(model, "membership", "memberships").filter(function (item) {
+          return item && typeof item === "object";
+        });
+      }
+
+      function inheritancesOf(model) {
+        return arrayValue(model, "inheritance", "inheritances").filter(function (item) {
+          return item && typeof item === "object";
+        });
+      }
+
+      function isHyperclass(item) {
+        return String(item && item.type || "").toLowerCase() === "hyperclass";
+      }
+
+      function attributeRecords(model) {
+        var rows = [];
+        classesOf(model).forEach(function (owner) {
+          var attributes = Array.isArray(owner.attributes) ? owner.attributes : [];
+          attributes.forEach(function (attribute, index) {
+            var record = attribute && typeof attribute === "object" && !Array.isArray(attribute)
+              ? attribute
+              : { name: attribute == null ? "(empty)" : String(attribute) };
+            rows.push({
+              attribute: record.name || record.label || record.id || "Attribute " + (index + 1),
+              id: record.id || "",
+              owner: owner.name || owner.id || "(unnamed class)",
+              ownerId: owner.id || "",
+              type: record.dataType || record.type || ""
+            });
+          });
+        });
+        return rows;
+      }
+
+      function modelStats(model) {
+        var allClasses = classesOf(model);
+        return {
+          classes: allClasses.filter(function (item) { return !isHyperclass(item); }).length,
+          hyperclasses: allClasses.filter(isHyperclass).length,
+          attributes: attributeRecords(model).length,
+          links: linksOf(model).length,
+          objects: objectsOf(model).length,
+          objectLinks: objectLinksOf(model).length,
+          memberships: membershipsOf(model).length,
+          inheritances: inheritancesOf(model).length
+        };
+      }
+
+      function cleanText(value) {
+        return String(value == null ? "" : value).trim();
+      }
+
+      function compareText(left, right) {
+        return cleanText(left).localeCompare(cleanText(right), "en", {
+          numeric: true,
+          sensitivity: "base"
+        });
+      }
+
+      function categoryOf(scenario) {
+        var source = cleanText(scenario && (scenario.value || scenario.label));
+        source = source.split("/").pop().replace(/^embedded:/, "");
+        return source.split(/[_\s-]+/)[0].toLowerCase() || "other";
+      }
+
+      function categoryCode(category) {
+        var codes = {
+          layout: "LA",
+          links: "LI",
+          render: "RE",
+          stress: "ST",
+          text: "TX",
+          edge: "ED",
+          fit: "FT",
+          semantics: "SE"
+        };
+        return codes[category] || category.slice(0, 2).toUpperCase();
+      }
+
+      function displayScenarioLabel(scenario) {
+        return cleanText(scenario && scenario.label)
+          .replace(/\.json$/i, "")
+          .replace(/[_-]+/g, " ")
+          .replace(/\b([a-z])/g, function (match) { return match.toUpperCase(); });
+      }
+
+      function modelName(model, scenario) {
+        return cleanText(model && model.metadata && model.metadata.name)
+          || displayScenarioLabel(scenario)
+          || "Untitled test";
+      }
+
+      function formatValue(value) {
+        if (value == null) return "";
+        if (Array.isArray(value)) {
+          return value.map(function (item) {
+            return item && typeof item === "object" ? JSON.stringify(item) : cleanText(item);
+          }).join(", ");
+        }
+        if (typeof value === "object") return JSON.stringify(value);
+        if (typeof value === "boolean") return value ? "Yes" : "No";
+        return String(value);
+      }
+
+      function persistSelection() {
+        try {
+          if (state.scenario) localStorage.setItem("hbds-query-scenario", state.scenario.value);
+        } catch (error) {
+          return;
+        }
+      }
+
+      function savedSelection() {
+        try {
+          return localStorage.getItem("hbds-query-scenario") || "";
+        } catch (error) {
+          return "";
+        }
+      }
+
+      function setDrawer(open) {
+        state.drawerOpen = Boolean(open);
+        elements.scenarioPanel.classList.toggle("open", state.drawerOpen);
+        elements.mobileTestsButton.setAttribute("aria-expanded", state.drawerOpen ? "true" : "false");
+        elements.mobileBackdrop.hidden = !state.drawerOpen;
+      }
+
+      function showToast(message) {
+        window.clearTimeout(state.toastTimer);
+        elements.toast.textContent = message;
+        elements.toast.hidden = false;
+        state.toastTimer = window.setTimeout(function () {
+          elements.toast.hidden = true;
+        }, 1800);
+      }
+
+      function renderSourceStatus() {
+        var isManifest = state.source === "manifest";
+        elements.sourceDot.classList.toggle("fallback", !isManifest);
+        elements.sourceLabel.textContent = isManifest ? "Test manifest" : "Embedded samples";
+        elements.headerScenarioCount.textContent = state.scenarios.length + " loaded";
+      }
+
+      function renderCategoryOptions() {
+        var selected = elements.scenarioCategory.value;
+        var categories = Array.from(new Set(state.scenarios.map(categoryOf))).sort(compareText);
+        elements.scenarioCategory.replaceChildren();
+        var allOption = document.createElement("option");
+        allOption.value = "";
+        allOption.textContent = "All categories";
+        elements.scenarioCategory.appendChild(allOption);
+        categories.forEach(function (category) {
+          var option = document.createElement("option");
+          option.value = category;
+          option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+          elements.scenarioCategory.appendChild(option);
+        });
+        elements.scenarioCategory.value = categories.includes(selected) ? selected : "";
+      }
+
+      function filteredScenarios() {
+        var query = cleanText(elements.scenarioSearch.value).toLowerCase();
+        var category = elements.scenarioCategory.value;
+        return state.scenarios.filter(function (scenario) {
+          var matchesCategory = !category || categoryOf(scenario) === category;
+          var haystack = [
+            scenario.label,
+            scenario.description,
+            scenario.value,
+            categoryOf(scenario)
+          ].join(" ").toLowerCase();
+          return matchesCategory && (!query || haystack.includes(query));
+        });
+      }
+
+      function renderScenarioList() {
+        var scenarios = filteredScenarios();
+        elements.scenarioList.replaceChildren();
+        elements.scenarioCount.textContent = scenarios.length + " of " + state.scenarios.length;
+        if (!scenarios.length) {
+          var empty = document.createElement("li");
+          empty.className = "scenario-list-empty";
+          empty.textContent = "No matching tests";
+          elements.scenarioList.appendChild(empty);
+          return;
+        }
+        scenarios.forEach(function (scenario) {
+          var item = document.createElement("li");
+          var button = document.createElement("button");
+          var code = document.createElement("span");
+          var copy = document.createElement("span");
+          var name = document.createElement("span");
+          var category = document.createElement("span");
+          button.className = "scenario-button";
+          button.type = "button";
+          button.setAttribute("aria-current", state.scenario && state.scenario.value === scenario.value ? "true" : "false");
+          button.addEventListener("click", function () {
+            selectScenario(scenario);
+            setDrawer(false);
+          });
+          code.className = "scenario-code";
+          code.textContent = categoryCode(categoryOf(scenario));
+          copy.className = "scenario-list-copy";
+          name.className = "scenario-list-name";
+          name.textContent = displayScenarioLabel(scenario);
+          category.className = "scenario-list-category";
+          category.textContent = categoryOf(scenario);
+          copy.append(name, category);
+          button.append(code, copy);
+          item.appendChild(button);
+          elements.scenarioList.appendChild(item);
+        });
+      }
+
+      function setOverviewLoading(scenario) {
+        elements.scenarioEyebrow.textContent = categoryOf(scenario) + " test";
+        elements.scenarioTitle.textContent = displayScenarioLabel(scenario);
+        elements.scenarioPurpose.textContent = "Loading selected test data.";
+        [elements.metricClasses, elements.metricAttributes, elements.metricLinks, elements.metricObjects].forEach(function (element) {
+          element.textContent = "-";
+        });
+      }
+
+      function renderOverview() {
+        if (!state.model || !state.scenario) return;
+        var stats = modelStats(state.model);
+        var metadata = state.model.metadata || {};
+        elements.scenarioEyebrow.textContent = categoryOf(state.scenario) + " test";
+        elements.scenarioTitle.textContent = modelName(state.model, state.scenario);
+        elements.scenarioPurpose.textContent = cleanText(metadata.purpose)
+          || cleanText(state.scenario.description)
+          || "HBDS test scenario";
+        elements.metricClasses.textContent = stats.classes;
+        elements.metricAttributes.textContent = stats.attributes;
+        elements.metricLinks.textContent = stats.links;
+        elements.metricObjects.textContent = stats.objects;
+      }
+
+      async function fetchJson(path) {
+        var response = await fetch(path, { cache: "no-store" });
+        if (!response.ok) throw new Error("Request failed with status " + response.status);
+        return response.json();
+      }
+
+      async function loadManifest() {
+        if (window.location.protocol === "file:") {
+          state.source = "embedded";
+          state.scenarios = FALLBACK_SCENARIOS;
+          return;
+        }
+        try {
+          var manifest = await fetchJson("test_models/test_models_manifest.json");
+          if (!manifest || !Array.isArray(manifest.models) || !manifest.models.length) {
+            throw new Error("Test manifest is empty");
+          }
+          state.source = "manifest";
+          state.scenarios = manifest.models.map(function (scenario) {
+            return {
+              value: cleanText(scenario.value),
+              label: cleanText(scenario.label || scenario.value),
+              description: cleanText(scenario.description)
+            };
+          }).filter(function (scenario) { return scenario.value; });
+        } catch (error) {
+          state.source = "embedded";
+          state.scenarios = FALLBACK_SCENARIOS;
+        }
+      }
+
+      async function loadScenarioModel(scenario) {
+        if (scenario.model) return scenario.model;
+        if (state.modelCache.has(scenario.value)) return state.modelCache.get(scenario.value);
+        var model = await fetchJson(scenario.value);
+        state.modelCache.set(scenario.value, model);
+        return model;
+      }
+
+      async function selectScenario(scenario) {
+        if (!scenario || state.loading) return;
+        state.scenario = scenario;
+        state.loading = true;
+        state.error = "";
+        state.rows = [];
+        state.columns = [];
+        persistSelection();
+        renderScenarioList();
+        setOverviewLoading(scenario);
+        renderQueryControls();
+        renderResultState("loading", "Loading test data", displayScenarioLabel(scenario));
+        try {
+          state.model = await loadScenarioModel(scenario);
+          state.loading = false;
+          renderOverview();
+          resetOperationParameters();
+          renderQueryControls();
+          var availability = queryAvailability();
+          if (availability.enabled) {
+            runQuery();
+          } else {
+            renderResultState("empty", "Functor unavailable", availability.message);
+          }
+        } catch (error) {
+          state.model = null;
+          state.loading = false;
+          state.error = cleanText(error && error.message) || "The selected test could not be loaded.";
+          renderQueryControls();
+          renderResultState("error", "Test could not be loaded", state.error);
+        }
+      }
+
+      function currentOperations() {
+        return state.mode === "semantic" ? SEMANTIC_OPERATIONS : STRUCTURAL_OPERATIONS;
+      }
+
+      function currentOperation() {
+        return currentOperations().find(function (operation) {
+          return operation.id === state.operation;
+        }) || currentOperations()[0];
+      }
+
+      function semanticExamples(kind) {
+        var metadata = state.model && state.model.metadata || {};
+        var examples = metadata.semanticExamples && metadata.semanticExamples.functorQueries;
+        if (!Array.isArray(examples)) return [];
+        return examples.filter(function (example) {
+          var steps = example && example.query && Array.isArray(example.query.steps) ? example.query.steps : [];
+          if (kind === "composed") return steps.length > 1;
+          return steps.length === 1 && cleanText(steps[0].kind || steps[0].functor).toLowerCase() === kind;
+        });
+      }
+
+      function resetOperationParameters() {
+        state.classFilter = "";
+        state.semanticStart = "";
+        state.semanticLink = "";
+        state.composedExample = "";
+        if (state.mode !== "semantic" || !state.model) return;
+        var examples = semanticExamples(state.operation);
+        if (examples.length) {
+          var example = examples[0];
+          var query = example.query || {};
+          var step = Array.isArray(query.steps) ? query.steps[0] || {} : {};
+          state.semanticStart = cleanText(Array.isArray(query.startObjectIds) ? query.startObjectIds[0] : query.startObjectIds);
+          state.semanticLink = cleanText(step.classLinkId || step.linkId || step.relationshipId);
+          state.composedExample = cleanText(example.id);
+        } else {
+          var objects = objectsOf(state.model);
+          var links = linksOf(state.model);
+          state.semanticStart = objects.length ? cleanText(objects[0].id) : "";
+          state.semanticLink = links.length ? cleanText(links[0].id) : "";
+        }
+      }
+
+      function createField(labelText, control) {
+        var label = document.createElement("label");
+        var span = document.createElement("span");
+        label.className = "field";
+        span.className = "field-label";
+        span.textContent = labelText;
+        label.append(span, control);
+        return label;
+      }
+
+      function createSelect(id, options, selectedValue, onChange) {
+        var select = document.createElement("select");
+        select.className = "select-control";
+        select.id = id;
+        options.forEach(function (item) {
+          var option = document.createElement("option");
+          option.value = item.value;
+          option.textContent = item.label;
+          option.disabled = Boolean(item.disabled);
+          select.appendChild(option);
+        });
+        select.value = selectedValue;
+        select.addEventListener("change", function () {
+          onChange(select.value);
+        });
+        return select;
+      }
+
+      function renderOperationOptions() {
+        var operations = currentOperations();
+        elements.operationSelect.replaceChildren();
+        operations.forEach(function (operation) {
+          var option = document.createElement("option");
+          option.value = operation.id;
+          option.textContent = operation.label;
+          elements.operationSelect.appendChild(option);
+        });
+        if (!operations.some(function (operation) { return operation.id === state.operation; })) {
+          state.operation = operations[0].id;
+        }
+        elements.operationSelect.value = state.operation;
+      }
+
+      function renderStructuralParameters() {
+        if (state.operation !== "attributes") {
+          var noParameters = document.createElement("div");
+          noParameters.className = "field";
+          var label = document.createElement("span");
+          var value = document.createElement("span");
+          label.className = "field-label";
+          label.textContent = "Scope";
+          value.className = "select-control";
+          value.style.alignItems = "center";
+          value.style.display = "flex";
+          value.textContent = "Entire selected test";
+          noParameters.append(label, value);
+          elements.parameterGrid.appendChild(noParameters);
+          return;
+        }
+        var options = [{ value: "", label: "All classes" }];
+        classesOf(state.model).forEach(function (item) {
+          options.push({
+            value: cleanText(item.id),
+            label: cleanText(item.name || item.id) || "(unnamed class)"
+          });
+        });
+        var classSelect = createSelect("class-filter-select", options, state.classFilter, function (value) {
+          state.classFilter = value;
+        });
+        elements.parameterGrid.appendChild(createField("Class scope", classSelect));
+      }
+
+      function objectLabel(object, classById) {
+        var className = classById.get(cleanText(object.classId));
+        var base = cleanText(object.name || object.id) || "(unnamed object)";
+        return className ? base + " - " + className : base;
+      }
+
+      function renderSemanticParameters() {
+        var allObjects = objectsOf(state.model);
+        var allLinks = linksOf(state.model);
+        var classById = new Map(classesOf(state.model).map(function (item) {
+          return [cleanText(item.id), cleanText(item.name || item.id)];
+        }));
+
+        if (state.operation === "composed") {
+          var examples = semanticExamples("composed");
+          var exampleOptions = examples.map(function (example) {
+            var steps = example.query && Array.isArray(example.query.steps) ? example.query.steps : [];
+            return {
+              value: cleanText(example.id),
+              label: cleanText(example.id).replace(/[_-]+/g, " ") + " (" + steps.length + " steps)"
+            };
+          });
+          if (!exampleOptions.length) {
+            exampleOptions.push({ value: "", label: "No composed examples available", disabled: true });
+          }
+          var exampleSelect = createSelect("composed-example-select", exampleOptions, state.composedExample, function (value) {
+            state.composedExample = value;
+          });
+          elements.parameterGrid.appendChild(createField("Query example", exampleSelect));
+          return;
+        }
+
+        var objectOptions = allObjects.map(function (object) {
+          return {
+            value: cleanText(object.id),
+            label: objectLabel(object, classById)
+          };
+        });
+        if (!objectOptions.length) {
+          objectOptions.push({ value: "", label: "No semantic objects available", disabled: true });
+        }
+        var objectSelect = createSelect("start-object-select", objectOptions, state.semanticStart, function (value) {
+          state.semanticStart = value;
+        });
+        elements.parameterGrid.appendChild(createField("Start object", objectSelect));
+
+        var linkOptions = [{ value: "", label: "Any relationship" }].concat(allLinks.map(function (link) {
+          return {
+            value: cleanText(link.id),
+            label: cleanText(link.name || link.id) || "(unnamed relationship)"
+          };
+        }));
+        var linkSelect = createSelect("semantic-link-select", linkOptions, state.semanticLink, function (value) {
+          state.semanticLink = value;
+        });
+        elements.parameterGrid.appendChild(createField("Relationship", linkSelect));
+      }
+
+      function queryAvailability() {
+        if (state.loading) return { enabled: false, message: "Loading selected test data.", warning: false };
+        if (!state.model) return { enabled: false, message: state.error || "No test is selected.", warning: true };
+        if (state.mode === "structural") return { enabled: true, message: currentOperation().description, warning: false };
+        if (!objectsOf(state.model).length || !objectLinksOf(state.model).length) {
+          return {
+            enabled: false,
+            message: "This test has no semantic object-link layer. Select the semantics test to run functors.",
+            warning: true
+          };
+        }
+        if (state.operation === "composed" && !semanticExamples("composed").length) {
+          return {
+            enabled: false,
+            message: "This test does not define a composed functor example.",
+            warning: true
+          };
+        }
+        return { enabled: true, message: currentOperation().description, warning: false };
+      }
+
+      function renderQueryControls() {
+        elements.structuralMode.setAttribute("aria-selected", state.mode === "structural" ? "true" : "false");
+        elements.semanticMode.setAttribute("aria-selected", state.mode === "semantic" ? "true" : "false");
+        renderOperationOptions();
+        elements.parameterGrid.replaceChildren();
+        if (state.model) {
+          if (state.mode === "semantic") renderSemanticParameters();
+          else renderStructuralParameters();
+        }
+        var availability = queryAvailability();
+        elements.runButton.disabled = !availability.enabled;
+        elements.queryDescriptionText.textContent = availability.message;
+        elements.descriptionIndicator.classList.toggle("warning", availability.warning);
+      }
+
+      function setMode(mode) {
+        if (state.mode === mode) return;
+        state.mode = mode;
+        state.operation = mode === "semantic" ? "direct" : "classes";
+        resetOperationParameters();
+        renderQueryControls();
+      }
+
+      function classMaps(model) {
+        var byId = new Map();
+        classesOf(model).forEach(function (item) {
+          byId.set(cleanText(item.id), item);
+        });
+        return byId;
+      }
+
+      function structuralResult(operation) {
+        var model = state.model;
+        var classById = classMaps(model);
+        if (operation === "classes") {
+          return {
+            title: "Classes",
+            columns: [
+              { key: "name", label: "Name" },
+              { key: "id", label: "ID", code: true },
+              { key: "type", label: "Type" },
+              { key: "parent", label: "Parent" },
+              { key: "attributes", label: "Attributes" }
+            ],
+            rows: classesOf(model).map(function (item) {
+              var parent = classById.get(cleanText(item.parentClassId));
+              return {
+                name: cleanText(item.name || item.id) || "(unnamed class)",
+                id: cleanText(item.id),
+                type: isHyperclass(item) ? "Hyperclass" : cleanText(item.type) || "Class",
+                parent: parent ? cleanText(parent.name || parent.id) : cleanText(item.parentClassId),
+                attributes: Array.isArray(item.attributes) ? item.attributes.length : 0
+              };
+            })
+          };
+        }
+        if (operation === "attributes") {
+          return {
+            title: "Attributes",
+            columns: [
+              { key: "attribute", label: "Attribute" },
+              { key: "id", label: "ID", code: true },
+              { key: "owner", label: "Owner class" },
+              { key: "ownerId", label: "Owner ID", code: true },
+              { key: "type", label: "Data type" }
+            ],
+            rows: attributeRecords(model).filter(function (row) {
+              return !state.classFilter || row.ownerId === state.classFilter;
+            })
+          };
+        }
+        if (operation === "relationships") {
+          return {
+            title: "Relationships",
+            columns: [
+              { key: "name", label: "Name" },
+              { key: "id", label: "ID", code: true },
+              { key: "source", label: "Source" },
+              { key: "target", label: "Target" },
+              { key: "direction", label: "Direction" }
+            ],
+            rows: linksOf(model).map(function (item) {
+              var sourceId = cleanText(item.sourceClassId || item.sourceId || item.source);
+              var targetId = cleanText(item.targetClassId || item.targetId || item.target);
+              var source = classById.get(sourceId);
+              var target = classById.get(targetId);
+              return {
+                name: cleanText(item.name || item.label || item.id) || "(unnamed relationship)",
+                id: cleanText(item.id),
+                source: source ? cleanText(source.name || source.id) : sourceId,
+                target: target ? cleanText(target.name || target.id) : targetId,
+                direction: cleanText(item.rendering && item.rendering.arrowDirection) || "source to target"
+              };
+            })
+          };
+        }
+        if (operation === "hyperclasses") {
+          return {
+            title: "Hyperclasses",
+            columns: [
+              { key: "name", label: "Name" },
+              { key: "id", label: "ID", code: true },
+              { key: "children", label: "Declared children" },
+              { key: "attributes", label: "Attributes" }
+            ],
+            rows: classesOf(model).filter(isHyperclass).map(function (item) {
+              var children = Array.isArray(item.children) ? item.children : [];
+              return {
+                name: cleanText(item.name || item.id) || "(unnamed hyperclass)",
+                id: cleanText(item.id),
+                children: children.map(function (childId) {
+                  var child = classById.get(cleanText(childId));
+                  return child ? cleanText(child.name || child.id) : cleanText(childId);
+                }).join(", "),
+                attributes: Array.isArray(item.attributes) ? item.attributes.length : 0
+              };
+            })
+          };
+        }
+        if (operation === "objects") {
+          return {
+            title: "Semantic objects",
+            columns: [
+              { key: "name", label: "Object" },
+              { key: "id", label: "ID", code: true },
+              { key: "className", label: "Class" },
+              { key: "classId", label: "Class ID", code: true },
+              { key: "values", label: "Values" }
+            ],
+            rows: objectsOf(model).map(function (item) {
+              var classId = cleanText(item.classId || item.classTypeId || item.typeId);
+              var owner = classById.get(classId);
+              return {
+                name: cleanText(item.name || item.id) || "(unnamed object)",
+                id: cleanText(item.id),
+                className: owner ? cleanText(owner.name || owner.id) : "",
+                classId: classId,
+                values: Array.isArray(item.attributeValues) ? item.attributeValues.length : 0
+              };
+            })
+          };
+        }
+        if (operation === "metadata") {
+          var metadata = model.metadata && typeof model.metadata === "object" ? model.metadata : {};
+          return {
+            title: "Metadata",
+            columns: [
+              { key: "field", label: "Field", code: true },
+              { key: "value", label: "Value" }
+            ],
+            rows: Object.keys(metadata).sort(compareText).map(function (key) {
+              return { field: key, value: formatValue(metadata[key]) };
+            })
+          };
+        }
+        var stats = modelStats(model);
+        return {
+          title: "Model summary",
+          columns: [
+            { key: "measure", label: "Measure" },
+            { key: "count", label: "Count" },
+            { key: "layer", label: "Layer" }
+          ],
+          rows: [
+            { measure: "Classes", count: stats.classes, layer: "Structural" },
+            { measure: "Hyperclasses", count: stats.hyperclasses, layer: "Structural" },
+            { measure: "Attributes", count: stats.attributes, layer: "Structural" },
+            { measure: "Relationships", count: stats.links, layer: "Structural" },
+            { measure: "Objects", count: stats.objects, layer: "Semantic" },
+            { measure: "Object links", count: stats.objectLinks, layer: "Semantic" },
+            { measure: "Memberships", count: stats.memberships, layer: "Semantic" },
+            { measure: "Inheritances", count: stats.inheritances, layer: "Semantic" }
+          ]
+        };
+      }
+
+      function resolveSemanticQuery() {
+        if (state.operation === "composed") {
+          var example = semanticExamples("composed").find(function (item) {
+            return cleanText(item.id) === state.composedExample;
+          }) || semanticExamples("composed")[0];
+          return example && example.query || { startObjectIds: [], steps: [] };
+        }
+        return {
+          startObjectIds: state.semanticStart ? [state.semanticStart] : [],
+          steps: [{
+            kind: state.operation,
+            classLinkId: state.semanticLink || undefined,
+            direction: state.operation === "homogeneous" ? "both" : undefined
+          }]
+        };
+      }
+
+      function executeSemanticQuery(model, query) {
+        var objects = objectsOf(model);
+        var objectLinks = objectLinksOf(model);
+        var classLinks = linksOf(model);
+        var classes = classesOf(model);
+        var objectById = new Map(objects.map(function (item) { return [cleanText(item.id), item]; }));
+        var classById = new Map(classes.map(function (item) { return [cleanText(item.id), item]; }));
+        var classLinkById = new Map(classLinks.map(function (item) { return [cleanText(item.id), item]; }));
+        var starts = Array.isArray(query.startObjectIds) ? query.startObjectIds : [query.startObjectIds];
+        var paths = starts.map(function (id) {
+          return {
+            objectIds: [cleanText(id)],
+            directions: [],
+            relationshipIds: []
+          };
+        }).filter(function (path) { return objectById.has(path.objectIds[0]); });
+        var steps = Array.isArray(query.steps) ? query.steps : [];
+        var truncated = false;
+
+        steps.forEach(function (step) {
+          var nextPaths = [];
+          var kind = cleanText(step.kind || step.functor || step.type).toLowerCase();
+          var wantedLink = cleanText(step.classLinkId || step.linkId || step.relationshipId);
+          paths.forEach(function (path) {
+            var currentId = path.objectIds[path.objectIds.length - 1];
+            objectLinks.forEach(function (objectLink) {
+              var sourceId = cleanText(objectLink.sourceObjectId || objectLink.sourceId || objectLink.source);
+              var targetId = cleanText(objectLink.targetObjectId || objectLink.targetId || objectLink.target);
+              var linkId = cleanText(objectLink.classLinkId || objectLink.linkId || objectLink.relationshipId);
+              if (wantedLink && linkId !== wantedLink) return;
+              var candidates = [];
+              if ((kind === "direct" || kind === "forward") && sourceId === currentId) {
+                candidates.push({ id: targetId, direction: "direct" });
+              } else if ((kind === "inverse" || kind === "reverse") && targetId === currentId) {
+                candidates.push({ id: sourceId, direction: "inverse" });
+              } else if (kind === "homogeneous") {
+                if (sourceId === currentId) candidates.push({ id: targetId, direction: "direct" });
+                if (targetId === currentId) candidates.push({ id: sourceId, direction: "inverse" });
+              }
+              candidates.forEach(function (candidate) {
+                if (!objectById.has(candidate.id) || nextPaths.length >= 500) {
+                  if (nextPaths.length >= 500) truncated = true;
+                  return;
+                }
+                nextPaths.push({
+                  objectIds: path.objectIds.concat(candidate.id),
+                  directions: path.directions.concat(candidate.direction),
+                  relationshipIds: path.relationshipIds.concat(linkId)
+                });
+              });
+            });
+          });
+          paths = nextPaths;
+        });
+
+        var seen = new Set();
+        var rows = [];
+        paths.sort(function (left, right) {
+          return compareText(left.objectIds.join("/"), right.objectIds.join("/"));
+        }).forEach(function (path) {
+          var resultId = path.objectIds[path.objectIds.length - 1];
+          var key = resultId + "|" + path.objectIds.join(">") + "|" + path.relationshipIds.join(">");
+          if (seen.has(key)) return;
+          seen.add(key);
+          var object = objectById.get(resultId);
+          var classId = cleanText(object && (object.classId || object.classTypeId || object.typeId));
+          var owner = classById.get(classId);
+          rows.push({
+            object: cleanText(object && (object.name || object.id)) || resultId,
+            id: resultId,
+            className: owner ? cleanText(owner.name || owner.id) : classId,
+            path: path.objectIds.map(function (id) {
+              var pathObject = objectById.get(id);
+              return cleanText(pathObject && (pathObject.name || pathObject.id)) || id;
+            }).join(" -> "),
+            direction: path.directions.join(" -> "),
+            relationship: path.relationshipIds.map(function (id) {
+              var relationship = classLinkById.get(id);
+              return cleanText(relationship && (relationship.name || relationship.id)) || id;
+            }).join(" -> ")
+          });
+        });
+        return { rows: rows, truncated: truncated };
+      }
+
+      function semanticResult() {
+        var executed = executeSemanticQuery(state.model, resolveSemanticQuery());
+        return {
+          title: currentOperation().label + " results",
+          truncated: executed.truncated,
+          columns: [
+            { key: "object", label: "Matched object" },
+            { key: "id", label: "Object ID", code: true },
+            { key: "className", label: "Class" },
+            { key: "path", label: "Path" },
+            { key: "direction", label: "Direction" },
+            { key: "relationship", label: "Relationship" }
+          ],
+          rows: executed.rows
+        };
+      }
+
+      function runQuery() {
+        var availability = queryAvailability();
+        if (!availability.enabled) return;
+        var started = performance.now();
+        var result;
+        try {
+          result = state.mode === "semantic"
+            ? semanticResult()
+            : structuralResult(state.operation);
+          state.rows = result.rows;
+          state.columns = result.columns;
+          state.resultTitle = result.title;
+          state.resultFilter = "";
+          state.sortKey = "";
+          state.sortDirection = "asc";
+          elements.resultFilter.value = "";
+          var elapsed = Math.max(0.1, performance.now() - started).toFixed(1);
+          state.resultMeta = state.rows.length + " result" + (state.rows.length === 1 ? "" : "s")
+            + " in " + elapsed + " ms" + (result.truncated ? " - limited to 500 paths" : "");
+          renderResults();
+        } catch (error) {
+          state.error = cleanText(error && error.message) || "The query could not be completed.";
+          renderResultState("error", "Query failed", state.error);
+        }
+      }
+
+      function filteredRows() {
+        var query = state.resultFilter.toLowerCase();
+        var rows = state.rows.filter(function (row) {
+          if (!query) return true;
+          return state.columns.some(function (column) {
+            return formatValue(row[column.key]).toLowerCase().includes(query);
+          });
+        });
+        if (state.sortKey) {
+          var direction = state.sortDirection === "desc" ? -1 : 1;
+          rows = rows.slice().sort(function (left, right) {
+            return compareText(left[state.sortKey], right[state.sortKey]) * direction;
+          });
+        }
+        return rows;
+      }
+
+      function renderResultState(kind, title, copy) {
+        elements.tableScroll.hidden = true;
+        elements.jsonOutput.hidden = true;
+        elements.resultState.hidden = false;
+        elements.resultState.classList.toggle("error", kind === "error");
+        var mark = elements.resultState.querySelector(".state-mark");
+        mark.textContent = kind === "error" ? "!" : kind === "empty" ? "0" : "...";
+        elements.resultStateTitle.textContent = title;
+        elements.resultStateCopy.textContent = copy;
+        if (kind === "error") {
+          elements.resultsTitle.textContent = "Results";
+          elements.resultsMeta.textContent = "Query not completed";
+        }
+      }
+
+      function renderTable(rows) {
+        elements.resultHead.replaceChildren();
+        elements.resultBody.replaceChildren();
+        var headerRow = document.createElement("tr");
+        state.columns.forEach(function (column) {
+          var th = document.createElement("th");
+          var button = document.createElement("button");
+          var indicator = state.sortKey === column.key
+            ? (state.sortDirection === "asc" ? " \u2191" : " \u2193")
+            : "";
+          button.className = "sort-button";
+          button.type = "button";
+          button.textContent = column.label + indicator;
+          button.setAttribute("aria-label", "Sort by " + column.label);
+          button.addEventListener("click", function () {
+            if (state.sortKey === column.key) {
+              state.sortDirection = state.sortDirection === "asc" ? "desc" : "asc";
+            } else {
+              state.sortKey = column.key;
+              state.sortDirection = "asc";
+            }
+            renderResults();
+          });
+          th.appendChild(button);
+          headerRow.appendChild(th);
+        });
+        elements.resultHead.appendChild(headerRow);
+        rows.forEach(function (row) {
+          var tr = document.createElement("tr");
+          state.columns.forEach(function (column) {
+            var td = document.createElement("td");
+            td.textContent = formatValue(row[column.key]);
+            if (column.code) td.className = "cell-code";
+            tr.appendChild(td);
+          });
+          elements.resultBody.appendChild(tr);
+        });
+      }
+
+      function resultPayload(rows) {
+        return {
+          scenario: state.scenario ? modelName(state.model, state.scenario) : "",
+          family: state.mode === "semantic" ? "Semantic functor" : "Structural query",
+          operation: currentOperation().label,
+          count: rows.length,
+          rows: rows
+        };
+      }
+
+      function renderResults() {
+        var rows = filteredRows();
+        elements.resultsTitle.textContent = state.resultTitle;
+        elements.resultsMeta.textContent = state.resultFilter
+          ? rows.length + " of " + state.rows.length + " matching results"
+          : state.resultMeta;
+        elements.tableViewButton.setAttribute("aria-pressed", state.view === "table" ? "true" : "false");
+        elements.jsonViewButton.setAttribute("aria-pressed", state.view === "json" ? "true" : "false");
+        if (!state.rows.length) {
+          renderResultState("empty", "No matching results", "The query completed without returning any records.");
+          elements.resultsTitle.textContent = state.resultTitle;
+          elements.resultsMeta.textContent = state.resultMeta;
+          return;
+        }
+        if (!rows.length) {
+          renderResultState("empty", "No filtered results", "No result contains the current filter value.");
+          elements.resultsTitle.textContent = state.resultTitle;
+          elements.resultsMeta.textContent = "0 of " + state.rows.length + " matching results";
+          return;
+        }
+        elements.resultState.hidden = true;
+        if (state.view === "json") {
+          elements.tableScroll.hidden = true;
+          elements.jsonOutput.hidden = false;
+          elements.jsonOutput.textContent = JSON.stringify(resultPayload(rows), null, 2);
+        } else {
+          elements.jsonOutput.hidden = true;
+          elements.tableScroll.hidden = false;
+          renderTable(rows);
+        }
+      }
+
+      async function copyResults() {
+        var rows = filteredRows();
+        if (!state.rows.length) {
+          showToast("No results to copy");
+          return;
+        }
+        var text;
+        if (state.view === "json") {
+          text = JSON.stringify(resultPayload(rows), null, 2);
+        } else {
+          var header = state.columns.map(function (column) { return column.label; }).join("\t");
+          var body = rows.map(function (row) {
+            return state.columns.map(function (column) {
+              return formatValue(row[column.key]).replace(/\t|\r?\n/g, " ");
+            }).join("\t");
+          }).join("\n");
+          text = header + "\n" + body;
+        }
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (error) {
+          var textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+        }
+        showToast(rows.length + " result" + (rows.length === 1 ? "" : "s") + " copied");
+      }
+
+      function bindEvents() {
+        elements.scenarioSearch.addEventListener("input", renderScenarioList);
+        elements.scenarioCategory.addEventListener("change", renderScenarioList);
+        elements.mobileTestsButton.addEventListener("click", function () {
+          setDrawer(!state.drawerOpen);
+        });
+        elements.mobileBackdrop.addEventListener("click", function () {
+          setDrawer(false);
+        });
+        elements.structuralMode.addEventListener("click", function () { setMode("structural"); });
+        elements.semanticMode.addEventListener("click", function () { setMode("semantic"); });
+        elements.operationSelect.addEventListener("change", function () {
+          state.operation = elements.operationSelect.value;
+          resetOperationParameters();
+          renderQueryControls();
+        });
+        elements.queryForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          runQuery();
+        });
+        elements.resultFilter.addEventListener("input", function () {
+          state.resultFilter = elements.resultFilter.value.trim();
+          renderResults();
+        });
+        elements.tableViewButton.addEventListener("click", function () {
+          state.view = "table";
+          renderResults();
+        });
+        elements.jsonViewButton.addEventListener("click", function () {
+          state.view = "json";
+          renderResults();
+        });
+        elements.copyButton.addEventListener("click", copyResults);
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && state.drawerOpen) setDrawer(false);
+        });
+        window.addEventListener("resize", function () {
+          if (window.innerWidth > 820 && state.drawerOpen) setDrawer(false);
+        });
+      }
+
+      async function initialize() {
+        bindEvents();
+        await loadManifest();
+        renderSourceStatus();
+        renderCategoryOptions();
+        var saved = savedSelection();
+        var initial = state.scenarios.find(function (scenario) { return scenario.value === saved; })
+          || state.scenarios.find(function (scenario) { return scenario.value.includes("semantics_035"); })
+          || state.scenarios[0];
+        renderScenarioList();
+        if (initial) {
+          await selectScenario(initial);
+        } else {
+          renderResultState("error", "No tests available", "No test scenarios were found.");
+        }
+      }
+
+      window.__HBDS_QUERY_WORKBENCH__ = {
+        getState: function () {
+          return {
+            source: state.source,
+            scenarioCount: state.scenarios.length,
+            scenario: state.scenario && state.scenario.value,
+            mode: state.mode,
+            operation: state.operation,
+            resultCount: state.rows.length,
+            view: state.view,
+            loading: state.loading,
+            error: state.error
+          };
+        },
+        run: runQuery,
+        modelStats: modelStats,
+        executeSemanticQuery: executeSemanticQuery
+      };
+
+      initialize();
+    }());
+  </script>
+</body>
+</html>

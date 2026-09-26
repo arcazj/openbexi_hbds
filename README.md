@@ -31,10 +31,10 @@ This week the project added a larger local-server workflow and collaboration sur
 * **OpenAPI specification**: `GET /api/openapi.json` remains available for tools and clients that need machine-readable API metadata.
 * **Automatic manifests**: `models/models_manifest.json` and `test_models/test_models_manifest.json` are regenerated every time `server.py` starts.
 * **Scoped test-model saving**: saves from the Tests workspace use `./test_models/`.
-* **AI Support**: Edit and Tests include an AI Support panel for HBDS model generation, validation, and improvement using OpenAI/ChatGPT, Claude/Anthropic, Local/Ollama, custom OpenAI-compatible providers, or ChatGPT Pro manual copy/paste.
+* **AI Support**: Edit and Tests include an AI Support panel for HBDS model generation, validation, and improvement using OpenAI/ChatGPT, Claude/Anthropic, Local/Ollama, custom OpenAI-compatible providers, or ChatGPT manual copy/paste.
 * **Transient AI keys**: API keys entered in the UI are held in memory only, validated against the provider, and are not written into saved models, exports, collaboration drafts, diagnostics, or server responses.
 * **AI response validation**: AI output must be strict HBDS JSON. Common aliases such as `kind`, `attribute`, `source`, and `target` are normalized before validation.
-* **AI changes preview**: applying AI results opens a dedicated diff window. `Preview on Canvas` displays a temporary grid-arranged preview while keeping saved AI JSON layout metadata unchanged unless the user explicitly saves another layout.
+* **AI changes preview**: applying AI results opens a dedicated diff window. `Preview on Canvas` displays a temporary preview of selected changes while keeping saved AI JSON layout metadata unchanged unless the user explicitly saves another layout.
 * **AI apply, save, and rollback**: AI results can update the current model, save as a new model, or roll back the last AI apply. Save-as-new rollback deletes the AI-created file and restores the previous selection.
 * **Model deletion**: Edit and Tests include `Delete Model` in Session. Deletes keep a backup under the matching `.backups/` directory, refresh manifests, and refuse protected default models.
 * **Swagger coverage**: the OpenAPI docs include AI provider, prompt, apply, rollback, model delete, scoped model, draft, event, and operation endpoints.
@@ -52,7 +52,7 @@ This week the project added a larger local-server workflow and collaboration sur
 * **Models view cleanup**: Models mode is read-focused and keeps model selection, 3-D view, fit, zoom, and overview behavior without edit/save controls.
 * **Editing cleanup**: attribute deletion has a dedicated button, and selected link deletion now uses explicit link text.
 * **Tool wrappers**: repo-local `mvn.cmd`, `mvn.ps1`, `rg.cmd`, and `rg.ps1` wrappers are available when global Maven or ripgrep is not installed.
-* **Regression coverage**: the smoke suite now checks health, OpenAPI, manifests, AI apply/rollback/delete APIs, drafts, events, presence, scoped saves, operation merge, stale conflicts, and server shutdown. Browser regression covers the shell version, Help user guide, AI UI, AI diff modal, AI grid preview, delete, rollback, and collaboration flows.
+* **Regression coverage**: the smoke suite now checks health, OpenAPI, manifests, AI apply/rollback/delete APIs, drafts, events, presence, scoped saves, operation merge, stale conflicts, and server shutdown. Browser regression covers the shell version, Help user guide, AI UI, AI diff modal, AI preview, delete, rollback, and collaboration flows.
 
 ## Features
 
@@ -137,13 +137,19 @@ http://127.0.0.1:8010/index.html
 
 When overwriting an existing model, the server writes a timestamped backup under the matching `.backups/` directory before replacing the file.
 
+Saves in both Edit and Tests require the revision returned when the model was loaded
+or last saved. Missing or stale revisions return `409` without changing the file.
+AI same-file apply requires `expectedRevision`; rollback uses the revision returned
+by that AI apply. Backup filenames include a unique suffix so rapid saves retain
+every recovery copy.
+
 ### Security Boundary
 
 Connected mode is intended for a trusted local workstation and binds to `127.0.0.1` by default. It does not currently provide user authentication or authorization. Non-loopback connected binds are refused unless `--allow-remote` is supplied; that flag acknowledges the risk but does not add authentication. Do not expose connected mode through a shared network or reverse proxy without adding those controls.
 
 The server restricts its static surface to public application assets and adds browser security headers. AI provider responses are size-limited, redirects are revalidated, unsafe URL schemes and credential-bearing URLs are rejected, public providers require HTTPS, and loopback HTTP is reserved for local providers such as Ollama. Private-network AI endpoints require explicit server opt-in with `HBDS_AI_ALLOW_PRIVATE_URLS=1` and must use HTTPS.
 
-Relevant AI transport limits are `HBDS_AI_REQUEST_MAX_BYTES` (default 512 KiB), `HBDS_AI_RESPONSE_MAX_BYTES` (default 8 MiB), `HBDS_AI_ERROR_MAX_BYTES` (default 64 KiB), and `HBDS_AI_TIMEOUT_SECONDS` (default 60 seconds).
+Relevant AI transport limits are `HBDS_AI_REQUEST_MAX_BYTES` (default 512 KiB), `HBDS_AI_RESPONSE_MAX_BYTES` (default 8 MiB), and `HBDS_AI_TIMEOUT_SECONDS` (default 60 seconds).
 
 ## Workspaces
 
@@ -192,6 +198,7 @@ Connected mode exposes these main endpoints:
 * `DELETE /api/drafts/{scope}/{modelName}/clients/{clientId}` - clear a scoped live draft.
 * `GET /api/events` - Server-Sent Events stream for presence, model updates, draft updates, and draft clears.
 * `GET /api/ai/providers` - list AI provider capabilities without exposing secrets.
+* `POST /api/ai/models` - refresh available provider model IDs without generating text.
 * `POST /api/ai/connection` - validate an AI provider credential and selected model.
 * `POST /api/ai/prompt` - prepare the deterministic HBDS AI prompt and optionally call the selected provider when enabled.
 * `POST /api/ai/apply` - normalize, validate, save, and return an AI-produced HBDS model.
@@ -242,10 +249,34 @@ When running with `server.py`, adding or removing a model file only requires res
 * **Delete selected link** removes the selected link when a link is selected.
 * **Save** writes to the active workspace in connected mode or downloads JSON in browser-only mode.
 * **Delete Model** removes the selected saved model in connected mode after confirmation and leaves a backup under `.backups/`.
-* **AI Support** can generate a new HBDS model, validate the current model, or improve the current model. ChatGPT Pro / Manual mode prepares a copy/paste prompt for ChatGPT without using an API key.
-* **AI Changes Preview** appears before saving an AI result. Use Preview on Canvas for a temporary grid-arranged view, Apply and Save for same-file validate/improve workflows, Apply as New Model for a new file, and Rollback AI Apply to restore the previous state.
+* **AI Support** can generate a new HBDS model, validate the current model, or improve the current model. ChatGPT / Manual mode prepares a copy/paste prompt for ChatGPT without using an API key.
+* **AI Changes Preview** appears before saving an AI result. Use Preview on Canvas for a temporary view of the selected changes, Apply and Save for same-file validate/improve workflows, Apply as New Model for a new file, and Rollback AI Apply to restore the previous state.
+
+## AI Support
+
+AI Support provides generation, validation, improvement, repair of validation errors, **Explain selection**, and **Improve selection**. Select classes or a link before using a selection operation. Existing positions are preserved during editing; focused edits preserve unrelated entities, IDs, and containment.
+
+- **Providers and models:** the UI and server share `js/hbds_ai_providers.json`. Current presets include GPT-6 Sol/Luna and Claude Sonnet 5, alongside compatible existing models. The existing OpenAI default remains GPT-5.5. Use **Refresh Available Models** for the IDs available to your account or local Ollama installation. Refreshing retains your selection and does not generate text. Discovered IDs alone do not establish feature support; unknown models use provider defaults.
+- **Response format:** supported models use JSON Schema output. Schemas include existing extension fields; unusually deep or large extension schemas fall back to JSON mode. The schema constrains response shape; local structural, reference, inheritance, and enabled semantic-profile validators still determine whether changes can be applied. Custom OpenAI-compatible endpoints have explicit JSON/JSON Schema options because feature support varies.
+- **Review:** the response can contain an `explanation` and a complete `model`, or a plain model in manual mode. Explanations never change the canvas. Each proposed field, attribute, class, link, or semantic entity has a checkbox and before/after details. A selection that leaves invalid references cannot be applied. Deletions and renames require confirmation, including before preview.
+- **Save safety:** applying is blocked if the local model changed after the request. Saves and rollbacks also enforce the server revision in both Edit and Tests. Preview changes stay local and can be rolled back.
+- **Credentials and privacy:** keys stay in server environment variables or page memory. They are not stored in model files or collaboration drafts. Editing and selection requests send the current model for context. Cancel discards late results locally; a request already sent to a provider may still finish and incur charges. Mutating requests are never automatically retried after an ambiguous failure.
+- **Errors:** authentication, access, unavailable models, rate/quota limits, transport timeouts, refusals, and incomplete replies have separate guidance. Provider error bodies are not echoed because they can contain keys or model content.
+
+Configure `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `HBDS_AI_CUSTOM_API_KEY` on the server and set `HBDS_AI_ENABLED=1`, or enter a transient key in the UI. Ollama calls require the server flag. `HBDS_AI_MAX_TOKENS` defaults to 8192 for OpenAI presets and Claude, bounded to 256?32768. Start with a small model; larger outputs may require a higher limit or a smaller request.
+
+Provider integration references (checked 26 September 2026): [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs), [OpenAI model discovery](https://developers.openai.com/api/reference/resources/models/methods/list), [GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol), [GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna), [Claude models](https://platform.claude.com/docs/en/models/overview), [Claude structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), [Claude model discovery](https://platform.claude.com/docs/en/api/models/list), and [Ollama structured outputs](https://docs.ollama.com/capabilities/structured-outputs).
 
 ## Testing
+
+Run the regression suites in a temporary copy, keeping local models and keys out of the test workspace:
+
+```sh
+py -3.9 -B scripts/check_project.py
+```
+
+Use `--skip-browser` for server/helpers only or `--browser-only` for the browser suite. Provider tests use mocks and incur no AI charges. The real-browser suite requires Edge or Chrome and access to the Three.js CDN. The existing individual commands below are also available; smoke/browser commands write temporary model fixtures in the directory where they run.
+
 
 Run the server regression smoke test:
 
@@ -334,13 +365,17 @@ If the wrapper is missing, run `.\scripts\bootstrap_maven.ps1` first. The reposi
 |-- icons/                         # Shell and menu icons
 |-- images/                        # Model/image assets
 |-- js/                            # HBDS rendering, model, layout, server, and collaboration modules
-|-- js/hbds_ai_support.js          # AI provider, prompt, validation, and response-normalization helpers
+|-- js/hbds_ai_support.js          # AI prompt, validation, focused edit, and change review helpers
+|-- js/hbds_ai_providers.json      # Shared provider/model capability catalog
+|-- hbds_ai_contract.py            # Structured output schema and provider-independent safeguards
 |-- js/hbds_model_productivity.js  # Pure helpers for duplicate, paste, route preset, and subgraph export workflows
 |-- models/                        # Standard/sample HBDS JSON models
 |-- test_models/                   # Regression and test HBDS JSON models
 |-- pictures/                      # README and project images
 |-- scripts/smoke_server.py        # Server regression smoke suite
 |-- scripts/ai_support_test.mjs    # Node checks for AI Support helper behavior
+|-- scripts/ai_provider_test.py    # Offline provider contract and failure tests
+|-- scripts/check_project.py       # Isolated regression runner
 |-- scripts/productivity_helpers_test.mjs # Node checks for productivity helper behavior
 |-- scripts/collaboration_browser_regression.py # Headless browser regression for shell, AI UI, and collaboration
 |-- tools/                         # Manifest and naming validation helpers
@@ -376,4 +411,8 @@ See the [open issues](https://github.com/arcazj/openbexi_hbds/issues) for propos
 
 ## License
 
-Distributed under the MIT License. See [LICENSE.txt](LICENSE.txt) for details.
+Free for **individual noncommercial use**, including personal projects, student coursework, hobbies, and independent research. **Companies, government bodies, and other organizations require a separate paid commercial license**, including for internal use, evaluation, and deployment. Individual commercial activity also requires a commercial license.
+
+See the [full license](LICENSE.txt), [commercial licensing contact](COMMERCIAL_LICENSE.md), and [licensing overview](license.html). Organizational educational or nonprofit exceptions require a written agreement.
+
+These source-available terms apply to new material published under this license. Earlier MIT permissions remain in effect for the material they cover; the [earlier MIT notice](LICENSES/MIT-legacy.txt) and [third-party notices](THIRD_PARTY_NOTICES.md) are preserved.

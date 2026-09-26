@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openbexi.local/hbds/model/v2",
+  "title": "HBDS Additive Semantic Profile v2",
+  "description": "Opt-in semantic object, membership, and inheritance layer over the v1 structural diagram profile.",
+  "allOf": [
+    {
+      "$ref": "https://openbexi.local/hbds/model/v1#/$defs/modelCore"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "allOf": [
+            {
+              "$ref": "https://openbexi.local/hbds/model/v1#/$defs/metadata"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "semanticVersion": {
+                  "type": "integer",
+                  "const": 1,
+                  "description": "Explicit opt-in to semantic contract version 1."
+                }
+              },
+              "required": ["semanticVersion"],
+              "additionalProperties": true
+            }
+          ]
+        },
+        "hypergraph": {
+          "allOf": [
+            {
+              "$ref": "https://openbexi.local/hbds/model/v1#/$defs/hypergraph"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "array",
+                  "items": {"$ref": "#/$defs/object"}
+                },
+                "objectLink": {
+                  "type": "array",
+                  "items": {"$ref": "#/$defs/objectLink"}
+                },
+                "membership": {
+                  "type": "array",
+                  "items": {"$ref": "#/$defs/membership"}
+                },
+                "inheritance": {
+                  "type": "array",
+                  "items": {"$ref": "#/$defs/inheritance"}
+                }
+              },
+              "additionalProperties": true
+            }
+          ]
+        }
+      },
+      "required": ["metadata"],
+      "additionalProperties": true
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "attributeValue": {
+      "type": "object",
+      "properties": {
+        "attributeId": {"$ref": "#/$defs/identifier"},
+        "value": {}
+      },
+      "required": ["attributeId", "value"],
+      "additionalProperties": false
+    },
+    "object": {
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "classId": {"$ref": "#/$defs/identifier"},
+        "name": {"type": "string"},
+        "attributeValues": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/attributeValue"}
+        },
+        "isPrototype": {
+          "type": "boolean",
+          "description": "Optional prototype-profile marker."
+        },
+        "prototypeId": {
+          "$ref": "#/$defs/identifier",
+          "description": "Optional prototype-profile reference to another object."
+        },
+        "overrides": {
+          "type": "object",
+          "description": "Optional prototype-profile attribute overrides keyed by attribute id.",
+          "additionalProperties": true
+        }
+      },
+      "required": ["id", "classId"],
+      "additionalProperties": false
+    },
+    "objectLink": {
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "classLinkId": {"$ref": "#/$defs/identifier"},
+        "sourceObjectId": {"$ref": "#/$defs/identifier"},
+        "targetObjectId": {"$ref": "#/$defs/identifier"}
+      },
+      "required": ["id", "classLinkId", "sourceObjectId", "targetObjectId"],
+      "additionalProperties": false
+    },
+    "membership": {
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "classId": {"$ref": "#/$defs/identifier"},
+        "hyperclassId": {"$ref": "#/$defs/identifier"}
+      },
+      "required": ["id", "classId", "hyperclassId"],
+      "additionalProperties": false
+    },
+    "inheritance": {
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "subClassId": {"$ref": "#/$defs/identifier"},
+        "superClassId": {"$ref": "#/$defs/identifier"}
+      },
+      "required": ["id", "subClassId", "superClassId"],
+      "additionalProperties": false
+    }
+  }
+}

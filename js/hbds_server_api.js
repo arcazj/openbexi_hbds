@@ -162,7 +162,14 @@ export async function prepareAiPrompt(payload = {}, options = {}) {
     ...options,
     method: 'POST',
     body: payload,
-    timeoutMs: options.timeoutMs ?? 8000
+    timeoutMs: options.timeoutMs ?? 70000
+  });
+}
+
+export async function discoverAiModels(payload = {}, options = {}) {
+  return apiRequest('/api/ai/models', {
+    ...options, method: 'POST', body: payload,
+    timeoutMs: options.timeoutMs ?? 70000, skipDebugLog: true
   });
 }
 
@@ -198,8 +205,19 @@ export async function loadServerModel(modelName, options = {}) {
   return apiRequest(`/api/models/${name}`, options);
 }
 
+export async function loadScopedModel(modelName, options = {}) {
+  const scope = normalizeDraftScope(options.modelScope || options.scope);
+  if (!scope) return loadServerModel(modelName, options);
+  const name = encodeURIComponent(modelFileNameFromValue(modelName));
+  return apiRequest(`/api/model-files/${encodeURIComponent(scope)}/${name}`, options);
+}
+
 export async function saveServerModel(modelName, modelData, options = {}) {
   const name = encodeURIComponent(modelFileNameFromValue(modelName));
+  return saveModelAtPath(`/api/models/${name}`, modelData, options);
+}
+
+async function saveModelAtPath(path, modelData, options) {
   const revision = options.revision ?? modelData?.metadata?.revision ?? modelData?.metadata?.contentHash;
   const headers = { ...(options.headers || {}) };
   if (revision && !hasHeader(headers, 'If-Match')) {
@@ -208,7 +226,7 @@ export async function saveServerModel(modelName, modelData, options = {}) {
   if (!hasHeader(headers, 'X-Client-Id')) {
     headers['X-Client-Id'] = getServerClientId();
   }
-  const result = await apiRequest(`/api/models/${name}`, {
+  const result = await apiRequest(path, {
     ...options,
     headers,
     method: 'POST',
@@ -230,13 +248,7 @@ export async function saveScopedModel(modelName, modelData, options = {}) {
   const scope = normalizeDraftScope(options.modelScope || options.scope);
   if (!scope) return saveServerModel(modelName, modelData, options);
   const name = encodeURIComponent(modelFileNameFromValue(modelName));
-  const headers = clientHeaders(options);
-  return apiRequest(`/api/model-files/${encodeURIComponent(scope)}/${name}`, {
-    ...options,
-    headers,
-    method: 'POST',
-    body: modelData
-  });
+  return saveModelAtPath(`/api/model-files/${encodeURIComponent(scope)}/${name}`, modelData, options);
 }
 
 export async function deleteServerModel(modelName, options = {}) {
@@ -501,7 +513,8 @@ async function apiRequest(path, options = {}) {
 
   for (const apiBase of apiBases) {
     const result = await attemptApiRequest(apiBase, path, options, timeoutMs);
-    if (result.retryable && apiBases.length > 1) {
+    // A lost POST response may already have created a model or incurred AI cost.
+    if (result.retryable && apiBases.length > 1 && (options.method || 'GET').toUpperCase() === 'GET') {
       lastRetryableError = result.payload;
       continue;
     }
@@ -577,14 +590,15 @@ async function attemptApiRequest(apiBase, path, options, timeoutMs) {
     ok = true;
     return { retryable: false, payload: { ok: true, status: response.status, data } };
   } catch (error) {
-    if (error?.name === 'AbortError') {
-      errorCode = 'timeout';
+    if (error?.name === 'AbortError' || controller.signal.aborted) {
+      const canceled = Boolean(options.signal?.aborted);
+      errorCode = canceled ? 'canceled' : 'timeout';
       return {
-        retryable: true,
+        retryable: !canceled,
         payload: {
           ok: false,
           status: 0,
-          error: { code: 'timeout', message: `Server request timed out after ${timeoutMs}ms` }
+          error: { code: errorCode, message: canceled ? 'Request canceled' : `Server request timed out after ${timeoutMs}ms` }
         }
       };
     }

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Lab</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=perf-hardening-20260718a">
+  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=ai-support-20260926">
   <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -154,6 +154,14 @@
       <label id="ai-custom-model-field" for="ai-model-input">Custom Model
         <input id="ai-model-input" type="text" autocomplete="off" spellcheck="false" placeholder="Provider model name">
       </label>
+      <button id="ai-refresh-models-button" type="button" class="quiet">Refresh Available Models</button>
+      <label id="ai-output-mode-field" for="ai-output-mode-select" hidden>Response Format
+        <select id="ai-output-mode-select">
+          <option value="auto">Provider default</option>
+          <option value="json">JSON mode</option>
+          <option value="schema">JSON Schema (when supported)</option>
+        </select>
+      </label>
       <label id="ai-reasoning-field" for="ai-reasoning-select">Reasoning Effort
         <select id="ai-reasoning-select">
           <option value="none">none</option>
@@ -168,7 +176,11 @@
         <option value="generate">Generate new model</option>
         <option value="validate">Validate current model</option>
         <option value="improve">Improve current model</option>
+        <option value="repair">Repair validation errors</option>
+        <option value="explain-selection">Explain selection</option>
+        <option value="improve-selection">Improve selection</option>
       </select>
+      <div class="section-meta">Editing and selection requests send the current model for context. Review it for private data before sending. Provider usage charges may apply.</div>
       <label for="ai-request-input">HBDS Request</label>
       <textarea id="ai-request-input" class="compact-textarea" spellcheck="false" placeholder="Ask for an HBDS model, model validation, or model improvement"></textarea>
       <div class="control-row">
@@ -357,6 +369,7 @@
         <h2 id="ai-diff-title">AI Changes Preview</h2>
       </div>
       <div id="ai-diff-summary" class="ai-diff-summary"></div>
+      <p id="ai-diff-selection-status" aria-live="polite"></p>
       <div id="ai-diff-content" class="ai-diff-content"></div>
       <label class="checkbox-wrapper ai-diff-confirm" for="ai-destructive-confirm">
         <input type="checkbox" id="ai-destructive-confirm">
@@ -372,6 +385,6 @@
     </div>
   </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=semantic-v1-20260718a"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=ai-support-20260926"></script>
 </body>
 </html>

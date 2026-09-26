@@ -1,0 +1,90 @@
+{
+  "$schema": "https://openbexi.local/hbds/model/v1",
+  "metadata": {
+    "name": "Parcel Delivery",
+    "purpose": "Schema example for the v1 structural diagram profile.",
+    "regressionTags": ["documentation", "schema", "v1"],
+    "preserveLayout": true,
+    "layout": {
+      "algorithm": "none"
+    },
+    "font": {
+      "size": 13,
+      "family": "Arial, sans-serif",
+      "classSize": 15,
+      "hyperclassSize": 17,
+      "attributeSize": 12,
+      "linkSize": 11
+    }
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "parcel_domain",
+        "name": "Parcel Domain",
+        "type": "hyperclass",
+        "attributes": [],
+        "children": ["parcel_class", "route_class"],
+        "position": {"x": 0, "y": 0, "z": 0},
+        "size": {"width": 8, "height": 4.5},
+        "rendering": {
+          "class": {
+            "color": "#dbeafe",
+            "borderColor": "#2563eb",
+            "opacity": 0.18
+          },
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "parcel_class",
+        "name": "Parcel",
+        "type": "class",
+        "parentClassId": "parcel_domain",
+        "attributes": [
+          {"id": "parcel_tracking_id", "name": "trackingId"},
+          {"id": "parcel_weight", "name": "weight", "value": "2.4 kg"}
+        ],
+        "position": {"x": -2, "y": 0, "z": 0},
+        "size": {"width": 2.5, "height": 1.4},
+        "rendering": {
+          "class": {"color": "#ffffff", "borderColor": "#2563eb"},
+          "textColor": "#111827"
+        }
+      },
+      {
+        "id": "route_class",
+        "name": "Route",
+        "type": "class",
+        "parentClassId": "parcel_domain",
+        "attributes": [
+          {"id": "route_code", "name": "routeCode"}
+        ],
+        "position": {"x": 2, "y": 0, "z": 0},
+        "size": {"width": 2.5, "height": 1.2},
+        "rendering": {
+          "class": {"color": "#f0fdf4", "borderColor": "#15803d"},
+          "textColor": "#111827"
+        }
+      }
+    ],
+    "link": [
+      {
+        "id": "parcel_assigned_route",
+        "name": "assigned route",
+        "type": "association",
+        "sourceClassId": "parcel_class",
+        "targetClassId": "route_class",
+        "rendering": {
+          "labelText": "assigned route",
+          "lineColor": "#334155",
+          "lineWidth": 2,
+          "lineStyle": "solid",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target",
+          "orthogonalStyle": "auto"
+        }
+      }
+    ]
+  }
+}

@@ -254,7 +254,7 @@ Manual edit workflow:
 AI Support manual workflow:
 
 1. Expand `AI Support`.
-2. Confirm provider choices include `ChatGPT/OpenAI`, `ChatGPT Pro / Manual`, `Claude/Anthropic`, `Local/Ollama`, and `Custom OpenAI-compatible`.
+2. Confirm provider choices include `ChatGPT/OpenAI`, `ChatGPT / Manual`, `Claude/Anthropic`, `Local/Ollama`, and `Custom OpenAI-compatible`.
 3. Confirm the section accent is pink and still readable in collapsed and expanded states.
 4. Select `ChatGPT/OpenAI` and confirm model presets include valid API model IDs such as `GPT-5.5`, `GPT-5.4`, `GPT-5.4 Mini`, and `GPT-4.1`.
 5. Select a reasoning-capable OpenAI model and confirm the Reasoning Effort combo offers `none`, `low`, `medium`, `high`, and `xhigh`.
@@ -266,10 +266,10 @@ AI Support manual workflow:
 11. Confirm `Reconnect` reruns the same real provider validation and never reports green without a provider success.
 12. Select `Local/Ollama` and confirm no key field is required while Base URL is visible.
 13. Select `Custom OpenAI-compatible` and confirm Base URL is required while API key remains optional.
-14. Confirm operation modes include `Generate new model`, `Validate current model`, and `Improve current model`.
+14. Confirm operation modes include generation, validation, improvement, repair, explain selection, and improve selection.
 15. Enter an HBDS request and click `Send Request`.
 16. With the default backend configuration and no transient key, confirm the server-prepared prompt requires JSON-only HBDS output, layout `none`, computed element positions, selected model, and selected reasoning effort.
-17. Select `ChatGPT Pro / Manual` and confirm no API key, Base URL, model, or reasoning controls are required.
+17. Select `ChatGPT / Manual` and confirm no API key, Base URL, model, or reasoning controls are required.
 18. In manual mode, click `Generate Prompt`, then confirm `Copy Prompt`, `Open ChatGPT`, `Paste AI Response`, and `Validate Response` are visible.
 19. Click `Open ChatGPT` and confirm it opens `https://chatgpt.com/` in a separate tab without sending credentials from HBDS.
 20. Paste a Markdown-fenced response and confirm validation rejects it.
@@ -279,10 +279,10 @@ AI Support manual workflow:
 24. Confirm provider text is shown in the preview and `Apply AI Result` is enabled only when a valid HBDS model response is parsed.
 25. Confirm AI configuration and keys are not written into the JSON preview, saved model, selected export, collaboration presence, or collaboration draft.
 26. Click `Apply AI Result` and confirm a dedicated `AI Changes Preview` window opens before any model is saved.
-27. Confirm the diff window summarizes added, removed, renamed, and modified classes, attributes, links, and metadata.
+27. Confirm the diff window offers individual checkboxes and before/after details for class fields, attributes, links, metadata, and semantic entities; renames and removals are highlighted.
 28. Confirm the diff window `Close` button is in the bottom action row, and the action buttons stay on one row on desktop with distinct preview, new-model, save, cancel, and close colors.
-29. Confirm removed or renamed existing elements require the destructive-change checkbox before `Apply and Save` or `Apply as New Model` can run.
-30. Click `Preview on Canvas` and confirm the AI model displays with a temporary grid layout, the saved AI JSON still keeps its original layout metadata such as `layout.algorithm = "none"`, and no model file is saved by preview alone.
+29. Confirm removed or renamed existing elements require the destructive-change checkbox before preview, `Apply and Save`, or `Apply as New Model` can run.
+30. Click `Preview on Canvas` and confirm the selected changes display with their proposed positions, the saved AI JSON keeps its layout metadata such as `layout.algorithm = "none"`, and no model file is saved by preview alone.
 31. Click `Rollback AI Apply` after preview and confirm the previous model returns.
 32. Click `Apply as New Model` from the diff window and confirm the AI model displays on the canvas, appears in the model selector, and is saved under `./models/` in Edit mode or `./test_models/` in Tests mode.
 33. Select `Validate current model` or `Improve current model`, apply the result to the same selected file, and confirm rollback restores the previous saved model content.
@@ -326,7 +326,7 @@ Validate:
 
 * Help opens as a panel.
 * Keyboard/help content is grouped under Help.
-* The comprehensive `User Guide` section is present and covers model loading, navigation, editing classes/hyperclasses/attributes/links, layout/view controls, saving, deleting, collaboration, AI Support, ChatGPT Pro manual workflow, API key handling, AI request/validation, Preview on Canvas, apply/save, rollback, and Edit versus Tests save locations.
+* The comprehensive `User Guide` section is present and covers model loading, navigation, editing classes/hyperclasses/attributes/links, layout/view controls, saving, deleting, collaboration, AI Support, ChatGPT manual workflow, API key handling, AI request/validation, Preview on Canvas, apply/save, rollback, and Edit versus Tests save locations.
 * API documentation link opens a readable HTML documentation page.
 * OpenAPI link or direct URL can return JSON.
 
@@ -436,10 +436,10 @@ Expected:
 * `/api/ai/providers` reports provider capability metadata and whether real AI calls are enabled.
 * `/api/ai/connection` validates provider credentials and model access when a server key or transient UI key is available, and returns provider error causes without exposing secrets.
 * OpenAI provider metadata includes valid API model presets such as `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, and `gpt-4.1`, plus reasoning-effort support where applicable.
-* `ChatGPT Pro / Manual` provider metadata reports `manualWorkflow: true` and never requires an API key.
+* `ChatGPT / Manual` provider metadata reports `manualWorkflow: true` and never requires an API key.
 * Provider responses never expose secret values or environment variable values.
 * `/api/ai/prompt` returns a deterministic `hbds-ai-prompt-v1` enhanced prompt and attempts the selected API provider call when `HBDS_AI_ENABLED` is true or when a transient user key is supplied.
-* `/api/ai/prompt` must never call an external provider for `ChatGPT Pro / Manual`; it only prepares a copy/paste prompt.
+* `/api/ai/prompt` must never call an external provider for `ChatGPT / Manual`; it only prepares a copy/paste prompt.
 * The enhanced prompt requires JSON only, valid HBDS JSON, layout `none`, computed positions, selected model, and selected reasoning effort.
 * AI model responses using common aliases are normalized before validation: `kind` to `type`, `attribute` to `attributes`, and `source`/`target` to `sourceClassId`/`targetClassId`.
 * `/api/ai/apply` saves normalized AI models to `models` or `test_models`, refreshes manifests, returns the saved model, and never accepts or returns provider keys.
@@ -1080,6 +1080,15 @@ Run collaboration draft helper tests:
 node scripts\collaboration_drafts_test.mjs
 ```
 
+Run model API client revision tests:
+
+```powershell
+node scripts\server_api_test.mjs
+```
+
+The server smoke suite also checks stale and missing revisions for both model scopes,
+AI apply and rollback, revision-protected deletion, and preservation of rapid-save backups.
+
 Run semantic object-layer, functor, and optional-profile conformance tests:
 
 ```powershell
@@ -1103,7 +1112,7 @@ Automated collaboration coverage:
 * shell menu displays app version `v1.1`
 * the temporary same-origin server remains available during concurrent asset loading, event streaming, and draft polling without fallback connection errors
 * Help includes the comprehensive user guide with AI, model delete, rollback, collaboration, and Edit/Tests save-location guidance
-* AI Support panel collapsed by default, pink section styling, provider-dependent credential UI, provider-specific model combo, custom model fallback, reasoning effort payload, and ChatGPT Pro / Manual no-key workflow
+* AI Support panel collapsed by default, pink section styling, provider-dependent credential UI, provider-specific model combo, custom model fallback, reasoning effort payload, and ChatGPT / Manual no-key workflow
 * manual ChatGPT workflow prepares a prompt, exposes copy/open/paste/validate controls, rejects Markdown-fenced responses, and enables Apply only for strict valid HBDS JSON
 * AI apply opens the dedicated diff window, keeps the close button in the bottom action row, keeps desktop action buttons aligned on one row, uses a grid Preview on Canvas without changing saved layout metadata, saves new AI models, deletes AI-created models from the Session control, and rolls back saved AI apply results
 * AI key masking, redacted debug state, no key leakage into model JSON, and no automatic AI result application
@@ -1309,6 +1318,14 @@ OpenAPI or docs returns JSON when HTML was expected:
 * `/api/docs` is the readable documentation page
 * `/api/openapi.json` is the machine-readable JSON specification
 
+## AI provider and review regression coverage
+
+Run `py -3.9 -B scripts/check_project.py` to use an isolated copy without local keys. `scripts/ai_provider_test.py` mocks provider transport and covers schema requests, capability-specific parameters, exact Ollama tags, paginated discovery, invalid credentials, unavailable models, rate limits, timeouts, malformed replies, refusals, incomplete output, validation failures, and focused scope preservation. No paid provider calls run in the suite.
+
+The browser suite also checks model discovery without changing the selected model, hidden reasoning controls for unknown models, selected-entity scope, selective save and rollback, cancellation without retries, late responses, and blocked application after local edits. The helper suite covers invalid partial approvals that would leave dangling references. Both Edit and Tests retain revision protection for save/apply/rollback.
+
+For release review, verify Help links to `license.html`, the individual noncommercial/commercial distinction matches `LICENSE.txt`, the earlier MIT notice remains present, and local PDFs, satellite working data, keys, backups, and browser profiles are excluded from Git.
+
 ## 27. Release Checklist
 
 Before release:
@@ -1321,7 +1338,9 @@ Before release:
 * run `py tools\lint_model_naming.py`
 * run `node scripts\productivity_helpers_test.mjs`
 * run `node scripts\ai_support_test.mjs`
+* run `py -3.9 -B scripts\ai_provider_test.py`
 * run `node scripts\collaboration_drafts_test.mjs`
+* run `node scripts\server_api_test.mjs`
 * run `node scripts\hbds_semantics_test.mjs`
 * run `node scripts\hbds_functors_test.mjs`
 * run `node scripts\hbds_semantic_profiles_test.mjs`

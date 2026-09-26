@@ -1,0 +1,112 @@
+{
+  "$schema": "https://openbexi.local/hbds/model/v2",
+  "metadata": {
+    "name": "Parcel Delivery Semantic Layer",
+    "purpose": "Opt-in example of objects, object links, membership, and inheritance.",
+    "regressionTags": ["documentation", "schema", "v2", "semantics"],
+    "semanticVersion": 1
+  },
+  "hypergraph": {
+    "class": [
+      {
+        "id": "delivery_domain",
+        "name": "Delivery Domain",
+        "type": "hyperclass",
+        "attributes": [],
+        "position": {"x": 0, "y": 0, "z": 0},
+        "size": {"width": 9, "height": 4.5}
+      },
+      {
+        "id": "parcel_class",
+        "name": "Parcel",
+        "type": "class",
+        "attributes": [
+          {"id": "parcel_tracking_id", "name": "trackingId"}
+        ],
+        "position": {"x": -2.5, "y": 0, "z": 0},
+        "size": {"width": 2.2, "height": 1.2}
+      },
+      {
+        "id": "priority_parcel_class",
+        "name": "Priority Parcel",
+        "type": "class",
+        "attributes": [],
+        "position": {"x": 0, "y": 0, "z": 0},
+        "size": {"width": 2.2, "height": 1.2}
+      },
+      {
+        "id": "route_class",
+        "name": "Route",
+        "type": "class",
+        "attributes": [
+          {"id": "route_code", "name": "routeCode"}
+        ],
+        "position": {"x": 2.5, "y": 0, "z": 0},
+        "size": {"width": 2.2, "height": 1.2}
+      }
+    ],
+    "link": [
+      {
+        "id": "parcel_route_link",
+        "name": "assigned route",
+        "sourceClassId": "parcel_class",
+        "targetClassId": "route_class",
+        "rendering": {
+          "labelText": "assigned route",
+          "arrowType": "triangle",
+          "arrowDirection": "source-to-target"
+        }
+      }
+    ],
+    "object": [
+      {
+        "id": "parcel_object_1001",
+        "classId": "parcel_class",
+        "name": "Parcel 1001",
+        "attributeValues": [
+          {"attributeId": "parcel_tracking_id", "value": "PX-1001"}
+        ]
+      },
+      {
+        "id": "route_object_north",
+        "classId": "route_class",
+        "name": "North Route",
+        "attributeValues": [
+          {"attributeId": "route_code", "value": "NORTH"}
+        ]
+      }
+    ],
+    "objectLink": [
+      {
+        "id": "parcel_object_1001_route_link",
+        "classLinkId": "parcel_route_link",
+        "sourceObjectId": "parcel_object_1001",
+        "targetObjectId": "route_object_north"
+      }
+    ],
+    "membership": [
+      {
+        "id": "parcel_delivery_membership",
+        "classId": "parcel_class",
+        "hyperclassId": "delivery_domain"
+      },
+      {
+        "id": "priority_parcel_delivery_membership",
+        "classId": "priority_parcel_class",
+        "hyperclassId": "delivery_domain"
+      },
+      {
+        "id": "route_delivery_membership",
+        "classId": "route_class",
+        "hyperclassId": "delivery_domain"
+      }
+    ],
+    "inheritance": [
+      {
+        "id": "priority_parcel_inherits_parcel",
+        "subClassId": "priority_parcel_class",
+        "superClassId": "parcel_class"
+      }
+    ]
+  }
+}

@@ -38,6 +38,20 @@ export function makeUniqueId(seed, existingIds = new Set(), fallbackPrefix = 'it
   return candidate;
 }
 
+export function collectModelIds(model = {}) {
+  const ids = new Set();
+  const hypergraph = model.hypergraph || {};
+  for (const key of ['class', 'link', 'object', 'objectLink', 'membership', 'inheritance']) {
+    for (const entity of Array.isArray(hypergraph[key]) ? hypergraph[key] : []) {
+      if (entity?.id != null) ids.add(String(entity.id));
+      for (const attribute of Array.isArray(entity?.attributes) ? entity.attributes : []) {
+        if (attribute?.id != null) ids.add(String(attribute.id));
+      }
+    }
+  }
+  return ids;
+}
+
 function offsetPosition(position = {}) {
   return {
     ...position,
@@ -71,6 +85,15 @@ export function cloneNodesForPaste(sourceNodes = [], existingIds = new Set()) {
     next.id = idMap.get(oldId);
     next.name = copyName(next.name, next.id);
     next.position = offsetPosition(next.position);
+    if (Array.isArray(next.attributes)) {
+      next.attributes = next.attributes.map((attribute, attributeIndex) => {
+        if (!attribute || typeof attribute !== 'object') return attribute;
+        return {
+          ...attribute,
+          id: makeUniqueId(`${attribute.id ?? `${next.id}_attribute_${attributeIndex + 1}`}_copy`, taken, 'attribute')
+        };
+      });
+    }
 
     if (next.parentClassId != null) {
       const parentId = String(next.parentClassId);

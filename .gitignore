@@ -47,3 +47,7 @@ __pycache__/
 /AI_KEY/
 /models/.backups/
 /test_models/.backups/
+
+# Local reference material and working datasets are not release artifacts.
+/doc/*.pdf
+/satellite_database/

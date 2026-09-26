@@ -10,6 +10,7 @@ quickly and accurately in the remote operations UI.
 from __future__ import annotations
 
 import base64
+import argparse
 import hashlib
 import json
 import os
@@ -1156,6 +1157,157 @@ def run_font_policy_ui_regression(base_url: str, debug_port: int) -> None:
         page.close()
 
 
+def run_ai_review_regression(base_url: str, debug_port: int) -> None:
+    """Mock only provider transport; exercise real review, save, and rollback."""
+    name = f"_ai_review_{os.getpid()}.json"
+    original = {"metadata": {"name": "AI review fixture", "layout": {"algorithm": "none"}}, "hypergraph": {
+        "class": [
+            {"id": "review_a", "type": "class", "name": "A", "attributes": [], "position": {"x": 0, "y": 0, "z": 0}},
+            {"id": "review_b", "type": "class", "name": "B", "attributes": [], "position": {"x": 4, "y": 0, "z": 0}},
+        ], "link": [{"id": "review_ab", "name": "connects", "sourceClassId": "review_a", "targetClassId": "review_b"}],
+    }}
+    request_json(base_url, f"/api/models/{name}", method="POST", payload=original)
+    page = BrowserPage(create_target(debug_port))
+    try:
+        page.navigate(dynamic_layout_url(base_url, shared_model=name))
+        wait_for_page_ready(page, "AI change review page")
+        result = page.evaluate(r"""
+(async () => {
+  const $ = id => document.getElementById(id);
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const wait = async (predicate, label) => {
+    const start = Date.now();
+    while (Date.now() - start < 10000) {
+      if (await predicate()) return;
+      await sleep(75);
+    }
+    throw new Error(`${label}: ${$('ai-status-message').textContent}`);
+  };
+  const assert = (value, message) => { if (!value) throw new Error(message); };
+  const data = () => structuredClone(window.__hbdsDynamicTest.getData());
+  const change = (id, value) => { $(id).value = value; $(id).dispatchEvent(new Event('change', { bubbles: true })); };
+  const realFetch = window.fetch.bind(window);
+  let lastPayload, promptCalls = 0, delay = false, pending, delaySave = false, savedResponse;
+  window.fetch = async (url, options) => {
+    const path = new URL(url, location.href).pathname;
+    const respond = payload => new Response(JSON.stringify(payload), { headers: { 'Content-Type': 'application/json' } });
+    if (path === '/api/ai/apply' && delaySave) {
+      const response = await realFetch(url, options);
+      return new Promise(resolve => { savedResponse = () => resolve(response); });
+    }
+    if (path === '/api/ai/connection') return respond({ ok: true, connected: true, modelName: 'gpt-5.5' });
+    if (path === '/api/ai/models') return respond({ ok: true, models: [{ id: 'gpt-5.5', label: 'GPT-5.5', supportsReasoningEffort: true, reasoningEfforts: ['none', 'low', 'medium', 'high', 'xhigh'] }, { id: 'future-model' }] });
+    if (path === '/api/ai/prompt') {
+      promptCalls += 1;
+      lastPayload = JSON.parse(options.body);
+      const proposal = structuredClone(lastPayload.currentModel || data());
+      proposal.hypergraph.class[0].name = 'Improved A';
+      proposal.hypergraph.class[0].position.x = 999;
+      proposal.hypergraph.class[0].attributes.push({ id: 'review_new_attr', name: 'Selected attribute' });
+      proposal.hypergraph.class[1].name = 'Unrelated mutation';
+      const response = { ok: true, aiCallEnabled: true, model: proposal, providerResponse: '{"explanation":"A connects to B"}' };
+      if (delay) return new Promise(resolve => { pending = () => resolve(respond(response)); });
+      return respond(response);
+    }
+    return realFetch(url, options);
+  };
+  try {
+    change('ai-provider-select', 'openai');
+    $('ai-api-key-input').value = 'offline-ui-test-key';
+    $('ai-refresh-models-button').click();
+    await wait(() => [...$('ai-model-select').options].some(option => option.value === 'future-model'), 'model discovery');
+    assert($('ai-model-select').value === 'gpt-5.5', 'refresh changed the selected model');
+    change('ai-model-select', 'future-model');
+    assert($('ai-reasoning-field').hidden, 'unknown model exposed unsupported reasoning');
+    change('ai-model-select', 'gpt-5.5');
+    change('selected-element-select', 'review_a');
+    change('ai-operation-select', 'improve-selection');
+    $('ai-request-input').value = 'Improve the selected entity';
+    const before = data();
+    $('ai-send-request-button').click();
+    await wait(() => !$('ai-apply-result-button').disabled, 'focused result');
+    assert(lastPayload.selectionIds.length === 1 && lastPayload.selectionIds[0] === 'review_a', 'selection not sent');
+    $('ai-apply-result-button').click();
+    await wait(() => !$('ai-diff-modal').hidden, 'review modal');
+    const choices = [...document.querySelectorAll('#ai-diff-content input[data-change-key]')];
+    assert(choices.length === 2, `unexpected focused changes: ${choices.length}`);
+    choices.forEach(input => {
+      input.checked = input.closest('label').textContent.includes('attribute');
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    assert(!$('ai-diff-apply-save-button').disabled, 'valid subset was blocked');
+    $('ai-diff-apply-save-button').click();
+    await wait(() => $('ai-diff-modal').hidden && data().hypergraph.class[0].attributes.length === 1, 'selective save');
+    const saved = data();
+    assert(saved.hypergraph.class[0].name === 'A', 'excluded rename applied');
+    assert(JSON.stringify(saved.hypergraph.class[0].position) === JSON.stringify(before.hypergraph.class[0].position), 'position moved');
+    assert(JSON.stringify(saved.hypergraph.class[1]) === JSON.stringify(before.hypergraph.class[1]), 'unselected class changed');
+    $('ai-rollback-result-button').click();
+    await wait(() => !window.__hbdsDynamicTest.getState().aiSupport.rollbackReady, 'selective save rollback');
+    assert(data().hypergraph.class[0].attributes.length === 0, 'rollback failed');
+
+    change('selected-element-select', 'review_a');
+    change('ai-operation-select', 'explain-selection');
+    $('ai-send-request-button').click();
+    await wait(() => $('ai-cancel-request-button').disabled, 'explanation');
+    assert($('ai-apply-result-button').disabled, 'explanation enabled model application');
+
+    change('ai-operation-select', 'improve-selection');
+    delay = true;
+    pending = null;
+    const callsBefore = promptCalls;
+    $('ai-send-request-button').click();
+    await wait(() => Boolean(pending), 'delayed request');
+    $('ai-cancel-request-button').click();
+    pending();
+    await sleep(150);
+    assert($('ai-apply-result-button').disabled, 'canceled result became applicable');
+    assert($('ai-status-message').textContent.includes('canceled'), 'cancel reported as timeout');
+    assert(promptCalls === callsBefore + 1, 'canceled request was retried');
+
+    pending = null;
+    $('ai-send-request-button').click();
+    await wait(() => Boolean(pending), 'stale request');
+    $('duplicate-node-button').click();
+    await wait(() => data().hypergraph.class.length === 3, 'local edit while waiting');
+    pending();
+    await wait(() => !$('ai-apply-result-button').disabled, 'stale result received');
+    $('ai-apply-result-button').click();
+    assert($('ai-diff-modal').hidden, 'stale result opened apply modal');
+    assert($('ai-status-message').textContent.includes('model changed'), 'stale result missing guidance');
+    assert(data().hypergraph.class.length === 3, 'stale result overwrote local edit');
+    delay = false;
+    change('selected-element-select', 'review_a');
+    $('ai-send-request-button').click();
+    await wait(() => !$('ai-apply-result-button').disabled, 'result before delayed save');
+    $('ai-apply-result-button').click();
+    await wait(() => !$('ai-diff-modal').hidden, 'review before delayed save');
+    $('ai-destructive-confirm').checked = true;
+    delaySave = true;
+    $('ai-diff-apply-save-button').click();
+    await wait(() => Boolean(savedResponse), 'delayed save response');
+    assert($('ai-send-request-button').disabled, 'new AI request was enabled during save');
+    $('duplicate-node-button').click();
+    await wait(() => data().hypergraph.class.length === 4, 'local edit during save');
+    savedResponse();
+    await wait(() => $('ai-status-message').textContent.includes('Newer local edits were kept'), 'save completion retained local edits');
+    assert(data().hypergraph.class.length === 4, 'save response replaced newer local edits');
+    $('ai-rollback-result-button').click();
+    await wait(() => $('ai-status-message').textContent.includes('newer local edits'), 'rollback local edit guard');
+    assert(data().hypergraph.class.length === 4, 'rollback replaced newer local edits');
+    return { selectiveSave: true, rollback: true, focusedScope: true, canceled: true, staleBlocked: true, models: true, saveRace: true };
+  } finally { window.fetch = realFetch; }
+})()
+""", timeout=60)
+        if not isinstance(result, dict) or not all(result.values()):
+            raise BrowserRegressionError(f"AI review regression failed: {result}")
+        assert_browser_errors([page])
+        print("PASS AI selection, selective save/rollback, model discovery, cancellation, and stale response guards")
+    finally:
+        page.close()
+        request_json(base_url, f"/api/models/{name}", method="DELETE", payload={})
+
+
 def run_ai_support_ui_regression(base_url: str, debug_port: int, model_name: str) -> None:
     page = BrowserPage(create_target(debug_port))
     try:
@@ -1334,6 +1486,7 @@ return prompt.includes('Return JSON only') &&
     }, 'AI diff modal');
     const summary = document.querySelector('#ai-diff-summary')?.innerText || '';
     const actionButtons = [...document.querySelectorAll('.ai-diff-actions button')];
+    if (actionButtons.some(button => button.scrollWidth > button.clientWidth + 1)) throw new Error('AI action label overflows its button');
     const actionTops = actionButtons.map(button => Math.round(button.getBoundingClientRect().top));
     const modalCloseBottom = document.querySelector('#ai-diff-close-button')?.closest('.modal-actions') !== null;
     const actionsAligned = actionTops.length === 5 && Math.max(...actionTops) - Math.min(...actionTops) <= 2;
@@ -1365,16 +1518,17 @@ return prompt.includes('Return JSON only') &&
       const element = document.querySelector('#ai-diff-modal');
       return element && element.hidden === false ? element : null;
     }, 'AI diff modal before preview');
+    document.querySelector('#ai-destructive-confirm').checked = true;
     document.querySelector('#ai-diff-preview-button').click();
     const preview = await waitUntil(() => {
       const state = window.__hbdsDynamicTest?.getState?.() || {};
       const status = document.querySelector('#ai-status-message')?.textContent || '';
       const layoutAlgorithm = state.layout?.algorithm || '';
-      return modal.hidden === true && state.aiSupport?.rollbackReady && status.includes('grid layout') && layoutAlgorithm === 'none' ? {
+      return modal.hidden === true && state.aiSupport?.rollbackReady && status.includes('Preview only') && layoutAlgorithm === 'none' ? {
         status,
         layoutAlgorithm
       } : false;
-    }, 'AI grid preview');
+    }, 'AI preview');
     document.querySelector('#ai-rollback-result-button').click();
     const rollback = await waitUntil(() => {
       const state = window.__hbdsDynamicTest?.getState?.().aiSupport || {};
@@ -1438,7 +1592,7 @@ return prompt.includes('Return JSON only') &&
         if apply_flow.get("deleteApply", {}).get("modalCloseBottom") is not True or apply_flow.get("deleteApply", {}).get("actionsAligned") is not True:
             raise BrowserRegressionError(f"AI diff modal button placement invalid: {apply_flow}")
         if not isinstance(apply_flow.get("previewFlow"), dict) or apply_flow["previewFlow"].get("preview", {}).get("layoutAlgorithm") != "none":
-            raise BrowserRegressionError(f"AI grid preview/rollback flow failed: {apply_flow}")
+            raise BrowserRegressionError(f"AI preview/rollback flow failed: {apply_flow}")
 
         prepared = wait_for(
             page,
@@ -1488,6 +1642,101 @@ return preview.includes('Return JSON only') && preview.includes('metadata.layout
         print("PASS AI support UI regression")
     finally:
         page.close()
+
+
+def run_save_safety_regression(base_url: str, debug_port: int) -> None:
+    for scope in ("models", "test_models"):
+        name = f"_save_safety_browser_{os.getpid()}.json"
+        endpoint = f"/api/models/{name}" if scope == "models" else f"/api/model-files/{scope}/{name}"
+        model = {
+            "metadata": {"name": "Save safety", "layout": {"algorithm": "none"}},
+            "hypergraph": {
+                "class": [{"id": "save_safety_class", "type": "class", "name": "Asset", "position": {"x": 0, "y": 0, "z": 0},
+                           "attributes": [{"id": "save_safety_attribute", "name": "status", "value": "ready"}]}],
+                "link": [],
+            },
+        }
+        request_json(base_url, endpoint, method="POST", payload=model)
+        page = BrowserPage(create_target(debug_port))
+        try:
+            page.navigate(dynamic_layout_url(base_url, shared_model=name, models_path=f"{scope}/"))
+            wait_for_page_ready(page, f"{scope} save safety page")
+            wait_for_model_loaded(page, name, f"{scope} save safety model")
+            set_page_edit_mode(page, "full")
+            result = page.evaluate(
+                """
+(async () => {
+  const config = __CONFIG__;
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const data = () => window.__hbdsDynamicTest.getData();
+  const state = () => window.__hbdsDynamicTest.getState();
+  const wait = async (predicate, label) => {
+    const start = Date.now();
+    while (Date.now() - start < 18000) {
+      if (await predicate()) return;
+      await sleep(100);
+    }
+    throw new Error(label + ': ' + document.querySelector('#layout-status').textContent);
+  };
+  if (!data().metadata.revision) throw new Error('Loaded model has no revision');
+  for (const count of [2, 3]) {
+    const select = document.querySelector('#selected-element-select');
+    select.value = 'save_safety_class';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    document.querySelector('#duplicate-node-button').click();
+    await wait(() => data().hypergraph.class.length === count && state().localDraftDirty, 'duplicate class');
+    const revision = data().metadata.revision;
+    document.querySelector('#save-model-button').click();
+    await wait(() => state().saved && data().metadata.revision !== revision, 'save duplicated class');
+    const response = await fetch(config.endpoint);
+    const saved = await response.json();
+    if (saved.model.hypergraph.class.length !== count) throw new Error('Duplicate was not persisted');
+    const ids = saved.model.hypergraph.class.flatMap(node => [node.id, ...node.attributes.map(attribute => attribute.id)]);
+    if (ids.length !== new Set(ids).size) throw new Error('Duplicate attribute IDs were persisted');
+  }
+  const beforeAi = data();
+  const aiModel = structuredClone(beforeAi);
+  aiModel.hypergraph.class[0].name = 'AI changed asset';
+  const provider = document.querySelector('#ai-provider-select');
+  provider.value = 'chatgpt-manual';
+  provider.dispatchEvent(new Event('change', { bubbles: true }));
+  const operation = document.querySelector('#ai-operation-select');
+  operation.value = 'improve';
+  operation.dispatchEvent(new Event('change', { bubbles: true }));
+  const request = document.querySelector('#ai-request-input');
+  request.value = 'Improve the asset name';
+  request.dispatchEvent(new Event('input', { bubbles: true }));
+  const manual = document.querySelector('#ai-manual-response-input');
+  manual.value = JSON.stringify(aiModel);
+  manual.dispatchEvent(new Event('input', { bubbles: true }));
+  document.querySelector('#ai-validate-response-button').click();
+  await wait(() => !document.querySelector('#ai-apply-result-button').disabled, 'AI response validation');
+  document.querySelector('#ai-apply-result-button').click();
+  await wait(() => !document.querySelector('#ai-diff-modal').hidden, 'AI diff');
+  document.querySelector('#ai-destructive-confirm').checked = true;
+  document.querySelector('#ai-diff-apply-save-button').click();
+  await wait(() => state().aiSupport.rollbackReady && document.querySelector('#ai-diff-modal').hidden
+    && data().hypergraph.class[0].name === 'AI changed asset', 'AI same-file apply');
+  document.querySelector('#ai-rollback-result-button').click();
+  await wait(() => !state().aiSupport.rollbackReady && data().hypergraph.class[0].name === beforeAi.hypergraph.class[0].name,
+    'AI same-file rollback');
+  const restored = await (await fetch(config.endpoint)).json();
+  if (restored.model.hypergraph.class[0].name !== beforeAi.hypergraph.class[0].name) throw new Error('Rollback was not persisted');
+  return { scope: config.scope, classCount: restored.model.hypergraph.class.length, rollback: true };
+})()
+""".replace("__CONFIG__", json.dumps({"scope": scope, "endpoint": endpoint})),
+                timeout=60,
+            )
+            if not isinstance(result, dict) or result.get("classCount") != 3 or result.get("rollback") is not True:
+                raise BrowserRegressionError(f"Save safety regression failed: {result}")
+            assert_browser_has_no_significant_errors(page, f"{scope} save safety")
+            print(f"PASS {scope} duplicate/save/repeated save/AI same-file rollback")
+        finally:
+            page.close()
+            request_json(base_url, endpoint, method="DELETE", expected=(200, 404))
+            backup_dir = (MODELS_DIR if scope == "models" else TEST_MODELS_DIR) / ".backups"
+            for backup in backup_dir.glob(f"{Path(name).stem}.*.bak.json"):
+                backup.unlink()
 
 
 def run_shell_menu_version_regression(base_url: str, debug_port: int) -> None:
@@ -2720,6 +2969,9 @@ def terminate_process(process: subprocess.Popen | None, name: str) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--suite", choices=("all", "ai"), default="all")
+    args = parser.parse_args()
     server_process: subprocess.Popen | None = None
     browser_process: subprocess.Popen | None = None
     base_url = ""
@@ -2734,10 +2986,16 @@ def main() -> int:
 
         browser_process = launch_browser(debug_port)
         wait_for_browser(debug_port, browser_process)
+        if args.suite == "ai":
+            run_ai_support_ui_regression(base_url, debug_port, TEMP_MODEL_NAME)
+            run_ai_review_regression(base_url, debug_port)
+            return 0
         run_shell_menu_version_regression(base_url, debug_port)
+        run_save_safety_regression(base_url, debug_port)
         run_render_scheduler_regression(base_url, debug_port)
         run_builtin_visual_regressions(base_url, debug_port)
         run_ai_support_ui_regression(base_url, debug_port, TEMP_MODEL_NAME)
+        run_ai_review_regression(base_url, debug_port)
         run_font_policy_ui_regression(base_url, debug_port)
         run_human_and_car_second_page_selection_regression(base_url, debug_port)
         run_regression(base_url, debug_port, loaded_model)
