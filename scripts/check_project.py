@@ -18,7 +18,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-browser", action="store_true", help="Run all checks except the real-browser suite")
     parser.add_argument("--browser-only", action="store_true", help="Run only the real-browser suite")
-    parser.add_argument("--browser-suite", choices=("all", "ai"), default="all")
+    parser.add_argument("--browser-suite", choices=("all", "ai", "satellite"), default="all")
     args = parser.parse_args()
     env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONUNBUFFERED": "1", "HBDS_AI_ENABLED": "0"}
     for key in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "HBDS_AI_CUSTOM_API_KEY"):
@@ -44,6 +44,7 @@ def main() -> int:
             run([sys.executable, "-B", "scripts/ai_provider_test.py"])
             for script in ("validate_manifests", "validate_models", "validate_test_models", "lint_model_naming"):
                 run([sys.executable, "-B", f"tools/{script}.py"])
+            run([sys.executable, "-B", "models/validate_satellite_models.py"])
             run([sys.executable, "-B", "scripts/smoke_server.py"], timeout=300)
         if not args.skip_browser:
             run([sys.executable, "-B", "scripts/collaboration_browser_regression.py", "--suite", args.browser_suite], timeout=900)

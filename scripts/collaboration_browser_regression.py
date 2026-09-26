@@ -37,7 +37,7 @@ HUMAN_AND_CAR_LINKS_MODEL_NAME = "human_and_car_links.json"
 HUMAN_AND_CAR_LINKS_SELECTION_MAX_MS = 250.0
 SOURCE_MODEL_CANDIDATES = [
     MODELS_DIR / "bridge_road_links.json",
-    MODELS_DIR / "satellite_world_complete_structure.json",
+    MODELS_DIR / "satellite_world_complete_structure2.json",
     TEST_MODELS_DIR / "stress_022_large_performance.json",
 ]
 BROWSER_CANDIDATES = [
@@ -1644,6 +1644,89 @@ return preview.includes('Return JSON only') && preview.includes('metadata.layout
         page.close()
 
 
+def run_satellite_model_regression(base_url: str, debug_port: int) -> None:
+    """Load satellite models and edit/save/reload disposable copies through the UI."""
+    model_names = ("satellite_world_simple_structure.json", "satellite_world_complete_structure2.json")
+    viewer = BrowserPage(create_target(debug_port))
+    try:
+        viewer.navigate(f"{base_url}/index_models.html")
+        wait_for(
+            viewer,
+            "return window.__hbdsModelsTest?.getData?.()?.metadata?.id === 'satellite_world_simple_structure';",
+            "Models viewer to load the default satellite model",
+            timeout=35,
+        )
+        assert_browser_has_no_significant_errors(viewer, "Default satellite viewer")
+    finally:
+        viewer.close()
+
+    for model_name in model_names:
+        original_bytes = (MODELS_DIR / model_name).read_bytes()
+        source = json.loads(original_bytes)
+        temporary_name = f"_satellite_roundtrip_{os.getpid()}.json"
+        endpoint = f"/api/models/{temporary_name}"
+        page = BrowserPage(create_target(debug_port))
+        try:
+            page.navigate(dynamic_layout_url(base_url, model_name, debug=False))
+            wait_for_page_ready(page, f"{model_name} load")
+            wait_for_model_loaded(page, model_name, f"{model_name} render")
+            state = page.evaluate("window.__hbdsDynamicTest.getState()")
+            pixels = page.evaluate("window.__hbdsDynamicTest.sampleRendererPixels(16)")
+            if not state["validation"]["valid"] or pixels["nonBackground"] <= 10:
+                raise BrowserRegressionError(f"Satellite model did not render correctly: {model_name}")
+            if state["counts"]["nodes"] != len(source["hypergraph"]["class"]):
+                raise BrowserRegressionError(f"Satellite classes were lost on load: {model_name}")
+            if state["counts"]["links"] != len(source["hypergraph"]["link"]):
+                raise BrowserRegressionError(f"Satellite links were lost on load: {model_name}")
+            screenshot_dir = os.environ.get("HBDS_SCREENSHOT_DIR")
+            if screenshot_dir:
+                destination = Path(screenshot_dir)
+                destination.mkdir(parents=True, exist_ok=True)
+                shot = page.cdp.send("Page.captureScreenshot", {"format": "png"})
+                (destination / f"{Path(model_name).stem}.png").write_bytes(base64.b64decode(shot["result"]["data"]))
+
+            request_json(base_url, endpoint, method="POST", payload=source)
+            page.navigate(dynamic_layout_url(base_url, temporary_name, debug=False))
+            wait_for_page_ready(page, f"{model_name} editable copy")
+            wait_for_model_loaded(page, temporary_name, "satellite copy load")
+            set_page_edit_mode(page, "full")
+            renamed = "Satellite save regression"
+            node_id, _ = rename_first_class(page, renamed)
+            revision = page.evaluate("window.__hbdsDynamicTest.getData().metadata.revision")
+            page.click("#save-model-button")
+            wait_for(
+                page,
+                "const hook = window.__hbdsDynamicTest; return hook.getState().saved && "
+                f"hook.getData().metadata.revision !== {json.dumps(revision)};",
+                f"{model_name} save to finish",
+                timeout=25,
+            )
+            saved = request_json(base_url, endpoint)["model"]
+            node = next(item for item in saved["hypergraph"]["class"] if item["id"] == node_id)
+            if node["name"] != renamed or len(saved["hypergraph"]["link"]) != len(source["hypergraph"]["link"]):
+                raise BrowserRegressionError(f"Satellite edit or links not persisted: {model_name}")
+            if saved["metadata"].get("sourceDatasets") != source["metadata"].get("sourceDatasets"):
+                raise BrowserRegressionError("Satellite source mapping was lost on save")
+            page.navigate(dynamic_layout_url(base_url, temporary_name, debug=False))
+            wait_for_page_ready(page, f"{model_name} reload")
+            wait_for_model_loaded(page, temporary_name, "saved satellite copy load")
+            wait_for(
+                page,
+                "return window.__hbdsDynamicTest.getData().hypergraph.class.some(node => "
+                f"node.id === {json.dumps(node_id)} && node.name === {json.dumps(renamed)});",
+                "saved satellite edit after reload",
+            )
+            assert_browser_has_no_significant_errors(page, f"{model_name} roundtrip")
+            if (MODELS_DIR / model_name).read_bytes() != original_bytes:
+                raise BrowserRegressionError(f"Satellite source fixture changed: {model_name}")
+            print(f"PASS satellite load/render/edit/save/reload {model_name}")
+        finally:
+            page.close()
+            request_json(base_url, endpoint, method="DELETE", expected=(200, 404))
+            for backup in (MODELS_DIR / ".backups").glob(f"{Path(temporary_name).stem}.*.bak.json"):
+                backup.unlink()
+
+
 def run_save_safety_regression(base_url: str, debug_port: int) -> None:
     for scope in ("models", "test_models"):
         name = f"_save_safety_browser_{os.getpid()}.json"
@@ -2970,7 +3053,7 @@ def terminate_process(process: subprocess.Popen | None, name: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--suite", choices=("all", "ai"), default="all")
+    parser.add_argument("--suite", choices=("all", "ai", "satellite"), default="all")
     args = parser.parse_args()
     server_process: subprocess.Popen | None = None
     browser_process: subprocess.Popen | None = None
@@ -2989,6 +3072,10 @@ def main() -> int:
         if args.suite == "ai":
             run_ai_support_ui_regression(base_url, debug_port, TEMP_MODEL_NAME)
             run_ai_review_regression(base_url, debug_port)
+            return 0
+        run_satellite_model_regression(base_url, debug_port)
+        if args.suite == "satellite":
+            run_builtin_visual_regressions(base_url, debug_port)
             return 0
         run_shell_menu_version_regression(base_url, debug_port)
         run_save_safety_regression(base_url, debug_port)

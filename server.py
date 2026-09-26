@@ -106,6 +106,8 @@ LOCAL_ORIGINS = {
     "http://localhost:8010",
 }
 PROTECTED_MODEL_FILE_NAMES = {
+    "satellite_world_simple_structure.json",
+    "satellite_world_complete_structure2.json",
     "hyperclass_mail_carrier_with_links.json",
     "models.json",
     "transportation_links.json",

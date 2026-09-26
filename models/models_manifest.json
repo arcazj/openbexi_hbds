@@ -56,11 +56,6 @@
       "description": "openshift cloud network"
     },
     {
-      "value": "models/satellite_world_complete_structure.json",
-      "label": "satellite world complete structure",
-      "description": "satellite world complete structure"
-    },
-    {
       "value": "models/satellite_world_complete_structure2.json",
       "label": "satellite world complete structure2",
       "description": "satellite world complete structure2"
@@ -69,11 +64,6 @@
       "value": "models/satellite_world_simple_structure.json",
       "label": "satellite world simple structure",
       "description": "satellite world simple structure"
-    },
-    {
-      "value": "models/satellite_world_simple_structure_v2.json",
-      "label": "satellite world simple structure v2",
-      "description": "satellite world simple structure v2"
     },
     {
       "value": "models/transportation_links.json",

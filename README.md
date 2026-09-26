@@ -21,6 +21,10 @@ This README is the main entry point for setup, features, server mode, API endpoi
 
 ## Recent Updates
 
+### Satellite Model Collection
+
+The satellite examples are `satellite_world_simple_structure.json` (the default, rebuilt from `data/space/json/`) and the preserved `satellite_world_complete_structure2.json`. The other existing models remain available; only the legacy complete satellite model and simple v2 model were removed. The [satellite source mapping](doc/SATELLITE_MODEL_SOURCES.md) explains the new model's classes, relationships, source coverage, and limitations. Regression fixtures remain available in Tests.
+
 This week the project added a larger local-server workflow and collaboration surface:
 
 * **Application shell**: `index.html` now provides Models, Edit, Tests, and Help views from one menu.
@@ -218,7 +222,7 @@ The Python server automatically regenerates both manifests on startup:
 
 Manifest entries are built from the `.json` files present in each directory. Hidden files and manifest files are skipped. For each model:
 
-* `value` is the relative path, for example `models/bridge_road_links.json`.
+* `value` is the relative path, for example `models/satellite_world_simple_structure.json`.
 * `label` is derived from the filename without `.json`, with `_` and `-` replaced by spaces.
 * `description` matches the label.
 

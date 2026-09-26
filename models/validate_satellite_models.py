@@ -55,5 +55,5 @@ def validate(path):
     print(f'OK: {path}')
 
 if __name__=='__main__':
-    paths=sys.argv[1:] or ['models/satellite_world_complete_structure.json','models/satellite_world_simple_structure.json']
+    paths=sys.argv[1:] or ['models/satellite_world_complete_structure2.json','models/satellite_world_simple_structure.json']
     for p in paths: validate(p)

@@ -46,7 +46,7 @@ Resolved or mitigated issues:
 * Java regression tests could not run because `mvn` was not available on the machine PATH; the repo now provides `mvn.cmd`, `mvn.ps1`, and `scripts/bootstrap_maven.ps1`.
 * `rg` was not available in the environment; the repo now provides `rg.cmd`, `rg.ps1`, and `scripts/bootstrap_ripgrep.ps1`.
 * `it_infrastructure_world_complete_structure.json` was removed from the model set and must not remain in manifests, tests, or large-model special-case references.
-* `models/satellite_world_complete_structure2.json` reused entity IDs from `models/satellite_world_complete_structure.json`; the second satellite model now uses a distinct `satellite_world_complete_structure2_*` ID namespace.
+* The satellite models use distinct entity ID namespaces to avoid cross-model collisions.
 * AI Support now needs provider-specific model presets, optional custom model entry, reasoning effort selection where supported, and pink section styling.
 
 Regression coverage required for these issues:
@@ -160,7 +160,7 @@ Validate:
 * Stopping the server turns the indicator red/not connected after polling catches up.
 * Restarting the server reconnects the UI.
 * `models/models_manifest.json` and `test_models/test_models_manifest.json` are refreshed at server startup.
-* Loading a large model such as `satellite_world_complete_structure.json` shows a centered non-blocking canvas progress bar instead of a blank or frozen canvas.
+* Loading a large model such as `satellite_world_complete_structure2.json` shows a centered non-blocking canvas progress bar instead of a blank or frozen canvas.
 
 ## 6. Port In Use Check
 
@@ -1109,6 +1109,7 @@ This opens real headless Edge/Chrome clients. Rendering checks run with debug di
 
 Automated collaboration coverage:
 
+* the Models viewer defaults to the new simple satellite model; both satellite models render, and temporary copies preserve edits through save and reload
 * shell menu displays app version `v1.1`
 * the temporary same-origin server remains available during concurrent asset loading, event streaming, and draft polling without fallback connection errors
 * Help includes the comprehensive user guide with AI, model delete, rollback, collaboration, and Edit/Tests save-location guidance

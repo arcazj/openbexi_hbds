@@ -47,7 +47,6 @@ Use these models when a roadmap item touches rendering, layout, font, links, AI,
 * `models/bridge_road_links.json`
 * `models/transportation_links.json`
 * `models/multimodal_transportation_diagram.json`
-* `models/satellite_world_complete_structure.json`
 * `models/satellite_world_complete_structure2.json`
 * `models/satellite_world_simple_structure.json`
 

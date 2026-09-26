@@ -1,4 +1,5 @@
 {
+  "description": "Historical icon-generation provenance. The models and files fields record original sources; current selectable models are listed in models/models_manifest.json.",
   "generatedAt": "2026-05-16T21:42:03.775Z",
   "models": [
     "bridge_road_links.json",

@@ -3,836 +3,1346 @@
   "metadata": {
     "id": "satellite_world_simple_structure",
     "name": "Satellite World Simple Structure",
-    "version": "2026.05.18-simple-radial-metallic",
-    "description": "Simple HBDS satellite model with richer lifecycle/spacecraft metadata and radial layout.",
-    "layout": {
-      "algorithm": "grid",
-      "mode": "Radial",
-      "fit": {
-        "padding": 1.18,
-        "fitHeightDistance": 11.4632,
-        "fitWidthDistance": 15.1626,
-        "distance": 15.2393,
-        "diagramWidth": 16.77,
-        "diagramHeight": 9.06,
-        "diagramDepth": 0.13,
-        "radius": 9.5307,
-        "center": {
-          "x": -0.6775,
-          "y": 0,
-          "z": 0.065
-        },
-        "cameraAspect": 1.3994,
-        "cameraFov": 50,
-        "mode": "userView",
-        "savedView": true,
-        "subjectCount": 7
-      }
-    },
-    "style": {
-      "classMaterial": "metallic",
-      "classPalette": "domain-colored",
-      "hyperclassMaterial": "metallic"
-    },
-    "font": {
-      "size": 28,
-      "family": "Arial, sans-serif",
-      "bold": false,
-      "italic": false,
-      "underline": false,
-      "classSize": 32,
-      "hyperclassSize": 37,
-      "attributeSize": 20,
-      "linkSize": 25
-    },
-    "sceneSettings": {
-      "background": "#eef2f6",
-      "ambient": 0,
-      "front": 0,
-      "sources": [
-        {
-          "intensity": 1,
-          "direction": {
-            "x": -5.734,
-            "y": 7,
-            "z": 14.937
-          }
-        },
-        {
-          "intensity": 0.6,
-          "direction": {
-            "x": 0,
-            "y": 11.314,
-            "z": 11.314
-          }
-        }
-      ]
-    },
-    "purpose": "Simple HBDS satellite model with richer lifecycle/spacecraft metadata and radial layout.",
+    "version": "2026.09.26-space-data",
+    "description": "Compact structure of the local space catalog, orbital data, lifecycle records, spacecraft profiles and display assets.",
+    "purpose": "Model the observed fields and relationships in data/space/json with explicit source mappings.",
     "regressionTags": [
       "model",
       "satellite",
-      "world",
-      "simple",
-      "structure"
+      "source-mapping",
+      "hyperclass",
+      "lifecycle",
+      "omm",
+      "tle"
+    ],
+    "preserveLayout": true,
+    "layout": {
+      "algorithm": "grid",
+      "mode": "grid"
+    },
+    "font": {
+      "size": 20,
+      "family": "Arial, sans-serif",
+      "classSize": 24,
+      "hyperclassSize": 27,
+      "attributeSize": 17,
+      "linkSize": 20
+    },
+    "sceneSettings": {
+      "background": "#EEF2F6",
+      "ambient": 0.6,
+      "front": 0.7
+    },
+    "sourceRoot": "data/space/json",
+    "sourceDatasets": {
+      "tracked": {
+        "path": "tracked/TRACKED.manifest.json",
+        "records": "chunks + history_chunks -> records[]",
+        "count": 70661,
+        "sha256": "e13cc7dc6032f1ed8c0f6de945b033c7e6d2af356cdb6e3301e863024de04961"
+      },
+      "satcat": {
+        "path": "satcat.csv",
+        "records": "CSV rows",
+        "count": 70661,
+        "sha256": "d9dbe72c138a30ad0c100624e12ea1db0f3b6f16bbaff7c631450e4ccbd63364"
+      },
+      "gp": {
+        "path": "gp/GP.json",
+        "records": "[]",
+        "count": 16470,
+        "sha256": "7e20905d9e159f17811b25cec87a38cb5d9063ea507027e251fdbcd191bb14c9"
+      },
+      "tle": {
+        "path": "tle/TLE.json",
+        "records": "[]",
+        "count": 16015,
+        "sha256": "58b3a6299bc22682165be28eaa09567e42c09d1df187458cfafbebfee6735d5d"
+      },
+      "launches": {
+        "path": "launches/launches.json",
+        "records": "[]",
+        "count": 27713,
+        "sha256": "90f73cab255baaf7a1124a30b887f48813dab71467a281a075ac27e6bb221dd1"
+      },
+      "decayed": {
+        "path": "decayed/decayed.json",
+        "records": "object-name -> []",
+        "count": 7636,
+        "sha256": "5fb3ce05b9c40061960671bd90085c5f8d0565d174d95b8f8c65c3f925e4def6"
+      },
+      "launch_dates": {
+        "path": "tle/satellite_launch_dates.json",
+        "records": "[]",
+        "count": 23891,
+        "sha256": "c38bde04b7daf78478c5e0ddfe2369fc545be0ea5d252c3c21964d6973e05738"
+      },
+      "profiles": {
+        "path": "satellites/*.json",
+        "records": "profile key -> object",
+        "count": 7
+      },
+      "display": {
+        "path": "display_satellite_models.json",
+        "records": "models[]",
+        "count": 6,
+        "sha256": "ce11cbbb77d447df68510b3ab50b93b9901fce4ae8f3c3286fc5820347662cf7"
+      },
+      "refresh": {
+        "path": "**/*.meta.json",
+        "records": "root metadata objects"
+      }
+    },
+    "sourceNotes": [
+      "Structure inspected on 2026-09-26; source snapshots have different dates and coverage.",
+      "Classes describe record structures; individual satellite records remain external.",
+      "Hyperclasses group the diagram visually, without asserting v2 inheritance or membership.",
+      "GP metadata reports a failed refresh and degraded source status; diagram generation does not establish freshness.",
+      "Profile samples can contain placeholders; display association requires a curated mapping.",
+      "Tracking lifecycle, observation, and element availability are independent statuses."
     ]
   },
   "hypergraph": {
     "class": [
       {
-        "id": "satellite_world_simple_structure_hc_satellite_catalog",
-        "name": "Satellite Catalog",
+        "id": "satellite_world_simple_structure_hc_catalog",
+        "name": "Catalog / Lifecycle",
         "type": "hyperclass",
-        "attributes": [
-          {
-            "name": "Catalog authority",
-            "id": "satellite_world_simple_structure_hc_satellite_catalog_attr_catalog_authority"
-          },
-          {
-            "name": "Object identity",
-            "id": "satellite_world_simple_structure_hc_satellite_catalog_attr_object_identity"
-          },
-          {
-            "name": "Launch lineage",
-            "id": "satellite_world_simple_structure_hc_satellite_catalog_attr_launch_lineage"
-          }
-        ],
+        "attributes": [],
         "children": [
-          "satellite_world_simple_structure_satellite",
-          "satellite_world_simple_structure_launch_vehicle",
-          "satellite_world_simple_structure_organization"
+          "satellite_world_simple_structure_space_object",
+          "satellite_world_simple_structure_lifecycle",
+          "satellite_world_simple_structure_tracking"
         ],
         "position": {
-          "x": 4.27,
+          "x": -6.6,
           "y": 0,
           "z": 0
         },
         "size": {
-          "width": 6.215,
-          "height": 9.06
+          "width": 6.1,
+          "height": 8.6
         },
         "rendering": {
           "class": {
             "color": "#DBEAFE",
-            "material": "metallic",
             "borderColor": "#1D4ED8",
             "borderWidth": 0.025,
-            "cornerRadius": 0.12,
-            "metalness": 0.42,
-            "roughness": 0.28,
-            "emissiveIntensity": 0.035
+            "material": "metallic",
+            "metalness": 0.25,
+            "roughness": 0.55
           },
-          "attributes": {}
+          "textColor": "#172033"
         }
       },
       {
-        "id": "satellite_world_simple_structure_hc_orbit_payload",
-        "name": "Orbit / Payload",
+        "id": "satellite_world_simple_structure_hc_orbits",
+        "name": "Orbit / Data Sources",
         "type": "hyperclass",
-        "attributes": [
-          {
-            "name": "Orbital state",
-            "id": "satellite_world_simple_structure_hc_orbit_payload_attr_orbital_state"
-          },
-          {
-            "name": "Payload mission",
-            "id": "satellite_world_simple_structure_hc_orbit_payload_attr_payload_mission"
-          },
-          {
-            "name": "TLE traceability",
-            "id": "satellite_world_simple_structure_hc_orbit_payload_attr_tle_traceability"
-          }
-        ],
+        "attributes": [],
         "children": [
-          "satellite_world_simple_structure_tle_set",
-          "satellite_world_simple_structure_payload_profile"
+          "satellite_world_simple_structure_elements",
+          "satellite_world_simple_structure_orbit_summary",
+          "satellite_world_simple_structure_snapshot"
         ],
         "position": {
-          "x": -6.065,
+          "x": 0.0,
           "y": 0,
           "z": 0
         },
         "size": {
-          "width": 5.995,
-          "height": 5.8100000000000005
+          "width": 6.1,
+          "height": 8.6
         },
         "rendering": {
           "class": {
             "color": "#DCFCE7",
-            "material": "metallic",
             "borderColor": "#15803D",
             "borderWidth": 0.025,
-            "cornerRadius": 0.12,
-            "metalness": 0.42,
-            "roughness": 0.28,
-            "emissiveIntensity": 0.035
+            "material": "metallic",
+            "metalness": 0.25,
+            "roughness": 0.55
           },
-          "attributes": {}
+          "textColor": "#172033"
         }
       },
       {
-        "id": "satellite_world_simple_structure_satellite",
-        "name": "Satellite",
-        "type": "roundedRectangle",
-        "parentClassId": "satellite_world_simple_structure_hc_satellite_catalog",
-        "attributes": [
-          {
-            "name": "noradCatalogId",
-            "id": "satellite_world_simple_structure_satellite_attr_noradcatalogid"
-          },
-          {
-            "name": "satelliteName",
-            "id": "satellite_world_simple_structure_satellite_attr_satellitename"
-          },
-          {
-            "name": "internationalDesignator",
-            "id": "satellite_world_simple_structure_satellite_attr_internationaldesignator"
-          },
-          {
-            "name": "cosparId",
-            "id": "satellite_world_simple_structure_satellite_attr_cosparid"
-          },
-          {
-            "name": "satelliteStatus",
-            "id": "satellite_world_simple_structure_satellite_attr_satellitestatus"
-          },
-          {
-            "name": "busType",
-            "id": "satellite_world_simple_structure_satellite_attr_bustype"
-          },
-          {
-            "name": "dryMassKg",
-            "id": "satellite_world_simple_structure_satellite_attr_drymasskg"
-          },
-          {
-            "name": "powerWatts",
-            "id": "satellite_world_simple_structure_satellite_attr_powerwatts"
-          },
-          {
-            "name": "manufacturerOrgId",
-            "id": "satellite_world_simple_structure_satellite_attr_manufacturerorgid"
-          },
-          {
-            "name": "operatorOrgId",
-            "id": "satellite_world_simple_structure_satellite_attr_operatororgid"
-          },
-          {
-            "name": "launchDateUtc",
-            "id": "satellite_world_simple_structure_satellite_attr_launchdateutc"
-          },
-          {
-            "name": "decayedDateUtc",
-            "id": "satellite_world_simple_structure_satellite_attr_decayeddateutc"
-          }
+        "id": "satellite_world_simple_structure_hc_spacecraft",
+        "name": "Spacecraft / Display",
+        "type": "hyperclass",
+        "attributes": [],
+        "children": [
+          "satellite_world_simple_structure_profile",
+          "satellite_world_simple_structure_payload",
+          "satellite_world_simple_structure_display"
         ],
         "position": {
-          "x": 3.2124999999999986,
-          "y": -2.745,
+          "x": 6.6,
+          "y": 0,
           "z": 0
         },
         "size": {
-          "width": 2.8,
-          "height": 2.4699999999999998
+          "width": 6.1,
+          "height": 8.6
         },
         "rendering": {
           "class": {
-            "color": "#2563EB",
-            "material": "metallic",
-            "borderColor": "#1E293B",
+            "color": "#FEF3C7",
+            "borderColor": "#A16207",
             "borderWidth": 0.025,
-            "cornerRadius": 0.12
+            "material": "metallic",
+            "metalness": 0.25,
+            "roughness": 0.55
           },
-          "attributes": {}
+          "textColor": "#172033"
         }
       },
       {
-        "id": "satellite_world_simple_structure_launch_vehicle",
-        "name": "Launch Vehicle",
-        "type": "roundedRectangle",
-        "parentClassId": "satellite_world_simple_structure_hc_satellite_catalog",
+        "id": "satellite_world_simple_structure_space_object",
+        "name": "Space Object",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_catalog",
         "attributes": [
           {
-            "name": "rocketName",
-            "id": "satellite_world_simple_structure_launch_vehicle_attr_rocketname"
+            "id": "satellite_world_simple_structure_space_object_norad",
+            "name": "NORAD catalog ID",
+            "type": "string",
+            "description": "Normalize catalog IDs as strings; preserve extended identifiers.",
+            "sourceFields": [
+              "tracked:norad_id",
+              "satcat:NORAD_CAT_ID",
+              "gp:norad_id",
+              "tle:norad_id"
+            ]
           },
           {
-            "name": "rocketFamily",
-            "id": "satellite_world_simple_structure_launch_vehicle_attr_rocketfamily"
+            "id": "satellite_world_simple_structure_space_object_object_id",
+            "name": "Object ID",
+            "type": "string",
+            "description": "Internal obx:norad identifier; distinct from SATCAT OBJECT_ID.",
+            "sourceFields": [
+              "tracked:object_id",
+              "gp:object_id"
+            ]
           },
           {
-            "name": "launchSite",
-            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchsite"
+            "id": "satellite_world_simple_structure_space_object_designator",
+            "name": "Intl designator",
+            "type": "string",
+            "description": "tracked:international_designator; satcat:OBJECT_ID",
+            "sourceFields": [
+              "tracked:international_designator",
+              "satcat:OBJECT_ID"
+            ]
           },
           {
-            "name": "launchProvider",
-            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchprovider"
+            "id": "satellite_world_simple_structure_space_object_name",
+            "name": "Object name",
+            "type": "string",
+            "description": "tracked:name; satcat:OBJECT_NAME",
+            "sourceFields": [
+              "tracked:name",
+              "satcat:OBJECT_NAME"
+            ]
           },
           {
-            "name": "launchSuccess",
-            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchsuccess"
+            "id": "satellite_world_simple_structure_space_object_kind",
+            "name": "Object type",
+            "type": "string",
+            "description": "Tracked taxonomy: PAYLOAD, DEBRIS, ROCKET_BODY, MISSION_RELATED, UNKNOWN; not all objects are satellites.",
+            "sourceFields": [
+              "tracked:object_type",
+              "satcat:OBJECT_TYPE"
+            ]
           },
           {
-            "name": "launchMassToLeoKg",
-            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchmasstoleokg"
+            "id": "satellite_world_simple_structure_space_object_owner",
+            "name": "Owner code",
+            "type": "string",
+            "description": "tracked:owner_code; satcat:OWNER",
+            "sourceFields": [
+              "tracked:owner_code",
+              "satcat:OWNER"
+            ]
           },
           {
-            "name": "launchMassToGtoKg",
-            "id": "satellite_world_simple_structure_launch_vehicle_attr_launchmasstogtokg"
-          },
-          {
-            "name": "firstFlightDate",
-            "id": "satellite_world_simple_structure_launch_vehicle_attr_firstflightdate"
+            "id": "satellite_world_simple_structure_space_object_rcs",
+            "name": "Radar cross-section",
+            "type": "number",
+            "description": "Nullable radar cross-section in square metres, not physical object size.",
+            "sourceFields": [
+              "tracked:rcs_m2",
+              "satcat:RCS"
+            ]
           }
         ],
         "position": {
-          "x": 3.3774999999999986,
-          "y": 2.7150000000000003,
+          "x": -8.15,
+          "y": 2.6,
           "z": 0
         },
         "size": {
-          "width": 2.8,
-          "height": 1.83
+          "width": 2.2,
+          "height": 2
         },
         "rendering": {
           "class": {
-            "color": "#3B82F6",
-            "material": "metallic",
-            "borderColor": "#1E293B",
+            "color": "#93C5FD",
+            "borderColor": "#1D4ED8",
             "borderWidth": 0.025,
-            "cornerRadius": 0.12
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
           },
-          "attributes": {}
+          "textColor": "#172033"
         }
       },
       {
-        "id": "satellite_world_simple_structure_organization",
-        "name": "Organization",
-        "type": "roundedRectangle",
-        "parentClassId": "satellite_world_simple_structure_hc_satellite_catalog",
+        "id": "satellite_world_simple_structure_lifecycle",
+        "name": "Launch / Lifecycle",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_catalog",
         "attributes": [
           {
-            "name": "organizationId",
-            "id": "satellite_world_simple_structure_organization_attr_organizationid"
+            "id": "satellite_world_simple_structure_lifecycle_norad",
+            "name": "NORAD catalog ID",
+            "type": "string",
+            "description": "launches:norad_id; launch_dates:norad_id; decayed:NORAD_CAT_ID",
+            "sourceFields": [
+              "launches:norad_id",
+              "launch_dates:norad_id",
+              "decayed:NORAD_CAT_ID"
+            ]
           },
           {
-            "name": "name",
-            "id": "satellite_world_simple_structure_organization_attr_name"
+            "id": "satellite_world_simple_structure_lifecycle_launch",
+            "name": "Launch date",
+            "type": "string",
+            "description": "tracked:launch_date; launches:launch_date; launch_dates:launch_date; decayed:LAUNCH_DATE",
+            "sourceFields": [
+              "tracked:launch_date",
+              "launches:launch_date",
+              "launch_dates:launch_date",
+              "decayed:LAUNCH_DATE"
+            ]
           },
           {
-            "name": "country",
-            "id": "satellite_world_simple_structure_organization_attr_country"
+            "id": "satellite_world_simple_structure_lifecycle_site",
+            "name": "Launch site code",
+            "type": "string",
+            "description": "tracked:launch_site; launches:launch_site; decayed:LAUNCH_SITE",
+            "sourceFields": [
+              "tracked:launch_site",
+              "launches:launch_site",
+              "decayed:LAUNCH_SITE"
+            ]
           },
           {
-            "name": "role",
-            "id": "satellite_world_simple_structure_organization_attr_role"
+            "id": "satellite_world_simple_structure_lifecycle_decay",
+            "name": "Decay date",
+            "type": "string",
+            "description": "Nullable date; a missing date does not establish an active operational status.",
+            "sourceFields": [
+              "tracked:decay_date",
+              "launches:decay_date",
+              "decayed:DECAY_DATE"
+            ]
           },
           {
-            "name": "organizationType",
-            "id": "satellite_world_simple_structure_organization_attr_organizationtype"
+            "id": "satellite_world_simple_structure_lifecycle_lifecycle",
+            "name": "Lifecycle status",
+            "type": "string",
+            "description": "tracked:lifecycle_status; launches:lifecycle_status",
+            "sourceFields": [
+              "tracked:lifecycle_status",
+              "launches:lifecycle_status"
+            ]
           },
           {
-            "name": "foundedDate",
-            "id": "satellite_world_simple_structure_organization_attr_foundeddate"
+            "id": "satellite_world_simple_structure_lifecycle_operational",
+            "name": "Operational status",
+            "type": "string",
+            "description": "tracked:operational_status; launches:operational_status",
+            "sourceFields": [
+              "tracked:operational_status",
+              "launches:operational_status"
+            ]
           }
         ],
         "position": {
-          "x": 3.404999999999999,
-          "y": 0.14500000000000002,
+          "x": -8.15,
+          "y": 0.0,
           "z": 0
         },
         "size": {
-          "width": 2.8,
-          "height": 1.75
+          "width": 2.2,
+          "height": 2
         },
         "rendering": {
           "class": {
-            "color": "#60A5FA",
-            "material": "metallic",
-            "borderColor": "#1E293B",
+            "color": "#93C5FD",
+            "borderColor": "#1D4ED8",
             "borderWidth": 0.025,
-            "cornerRadius": 0.12
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
           },
-          "attributes": {}
+          "textColor": "#172033"
         }
       },
       {
-        "id": "satellite_world_simple_structure_tle_set",
-        "name": "TLE Set",
-        "type": "roundedRectangle",
-        "parentClassId": "satellite_world_simple_structure_hc_orbit_payload",
+        "id": "satellite_world_simple_structure_tracking",
+        "name": "Tracking State",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_catalog",
         "attributes": [
           {
-            "name": "tleEpochUtc",
-            "id": "satellite_world_simple_structure_tle_set_attr_tleepochutc"
+            "id": "satellite_world_simple_structure_tracking_membership",
+            "name": "Catalog membership",
+            "type": "string",
+            "description": "tracked:catalog_membership_status",
+            "sourceFields": [
+              "tracked:catalog_membership_status"
+            ]
           },
           {
-            "name": "tleLine1",
-            "id": "satellite_world_simple_structure_tle_set_attr_tleline1"
+            "id": "satellite_world_simple_structure_tracking_observation",
+            "name": "Observation status",
+            "type": "string",
+            "description": "tracked:observation_status",
+            "sourceFields": [
+              "tracked:observation_status"
+            ]
           },
           {
-            "name": "tleLine2",
-            "id": "satellite_world_simple_structure_tle_set_attr_tleline2"
+            "id": "satellite_world_simple_structure_tracking_available",
+            "name": "Current elements",
+            "type": "boolean",
+            "description": "tracked:has_current_elements",
+            "sourceFields": [
+              "tracked:has_current_elements"
+            ]
           },
           {
-            "name": "inclinationDeg",
-            "id": "satellite_world_simple_structure_tle_set_attr_inclinationdeg"
+            "id": "satellite_world_simple_structure_tracking_availability",
+            "name": "Element availability",
+            "type": "string",
+            "description": "tracked:element_availability_status",
+            "sourceFields": [
+              "tracked:element_availability_status"
+            ]
           },
           {
-            "name": "eccentricity",
-            "id": "satellite_world_simple_structure_tle_set_attr_eccentricity"
+            "id": "satellite_world_simple_structure_tracking_propagation",
+            "name": "Propagation status",
+            "type": "string",
+            "description": "tracked:propagation_status",
+            "sourceFields": [
+              "tracked:propagation_status"
+            ]
           },
           {
-            "name": "meanMotionRevPerDay",
-            "id": "satellite_world_simple_structure_tle_set_attr_meanmotionrevperday"
+            "id": "satellite_world_simple_structure_tracking_metadata",
+            "name": "Metadata only",
+            "type": "boolean",
+            "description": "tracked:metadata_only",
+            "sourceFields": [
+              "tracked:metadata_only"
+            ]
           },
           {
-            "name": "raanDeg",
-            "id": "satellite_world_simple_structure_tle_set_attr_raandeg"
-          },
-          {
-            "name": "argPerigeeDeg",
-            "id": "satellite_world_simple_structure_tle_set_attr_argperigeedeg"
+            "id": "satellite_world_simple_structure_tracking_reason",
+            "name": "Unavailable reason",
+            "type": "string",
+            "description": "tracked:unavailable_reason",
+            "sourceFields": [
+              "tracked:unavailable_reason"
+            ]
           }
         ],
         "position": {
-          "x": -7.0125,
-          "y": -1.44,
+          "x": -8.15,
+          "y": -2.6,
           "z": 0
         },
         "size": {
-          "width": 2.8,
-          "height": 1.83
+          "width": 2.2,
+          "height": 2
         },
         "rendering": {
           "class": {
-            "color": "#22C55E",
-            "material": "metallic",
-            "borderColor": "#1E293B",
+            "color": "#93C5FD",
+            "borderColor": "#1D4ED8",
             "borderWidth": 0.025,
-            "cornerRadius": 0.12
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
           },
-          "attributes": {}
+          "textColor": "#172033"
         }
       },
       {
-        "id": "satellite_world_simple_structure_payload_profile",
+        "id": "satellite_world_simple_structure_elements",
+        "name": "Orbital Elements",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_orbits",
+        "attributes": [
+          {
+            "id": "satellite_world_simple_structure_elements_norad",
+            "name": "NORAD catalog ID",
+            "type": "string",
+            "description": "gp:norad_id; tle:norad_id",
+            "sourceFields": [
+              "gp:norad_id",
+              "tle:norad_id"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_elements_format",
+            "name": "Element format",
+            "type": "string",
+            "description": "gp:source_format; gp:element_set.format",
+            "sourceFields": [
+              "gp:source_format",
+              "gp:element_set.format"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_elements_epoch",
+            "name": "Element epoch",
+            "type": "string",
+            "description": "TLE epoch remains encoded in tle_line1; no fabricated explicit TLE epoch field.",
+            "sourceFields": [
+              "gp:element_set.epoch",
+              "gp:element_set.omm.EPOCH"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_elements_frame",
+            "name": "Native frame",
+            "type": "string",
+            "description": "gp:element_set.native_frame",
+            "sourceFields": [
+              "gp:element_set.native_frame"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_elements_time",
+            "name": "Time scale",
+            "type": "string",
+            "description": "gp:element_set.time_scale",
+            "sourceFields": [
+              "gp:element_set.time_scale"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_elements_theory",
+            "name": "Propagation theory",
+            "type": "string",
+            "description": "gp:element_set.propagation_theory",
+            "sourceFields": [
+              "gp:element_set.propagation_theory"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_elements_omm",
+            "name": "OMM elements",
+            "type": "object",
+            "description": "gp:element_set.omm",
+            "sourceFields": [
+              "gp:element_set.omm"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_elements_line1",
+            "name": "TLE line 1",
+            "type": "string",
+            "description": "GP snapshot has null TLE lines; OMM and TLE are alternative source representations.",
+            "sourceFields": [
+              "tle:tle_line1",
+              "gp:tle_line1"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_elements_line2",
+            "name": "TLE line 2",
+            "type": "string",
+            "description": "tle:tle_line2; gp:tle_line2",
+            "sourceFields": [
+              "tle:tle_line2",
+              "gp:tle_line2"
+            ]
+          }
+        ],
+        "position": {
+          "x": -1.55,
+          "y": 2.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2
+        },
+        "rendering": {
+          "class": {
+            "color": "#86EFAC",
+            "borderColor": "#15803D",
+            "borderWidth": 0.025,
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
+          },
+          "textColor": "#172033"
+        }
+      },
+      {
+        "id": "satellite_world_simple_structure_orbit_summary",
+        "name": "Orbit Summary",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_orbits",
+        "attributes": [
+          {
+            "id": "satellite_world_simple_structure_orbit_summary_class",
+            "name": "Orbit class",
+            "type": "string",
+            "description": "tracked:orbit_class; gp:orbit_class; tle:orbit_class",
+            "sourceFields": [
+              "tracked:orbit_class",
+              "gp:orbit_class",
+              "tle:orbit_class"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_orbit_summary_source",
+            "name": "Classification source",
+            "type": "string",
+            "description": "tracked:orbit_class_source",
+            "sourceFields": [
+              "tracked:orbit_class_source"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_orbit_summary_inclination",
+            "name": "Inclination (deg)",
+            "type": "number",
+            "description": "tracked:satcat_orbit_summary.inclination_deg; gp:inclination_deg; tle:inclination_deg",
+            "sourceFields": [
+              "tracked:satcat_orbit_summary.inclination_deg",
+              "gp:inclination_deg",
+              "tle:inclination_deg"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_orbit_summary_eccentricity",
+            "name": "Eccentricity",
+            "type": "number",
+            "description": "gp:eccentricity; tle:eccentricity",
+            "sourceFields": [
+              "gp:eccentricity",
+              "tle:eccentricity"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_orbit_summary_motion",
+            "name": "Mean motion (rev/day)",
+            "type": "number",
+            "description": "gp:mean_motion_rev_per_day; tle:mean_motion_rev_per_day",
+            "sourceFields": [
+              "gp:mean_motion_rev_per_day",
+              "tle:mean_motion_rev_per_day"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_orbit_summary_period",
+            "name": "Period (min)",
+            "type": "number",
+            "description": "tracked:satcat_orbit_summary.period_min; gp:period_min; tle:period_min",
+            "sourceFields": [
+              "tracked:satcat_orbit_summary.period_min",
+              "gp:period_min",
+              "tle:period_min"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_orbit_summary_perigee",
+            "name": "Perigee (km)",
+            "type": "number",
+            "description": "tracked:satcat_orbit_summary.perigee_km; gp:perigee_km; tle:perigee_km",
+            "sourceFields": [
+              "tracked:satcat_orbit_summary.perigee_km",
+              "gp:perigee_km",
+              "tle:perigee_km"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_orbit_summary_apogee",
+            "name": "Apogee (km)",
+            "type": "number",
+            "description": "tracked:satcat_orbit_summary.apogee_km; gp:apogee_km; tle:apogee_km",
+            "sourceFields": [
+              "tracked:satcat_orbit_summary.apogee_km",
+              "gp:apogee_km",
+              "tle:apogee_km"
+            ]
+          }
+        ],
+        "position": {
+          "x": -1.55,
+          "y": 0.0,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2
+        },
+        "rendering": {
+          "class": {
+            "color": "#86EFAC",
+            "borderColor": "#15803D",
+            "borderWidth": 0.025,
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
+          },
+          "textColor": "#172033"
+        }
+      },
+      {
+        "id": "satellite_world_simple_structure_snapshot",
+        "name": "Dataset Snapshot",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_orbits",
+        "attributes": [
+          {
+            "id": "satellite_world_simple_structure_snapshot_revision",
+            "name": "Catalog revision",
+            "type": "string",
+            "description": "tracked:@manifest.catalog_revision; refresh:catalog_revision",
+            "sourceFields": [
+              "tracked:@manifest.catalog_revision",
+              "refresh:catalog_revision"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_schema",
+            "name": "Schema version",
+            "type": "string",
+            "description": "tracked:@manifest.schema_version; refresh:schema_version",
+            "sourceFields": [
+              "tracked:@manifest.schema_version",
+              "refresh:schema_version"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_generated",
+            "name": "Generated / fetched at",
+            "type": "string",
+            "description": "tracked:@manifest.generated_at; refresh:fetched_at",
+            "sourceFields": [
+              "tracked:@manifest.generated_at",
+              "refresh:fetched_at"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_status",
+            "name": "Last refresh status",
+            "type": "string",
+            "description": "refresh:last_status",
+            "sourceFields": [
+              "refresh:last_status"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_provider",
+            "name": "Provider / sources",
+            "type": "object",
+            "description": "tracked:@manifest.provenance; refresh:source_urls",
+            "sourceFields": [
+              "tracked:@manifest.provenance",
+              "refresh:source_urls"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_coverage",
+            "name": "Coverage counts",
+            "type": "object",
+            "description": "tracked:@manifest.counts; tracked:@manifest.coverage",
+            "sourceFields": [
+              "tracked:@manifest.counts",
+              "tracked:@manifest.coverage"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_chunks",
+            "name": "Current / history chunks",
+            "type": "array",
+            "description": "tracked:@manifest.chunks; tracked:@manifest.history_chunks",
+            "sourceFields": [
+              "tracked:@manifest.chunks",
+              "tracked:@manifest.history_chunks"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_snapshot_quarantine",
+            "name": "Quarantine manifest",
+            "type": "object",
+            "description": "tracked:@manifest.quarantine",
+            "sourceFields": [
+              "tracked:@manifest.quarantine"
+            ]
+          }
+        ],
+        "position": {
+          "x": -1.55,
+          "y": -2.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2
+        },
+        "rendering": {
+          "class": {
+            "color": "#86EFAC",
+            "borderColor": "#15803D",
+            "borderWidth": 0.025,
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
+          },
+          "textColor": "#172033"
+        }
+      },
+      {
+        "id": "satellite_world_simple_structure_profile",
+        "name": "Spacecraft Profile",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_spacecraft",
+        "attributes": [
+          {
+            "id": "satellite_world_simple_structure_profile_name",
+            "name": "Profile name",
+            "type": "string",
+            "description": "profiles:name",
+            "sourceFields": [
+              "profiles:name"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_profile_identity",
+            "name": "Catalog ID / designator",
+            "type": "object",
+            "description": "Some profiles use 0 or placeholders; join to a catalog object only after verifying a real identifier.",
+            "sourceFields": [
+              "profiles:meta.norad_id",
+              "profiles:meta.cospar_id"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_profile_bus",
+            "name": "Bus / manufacturer",
+            "type": "object",
+            "description": "profiles:meta.bus; profiles:meta.manufacturer",
+            "sourceFields": [
+              "profiles:meta.bus",
+              "profiles:meta.manufacturer"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_profile_mass",
+            "name": "Launch / dry mass (kg)",
+            "type": "object",
+            "description": "profiles:meta.launch_mass_kg; profiles:meta.dry_mass_kg",
+            "sourceFields": [
+              "profiles:meta.launch_mass_kg",
+              "profiles:meta.dry_mass_kg"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_profile_vehicle",
+            "name": "Launch vehicle",
+            "type": "string",
+            "description": "profiles:meta.launch_vehicle",
+            "sourceFields": [
+              "profiles:meta.launch_vehicle"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_profile_orbit",
+            "name": "Profile orbit / slot",
+            "type": "object",
+            "description": "profiles:meta.orbit; profiles:orbit; profiles:meta.orbital_slot; profiles:orbital_slot",
+            "sourceFields": [
+              "profiles:meta.orbit",
+              "profiles:orbit",
+              "profiles:meta.orbital_slot",
+              "profiles:orbital_slot"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_profile_attitude",
+            "name": "Attitude / capability",
+            "type": "object",
+            "description": "profiles:meta.attitude; profiles:attitude; profiles:meta.attitudeCapability; profiles:attitudeCapability",
+            "sourceFields": [
+              "profiles:meta.attitude",
+              "profiles:attitude",
+              "profiles:meta.attitudeCapability",
+              "profiles:attitudeCapability"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_profile_footprints",
+            "name": "Footprints",
+            "type": "object",
+            "description": "Optional GeoJSON-shaped profile field; sample/template values are not verified spacecraft telemetry.",
+            "sourceFields": [
+              "profiles:footprints"
+            ]
+          }
+        ],
+        "position": {
+          "x": 5.05,
+          "y": 2.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2
+        },
+        "rendering": {
+          "class": {
+            "color": "#FDE68A",
+            "borderColor": "#A16207",
+            "borderWidth": 0.025,
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
+          },
+          "textColor": "#172033"
+        }
+      },
+      {
+        "id": "satellite_world_simple_structure_payload",
         "name": "Payload Profile",
-        "type": "roundedRectangle",
-        "parentClassId": "satellite_world_simple_structure_hc_orbit_payload",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_spacecraft",
         "attributes": [
           {
-            "name": "payloadType",
-            "id": "satellite_world_simple_structure_payload_profile_attr_payloadtype"
+            "id": "satellite_world_simple_structure_payload_transponders",
+            "name": "Transponders / beams",
+            "type": "object",
+            "description": "profiles:payload.transponders",
+            "sourceFields": [
+              "profiles:payload.transponders"
+            ]
           },
           {
-            "name": "missionClass",
-            "id": "satellite_world_simple_structure_payload_profile_attr_missionclass"
+            "id": "satellite_world_simple_structure_payload_bandwidth",
+            "name": "Bandwidth (MHz)",
+            "type": "array",
+            "description": "profiles:payload.bandwidth_MHz",
+            "sourceFields": [
+              "profiles:payload.bandwidth_MHz"
+            ]
           },
           {
-            "name": "capacityDescriptor",
-            "id": "satellite_world_simple_structure_payload_profile_attr_capacitydescriptor"
+            "id": "satellite_world_simple_structure_payload_polarization",
+            "name": "Polarization by band",
+            "type": "object",
+            "description": "profiles:payload.polarization",
+            "sourceFields": [
+              "profiles:payload.polarization"
+            ]
           },
           {
-            "name": "frequencyBand",
-            "id": "satellite_world_simple_structure_payload_profile_attr_frequencyband"
-          },
-          {
-            "name": "coverageRegion",
-            "id": "satellite_world_simple_structure_payload_profile_attr_coverageregion"
-          },
-          {
-            "name": "designLifeYears",
-            "id": "satellite_world_simple_structure_payload_profile_attr_designlifeyears"
-          },
-          {
-            "name": "operatorOrgId",
-            "id": "satellite_world_simple_structure_payload_profile_attr_operatororgid"
+            "id": "satellite_world_simple_structure_payload_frequencies",
+            "name": "Uplink / downlink (GHz)",
+            "type": "object",
+            "description": "profiles:payload.frequency_bands_ghz",
+            "sourceFields": [
+              "profiles:payload.frequency_bands_ghz"
+            ]
           }
         ],
         "position": {
-          "x": -6.985,
-          "y": 1.1300000000000003,
+          "x": 5.05,
+          "y": 0.0,
           "z": 0
         },
         "size": {
-          "width": 2.8,
-          "height": 1.75
+          "width": 2.2,
+          "height": 2
         },
         "rendering": {
           "class": {
-            "color": "#4ADE80",
-            "material": "metallic",
-            "borderColor": "#1E293B",
+            "color": "#FDE68A",
+            "borderColor": "#A16207",
             "borderWidth": 0.025,
-            "cornerRadius": 0.12
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
           },
-          "attributes": {}
+          "textColor": "#172033"
+        }
+      },
+      {
+        "id": "satellite_world_simple_structure_display",
+        "name": "Display Asset",
+        "type": "class",
+        "parentClassId": "satellite_world_simple_structure_hc_spacecraft",
+        "attributes": [
+          {
+            "id": "satellite_world_simple_structure_display_id",
+            "name": "Asset ID",
+            "type": "string",
+            "description": "display:id",
+            "sourceFields": [
+              "display:id"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_display_name",
+            "name": "Display name",
+            "type": "string",
+            "description": "display:displayName",
+            "sourceFields": [
+              "display:displayName"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_display_type",
+            "name": "Format (OBJ/MTL, GLB)",
+            "type": "string",
+            "description": "display:type",
+            "sourceFields": [
+              "display:type"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_display_files",
+            "name": "Asset files",
+            "type": "object",
+            "description": "display:files",
+            "sourceFields": [
+              "display:files"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_display_textures",
+            "name": "Textures",
+            "type": "array",
+            "description": "display:textures",
+            "sourceFields": [
+              "display:textures"
+            ]
+          },
+          {
+            "id": "satellite_world_simple_structure_display_tags",
+            "name": "Display tags",
+            "type": "array",
+            "description": "display:tags",
+            "sourceFields": [
+              "display:tags"
+            ]
+          }
+        ],
+        "position": {
+          "x": 5.05,
+          "y": -2.6,
+          "z": 0
+        },
+        "size": {
+          "width": 2.2,
+          "height": 2
+        },
+        "rendering": {
+          "class": {
+            "color": "#FDE68A",
+            "borderColor": "#A16207",
+            "borderWidth": 0.025,
+            "material": "metallic",
+            "metalness": 0.15,
+            "roughness": 0.65
+          },
+          "textColor": "#172033"
         }
       }
     ],
     "link": [
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_001",
-        "sourceClassId": "satellite_world_simple_structure_satellite",
-        "targetClassId": "satellite_world_simple_structure_launch_vehicle",
-        "name": "is launched by",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_space_object_lifecycle",
+        "sourceClassId": "satellite_world_simple_structure_space_object",
+        "targetClassId": "satellite_world_simple_structure_lifecycle",
+        "name": "has lifecycle",
+        "description": "Join normalized NORAD catalog IDs; launch/decay feeds can cover different snapshots.",
         "rendering": {
-          "labelText": "is launched by",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "has lifecycle"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_002",
-        "sourceClassId": "satellite_world_simple_structure_satellite",
-        "targetClassId": "satellite_world_simple_structure_organization",
-        "name": "is manufactured by",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_space_object_tracking",
+        "sourceClassId": "satellite_world_simple_structure_space_object",
+        "targetClassId": "satellite_world_simple_structure_tracking",
+        "name": "has tracking state",
+        "description": "Identity and status fields coexist in tracked records; statuses are independent dimensions.",
         "rendering": {
-          "labelText": "is manufactured by",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "has tracking state"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_003",
-        "sourceClassId": "satellite_world_simple_structure_satellite",
-        "targetClassId": "satellite_world_simple_structure_tle_set",
-        "name": "is tracked by",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_space_object_elements",
+        "sourceClassId": "satellite_world_simple_structure_space_object",
+        "targetClassId": "satellite_world_simple_structure_elements",
+        "name": "has elements",
+        "description": "Join NORAD ID only where elements exist. Catalog membership alone does not imply an available orbit.",
         "rendering": {
-          "labelText": "is tracked by",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "has elements"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_004",
-        "sourceClassId": "satellite_world_simple_structure_satellite",
-        "targetClassId": "satellite_world_simple_structure_payload_profile",
-        "name": "carries",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_elements_orbit_summary",
+        "sourceClassId": "satellite_world_simple_structure_elements",
+        "targetClassId": "satellite_world_simple_structure_orbit_summary",
+        "name": "describes orbit",
+        "description": "GP/TLE source records contain both element fields and derived orbital summaries.",
         "rendering": {
-          "labelText": "carries",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "describes orbit"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_005",
-        "sourceClassId": "satellite_world_simple_structure_organization",
-        "targetClassId": "satellite_world_simple_structure_payload_profile",
-        "name": "operates",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_space_object_orbit_summary",
+        "sourceClassId": "satellite_world_simple_structure_space_object",
+        "targetClassId": "satellite_world_simple_structure_orbit_summary",
+        "name": "has summary",
+        "description": "Tracked records can retain SATCAT summaries without current propagatable elements.",
         "rendering": {
-          "labelText": "operates",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "has summary"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_006",
-        "sourceClassId": "satellite_world_simple_structure_hc_satellite_catalog",
-        "targetClassId": "satellite_world_simple_structure_hc_orbit_payload",
-        "name": "supplies context for",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_snapshot_space_object",
+        "sourceClassId": "satellite_world_simple_structure_snapshot",
+        "targetClassId": "satellite_world_simple_structure_space_object",
+        "name": "catalogs",
+        "description": "Tracked manifest chunks and history_chunks locate catalog records.",
         "rendering": {
-          "labelText": "supplies context for",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "catalogs"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_007",
-        "sourceClassId": "satellite_world_simple_structure_satellite",
-        "targetClassId": "satellite_world_simple_structure_organization",
-        "name": "is operated by",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_snapshot_elements",
+        "sourceClassId": "satellite_world_simple_structure_snapshot",
+        "targetClassId": "satellite_world_simple_structure_elements",
+        "name": "records source",
+        "description": "GP/TLE sidecars describe refresh status and source revisions.",
         "rendering": {
-          "labelText": "is operated by",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "records source"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_008",
-        "sourceClassId": "satellite_world_simple_structure_satellite",
-        "targetClassId": "satellite_world_simple_structure_organization",
-        "name": "is owned by",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_tracking_snapshot",
+        "sourceClassId": "satellite_world_simple_structure_tracking",
+        "targetClassId": "satellite_world_simple_structure_snapshot",
+        "name": "belongs to snapshot",
+        "description": "Manifest scope distinguishes current and historical chunks.",
         "rendering": {
-          "labelText": "is owned by",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "belongs to snapshot"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_009",
-        "sourceClassId": "satellite_world_simple_structure_launch_vehicle",
-        "targetClassId": "satellite_world_simple_structure_organization",
-        "name": "is provided by",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_profile_space_object",
+        "sourceClassId": "satellite_world_simple_structure_profile",
+        "targetClassId": "satellite_world_simple_structure_space_object",
+        "name": "may identify",
+        "description": "Optional verified NORAD ID join; zero and placeholder IDs cannot establish a match.",
         "rendering": {
-          "labelText": "is provided by",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "dashed",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "may identify"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_010",
-        "sourceClassId": "satellite_world_simple_structure_organization",
-        "targetClassId": "satellite_world_simple_structure_launch_vehicle",
-        "name": "procures launch with",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_profile_payload",
+        "sourceClassId": "satellite_world_simple_structure_profile",
+        "targetClassId": "satellite_world_simple_structure_payload",
+        "name": "contains payload",
+        "description": "Nested profiles:payload object; profile/template values may be incomplete.",
         "rendering": {
-          "labelText": "procures launch with",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "solid",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
+          "orthogonalStyle": "auto",
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "contains payload"
         }
       },
       {
-        "id": "satellite_world_simple_structure_link_rel_simple_011",
-        "sourceClassId": "satellite_world_simple_structure_payload_profile",
-        "targetClassId": "satellite_world_simple_structure_tle_set",
-        "name": "is characterized by",
-        "allowSelfLink": false,
+        "id": "satellite_world_simple_structure_link_profile_display",
+        "sourceClassId": "satellite_world_simple_structure_profile",
+        "targetClassId": "satellite_world_simple_structure_display",
+        "name": "can use asset",
+        "description": "Conceptual display association by curated profile/asset identity; no foreign-key field is supplied by the data.",
         "rendering": {
-          "labelText": "is characterized by",
-          "orthogonalStyle": "auto",
           "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
+          "lineWidth": 0.022,
+          "arrowDirection": "source-to-target",
           "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
-        }
-      },
-      {
-        "id": "satellite_world_simple_structure_link_rel_simple_012",
-        "sourceClassId": "satellite_world_simple_structure_launch_vehicle",
-        "targetClassId": "satellite_world_simple_structure_payload_profile",
-        "name": "deploys",
-        "allowSelfLink": false,
-        "rendering": {
-          "labelText": "deploys",
+          "arrowheadSize": 0.12,
+          "maxArrowheadSize": 0.12,
+          "lineStyle": "dashed",
+          "labelColor": "#172033",
+          "labelBackgroundColor": "rgba(255,255,255,0.94)",
+          "font": {
+            "size": 20
+          },
           "orthogonalStyle": "auto",
-          "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
-          "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
-        }
-      },
-      {
-        "id": "satellite_world_simple_structure_link_rel_simple_013",
-        "sourceClassId": "satellite_world_simple_structure_hc_orbit_payload",
-        "targetClassId": "satellite_world_simple_structure_satellite",
-        "name": "describes orbital state of",
-        "allowSelfLink": false,
-        "rendering": {
-          "labelText": "describes orbital state of",
-          "orthogonalStyle": "auto",
-          "lineColor": "#475569",
-          "lineWidth": 0.025,
-          "lineStyle": "solid",
-          "arrowheadSize": 0.14,
-          "arrowheadScale": 0.65,
-          "maxArrowheadSize": 0.12,
-          "relationshipPortRadius": 0.07,
-          "relationshipPortFill": "#FFFFFF",
-          "relationshipPortStroke": "#475569",
-          "labelColor": "#0F172A",
-          "labelBackgroundColor": "rgba(255,255,255,0.92)",
-          "parallelRouteGap": 0.34,
-          "obstacleRouteGap": 0.36,
-          "globalRouteGap": 0.34,
-          "curveRadius": 0.18,
-          "arrowType": "triangle",
-          "arrowDirection": "source-to-target"
+          "parallelRouteGap": 0.36,
+          "obstacleRouteGap": 0.5,
+          "labelText": "can use asset"
         }
       }
     ]
