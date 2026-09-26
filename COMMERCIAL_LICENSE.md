@@ -6,7 +6,7 @@ Individual noncommercial learning, coursework, hobbies, and independent research
 
 ## Request a license
 
-Contact the project maintainer through the [OpenBEXI HBDS repository](https://github.com/arcazj/openbexi_hdbs). You can open a [licensing inquiry](https://github.com/arcazj/openbexi_hdbs/issues/new?title=Commercial%20licensing%20inquiry) to arrange a suitable contact channel. GitHub issues are public, so keep confidential procurement details out of the initial inquiry.
+Contact the project maintainer through the [OpenBEXI HBDS repository](https://github.com/arcazj/openbexi_hbds). You can open a [licensing inquiry](https://github.com/arcazj/openbexi_hbds/issues/new?title=Commercial%20licensing%20inquiry) to arrange a suitable contact channel. GitHub issues are public, so keep confidential procurement details out of the initial inquiry.
 
 Include the organization type, intended use, estimated users/deployments, whether you plan to host or redistribute the software, and any support needs. Pricing and rights are agreed in a separate written agreement; this repository does not supply a commercial license key or an automatic commercial grant.
 
