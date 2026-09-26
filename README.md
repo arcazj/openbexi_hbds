@@ -8,7 +8,7 @@ An interactive browser-based simulator for **Hypergraph-Based Data Structures (H
 
 [Live demo for building a new HBDS model](https://arcazj.github.io/openbexi_hbds/test_dynamic_hbds_layout.html)
 
-![HBDS builder Lab](pictures/HBDS_LAB.PNG)
+![HBDS builder Lab](pictures/HBDS_LAB.png)
 
 ## Documentation
 
@@ -18,8 +18,6 @@ This README is the main entry point for setup, features, server mode, API endpoi
 * [Prompt4HDBS_graphi_ simulator.md](Prompt4HDBS_graphi_%20simulator.md) - reverse-engineering and phased implementation prompt for covering the full HBDS Graphic Simulator capability set.
 * [HBDS source and documentation catalog](doc/README.md) - historical PDF inventory, provenance and license status, duplicate/missing chapter notes, glossary, tutorial, support matrix, and profile documentation.
 * [HBDS Structural Diagram Profile v1](doc/HBDS_STRUCTURAL_DIAGRAM_PROFILE_V1.md) - normative current diagram contract, with [v1 and additive v2 JSON Schemas](schemas/README.md) and validated examples.
-
-Generated preview caches may contain third-party Markdown under hidden directories such as `.codex_previews/`; those files are not project documentation.
 
 ## Recent Updates
 
