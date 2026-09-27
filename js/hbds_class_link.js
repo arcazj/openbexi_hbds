@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { findOrthogonalPath } from './hbds_routing.js';
-import { fitTextSize, linkLabelSize } from './hbds_text_metrics.js?v=readability-20260927';
+import { fitTextSize, linkLabelSize } from './hbds_text_metrics.js?v=release-1.2.1';
 
 const linkLabels = [];
 const activeLinks = [];
@@ -1550,9 +1550,12 @@ export function updateLinkFontSizes(camera, renderer) {
     const minimum = Number.isFinite(configuredMinimum) ? Math.max(0,configuredMinimum) : 10;
     const maximum = Math.max(minimum,toPositiveNumber(rendering.arrowheadMaxPixels,22));
     for (const marker of link.arrow.children) {
+      // A deferred link batch can trigger a resize before routing completes.
+      const tangent = marker.userData.routeTangent;
+      if (!tangent) continue;
       const worldTip = marker.getWorldPosition(new THREE.Vector3());
       const tip = worldTip.clone().project(camera);
-      const tail = marker.parent.localToWorld(marker.position.clone().addScaledVector(marker.userData.routeTangent,-baseSize)).project(camera);
+      const tail = marker.parent.localToWorld(marker.position.clone().addScaledVector(tangent,-baseSize)).project(camera);
       const angle = Math.atan2((tip.y-tail.y)*viewportHeight,(tip.x-tail.x)*viewportWidth)-Math.PI/2;
       // Face the camera while pointing along the projected route. Flat arrows
       // remain visible when the user tilts the diagram in 3-D mode.

@@ -4,7 +4,7 @@
     <title>HDBS Graphic Simulator</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="stylesheet" href="css/style.css?v=readability-20260927">
+    <link rel="stylesheet" href="css/style.css?v=release-1.2.1">
 </head>
 <body>
 <div id="container">
@@ -48,11 +48,11 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {updateLabelFontSizes} from './js/hbds_class.js?v=readability-20260927';
-    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=readability-20260927';
-    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=readability-20260927';
-    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=readability-20260927';
-    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=readability-20260927';
+    import {updateLabelFontSizes} from './js/hbds_class.js?v=release-1.2.1';
+    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=release-1.2.1';
+    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=release-1.2.1';
+    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=release-1.2.1';
+    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=release-1.2.1';
     import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260718a';
 
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {

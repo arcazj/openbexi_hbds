@@ -2293,7 +2293,7 @@ def openapi_spec(host: str) -> dict:
         "openapi": "3.0.3",
         "info": {
             "title": "HBDS Graphic Simulator API",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "description": "Local API for HBDS model listing, loading, and saving.",
         },
         "servers": [{"url": server_url}],
@@ -3489,7 +3489,7 @@ class HBDSLocalServer(ThreadingHTTPServer):
 
 
 class HBDSRequestHandler(SimpleHTTPRequestHandler):
-    server_version = "HBDSLocalServer/1.2"
+    server_version = "HBDSLocalServer/1.2.1"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT_DIR), **kwargs)

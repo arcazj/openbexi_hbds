@@ -39,8 +39,8 @@ import {
   normalizeFontSettings,
   getFontSettingsForTextType,
   getFitQualityMetrics
-} from './hbds_model.js?v=readability-20260927';
-import { recalculateAllLinks } from './hbds_class_link.js?v=readability-20260927';
+} from './hbds_model.js?v=release-1.2.1';
+import { recalculateAllLinks } from './hbds_class_link.js?v=release-1.2.1';
 import {
   applyAiModel,
   applyServerModelOperations,

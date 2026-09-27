@@ -1,6 +1,10 @@
 # Release notes
 
-## Unreleased
+## 1.2.1 - 2026-09-27
+
+* Shorten the README, add fresh Satellite World Simple Structure and Transportation Links illustrations, and move server/AI setup details into a focused guide.
+* Remove obsolete documentation images and synchronize application, server, API, and Maven version references.
+* Fix Models-view switching when arrow sizing runs before a new batch of links has been routed.
 
 * Recheck all 32 local space source files and preserve the simple satellite model's structure and provenance. Clarify relationship verbs, save a clearer hierarchy, and enlarge target arrows.
 * Show complete class and hyperclass names, keep link labels close to their routes, and separate shared ports and route lanes where space permits.

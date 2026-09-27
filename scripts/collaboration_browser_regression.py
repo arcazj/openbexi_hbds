@@ -944,6 +944,13 @@ def run_readability_ui_regression(base_url: str, debug_port: int) -> None:
         try:
             page.navigate(url)
             wait_for(page, "return (window.__hbdsDynamicTest || window.__hbdsModelsTest)?.getData()?.hypergraph?.class?.length > 0;", f"{mode} readability load", timeout=35)
+            if mode == "Models":
+                for model_name in ("transportation_links.json", "satellite_world_simple_structure.json"):
+                    expected_ids = [node["id"] for node in json.loads((MODELS_DIR / model_name).read_text(encoding="utf-8-sig"))["hypergraph"]["class"]]
+                    wait_for(page, "return window.__hbdsModelsTest.getLabelMetrics().some(label=>label.visible);", "initial viewer render")
+                    page.evaluate("(() => { const select=document.querySelector('#model-select'); select.value=[...select.options].find(option=>option.value.endsWith(" + json.dumps(model_name) + ")).value; select.dispatchEvent(new Event('change',{bubbles:true})); })()")
+                    wait_for(page, "const hook=window.__hbdsModelsTest, expected=" + json.dumps(expected_ids) + "; const nodes=hook.getData().hypergraph.class; return nodes.length===expected.length && expected.every(id=>nodes.some(node=>node.id===id)) && hook.getState().canvasTitle.length>0 && hook.getLabelMetrics().filter(label=>label.classes.includes('class-label') && label.visible).length===expected.length;", f"viewer switch to {model_name}", timeout=35)
+                print("PASS Models switch between satellite and transportation diagrams")
             for width, height in ((1600, 1000), (390, 844), (1600, 1000)):
                 page.cdp.send("Emulation.setDeviceMetricsOverride", {"width": width, "height": height, "deviceScaleFactor": 1, "mobile": False})
                 page.evaluate("document.querySelector('#fit-model-button').click()")
@@ -2083,7 +2090,7 @@ return (() => {
             timeout=10,
             interval=0.25,
         )
-        if not isinstance(version_state, dict) or version_state.get("text") != "v1.2" or version_state.get("visible") is not True:
+        if not isinstance(version_state, dict) or version_state.get("text") != "v1.2.1" or version_state.get("visible") is not True:
             raise BrowserRegressionError(f"Shell app version display invalid: {version_state}")
         help_state = wait_for(
             page,
