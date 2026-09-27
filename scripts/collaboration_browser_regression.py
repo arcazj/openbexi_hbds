@@ -933,6 +933,130 @@ return !state.controlsInteracting && !state.frameScheduled ? state : null;
         page.close()
 
 
+def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
+    page = BrowserPage(create_target(debug_port))
+    try:
+        cases = [
+            ("models/", "satellite_world_simple_structure.json"),
+            ("models/", "satellite_world_complete_structure2.json"),
+            ("test_models/", "layout_007_nested_hyperclasses.json"),
+            ("test_models/", "stress_022_large_performance.json"),
+        ]
+        for directory, model_name in cases:
+            page.navigate(dynamic_layout_url(base_url, model_name, models_path=directory, debug=False))
+            wait_for_page_ready(page, "layout optimization page")
+            wait_for_model_loaded(page, model_name, "layout source load")
+            result = page.evaluate("""
+(async () => {
+  const hook = window.__hbdsDynamicTest;
+  const settle = async () => {
+    for (let i = 0; i < 4; i++) await new Promise(requestAnimationFrame);
+  };
+  const geometry = () => hook.getData().hypergraph.class.map(n => ({id:n.id, position:n.position, size:n.size}));
+  const content = () => JSON.stringify({...hook.getData().hypergraph,
+    class:hook.getData().hypergraph.class.map(({position,size,...node})=>node)});
+  const originalContent=content(), initialGeometry=JSON.stringify(geometry());
+  const errors = [], samples = [];
+  const select = document.getElementById('layout-algorithm-select');
+  document.getElementById('auto-optimize-toggle').checked=false;
+  select.value='none'; select.dispatchEvent(new Event('change',{bubbles:true}));
+  await settle();
+  if (initialGeometry!==JSON.stringify(geometry())) errors.push('Auto Layout off changed positions');
+  document.getElementById('auto-optimize-toggle').checked=true;
+  for (const algorithm of ['radial', 'hierarchy', 'grid', 'radial', 'hierarchy']) {
+    select.value = algorithm;
+    select.dispatchEvent(new Event('change', {bubbles:true}));
+    await settle();
+    const first = geometry();
+    document.getElementById('optimize-layout-button').click();
+    await settle();
+    if (JSON.stringify(first) !== JSON.stringify(geometry())) errors.push(`${algorithm}: repeated optimization changed geometry`);
+    const model = hook.getData(), byId = new Map(model.hypergraph.class.map(n => [n.id,n]));
+    for (const child of byId.values()) {
+      const parent = byId.get(child.parentClassId);
+      if (!parent) continue;
+      if (Math.abs(child.position.x-parent.position.x)+child.size.width/2 > parent.size.width/2+0.01 ||
+          Math.abs(child.position.y-parent.position.y)+child.size.height/2 > parent.size.height/2+0.01) {
+        errors.push(`${algorithm}: ${child.name} escapes ${parent.name}`);
+      }
+    }
+    const metrics = hook.getLayoutMetrics();
+    if (metrics.overlapPairs) errors.push(`${algorithm}: ${metrics.overlapPairs} unrelated nodes overlap ${JSON.stringify(metrics.overlapDetails)}`);
+    if (metrics.linkObstacleIntersections) errors.push(`${algorithm}: links cross unrelated nodes ${JSON.stringify(metrics.linkObstacleDetails)}`);
+    const labels = hook.getLabelMetrics().filter(l => l.visible);
+    const overlaps = [];
+    for (let i=0; i<labels.length; i++) for (let j=i+1; j<labels.length; j++) {
+      const a=labels[i], b=labels[j];
+      const area=Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+      if (area/Math.max(1,Math.min(a.width*a.height,b.width*b.height))>0.2) overlaps.push([a.text,b.text]);
+    }
+    if (overlaps.length) errors.push(`${algorithm}: labels overlap ${JSON.stringify(overlaps.slice(0,6))}`);
+    const zoom = await hook.sampleLayoutZoomStates();
+    for (const sample of zoom) {
+      if (sample.overlap.severe || sample.containmentErrors.length || sample.overlapErrors.length)
+        errors.push(`${algorithm} ${sample.label}: ${JSON.stringify(sample)}`);
+    }
+    samples.push({algorithm, ...metrics, labelOverlapCount:overlaps.length, labelOverlaps:overlaps.slice(0,6)});
+  }
+  if (content()!==originalContent) errors.push('Optimization changed model content');
+  return {errors, samples};
+})()
+""", timeout=120)
+            if result["errors"]:
+                raise BrowserRegressionError(f"Layout regression {model_name}: {result['errors']}")
+            # Resizing and Fit View must leave the saved layout geometry intact.
+            before_resize = page.evaluate("window.__hbdsDynamicTest.getData().hypergraph")
+            page.cdp.send("Emulation.setDeviceMetricsOverride", {"width":1100,"height":800,"deviceScaleFactor":1,"mobile":False})
+            page.evaluate("document.getElementById('fit-model-button').click()")
+            page.evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+            resized = page.evaluate("window.__hbdsDynamicTest.getViewportLayoutMetrics()")
+            if resized["containmentErrors"] or resized["overlapErrors"]:
+                raise BrowserRegressionError(f"Layout resize regression {model_name}: {resized}")
+            if page.evaluate("window.__hbdsDynamicTest.getData().hypergraph") != before_resize:
+                raise BrowserRegressionError("Fit View changed model geometry")
+            page.cdp.send("Emulation.setDeviceMetricsOverride", {"width":1600,"height":1000,"deviceScaleFactor":1,"mobile":False})
+            page.evaluate("document.getElementById('fit-model-button').click()")
+            screenshot_dir = os.environ.get("HBDS_SCREENSHOT_DIR")
+            if screenshot_dir:
+                destination = Path(screenshot_dir)
+                destination.mkdir(parents=True, exist_ok=True)
+                for algorithm in ("radial", "hierarchy"):
+                    page.evaluate("document.getElementById('layout-algorithm-select').value=" + json.dumps(algorithm) + "; document.getElementById('optimize-layout-button').click()")
+                    page.evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+                    shot = page.cdp.send("Page.captureScreenshot", {"format": "png"})
+                    (destination / f"{Path(model_name).stem}-{algorithm}.png").write_bytes(base64.b64decode(shot["result"]["data"]))
+            snapshot = page.evaluate("window.__hbdsDynamicTest.getData()")
+            temporary_name = f"_layout_roundtrip_{os.getpid()}_{Path(model_name).stem}.json"
+            endpoint = f"/api/models/{temporary_name}"
+            try:
+                request_json(base_url, endpoint, method="POST", payload=snapshot)
+                page.close()
+                page = BrowserPage(create_target(debug_port))
+                page.navigate(dynamic_layout_url(base_url, temporary_name, debug=False))
+                wait_for_page_ready(page, "optimized model reload")
+                wait_for_model_loaded(page, temporary_name, "optimized model reload")
+                reloaded = page.evaluate("window.__hbdsDynamicTest.getData()")
+                if reloaded["hypergraph"] != snapshot["hypergraph"]:
+                    raise BrowserRegressionError("Optimized model changed after save/reload")
+                set_page_edit_mode(page, "full")
+                revision = reloaded["metadata"].get("revision")
+                page.click("#save-model-button")
+                wait_for(page, "const hook=window.__hbdsDynamicTest; return hook.getState().saved && "
+                         f"hook.getData().metadata.revision !== {json.dumps(revision)};", "optimized UI save", timeout=25)
+                if request_json(base_url, endpoint)["model"]["hypergraph"] != snapshot["hypergraph"]:
+                    raise BrowserRegressionError("UI save changed optimized model content")
+            finally:
+                request_json(base_url, endpoint, method="DELETE", expected=(200,404))
+                for backup in (MODELS_DIR / ".backups").glob(f"{Path(temporary_name).stem}.*.bak.json"):
+                    backup.unlink()
+            page.close()
+            page = BrowserPage(create_target(debug_port))
+            assert_browser_has_no_significant_errors(page, f"Layout regression {model_name}")
+            print(f"PASS layout optimization {model_name}")
+    finally:
+        page.close()
+
+
 def run_builtin_visual_regressions(base_url: str, debug_port: int) -> None:
     page = BrowserPage(create_target(debug_port))
     try:
@@ -3073,7 +3197,7 @@ def terminate_process(process: subprocess.Popen | None, name: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--suite", choices=("all", "ai", "satellite"), default="all")
+    parser.add_argument("--suite", choices=("all", "ai", "satellite", "layout"), default="all")
     args = parser.parse_args()
     server_process: subprocess.Popen | None = None
     browser_process: subprocess.Popen | None = None
@@ -3097,9 +3221,13 @@ def main() -> int:
         if args.suite == "satellite":
             run_builtin_visual_regressions(base_url, debug_port)
             return 0
+        if args.suite == "layout":
+            run_layout_optimization_regression(base_url, debug_port)
+            return 0
         run_shell_menu_version_regression(base_url, debug_port)
         run_save_safety_regression(base_url, debug_port)
         run_render_scheduler_regression(base_url, debug_port)
+        run_layout_optimization_regression(base_url, debug_port)
         run_builtin_visual_regressions(base_url, debug_port)
         run_ai_support_ui_regression(base_url, debug_port, TEMP_MODEL_NAME)
         run_ai_review_regression(base_url, debug_port)

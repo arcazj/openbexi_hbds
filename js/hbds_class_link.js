@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { findOrthogonalPath } from './hbds_routing.js';
 
 const linkLabels = [];
 const activeLinks = [];
@@ -176,7 +177,7 @@ export function recalculateAllLinks() {
     bucket.forEach((link, index) => {
       const parent = link.linkGroup.parent;
       if (parent && !occupiedLabelParents.has(parent)) {
-        occupiedLabels.push(...getStaticAttributeLabelBounds(parent));
+        occupiedLabels.push(...getStaticContentBounds(parent));
         occupiedLabelParents.add(parent);
       }
       const obstacleBoxes = getCachedObstacleBoxes(obstacleBoxesByParent, parent, link.sourceClass, link.targetClass);
@@ -671,6 +672,14 @@ function buildOrthogonalRoute({ link, p0, p1, parent, index, count, lane, occupi
   let points = buildBaseRoutePoints({ link, p0, p1, parent, rendering, lane, sourcePort, targetPort });
   points = separateSharedRouteLane(points, rendering, occupiedLanes);
   points = avoidObstacleIntersections(points, obstacleBoxes, rendering);
+  if (countRouteObstacleIntersections(points, obstacleBoxes) > 0 && !rendering.routePoints?.length) {
+    const start = getPortStubPoint(p0, sourcePort, rendering);
+    const end = getPortStubPoint(p1, targetPort, rendering);
+    const path = findOrthogonalPath(start, end, obstacleBoxes.map(box => ({
+      minX:box.min.x, maxX:box.max.x, minY:box.min.y, maxY:box.max.y
+    })), rendering.obstacleRouteGap ?? 0.15);
+    if (path) points = [p0.clone(), ...path.map(p => new THREE.Vector3(p.x,p.y,p0.z)), p1.clone()];
+  }
   const basePoints = compactPoints(points);
   const roundedPoints = roundOrthogonalCorners(basePoints, rendering.relationshipCornerRadius ?? rendering.curveRadius ?? rendering.cornerRadius ?? 0.16);
   const label = getLabelPlacement(basePoints, rendering, lane);
@@ -903,9 +912,16 @@ function getNodeLocalBox(node, parent, fallbackPoint) {
 
   function collectNodeBounds(object, isRoot) {
     if (!isRoot && object.userData?.isClassLike) return;
-    if (!object.geometry || (!object.isMesh && !object.isLine && !object.isLineSegments)) return;
-    if (!object.geometry.boundingBox) object.geometry.computeBoundingBox?.();
-    if (object.geometry.boundingBox) {
+    if (object.isCSS2DObject && object.userData?.labelKind === 'attribute') {
+      const width = object.userData.maxWorldWidth ?? 2.25;
+      const height = Math.max(0.16, (object.userData.gapY ?? 0.17) * 0.9);
+      worldBox.set(new THREE.Vector3(0, -height / 2, 0), new THREE.Vector3(width, height / 2, 0)).applyMatrix4(object.matrixWorld);
+      expandLocalBoxFromWorldBox(localBox, worldBox, parent);
+    }
+    if (object.geometry && (object.isMesh || object.isLine || object.isLineSegments)) {
+      if (!object.geometry.boundingBox) object.geometry.computeBoundingBox?.();
+    }
+    if (object.geometry?.boundingBox) {
       worldBox.copy(object.geometry.boundingBox).applyMatrix4(object.matrixWorld);
       expandLocalBoxFromWorldBox(localBox, worldBox, parent);
     }
@@ -1201,8 +1217,8 @@ function getLabelPlacement(points, rendering, lane) {
 function separateLinkLabel(route, occupiedLabels, rendering) {
   const labelText = String(rendering.labelText ?? '');
   const boundsSize = {
-    width: rendering.labelCollisionWidth ?? Math.max(0.85, labelText.length * 0.12),
-    height: rendering.labelCollisionHeight ?? 0.42
+    width: Math.max(rendering.labelCollisionWidth || 0, 0.85, labelText.length * 0.22 + 0.5),
+    height: Math.max(rendering.labelCollisionHeight || 0, 0.6)
   };
   const margin = rendering.labelCollisionMargin ?? 0.06;
   const basePosition = route.labelPosition.clone();
@@ -1212,7 +1228,7 @@ function separateLinkLabel(route, occupiedLabels, rendering) {
   const normal = getNormal(tangent);
   const candidates = [basePosition.clone()];
 
-  for (let step = 1; step <= 10; step += 1) {
+  for (let step = 1; step <= 20; step += 1) {
     const along = tangent.clone().multiplyScalar(0.34 * step);
     const away = normal.clone().multiplyScalar(0.2 * step);
     candidates.push(basePosition.clone().add(away));
@@ -1248,23 +1264,27 @@ function getLabelBounds(position, size) {
   };
 }
 
-function getStaticAttributeLabelBounds(parent) {
+function getStaticContentBounds(parent) {
   const bounds = [];
   const localPosition = new THREE.Vector3();
   parent.updateWorldMatrix?.(true, true);
   parent.traverse?.(object => {
-    if (!object.isCSS2DObject || object.userData?.labelKind !== 'attribute') return;
+    if (object.userData?.isClassLike && !object.userData?.isHyperClass) {
+      const box = getNodeLocalBox(object, parent, object.position);
+      bounds.push({minX:box.min.x, maxX:box.max.x, minY:box.min.y, maxY:box.max.y});
+      return;
+    }
+    if (!object.isCSS2DObject || !['attribute', 'title'].includes(object.userData?.labelKind)) return;
     object.getWorldPosition(localPosition);
     parent.worldToLocal(localPosition);
     const text = String(object.userData?.text || object.element?.textContent || '');
-    const width = Math.min(
-      object.userData?.maxWorldWidth ?? 2.25,
-      Math.max(0.24, text.length * 0.075)
-    );
-    const height = Math.max(0.08, (object.userData?.gapY ?? 0.17) * 0.9);
+    const attribute = object.userData.labelKind === 'attribute';
+    const width = attribute ? (object.userData.maxWorldWidth ?? 2.25)
+      : (object.userData.nodeSize?.width ?? Math.max(1, text.length * 0.3));
+    const height = attribute ? Math.max(0.16, (object.userData?.gapY ?? 0.17) * 0.9) : 0.7;
     bounds.push({
-      minX: localPosition.x,
-      maxX: localPosition.x + width,
+      minX: localPosition.x - (attribute ? 0 : width / 2),
+      maxX: localPosition.x + (attribute ? width : width / 2),
       minY: localPosition.y - height / 2,
       maxY: localPosition.y + height / 2
     });
@@ -1373,7 +1393,7 @@ export function updateLinkFontSizes(camera, renderer) {
     const rendering = label.parent?.userData?.linkData?.rendering || {};
     const collisionWidthWorld = rendering.labelCollisionWidth ?? Math.max(0.85, String(label.userData?.text || label.element.textContent || '').length * 0.12);
     const availableWidthPx = Math.max(42, collisionWidthWorld * pixelsPerWorldUnit);
-    const minSize = Math.min(preferredSize, Math.max(MIN_READABLE_LINK_FONT_SIZE, preferredSize * 0.68));
+    const minSize = Math.min(preferredSize, Math.max(MIN_READABLE_LINK_FONT_SIZE, preferredSize * 0.68), Math.max(1, 0.28 * pixelsPerWorldUnit));
     const preferredScale = Math.max(1, preferredSize / DEFAULT_LINK_FONT_SETTINGS.size);
     const distanceSize = THREE.MathUtils.clamp((120 * preferredScale) / d, minSize, Math.max(18, preferredSize));
     const fitSize = getFontSizeForTextWidth(label.userData?.text || label.element.textContent || '', availableWidthPx, 2);

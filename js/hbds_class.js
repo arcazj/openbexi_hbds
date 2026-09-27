@@ -919,7 +919,7 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
 
     const cbW = attrCfg.size.width;
     const cbH = attrCfg.size.height ?? cbW;
-    const gapY = options.gapY ?? 0.17;
+    const gapY = options.gapY ?? Math.max(0.17, (size.height - 0.3) / Math.max(1, attributes.length - 1));
     const startY = options.startY ?? (size.height / 2 - 0.1);
     const colX = options.colX ?? (size.width / 2 + 0.25 + cbW);
     const hubPos = options.hubPosition ?? new THREE.Vector3((size.width * 0.9) / 2, (size.height * 0.9) / 2, options.z ?? 0.06);
@@ -1446,11 +1446,11 @@ export function updateLabelFontSizes(camera, renderer) {
             const nodeSize = label.userData?.nodeSize ?? label.parent?.userData?.modelData?.size ?? {};
             const nodeWidth = nodeSize.width ?? 1.2;
             const nodeHeight = nodeSize.height ?? 1.6;
-            const availableWidthPx = Math.max(42, (nodeWidth - 0.22) * pixelsPerWorldUnit);
+            const availableWidthPx = Math.max(1, (nodeWidth - 0.22) * pixelsPerWorldUnit);
             const text = label.userData?.text || label.element.textContent || '';
             const fitSize = getFontSizeForTextWidth(text, availableWidthPx, label.element.classList.contains('hbds-icon-title') ? 1.25 : 0);
             const configuredSize = getConfiguredLabelSize(label, DEFAULT_LABEL_FONT_SETTINGS.size);
-            const minSize = Math.min(configuredSize, MIN_READABLE_TITLE_FONT_SIZE);
+            const minSize = Math.min(configuredSize, MIN_READABLE_TITLE_FONT_SIZE, Math.max(1, nodeHeight * pixelsPerWorldUnit * 0.38));
             const distanceSize = getDistanceScaledFontSize(132, distance, configuredSize, minSize);
             const verticalCap = Math.max(minSize, nodeHeight * pixelsPerWorldUnit * 0.38);
             const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), minSize, configuredSize);
@@ -1458,14 +1458,17 @@ export function updateLabelFontSizes(camera, renderer) {
             applyTitleLabelSizing(label.element, availableWidthPx, fontSize);
         } else {
             const maxWorldWidth = label.userData?.maxWorldWidth ?? 1.75;
-            const availableWidthPx = Math.max(34, maxWorldWidth * pixelsPerWorldUnit);
+            const availableWidthPx = Math.max(1, maxWorldWidth * pixelsPerWorldUnit);
             const gapY = label.userData?.gapY ?? 0.17;
             const configuredSize = getConfiguredLabelSize(label, DEFAULT_LABEL_FONT_SETTINGS.size);
-            const minSize = Math.min(configuredSize, MIN_READABLE_ATTRIBUTE_FONT_SIZE);
+            // At overview zoom the row pitch is the hard limit; a fixed pixel
+            // minimum makes adjacent attribute rows paint over one another.
+            const rowBudget = Math.max(1, gapY * pixelsPerWorldUnit * 0.9);
+            const minSize = Math.min(configuredSize, MIN_READABLE_ATTRIBUTE_FONT_SIZE, rowBudget, Math.max(1, 0.17 * pixelsPerWorldUnit));
             const distanceSize = getDistanceScaledFontSize(110, distance, configuredSize, minSize);
             const verticalCap = Math.max(minSize, gapY * pixelsPerWorldUnit * 1.45, configuredSize * 0.62);
             const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, verticalCap), minSize, configuredSize);
-            const fontSize = THREE.MathUtils.clamp(dynamicSize, minSize, configuredSize);
+            const fontSize = Math.min(rowBudget, THREE.MathUtils.clamp(dynamicSize, minSize, configuredSize));
             applyAttributeLabelSizing(label.element, availableWidthPx, fontSize);
         }
     });
@@ -1501,6 +1504,7 @@ function getDistanceScaledFontSize(baseSize, distance, configuredSize, minSize) 
 }
 
 function applyTitleLabelSizing(element, availableWidthPx, fontSize) {
+    element.style.padding = '0';
     element.style.fontSize = `${fontSize.toFixed(1)}px`;
     if (element.__hbdsFontSettings) applyLabelFontSettings(element, {...element.__hbdsFontSettings, size: fontSize});
     element.style.maxWidth = `${Math.round(availableWidthPx)}px`;
@@ -1524,6 +1528,7 @@ function applyTitleLabelSizing(element, availableWidthPx, fontSize) {
 }
 
 function applyAttributeLabelSizing(element, availableWidthPx, fontSize) {
+    element.style.padding = '0';
     element.style.fontSize = `${fontSize.toFixed(1)}px`;
     if (element.__hbdsFontSettings) applyLabelFontSettings(element, {...element.__hbdsFontSettings, size: fontSize});
     element.style.lineHeight = '1';

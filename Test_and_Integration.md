@@ -917,6 +917,17 @@ Validate:
 * links route to expected source/target elements
 * no layout control appears in Models view
 
+Run the [layout regression checks](doc/LAYOUT_OPTIMIZATION.md) in an isolated copy:
+
+```powershell
+py -3.9 -B scripts/check_project.py --browser-only --browser-suite layout
+```
+
+These checks cover full visual footprints, nested group containment, repeated
+optimization, automatic layout selection, zoom, resizing, and save/reload.
+At overview zoom, label sizes must respect the available row spacing; a fixed
+pixel minimum must not cause labels to overlap. Zooming in restores detail.
+
 ## 22. Model Validation And JSON Editing
 
 Manual validation:

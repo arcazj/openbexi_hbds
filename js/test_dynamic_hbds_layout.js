@@ -39,8 +39,8 @@ import {
   normalizeFontSettings,
   getFontSettingsForTextType,
   getFitQualityMetrics
-} from './hbds_model.js?v=semantic-v1-20260718a';
-import { recalculateAllLinks } from './hbds_class_link.js?v=perf-hardening-20260718a';
+} from './hbds_model.js?v=layout-20260926a';
+import { recalculateAllLinks } from './hbds_class_link.js?v=layout-20260926a';
 import {
   applyAiModel,
   applyServerModelOperations,
@@ -1217,8 +1217,12 @@ function applyModelFontSettings(settings) {
   syncFontSettingsControls();
 }
 
-function handleLayoutSettingChange() {
+async function handleLayoutSettingChange() {
   setLayoutSettings({ ...getLayoutSettings(), algorithm: getLayoutAlgorithm() }, { applyContext: false });
+  if (shouldOptimizeAfterCrud()) {
+    await refreshWorkspace(`Applied ${getLayoutAlgorithm()} layout`, { optimize: true, refresh: false });
+    return;
+  }
   updateJsonPreviewFromData();
   scheduleLocalDraftPublish('Changed layout setting');
 }
@@ -8489,6 +8493,18 @@ function installDebugHooks() {
     triggerCollaborationStatusForTest,
     getLinkHubMetrics: collectLinkHubMetrics,
     getLabelMetrics: collectLabelMetrics,
+    getLayoutMetrics: collectLayoutMetrics,
+    getViewportLayoutMetrics: collectViewportLayoutMetrics,
+    sampleLayoutZoomStates: async () => {
+      const target = orbitControls.target.clone();
+      const distance = camera.position.distanceTo(target);
+      const samples = [];
+      for (const [label, factor] of [['near', 0.7], ['far', 1.75], ['fit', 1]]) {
+        const sample = await sampleSatelliteFontZoomState(label, factor, distance, target);
+        samples.push({label, overlap:getLabelOverlapSummary(sample.metrics, 0.2), ...collectViewportLayoutMetrics()});
+      }
+      return samples;
+    },
     getFitQuality: () => getFitQualityMetrics(ctx()),
     getRenderState: () => ({
       completedRenderCount,
@@ -8703,6 +8719,46 @@ function summarizeFontZoomSamples(samples) {
     + `link ${sample.linkLabel.min.toFixed(1)}-${sample.linkLabel.max.toFixed(1)}, `
     + `overlap ${sample.overlap.severe}/${sample.overlap.maxRatio.toFixed(2)}`
   )).join(' | ');
+}
+
+function collectViewportLayoutMetrics() {
+  const entries = [], containmentErrors = [], overlapErrors = [];
+  if (!diagramGroup || !renderer || !camera) return {containmentErrors, overlapErrors};
+  const viewport = renderer.domElement.getBoundingClientRect();
+  diagramGroup.updateWorldMatrix(true, true);
+  diagramGroup.traverse(object => {
+    if (!object.userData?.isClassLike || !object.visible) return;
+    object.geometry?.computeBoundingBox?.();
+    const box = object.geometry?.boundingBox;
+    if (!box) return;
+    const corners = [];
+    for (const x of [box.min.x,box.max.x]) for (const y of [box.min.y,box.max.y]) {
+      const p = object.localToWorld(new THREE.Vector3(x,y,0)).project(camera);
+      corners.push({x:viewport.left+(p.x+1)*viewport.width/2,y:viewport.top+(1-p.y)*viewport.height/2});
+    }
+    const body = {left:Math.min(...corners.map(p=>p.x)),right:Math.max(...corners.map(p=>p.x)),
+      top:Math.min(...corners.map(p=>p.y)),bottom:Math.max(...corners.map(p=>p.y))};
+    const visual = {...body};
+    for (const child of object.children) {
+      if (!child.isCSS2DObject || !child.element) continue;
+      const rect = child.element.getBoundingClientRect();
+      if (!rect.width || !rect.height) continue;
+      visual.left=Math.min(visual.left,rect.left); visual.right=Math.max(visual.right,rect.right);
+      visual.top=Math.min(visual.top,rect.top); visual.bottom=Math.max(visual.bottom,rect.bottom);
+    }
+    entries.push({object,body,visual,id:object.userData.hbdsId});
+  });
+  for (let i=0; i<entries.length; i++) {
+    const a=entries[i], parent=entries.find(entry=>entry.object===a.object.parent);
+    if (parent && (a.visual.left<parent.body.left-1 || a.visual.right>parent.body.right+1 ||
+      a.visual.top<parent.body.top-1 || a.visual.bottom>parent.body.bottom+1)) containmentErrors.push(a.id);
+    for (const b of entries.slice(i+1)) {
+      if (areRelatedObjects(a.object,b.object)) continue;
+      if (Math.min(a.visual.right,b.visual.right)-Math.max(a.visual.left,b.visual.left)>1 &&
+        Math.min(a.visual.bottom,b.visual.bottom)-Math.max(a.visual.top,b.visual.top)>1) overlapErrors.push([a.id,b.id]);
+    }
+  }
+  return {containmentErrors, overlapErrors};
 }
 
 function collectLayoutMetrics() {
@@ -10632,7 +10688,7 @@ function bindUi() {
     ...TYPE_FONT_SIZE_CONTROLS.map(control => control.inputId)
   ].forEach(id => $(id)?.addEventListener('input', handleFontSettingInput));
 
-  $('layout-algorithm-select')?.addEventListener('change', handleLayoutSettingChange);
+  $('layout-algorithm-select')?.addEventListener('change', () => runAction(handleLayoutSettingChange, 'layout.change'));
   $('view-toggle')?.addEventListener('change', handleViewToggle);
 
   $('test-model-select').addEventListener('change', () => {

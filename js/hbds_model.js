@@ -1,8 +1,9 @@
 ﻿import * as THREE from 'three';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=perf-hardening-20260718a';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=perf-hardening-20260718a';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=perf-hardening-20260718a';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=perf-hardening-20260718a';
+import { optimizeModelLayout } from './hbds_layout.js';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=layout-20260926a';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=layout-20260926a';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=layout-20260926a';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=layout-20260926a';
 import { initModelOverview as initModelOverviewPanel, updateModelOverview as updateModelOverviewPanel } from './hbds_model_overview.js?v=overview-module-20260530a';
 import {
   normalizeSemanticModel,
@@ -108,16 +109,6 @@ function disposeDiagramResources(root) {
     if(object.isCSS2DObject) object.element?.remove?.();
   });
 }
-const GRID_GAP_X = 1.15;
-const GRID_GAP_Y = 0.78;
-const ROOT_GAP_X = 2.6;
-const ROOT_GAP_Y = 2.2;
-const MIN_HYPERCLASS_GAP = 0.8;
-const CLASS_MIN_WIDTH = 1.35;
-const CLASS_MIN_HEIGHT = 1.75;
-const HYPERCLASS_MIN_WIDTH = 4;
-const HYPERCLASS_MIN_HEIGHT = 3.2;
-const HYPERCLASS_PADDING = { left: 0.65, right: 0.75, top: 0.9, bottom: 0.55 };
 const HIDDEN_MODEL_VALUES = new Set([
   'models/hyperclasse_human_and_car.json',
   'models/hyperclasse_link_human_and_car.json'
@@ -670,6 +661,24 @@ function fitBoxForContext(context) {
     hasClassLikeBounds = true;
   };
   for (const object of modelRuntime.classById.values()) includeObject(object);
+  // CSS2D labels have no Three.js geometry. Include their reserved footprint
+  // and relationship routes so Fit View also contains text and outside lanes.
+  context.diagramGroup.traverseVisible(object => {
+    if (object.userData?.isHBDSLink) box.expandByObject(object);
+    if (!object.isCSS2DObject) return;
+    const attribute = object.userData?.labelKind === 'attribute';
+    const link = object.element?.classList?.contains('link-label');
+    if (!attribute && !link) return;
+    const rendering = object.parent?.userData?.linkData?.rendering || {};
+    const width = attribute ? (object.userData.maxWorldWidth ?? 2.25)
+      : Math.max(rendering.labelCollisionWidth || 0, String(object.userData?.text || '').length * 0.18 + 0.35);
+    const height = attribute ? Math.max(0.16, object.userData.gapY * 0.9 || 0.16) : 0.5;
+    const labelBox = new THREE.Box3(
+      new THREE.Vector3(attribute ? 0 : -width / 2, -height / 2, 0),
+      new THREE.Vector3(attribute ? width : width / 2, height / 2, 0)
+    ).applyMatrix4(object.matrixWorld);
+    box.union(labelBox);
+  });
   if (!hasClassLikeBounds) {
     context.diagramGroup.traverse(object => {
       if (object.userData?.isClassLike || object.userData?.isHbdsClass) includeObject(object);
@@ -1092,282 +1101,6 @@ function modelNeedsLayoutPlacement(model){
 }
 export function prepareSceneSnapshot(context, options={}){ if(options.updateFitMetadata!==false) updateFitMetadataFromContext(context,options); return getData(); }
 export function saveScene(context, options={}){ const snapshot=prepareSceneSnapshot(context,options); const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=options.fileName||'hbds_saved_model.json'; a.click(); URL.revokeObjectURL(url); return snapshot; }
-function getNodeSize(node){
-  return getNodeBodySize(node);
-}
-function getNodeBodySize(node){
-  const base=node?.size||{};
-  const attrCount=Array.isArray(node?.attributes)?node.attributes.length:0;
-  if(node?.type==='hyperclass'){
-    return {
-      width:Math.max(base.width||0,HYPERCLASS_MIN_WIDTH),
-      height:Math.max(base.height||0,HYPERCLASS_MIN_HEIGHT)
-    };
-  }
-  return {
-    width:Math.max(base.width||0,CLASS_MIN_WIDTH),
-    height:Math.max(base.height||0,CLASS_MIN_HEIGHT,0.55+attrCount*0.16)
-  };
-}
-function getOptimizedHyperclassBaseSize(){
-  return { width:HYPERCLASS_MIN_WIDTH, height:HYPERCLASS_MIN_HEIGHT };
-}
-function getNodeVisualMetrics(node){
-  const body=getNodeBodySize(node);
-  const attributeRight=getAttributeRightExtent(node);
-  return {
-    body,
-    width:body.width+attributeRight,
-    height:body.height,
-    offsetX:attributeRight/2,
-    offsetY:0,
-    attributeRight
-  };
-}
-function getAttributeRightExtent(node){
-  const attributes=Array.isArray(node?.attributes)?node.attributes:[];
-  if(!attributes.length) return 0;
-  const cbW=node?.rendering?.attributes?.size?.width ?? 0.1;
-  const longest=Math.max(...attributes.map((attribute,index)=>getAttributeDisplayName(attribute,index).length));
-  const labelWidth=Math.min(2.2,Math.max(0.46,longest*0.055));
-  return 0.25 + cbW*2 + 0.12 + labelWidth + 0.18;
-}
-function getAttributeDisplayName(attribute,index){
-  if(typeof attribute==='string') return attribute;
-  if(typeof attribute==='number' || typeof attribute==='boolean') return String(attribute);
-  if(!attribute || typeof attribute!=='object') return `attribute${index+1}`;
-  return String(attribute.name ?? attribute.label ?? attribute.title ?? attribute.id ?? `attribute${index+1}`);
-}
-function getGridDimensions(childCount){
-  if(childCount<=1) return {cols:1,rows:1};
-  if(childCount===2) return {cols:1,rows:2};
-  if(childCount===3) return {cols:1,rows:3};
-  if(childCount===4) return {cols:2,rows:2};
-  if(childCount<=6) return {cols:2,rows:Math.ceil(childCount/2)};
-  if(childCount<=9) return {cols:3,rows:Math.ceil(childCount/3)};
-  if(childCount<=16) return {cols:4,rows:Math.ceil(childCount/4)};
-  const cols=Math.ceil(Math.sqrt(childCount));
-  return {cols,rows:Math.ceil(childCount/cols)};
-}
-function getChildrenByParent(nodes){
-  const childrenByParent=new Map();
-  nodes.forEach(n=>{ if(n.parentClassId){ const a=childrenByParent.get(n.parentClassId)||[]; a.push(n); childrenByParent.set(n.parentClassId,a); } });
-  return childrenByParent;
-}
-function sortByName(a,b){
-  return String(a.name).localeCompare(String(b.name));
-}
-function buildGridMetrics(items,metrics,options={}){
-  const {cols,rows}=options.dimensions || getGridDimensions(items.length);
-  const gapX=options.gapX ?? GRID_GAP_X;
-  const gapY=options.gapY ?? GRID_GAP_Y;
-  const colWidths=Array(cols).fill(0);
-  const rowHeights=Array(rows).fill(0);
-  items.forEach((item,index)=>{
-    const col=index%cols;
-    const row=Math.floor(index/cols);
-    const metric=metrics.get(item.id) || getNodeVisualMetrics(item);
-    colWidths[col]=Math.max(colWidths[col],metric.width);
-    rowHeights[row]=Math.max(rowHeights[row],metric.height);
-  });
-  return {
-    cols,
-    rows,
-    gapX,
-    gapY,
-    colWidths,
-    rowHeights,
-    width:colWidths.reduce((sum,width)=>sum+width,0)+Math.max(0,cols-1)*gapX,
-    height:rowHeights.reduce((sum,height)=>sum+height,0)+Math.max(0,rows-1)*gapY
-  };
-}
-function measureLayoutTree(node,childrenByParent,metrics){
-  const kids=(childrenByParent.get(node.id)||[]).sort(sortByName);
-  if(node.type!=='hyperclass' || kids.length===0){
-    const metric=getNodeVisualMetrics(node);
-    node.size=metric.body;
-    metrics.set(node.id,metric);
-    return metric;
-  }
-
-  kids.forEach(child=>measureLayoutTree(child,childrenByParent,metrics));
-  const grid=buildGridMetrics(kids,metrics);
-  const base=getOptimizedHyperclassBaseSize(node);
-  node.size={
-    width:Math.max(base.width,grid.width+HYPERCLASS_PADDING.left+HYPERCLASS_PADDING.right),
-    height:Math.max(base.height,grid.height+HYPERCLASS_PADDING.top+HYPERCLASS_PADDING.bottom)
-  };
-  const metric=getNodeVisualMetrics(node);
-  metrics.set(node.id,metric);
-  return metric;
-}
-function placeMeasuredTree(node,cx,cy,childrenByParent,metrics){
-  const kids=(childrenByParent.get(node.id)||[]).sort(sortByName);
-  if(!node.position) node.position={x:0,y:0,z:0};
-  node.position.x=cx;
-  node.position.y=cy;
-  node.position.z=0;
-  if(node.type!=='hyperclass' || kids.length===0) return;
-
-  const grid=buildGridMetrics(kids,metrics);
-  const contentLeft=cx-node.size.width/2+HYPERCLASS_PADDING.left;
-  const contentTop=cy+node.size.height/2-HYPERCLASS_PADDING.top;
-  let yCursor=contentTop;
-  for(let row=0;row<grid.rows;row++){
-    let xCursor=contentLeft;
-    const rowHeight=grid.rowHeights[row];
-    for(let col=0;col<grid.cols;col++){
-      const index=row*grid.cols+col;
-      const child=kids[index];
-      const colWidth=grid.colWidths[col];
-      if(child){
-        const metric=metrics.get(child.id);
-        const childX=xCursor+colWidth/2-(metric?.offsetX||0);
-        const childY=yCursor-rowHeight/2-(metric?.offsetY||0);
-        placeMeasuredTree(child,childX,childY,childrenByParent,metrics);
-      }
-      xCursor+=colWidth+grid.gapX;
-    }
-    yCursor-=rowHeight+grid.gapY;
-  }
-}
-function optimizeLayoutGrid(){
-  const nodes=data.hypergraph.class||[];
-  const childrenByParent=getChildrenByParent(nodes);
-  const roots=nodes.filter(n=>!n.parentClassId).sort(sortByName);
-  const metrics=new Map();
-  roots.forEach(root=>measureLayoutTree(root,childrenByParent,metrics));
-  const rootCount=roots.length;
-  const rootCols=Math.max(1,Math.ceil(Math.sqrt(rootCount)));
-  const rootRows=Math.ceil(rootCount/rootCols);
-  const rootGrid=buildGridMetrics(roots,metrics,{dimensions:{cols:rootCols,rows:rootRows},gapX:ROOT_GAP_X,gapY:ROOT_GAP_Y});
-  roots.forEach((root,idx)=>{
-    const col=idx%rootCols;
-    const row=Math.floor(idx/rootCols);
-    const xStart=-rootGrid.width/2+rootGrid.colWidths.slice(0,col).reduce((sum,width)=>sum+width+ROOT_GAP_X,0);
-    const yStart=rootGrid.height/2-rootGrid.rowHeights.slice(0,row).reduce((sum,height)=>sum+height+ROOT_GAP_Y,0);
-    const metric=metrics.get(root.id);
-    const x=xStart+rootGrid.colWidths[col]/2-(metric?.offsetX||0);
-    const y=yStart-rootGrid.rowHeights[row]/2-(metric?.offsetY||0);
-    placeMeasuredTree(root,x,y,childrenByParent,metrics);
-  });
-}
-function optimizeLayoutRadial(){
-  const nodes=data.hypergraph.class||[];
-  const roots=nodes.filter(n=>!n.parentClassId).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-  const radiusStep = 5;
-  roots.forEach((root, idx)=>{
-    const angle=(Math.PI*2*idx)/Math.max(roots.length,1);
-    if(!root.position) root.position={x:0,y:0,z:0};
-    root.position.x=Math.cos(angle)*radiusStep;
-    root.position.y=Math.sin(angle)*radiusStep;
-    root.position.z=0;
-  });
-}
-function optimizeLayoutHierarchy(){
-  const nodes=data.hypergraph.class||[];
-  const childrenByParent=new Map();
-  nodes.forEach(n=>{ if(n.parentClassId){ const a=childrenByParent.get(n.parentClassId)||[]; a.push(n); childrenByParent.set(n.parentClassId,a); } });
-  const roots=nodes.filter(n=>!n.parentClassId).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-  const rowGap=3.8, colGap=4.2;
-  function layoutLevel(parent, depth, centerX){
-    const kids=(childrenByParent.get(parent.id)||[]).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-    kids.forEach((child,i)=>{
-      const offset=i-(kids.length-1)/2;
-      if(!child.position) child.position={x:0,y:0,z:0};
-      child.position.x=centerX+offset*colGap;
-      child.position.y=-depth*rowGap;
-      child.position.z=0;
-      layoutLevel(child, depth+1, child.position.x);
-    });
-  }
-  roots.forEach((root, i)=>{
-    if(!root.position) root.position={x:0,y:0,z:0};
-    root.position.x=(i-(roots.length-1)/2)*colGap*1.2;
-    root.position.y=0;
-    root.position.z=0;
-    layoutLevel(root,1,root.position.x);
-  });
-}
-function applyLayoutByAlgorithm(algorithm='grid'){
-  if(algorithm==='radial') return optimizeLayoutRadial();
-  if(algorithm==='hierarchy') return optimizeLayoutHierarchy();
-  return optimizeLayoutGrid();
-}
-
-function layoutChildrenInsideParents(){
-  const nodes=data.hypergraph.class||[];
-  const childrenByParent=getChildrenByParent(nodes);
-  const metrics=new Map();
-  const roots=nodes.filter(n=>!n.parentClassId);
-  roots.forEach(root=>measureLayoutTree(root,childrenByParent,metrics));
-  roots.forEach(root=>{
-    const p=root.position||{x:0,y:0,z:0};
-    placeMeasuredTree(root,p.x||0,p.y||0,childrenByParent,metrics);
-  });
-}
-function getNodeBounds(node){
-  const size=getNodeSize(node);
-  const pos=node?.position||{x:0,y:0};
-  return {
-    minX:(pos.x||0)-size.width/2,
-    maxX:(pos.x||0)+size.width/2,
-    minY:(pos.y||0)-size.height/2,
-    maxY:(pos.y||0)+size.height/2
-  };
-}
-function isAncestor(ancestorId,nodeId,byId){
-  let current=byId.get(nodeId);
-  while(current?.parentClassId){
-    if(current.parentClassId===ancestorId) return true;
-    current=byId.get(current.parentClassId);
-  }
-  return false;
-}
-function overlapDepth(a,b,gap=MIN_HYPERCLASS_GAP){
-  const x=Math.min(a.maxX,b.maxX)-Math.max(a.minX,b.minX);
-  const y=Math.min(a.maxY,b.maxY)-Math.max(a.minY,b.minY);
-  if(x<=-gap || y<=-gap) return null;
-  return {x:x+gap,y:y+gap};
-}
-function resolveHyperclassOverlaps(){
-  const nodes=data.hypergraph.class||[];
-  const byId=new Map(nodes.map(n=>[n.id,n]));
-  const hyperclasses=nodes.filter(n=>n.type==='hyperclass');
-  if(hyperclasses.length<2) return;
-
-  for(let iter=0; iter<80; iter++){
-    let moved=false;
-    for(let i=0;i<hyperclasses.length;i++){
-      for(let j=i+1;j<hyperclasses.length;j++){
-        const a=hyperclasses[i];
-        const b=hyperclasses[j];
-        if(isAncestor(a.id,b.id,byId) || isAncestor(b.id,a.id,byId)) continue;
-        const ab=getNodeBounds(a);
-        const bb=getNodeBounds(b);
-        const overlap=overlapDepth(ab,bb);
-        if(!overlap) continue;
-        if(!a.position) a.position={x:0,y:0,z:0};
-        if(!b.position) b.position={x:0,y:0,z:0};
-        const dx=(b.position.x||0)-(a.position.x||0);
-        const dy=(b.position.y||0)-(a.position.y||0);
-        const separateX=Math.abs(dx)>=Math.abs(dy);
-        const sign=(separateX?dx:dy)>=0?1:-1;
-        if(separateX){
-          const shift=overlap.x/2;
-          a.position.x-=sign*shift;
-          b.position.x+=sign*shift;
-        } else {
-          const shift=overlap.y/2;
-          a.position.y-=sign*shift;
-          b.position.y+=sign*shift;
-        }
-        moved=true;
-      }
-    }
-    if(!moved) break;
-  }
-}
 export async function optimizeAndRefreshLayout(context, options={}){
   const algorithm=normalizeLayoutAlgorithm(options.algorithm||getLayoutSettings().algorithm);
   setLayoutSettings({ ...getLayoutSettings(), algorithm }, { applyContext:false });
@@ -1376,9 +1109,7 @@ export async function optimizeAndRefreshLayout(context, options={}){
     updateLayoutFromData(context,options);
     return { algorithm, skipped:true };
   }
-  applyLayoutByAlgorithm(algorithm);
-  layoutChildrenInsideParents();
-  resolveHyperclassOverlaps();
+  optimizeModelLayout(data,algorithm);
   refreshSceneFromData(context);
   updateLayoutFromData(context,options);
   return { algorithm };
