@@ -1,6 +1,16 @@
 // Orthogonal path search used when the inexpensive lane adjustment is blocked.
 // Axes follow obstacle edges, so cost depends on diagram complexity, not pixels.
-export function findOrthogonalPath(start, end, boxes, gap = 0.15) {
+export function findOrthogonalPath(start, end, boxes, gap = 0.15, simpleOnly = false) {
+  if ([start,end].some(p=>boxes.some(b=>p.x>b.minX && p.x<b.maxX && p.y>b.minY && p.y<b.maxY))) return null;
+  const blocked = (a,b) => boxes.some(box => a.y === b.y
+    ? a.y > box.minY && a.y < box.maxY && Math.min(a.x,b.x)<box.maxX && Math.max(a.x,b.x)>box.minX
+    : a.x > box.minX && a.x < box.maxX && Math.min(a.y,b.y)<box.maxY && Math.max(a.y,b.y)>box.minY);
+  // Clear Manhattan routes are already shortest. Most links need no grid search.
+  for (const corner of [{x:end.x,y:start.y},{x:start.x,y:end.y}]) {
+    if (!blocked(start,corner) && !blocked(corner,end))
+      return [start,corner,end];
+  }
+  if (simpleOnly) return null;
   const xs = [...new Set([start.x, end.x, ...boxes.flatMap(b => [b.minX-gap, b.maxX+gap])])].sort((a,b)=>a-b);
   const ys = [...new Set([start.y, end.y, ...boxes.flatMap(b => [b.minY-gap, b.maxY+gap])])].sort((a,b)=>a-b);
   const nx = xs.length, count = nx * ys.length * 3;

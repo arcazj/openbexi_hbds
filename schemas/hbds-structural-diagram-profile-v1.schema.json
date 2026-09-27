@@ -43,6 +43,7 @@
         "family": {"type": "string"},
         "fontFamily": {"type": "string", "deprecated": true},
         "bold": {"type": "boolean"},
+        "titleBold": {"type": "boolean", "default": true, "description": "Default bold style for class and hyperclass names."},
         "italic": {"type": "boolean"},
         "underline": {"type": "boolean"},
         "classSize": {

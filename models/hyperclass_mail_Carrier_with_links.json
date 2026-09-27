@@ -67,7 +67,8 @@
       "links",
       "rendering",
       "color"
-    ]
+    ],
+    "preserveLayout": false
   },
   "hypergraph": {
     "class": [

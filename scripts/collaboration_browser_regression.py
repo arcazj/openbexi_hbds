@@ -936,9 +936,8 @@ return !state.controlsInteracting && !state.frameScheduled ? state : null;
 def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
     page = BrowserPage(create_target(debug_port))
     try:
-        cases = [
-            ("models/", "satellite_world_simple_structure.json"),
-            ("models/", "satellite_world_complete_structure2.json"),
+        cases = [("models/", path.name) for path in sorted(MODELS_DIR.glob("*.json"))
+                 if not path.name.startswith("_") and "hypergraph" in json.loads(path.read_text(encoding="utf-8-sig"))] + [
             ("test_models/", "layout_007_nested_hyperclasses.json"),
             ("test_models/", "stress_022_large_performance.json"),
         ]
@@ -953,10 +952,27 @@ def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
     for (let i = 0; i < 4; i++) await new Promise(requestAnimationFrame);
   };
   const geometry = () => hook.getData().hypergraph.class.map(n => ({id:n.id, position:n.position, size:n.size}));
-  const content = () => JSON.stringify({...hook.getData().hypergraph,
-    class:hook.getData().hypergraph.class.map(({position,size,...node})=>node)});
+  const content = () => {
+    const graph=structuredClone(hook.getData().hypergraph);
+    graph.class=graph.class.map(({position,size,...node})=>node);
+    for (const link of graph.link) if (link.rendering) delete link.rendering.routePoints;
+    return JSON.stringify(graph);
+  };
   const originalContent=content(), initialGeometry=JSON.stringify(geometry());
   const errors = [], samples = [];
+  const snapshotMetrics=hook.getSnapshotMetrics();
+  const snapshotSvg=new DOMParser().parseFromString(hook.getSnapshotSvg(),'image/svg+xml');
+  const snapshotImage=snapshotSvg.querySelector('image');
+  if (Number(snapshotImage?.getAttribute('y'))!==snapshotMetrics.renderY || snapshotMetrics.renderY<60 ||
+      snapshotMetrics.renderHeight+snapshotMetrics.renderY>snapshotMetrics.cssHeight+1)
+    errors.push('Snapshot lost the reserved title area');
+  if (!hook.getData().metadata?.preserveLayout && hook.getData().metadata?.layout?.algorithm!=='none') {
+    document.getElementById('optimize-layout-button').click();
+    await settle();
+    if (initialGeometry!==JSON.stringify(geometry())) errors.push('Initial load was not optimized');
+  }
+  if (hook.getData().metadata?.font?.titleBold!==false && hook.getLabelMetrics().some(l=>l.classes.includes('class-label') && l.fontWeight!=='700'))
+    errors.push('Class names did not use the default bold style');
   const select = document.getElementById('layout-algorithm-select');
   document.getElementById('auto-optimize-toggle').checked=false;
   select.value='none'; select.dispatchEvent(new Event('change',{bubbles:true}));
@@ -988,12 +1004,12 @@ def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
     for (let i=0; i<labels.length; i++) for (let j=i+1; j<labels.length; j++) {
       const a=labels[i], b=labels[j];
       const area=Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
-      if (area/Math.max(1,Math.min(a.width*a.height,b.width*b.height))>0.2) overlaps.push([a.text,b.text]);
+      if (area/Math.max(1,Math.min(a.width*a.height,b.width*b.height))>0.02) overlaps.push([a.text,b.text]);
     }
     if (overlaps.length) errors.push(`${algorithm}: labels overlap ${JSON.stringify(overlaps.slice(0,6))}`);
     const zoom = await hook.sampleLayoutZoomStates();
     for (const sample of zoom) {
-      if (sample.overlap.severe || sample.containmentErrors.length || sample.overlapErrors.length)
+      if (sample.overlap.severe || sample.containmentErrors.length || sample.overlapErrors.length || sample.titleErrors?.length || sample.routeLabelErrors?.length)
         errors.push(`${algorithm} ${sample.label}: ${JSON.stringify(sample)}`);
     }
     samples.push({algorithm, ...metrics, labelOverlapCount:overlaps.length, labelOverlaps:overlaps.slice(0,6)});
@@ -1010,7 +1026,7 @@ def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
             page.evaluate("document.getElementById('fit-model-button').click()")
             page.evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
             resized = page.evaluate("window.__hbdsDynamicTest.getViewportLayoutMetrics()")
-            if resized["containmentErrors"] or resized["overlapErrors"]:
+            if resized["containmentErrors"] or resized["overlapErrors"] or resized["titleErrors"] or resized["routeLabelErrors"]:
                 raise BrowserRegressionError(f"Layout resize regression {model_name}: {resized}")
             if page.evaluate("window.__hbdsDynamicTest.getData().hypergraph") != before_resize:
                 raise BrowserRegressionError("Fit View changed model geometry")
@@ -1045,13 +1061,30 @@ def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
                          f"hook.getData().metadata.revision !== {json.dumps(revision)};", "optimized UI save", timeout=25)
                 if request_json(base_url, endpoint)["model"]["hypergraph"] != snapshot["hypergraph"]:
                     raise BrowserRegressionError("UI save changed optimized model content")
+                if model_name == "bridge_road_links.json":
+                    page.evaluate("const toggle=document.getElementById('preserve-layout-toggle'); toggle.checked=true; toggle.dispatchEvent(new Event('change',{bubbles:true}));")
+                    if not page.evaluate("window.__hbdsDynamicTest.getData().metadata.preserveLayout"):
+                        raise BrowserRegressionError("Keep saved positions preference was not applied")
+                    manual = request_json(base_url, endpoint)["model"]
+                    manual["metadata"]["preserveLayout"] = True
+                    for node in manual["hypergraph"]["class"]:
+                        node["position"]["x"] += 7
+                        node["position"]["y"] -= 4
+                    request_json(base_url, endpoint, method="POST", payload=manual)
+                    page.close()
+                    page = BrowserPage(create_target(debug_port))
+                    page.navigate(dynamic_layout_url(base_url, temporary_name, debug=False))
+                    wait_for_page_ready(page, "manual model reload")
+                    wait_for_model_loaded(page, temporary_name, "manual model reload")
+                    if page.evaluate("window.__hbdsDynamicTest.getData().hypergraph") != manual["hypergraph"]:
+                        raise BrowserRegressionError("Manual layout was optimized despite the saved preference")
             finally:
                 request_json(base_url, endpoint, method="DELETE", expected=(200,404))
                 for backup in (MODELS_DIR / ".backups").glob(f"{Path(temporary_name).stem}.*.bak.json"):
                     backup.unlink()
+            assert_browser_has_no_significant_errors(page, f"Layout regression {model_name}")
             page.close()
             page = BrowserPage(create_target(debug_port))
-            assert_browser_has_no_significant_errors(page, f"Layout regression {model_name}")
             print(f"PASS layout optimization {model_name}")
     finally:
         page.close()
@@ -1215,7 +1248,10 @@ def run_font_policy_ui_regression(base_url: str, debug_port: int) -> None:
   }, 'link category font override clears link element overrides');
 
   const modelForCategory = customModel();
+  delete modelForCategory.hypergraph.link[0].rendering.labelText;
   await applyJsonModel(modelForCategory);
+  if (data().hypergraph.link[0].rendering.labelText !== modelForCategory.hypergraph.link[0].name)
+    throw new Error('Named link displayed its internal ID instead of its relationship name');
   const beforeCategory = overrideCounts(data());
   setInputValue('#model-class-font-size-input', 22);
   const afterClass = await waitUntil(() => {
@@ -1533,7 +1569,8 @@ document.querySelector('#ai-validate-response-button').click();
 await new Promise(resolve => setTimeout(resolve, 100));
 const state = window.__hbdsDynamicTest?.getState?.().aiSupport || {};
 return prompt.includes('Return JSON only') &&
-  prompt.includes('well-positioned') &&
+  prompt.includes('explicit initial positions') &&
+  prompt.includes('concise verbs') &&
   invalidStatus.includes('without Markdown fences') &&
   document.querySelector('#ai-api-key-field')?.hidden === true &&
   document.querySelector('#ai-manual-actions')?.hidden === false &&
@@ -3197,7 +3234,7 @@ def terminate_process(process: subprocess.Popen | None, name: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--suite", choices=("all", "ai", "satellite", "layout"), default="all")
+    parser.add_argument("--suite", choices=("all", "ai", "interaction", "satellite", "layout"), default="all")
     args = parser.parse_args()
     server_process: subprocess.Popen | None = None
     browser_process: subprocess.Popen | None = None
@@ -3213,9 +3250,13 @@ def main() -> int:
 
         browser_process = launch_browser(debug_port)
         wait_for_browser(debug_port, browser_process)
-        if args.suite == "ai":
+        if args.suite in ("ai", "interaction"):
             run_ai_support_ui_regression(base_url, debug_port, TEMP_MODEL_NAME)
             run_ai_review_regression(base_url, debug_port)
+            if args.suite == "interaction":
+                run_font_policy_ui_regression(base_url, debug_port)
+                run_human_and_car_second_page_selection_regression(base_url, debug_port)
+                run_regression(base_url, debug_port, loaded_model)
             return 0
         run_satellite_model_regression(base_url, debug_port)
         if args.suite == "satellite":

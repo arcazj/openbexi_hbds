@@ -24,7 +24,7 @@
       ]
     },
     "layout": {
-      "algorithm": "none",
+      "algorithm": "grid",
       "fit": {
         "padding": 1.35,
         "fitHeightDistance": 3.7367,
@@ -58,7 +58,8 @@
     "regressionTags": [
       "model",
       "human"
-    ]
+    ],
+    "preserveLayout": false
   },
   "hypergraph": {
     "class": [

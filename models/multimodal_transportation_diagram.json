@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Multimodal Transportation Diagram",
     "description": "HBDS model reconstructed from the multimodal transportation diagram.",
-    "preserveLayout": true,
+    "preserveLayout": false,
     "sceneSettings": {
       "background": "#eef2f6",
       "ambient": 0,

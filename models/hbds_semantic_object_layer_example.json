@@ -13,9 +13,9 @@
       "fuzzy": { "enabled": true },
       "prototype": { "enabled": true }
     },
-    "preserveLayout": true,
+    "preserveLayout": false,
     "layout": {
-      "algorithm": "none",
+      "algorithm": "grid",
       "fit": { "padding": 1.18 }
     },
     "font": {

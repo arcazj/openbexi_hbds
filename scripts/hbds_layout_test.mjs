@@ -47,6 +47,7 @@ for (const directory of ['models','test_models']) {
       }
     }
     const model=clone(original), before=contents(model), links=clone(model.hypergraph.link);
+    for (const link of links) if (link.rendering?.routePoints) delete link.rendering.routePoints;
     const firstByAlgorithm=new Map();
     for (const algorithm of ['radial','hierarchy','grid','radial','hierarchy']) {
       optimizeModelLayout(model,algorithm);

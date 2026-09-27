@@ -39,8 +39,8 @@ import {
   normalizeFontSettings,
   getFontSettingsForTextType,
   getFitQualityMetrics
-} from './hbds_model.js?v=layout-20260926a';
-import { recalculateAllLinks } from './hbds_class_link.js?v=layout-20260926a';
+} from './hbds_model.js?v=layout-20260926b';
+import { recalculateAllLinks } from './hbds_class_link.js?v=layout-20260926b';
 import {
   applyAiModel,
   applyServerModelOperations,
@@ -691,7 +691,7 @@ function continueOrbitAnimation() {
 }
 
 function getCanvasSize() {
-  const rect = $('container').getBoundingClientRect();
+  const rect = $('diagram-viewport').getBoundingClientRect();
   return {
     width: Math.max(1, Math.floor(rect.width)),
     height: Math.max(1, Math.floor(rect.height))
@@ -705,6 +705,7 @@ function resizeRenderers() {
   camera.updateProjectionMatrix();
   renderer.setSize(size.width, size.height);
   labelRenderer.setSize(size.width, size.height);
+  updateSceneLabelScales({ ...ctx(), renderOnce: null });
   renderNow();
   updateOverview();
 }
@@ -1034,6 +1035,7 @@ function syncFontSettingsControls() {
   bind('model-font-size-input', fontState.size);
   bind('model-font-family-input', fontState.family);
   bind('model-font-bold-input', fontState.bold);
+  bind('model-title-bold-input', fontState.titleBold);
   bind('model-font-italic-input', fontState.italic);
   bind('model-font-underline-input', fontState.underline);
   TYPE_FONT_SIZE_CONTROLS.forEach(control => syncTypeFontSizeControl(control));
@@ -1066,6 +1068,7 @@ function readFontSettingsControls(options = {}) {
     size: numberValue('model-font-size-input', fontState.size),
     family: $('model-font-family-input')?.value || fontState.family,
     bold: $('model-font-bold-input')?.checked === true,
+    titleBold: $('model-title-bold-input')?.checked !== false,
     italic: $('model-font-italic-input')?.checked === true,
     underline: $('model-font-underline-input')?.checked === true
   };
@@ -3263,6 +3266,7 @@ function updateModeControls() {
     'model-font-size-input',
     'model-font-family-input',
     'model-font-bold-input',
+    'model-title-bold-input',
     'model-font-italic-input',
     'model-font-underline-input',
     'reset-model-font-settings-button',
@@ -3516,17 +3520,21 @@ function getLiveSnapshotMetrics() {
   const canvas = renderer?.domElement;
   if (!canvas) throw new Error('Renderer is not ready');
   const rect = canvas.getBoundingClientRect();
-  const cssWidth = Math.max(1, Math.round(rect.width));
-  const cssHeight = Math.max(1, Math.round(rect.height));
-  const pixelWidth = Math.max(1, canvas.width || cssWidth);
-  const pixelHeight = Math.max(1, canvas.height || cssHeight);
+  const outer = $('container').getBoundingClientRect();
+  const cssWidth = Math.max(1, Math.round(outer.width));
+  const cssHeight = Math.max(1, Math.round(outer.height));
+  const scaleX = canvas.width / Math.max(1,rect.width);
+  const scaleY = canvas.height / Math.max(1,rect.height);
+  const pixelWidth = Math.round(cssWidth * scaleX);
+  const pixelHeight = Math.round(cssHeight * scaleY);
   return {
     cssWidth,
     cssHeight,
     pixelWidth,
     pixelHeight,
-    scaleX: pixelWidth / cssWidth,
-    scaleY: pixelHeight / cssHeight
+    scaleX, scaleY,
+    renderX: rect.left-outer.left, renderY: rect.top-outer.top,
+    renderWidth: rect.width, renderHeight: rect.height
   };
 }
 
@@ -3620,13 +3628,17 @@ function cloneLiveLabelLayerForSnapshot(metrics) {
   layer.style.margin = '0';
   layer.style.padding = '0';
   layer.style.fontFamily = window.getComputedStyle(container).fontFamily;
+  const viewport = document.createElement('div');
+  Object.assign(viewport.style, {position:'absolute', left:`${metrics.renderX}px`, top:`${metrics.renderY}px`,
+    width:`${metrics.renderWidth}px`,height:`${metrics.renderHeight}px`,overflow:'hidden'});
+  layer.appendChild(viewport);
 
   const sourceLabels = [...(labelRenderer?.domElement?.children || [])]
     .filter(element => isSnapshotElementVisible(element, containerRect));
   for (const source of sourceLabels) {
     const clone = source.cloneNode(true);
     inlineComputedSnapshotStyles(source, clone);
-    layer.appendChild(clone);
+    viewport.appendChild(clone);
   }
 
   const canvasTitle = $('canvas-model-title');
@@ -3656,10 +3668,10 @@ function buildLiveSnapshotSvgText() {
   svg.appendChild(title);
 
   const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-  image.setAttribute('x', '0');
-  image.setAttribute('y', '0');
-  image.setAttribute('width', String(metrics.cssWidth));
-  image.setAttribute('height', String(metrics.cssHeight));
+  image.setAttribute('x', String(metrics.renderX));
+  image.setAttribute('y', String(metrics.renderY));
+  image.setAttribute('width', String(metrics.renderWidth));
+  image.setAttribute('height', String(metrics.renderHeight));
   image.setAttribute('preserveAspectRatio', 'none');
   image.setAttribute('href', liveCanvasDataUrl());
   svg.appendChild(image);
@@ -3775,19 +3787,9 @@ function buildManualLiveSnapshotPngDataUrl(metrics) {
   canvas.width = metrics.pixelWidth;
   canvas.height = metrics.pixelHeight;
   const canvasContext = canvas.getContext('2d');
-  canvasContext.drawImage(renderer.domElement, 0, 0, metrics.pixelWidth, metrics.pixelHeight);
-
-  const container = $('container');
-  const containerRect = container.getBoundingClientRect();
   canvasContext.save();
   canvasContext.scale(metrics.scaleX, metrics.scaleY);
-  const labels = [...(labelRenderer?.domElement?.children || [])]
-    .filter(element => isSnapshotElementVisible(element, containerRect));
-  labels.forEach(element => drawSnapshotElement(canvasContext, element, containerRect));
-  const canvasTitle = $('canvas-model-title');
-  if (canvasTitle && isSnapshotElementVisible(canvasTitle, containerRect)) {
-    drawSnapshotElement(canvasContext, canvasTitle, containerRect);
-  }
+  drawLiveSnapshotContents(canvasContext, metrics);
   canvasContext.restore();
   return canvas.toDataURL('image/png');
 }
@@ -3799,22 +3801,32 @@ function renderLiveSnapshotToCanvas(targetWidth, targetHeight) {
   canvas.width = Math.max(1, Math.round(targetWidth));
   canvas.height = Math.max(1, Math.round(targetHeight));
   const canvasContext = canvas.getContext('2d');
-  canvasContext.drawImage(renderer.domElement, 0, 0, canvas.width, canvas.height);
-
-  const container = $('container');
-  const containerRect = container.getBoundingClientRect();
   canvasContext.save();
   canvasContext.scale(canvas.width / metrics.cssWidth, canvas.height / metrics.cssHeight);
+  drawLiveSnapshotContents(canvasContext, metrics);
+  canvasContext.restore();
+
+  return { canvas, metrics };
+}
+
+function drawLiveSnapshotContents(canvasContext, metrics) {
+  const containerRect = $('container').getBoundingClientRect();
+  const viewportRect = $('diagram-viewport').getBoundingClientRect();
+  canvasContext.fillStyle = getComputedStyle($('container')).backgroundColor || '#f8fafc';
+  canvasContext.fillRect(0,0,metrics.cssWidth,metrics.cssHeight);
+  canvasContext.drawImage(renderer.domElement,metrics.renderX,metrics.renderY,metrics.renderWidth,metrics.renderHeight);
+  canvasContext.save();
+  canvasContext.beginPath();
+  canvasContext.rect(metrics.renderX,metrics.renderY,metrics.renderWidth,metrics.renderHeight);
+  canvasContext.clip();
   const labels = [...(labelRenderer?.domElement?.children || [])]
-    .filter(element => isSnapshotElementVisible(element, containerRect));
+    .filter(element => isSnapshotElementVisible(element, viewportRect));
   labels.forEach(element => drawSnapshotElement(canvasContext, element, containerRect));
+  canvasContext.restore();
   const canvasTitle = $('canvas-model-title');
   if (canvasTitle && isSnapshotElementVisible(canvasTitle, containerRect)) {
     drawSnapshotElement(canvasContext, canvasTitle, containerRect);
   }
-  canvasContext.restore();
-
-  return { canvas, metrics };
 }
 
 function collaborationPreviewSize(metrics, scale = 1) {
@@ -8495,13 +8507,15 @@ function installDebugHooks() {
     getLabelMetrics: collectLabelMetrics,
     getLayoutMetrics: collectLayoutMetrics,
     getViewportLayoutMetrics: collectViewportLayoutMetrics,
+    getSnapshotMetrics: getLiveSnapshotMetrics,
+    getSnapshotSvg: () => buildLiveSnapshotSvgText().text,
     sampleLayoutZoomStates: async () => {
       const target = orbitControls.target.clone();
       const distance = camera.position.distanceTo(target);
       const samples = [];
       for (const [label, factor] of [['near', 0.7], ['far', 1.75], ['fit', 1]]) {
         const sample = await sampleSatelliteFontZoomState(label, factor, distance, target);
-        samples.push({label, overlap:getLabelOverlapSummary(sample.metrics, 0.2), ...collectViewportLayoutMetrics()});
+        samples.push({label, overlap:getLabelOverlapSummary(sample.metrics, 0.02), ...collectViewportLayoutMetrics()});
       }
       return samples;
     },
@@ -8758,7 +8772,32 @@ function collectViewportLayoutMetrics() {
         Math.min(a.visual.bottom,b.visual.bottom)-Math.max(a.visual.top,b.visual.top)>1) overlapErrors.push([a.id,b.id]);
     }
   }
-  return {containmentErrors, overlapErrors};
+  const title=$('canvas-model-title')?.getBoundingClientRect();
+  const titleClearance=title?.height ? viewport.top-title.bottom : null;
+  const titleErrors=titleClearance!==null && titleClearance<8 ? ['Diagram viewport intrudes on model title'] : [];
+  if (renderer.domElement.parentElement!==$('diagram-viewport') || labelRenderer.domElement.parentElement!==$('diagram-viewport'))
+    titleErrors.push('A renderer is outside the protected viewport');
+  const routeLabelErrors=[];
+  const labels=collectLabelMetrics().filter(label=>label.visible);
+  diagramGroup.traverseVisible(object=>{
+    if (!object.userData?.isHBDSLink) return;
+    const points=getLineWorldPoints(object.getObjectByName('link-route')).map(point=>{
+      point.project(camera);
+      return {x:viewport.left+(point.x+1)*viewport.width/2,y:viewport.top+(1-point.y)*viewport.height/2};
+    });
+    for (let i=1;i<points.length;i++) {
+      const a=points[i-1],b=points[i];
+      for (const label of labels) {
+        const left=label.left+0.25,right=label.right-0.25,top=label.top+0.25,bottom=label.bottom-0.25;
+        if (right<=left || bottom<=top) continue;
+        const hit=Math.abs(a.y-b.y)<0.1
+          ? a.y>top && a.y<bottom && Math.min(a.x,b.x)<right && Math.max(a.x,b.x)>left
+          : Math.abs(a.x-b.x)<0.1 && a.x>left && a.x<right && Math.min(a.y,b.y)<bottom && Math.max(a.y,b.y)>top;
+        if (hit && routeLabelErrors.length<12) routeLabelErrors.push([object.userData.linkData.id,label.text]);
+      }
+    }
+  });
+  return {containmentErrors, overlapErrors, titleErrors, titleClearance, routeLabelErrors};
 }
 
 function collectLayoutMetrics() {
@@ -8796,6 +8835,12 @@ function collectLayoutMetrics() {
     const source = nodesById.get(String(object.userData.sourceClassId));
     const target = nodesById.get(String(object.userData.targetClassId));
     const obstacles = boxes.filter(entry => !areRelatedObjects(entry.object, source) && !areRelatedObjects(entry.object, target));
+    for (const endpoint of [source,target]) {
+      const peer=endpoint===source ? target : source;
+      if (!endpoint || (endpoint!==peer && isAncestorObject(endpoint,peer))) continue;
+      const entry=boxes.find(item=>item.object===endpoint);
+      if (entry) obstacles.push({...entry,box:entry.box.clone().expandByScalar(-0.01)});
+    }
 
     for (let index = 1; index < points.length; index += 1) {
       const start = points[index - 1];
@@ -9937,7 +9982,8 @@ async function handleLoadModel(options = {}) {
     progress.update(72, `Preparing ${selectedLabel}`);
     const preserveLayout = Boolean(model?.metadata?.preserveLayout || model?.hypergraph?.metadata?.preserveLayout);
     const hasSavedFit = hasFitMetadata(model);
-    const optimize = !preserveLayout && !hasSavedFit && shouldOptimizeAfterCrud();
+    const optimize = !preserveLayout && shouldOptimizeAfterCrud();
+    $('preserve-layout-toggle').checked = preserveLayout;
     selectedElementId = null;
     selectedParentHyperclassId = null;
     selectedAttributeOwnerId = null;
@@ -10683,12 +10729,21 @@ function bindUi() {
     'model-font-size-input',
     'model-font-family-input',
     'model-font-bold-input',
+    'model-title-bold-input',
     'model-font-italic-input',
     'model-font-underline-input',
     ...TYPE_FONT_SIZE_CONTROLS.map(control => control.inputId)
   ].forEach(id => $(id)?.addEventListener('input', handleFontSettingInput));
 
   $('layout-algorithm-select')?.addEventListener('change', () => runAction(handleLayoutSettingChange, 'layout.change'));
+  $('preserve-layout-toggle')?.addEventListener('change', event => {
+    const model = getData();
+    model.metadata = { ...model.metadata, preserveLayout: event.target.checked };
+    if (model.hypergraph?.metadata) delete model.hypergraph.metadata.preserveLayout;
+    setData(model, { context: ctx(), refresh: false });
+    updateJsonPreviewFromData();
+    scheduleLocalDraftPublish('Changed saved layout preference');
+  });
   $('view-toggle')?.addEventListener('change', handleViewToggle);
 
   $('test-model-select').addEventListener('change', () => {
@@ -10716,7 +10771,7 @@ function bindUi() {
 }
 
 async function init() {
-  const container = $('container');
+  const container = $('diagram-viewport');
   const size = getCanvasSize();
 
   scene = new THREE.Scene();

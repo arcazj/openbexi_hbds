@@ -88,6 +88,14 @@ body.has-model #canvas-model-title {
   display: inline-block;
 }
 
+/* The title is outside both renderers. Panning and zooming cannot paint over it. */
+#diagram-viewport {
+  position: absolute;
+  inset: 68px 0 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
 .canvas-load-progress {
   position: absolute;
   top: 50%;

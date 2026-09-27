@@ -67,7 +67,8 @@
       "hyperclassSize": null,
       "attributeSize": 25,
       "linkSize": null
-    }
+    },
+    "preserveLayout": false
   },
   "hypergraph": {
     "class": [
@@ -291,10 +292,10 @@
       },
       {
         "id": "hyperclasse_link_human_and_car_link_1003",
-        "name": "Married To",
+        "name": "is married to",
         "type": "bidirectional-arrow",
         "rendering": {
-          "labelText": "Married To",
+          "labelText": "is married to",
           "orthogonalStyle": "auto",
           "lineColor": "#e74c3c",
           "lineWidth": 0.02,
@@ -310,10 +311,10 @@
       },
       {
         "id": "hyperclasse_link_human_and_car_link_1004",
-        "name": "Sibling Of",
+        "name": "is a sibling of",
         "type": "tube",
         "rendering": {
-          "labelText": "Sibling Of",
+          "labelText": "is a sibling of",
           "orthogonalStyle": "auto",
           "lineColor": "#9b59b6",
           "lineWidth": 0.015,

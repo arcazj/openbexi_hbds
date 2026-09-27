@@ -71,7 +71,8 @@
       "attributeSize": 37,
       "linkSize": 13
     },
-    "updated": "2026-05-31"
+    "updated": "2026-05-31",
+    "preserveLayout": false
   },
   "hypergraph": {
     "class": [
@@ -915,7 +916,7 @@
         "targetClassId": "cca_application",
         "type": "composition",
         "rendering": {
-          "labelText": "cca_link_cloud_hosts_application",
+          "labelText": "hosts",
           "orthogonalStyle": "auto",
           "lineWidth": 0.075,
           "labelVisible": true,
@@ -936,7 +937,7 @@
         "targetClassId": "cca_storage_data",
         "type": "composition",
         "rendering": {
-          "labelText": "cca_link_cloud_hosts_storage",
+          "labelText": "stores",
           "orthogonalStyle": "auto",
           "lineWidth": 0.075,
           "labelVisible": true,
@@ -957,7 +958,7 @@
         "targetClassId": "cca_servers",
         "type": "composition",
         "rendering": {
-          "labelText": "cca_link_cloud_runs_servers",
+          "labelText": "runs",
           "orthogonalStyle": "auto",
           "lineWidth": 0.075,
           "labelVisible": true,
@@ -978,7 +979,7 @@
         "targetClassId": "cca_virtual_desktop",
         "type": "composition",
         "rendering": {
-          "labelText": "cca_link_cloud_provides_virtual_desktop",
+          "labelText": "provides",
           "orthogonalStyle": "auto",
           "lineWidth": 0.075,
           "labelVisible": true,
@@ -999,7 +1000,7 @@
         "targetClassId": "cca_software_platform",
         "type": "composition",
         "rendering": {
-          "labelText": "cca_link_cloud_provides_platform",
+          "labelText": "provides",
           "orthogonalStyle": "auto",
           "lineWidth": 0.075,
           "labelVisible": true,
@@ -1020,7 +1021,7 @@
         "targetClassId": "cca_internet",
         "type": "network",
         "rendering": {
-          "labelText": "cca_link_cloud_to_internet",
+          "labelText": "connects through",
           "orthogonalStyle": "vertical",
           "lineColor": "#111827",
           "lineWidth": 0.075,
@@ -1036,12 +1037,12 @@
       },
       {
         "id": "cca_link_internet_to_router",
-        "name": "internet access",
+        "name": "connects to",
         "sourceClassId": "cca_internet",
         "targetClassId": "cca_router",
         "type": "network",
         "rendering": {
-          "labelText": "cca_link_internet_to_router",
+          "labelText": "connects to",
           "orthogonalStyle": "horizontal",
           "lineColor": "#111827",
           "lineWidth": 0.075,
@@ -1057,12 +1058,12 @@
       },
       {
         "id": "cca_link_internet_to_switch",
-        "name": "internet access",
+        "name": "connects to",
         "sourceClassId": "cca_internet",
         "targetClassId": "cca_switch",
         "type": "network",
         "rendering": {
-          "labelText": "cca_link_internet_to_switch",
+          "labelText": "connects to",
           "orthogonalStyle": "horizontal",
           "lineColor": "#111827",
           "lineWidth": 0.075,
@@ -1083,7 +1084,7 @@
         "targetClassId": "cca_mobile",
         "type": "access",
         "rendering": {
-          "labelText": "cca_link_router_to_mobile",
+          "labelText": "serves",
           "orthogonalStyle": "vertical",
           "lineColor": "#111827",
           "lineWidth": 0.075,
@@ -1104,7 +1105,7 @@
         "targetClassId": "cca_laptop",
         "type": "access",
         "rendering": {
-          "labelText": "cca_link_router_to_laptop",
+          "labelText": "serves",
           "orthogonalStyle": "vertical",
           "lineColor": "#111827",
           "lineWidth": 0.075,
@@ -1125,7 +1126,7 @@
         "targetClassId": "cca_printer",
         "type": "access",
         "rendering": {
-          "labelText": "cca_link_router_to_printer",
+          "labelText": "serves",
           "orthogonalStyle": "vertical",
           "lineColor": "#111827",
           "lineWidth": 0.075,
@@ -1146,7 +1147,7 @@
         "targetClassId": "cca_desktop_1",
         "type": "access",
         "rendering": {
-          "labelText": "cca_link_switch_to_desktop_1",
+          "labelText": "serves",
           "orthogonalStyle": "vertical",
           "lineColor": "#111827",
           "lineWidth": 0.075,
@@ -1167,7 +1168,7 @@
         "targetClassId": "cca_desktop_2",
         "type": "access",
         "rendering": {
-          "labelText": "cca_link_switch_to_desktop_2",
+          "labelText": "serves",
           "orthogonalStyle": "vertical",
           "lineColor": "#111827",
           "lineWidth": 0.075,
@@ -1188,7 +1189,7 @@
         "targetClassId": "cca_desktop_3",
         "type": "access",
         "rendering": {
-          "labelText": "cca_link_switch_to_desktop_3",
+          "labelText": "serves",
           "orthogonalStyle": "vertical",
           "lineColor": "#111827",
           "lineWidth": 0.075,
@@ -1209,7 +1210,7 @@
         "targetClassId": "cca_cloud_computing",
         "type": "consumer",
         "rendering": {
-          "labelText": "cca_link_end_user_consumes_cloud",
+          "labelText": "uses",
           "orthogonalStyle": "auto",
           "lineColor": "#111827",
           "lineWidth": 0.075,

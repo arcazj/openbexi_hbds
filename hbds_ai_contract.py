@@ -53,7 +53,7 @@ def build_response_schema(payload: dict) -> dict | None:
         return _object({"explanation": {"type": "string"}})
     scalar_values = [None, "", 0, False]
     template = {
-        "metadata": {"name": "", "description": "", "layout": {"algorithm": "none"}, "semanticVersion": 1},
+        "metadata": {"name": "", "description": "", "layout": {"algorithm": "grid"}, "semanticVersion": 1},
         "hypergraph": {
             "class": [{"id": "", "type": "class", "name": "", "position": {"x": 0, "y": 0, "z": 0},
                        "attributes": [{"id": "", "name": "", "value": value} for value in scalar_values]}],

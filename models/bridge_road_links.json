@@ -60,7 +60,8 @@
       "bridge",
       "road",
       "links"
-    ]
+    ],
+    "preserveLayout": false
   },
   "hypergraph": {
     "class": [
@@ -298,7 +299,7 @@
         "sourceClassId": "bridge_road_links_2",
         "targetClassId": "bridge_road_links_1",
         "rendering": {
-          "labelText": "crossed by",
+          "labelText": "is crossed by",
           "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -346,7 +347,7 @@
         "sourceClassId": "bridge_road_links_3",
         "targetClassId": "bridge_road_links_2",
         "rendering": {
-          "labelText": "crossed by",
+          "labelText": "is crossed by",
           "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,
@@ -394,7 +395,7 @@
         "sourceClassId": "bridge_road_links_4",
         "targetClassId": "bridge_road_links_1",
         "rendering": {
-          "labelText": "supported by",
+          "labelText": "is supported by",
           "orthogonalStyle": "auto",
           "lineColor": "#ef6c00",
           "lineWidth": 2,
@@ -442,7 +443,7 @@
         "sourceClassId": "bridge_road_links_3",
         "targetClassId": "bridge_road_links_4",
         "rendering": {
-          "labelText": "crossed by",
+          "labelText": "is crossed by",
           "orthogonalStyle": "auto",
           "lineColor": "#2e7d32",
           "lineWidth": 2,

@@ -26,4 +26,9 @@ for (const {start,end,boxes} of cases) {
   }
 }
 assert.equal(findOrthogonalPath({x:0,y:0},{x:4,y:0},[{minX:-1,maxX:1,minY:-1,maxY:1}]),null);
+const length = path => path.slice(1).reduce((n,b,i)=>n+Math.abs(b.x-path[i].x)+Math.abs(b.y-path[i].y),0);
+assert.equal(length(findOrthogonalPath({x:0,y:0},{x:10,y:8},[])),18,'clear route must have Manhattan length');
+assert.equal(length(findOrthogonalPath({x:0,y:0},{x:10,y:0},[{minX:3,maxX:7,minY:-2,maxY:2}],0.15)),14.3,'barrier route takes the nearest clear edge');
+const endpointBodies=[{minX:-2,maxX:0,minY:-1,maxY:1},{minX:10,maxX:12,minY:-1,maxY:1}];
+assert.equal(length(findOrthogonalPath({x:0.24,y:0},{x:9.76,y:0},endpointBodies)),9.52,'facing ports connect directly without detouring around endpoints');
 console.log('PASS orthogonal routing: wide barriers, staggered barriers, overlapping obstacles, endpoints and blocked paths');

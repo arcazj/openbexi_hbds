@@ -924,7 +924,10 @@ py -3.9 -B scripts/check_project.py --browser-only --browser-suite layout
 ```
 
 These checks cover full visual footprints, nested group containment, repeated
-optimization, automatic layout selection, zoom, resizing, and save/reload.
+optimization, automatic layout selection, zoom, resizing, and save/reload for
+all 14 shipped models and two stress/containment fixtures. They also check
+default bold names, the protected title area, snapshot geometry, manual layout
+preservation, and links crossing labels or unrelated nodes.
 At overview zoom, label sizes must respect the available row spacing; a fixed
 pixel minimum must not cause labels to overlap. Zooming in restores detail.
 

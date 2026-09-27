@@ -32,7 +32,7 @@
       ]
     },
     "layout": {
-      "algorithm": "none",
+      "algorithm": "grid",
       "fit": {
         "padding": 1.35,
         "fitHeightDistance": 3.0447,
@@ -60,7 +60,8 @@
       "bold": false,
       "italic": false,
       "underline": false
-    }
+    },
+    "preserveLayout": false
   },
   "hypergraph": {
     "class": [

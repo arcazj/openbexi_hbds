@@ -722,8 +722,9 @@ def main() -> int:
         assert_ok(ai_prompt.get("reasoningEffort") == "xhigh", "AI prompt response did not echo reasoning effort")
         assert_ok("Reasoning effort: xhigh" in prompt_text, "AI prompt did not include reasoning effort")
         assert_ok("Return JSON only" in prompt_text, "AI prompt did not require JSON-only output")
-        assert_ok("metadata.layout" in prompt_text and '"none"' in prompt_text, "AI prompt did not require layout none")
-        assert_ok("well-positioned" in prompt_text, "AI prompt did not require computed positions")
+        assert_ok("metadata.layout" in prompt_text and '"grid"' in prompt_text, "AI prompt did not request automatic layout")
+        assert_ok("concise verbs" in prompt_text and "may identify" in prompt_text, "AI prompt omitted relationship wording rules")
+        assert_ok("explicit initial positions" in prompt_text, "AI prompt did not require computed positions")
         manual_prompt = request_json(
             base_url,
             "/api/ai/prompt",

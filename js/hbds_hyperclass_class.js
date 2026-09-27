@@ -1,8 +1,8 @@
 ﻿import * as THREE from 'three';
-import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=layout-20260926a';
+import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=layout-20260926b';
 
+import { fitTextSize } from './hbds_text_metrics.js';
 const hyperclassLabels = [];
-const MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE = 6;
 let lastSizingCamera = null;
 let lastSizingRenderer = null;
 let labelFontSizeRefreshScheduled = false;
@@ -79,13 +79,13 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
   const title = createIconTitleLabel(hyperClassData, {
     className: 'label class-label hyperclass-label',
     isHyperclass: true,
-    textColor,
+    textColor: hyperClassData.rendering?.titleColor ?? textColor,
     font: hyperClassData.rendering?.font,
     modelFont: hyperClassData.modelTitleFont ?? hyperClassData.modelFont,
     legacyFont: 'bold 18px Arial',
     iconFont: 'bold 18px Arial',
     iconSize: classCfg.iconSize ?? 1,
-    legacyPosition: new THREE.Vector3(0, sz.height / 2 - 0.22, 0.08),
+    legacyPosition: new THREE.Vector3(0, sz.height / 2 - 0.4, 0.08),
     iconPosition: new THREE.Vector3(0, sz.height / 2 - 0.4, 0.08),
     onIconLoaded: scheduleLabelFontSizeRefresh
   });
@@ -167,19 +167,13 @@ export function updateLabelFontSizes(camera, renderer, options = {}) {
     label.getWorldPosition(wp);
     const dist = Math.max(1, wp.distanceTo(cp));
     const nodeWidth = label.userData?.nodeSize?.width ?? label.parent?.userData?.modelData?.size?.width ?? 4;
-    const nodeHeight = label.userData?.nodeSize?.height ?? label.parent?.userData?.modelData?.size?.height ?? 3.2;
     const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, dist, viewportHeight);
     const availableWidthPx = Math.max(1, (nodeWidth - 0.36) * pixelsPerWorldUnit);
     const text = label.userData?.text || label.element.textContent || '';
-    const fitSize = availableWidthPx / Math.max(1, String(text).length * 0.62 + (label.element.classList.contains('hbds-icon-title') ? 1.25 : 0));
     const configuredSize = clampHyperclassFontSize(label.userData?.fontSettings?.size);
-    const titleBudget = Math.max(1, 0.55 * pixelsPerWorldUnit);
-    const minSize = Math.min(configuredSize, MIN_READABLE_HYPERCLASS_TITLE_FONT_SIZE, titleBudget);
-    const configuredScale = Math.max(1, configuredSize / 12);
-    const distanceSize = THREE.MathUtils.clamp((150 * configuredScale) / dist, minSize, configuredSize);
-    const verticalCap = Math.max(minSize, nodeHeight * pixelsPerWorldUnit * 0.28);
-    const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), minSize, configuredSize);
-    const size = Math.min(titleBudget, THREE.MathUtils.clamp(dynamicSize, minSize, configuredSize));
+    const size = fitTextSize(text, label.userData.fontSettings, availableWidthPx,
+      0.6 * pixelsPerWorldUnit, configuredSize,
+      label.element.classList.contains('hbds-icon-title') ? 1.45 : 0);
     applyHyperclassTitleSizing(label.element, availableWidthPx, size);
   });
 }
@@ -216,7 +210,7 @@ function applyHyperclassTitleSizing(element, availableWidthPx, fontSize) {
   if (title) {
     const icon = row?.querySelector?.('img');
     const iconWidth = icon ? icon.getBoundingClientRect().width + fontSize * 0.45 : 0;
-    title.style.maxWidth = `${Math.max(30, Math.round(availableWidthPx - iconWidth))}px`;
+    title.style.maxWidth = `${Math.max(0, Math.floor(availableWidthPx - iconWidth))}px`;
     title.style.overflow = 'hidden';
     title.style.textOverflow = 'ellipsis';
     title.style.whiteSpace = 'nowrap';

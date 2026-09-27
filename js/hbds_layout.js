@@ -211,4 +211,7 @@ export function optimizeModelLayout(model, algorithm = 'grid') {
     const p = arrangement.positions.get(root.id);
     place(root, p.x, p.y);
   }
+  // Absolute waypoints belong to the previous arrangement. Regenerate routes
+  // after moving nodes; manual layouts (algorithm none) retain their waypoints.
+  for (const link of links) if (link.rendering?.routePoints) delete link.rendering.routePoints;
 }

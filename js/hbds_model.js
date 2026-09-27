@@ -1,9 +1,9 @@
 ﻿import * as THREE from 'three';
 import { optimizeModelLayout } from './hbds_layout.js';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=layout-20260926a';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=layout-20260926a';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=layout-20260926a';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=layout-20260926a';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=layout-20260926b';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=layout-20260926b';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=layout-20260926b';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=layout-20260926b';
 import { initModelOverview as initModelOverviewPanel, updateModelOverview as updateModelOverviewPanel } from './hbds_model_overview.js?v=overview-module-20260530a';
 import {
   normalizeSemanticModel,
@@ -62,6 +62,7 @@ export const DEFAULT_FONT_SETTINGS = {
   size: 12,
   family: 'Arial, sans-serif',
   bold: false,
+  titleBold: true,
   italic: false,
   underline: false,
   classSize: null,
@@ -260,6 +261,7 @@ export function normalizeFontSettings(font={},fallback=DEFAULT_FONT_SETTINGS){
     size:clampFontSize(source.size ?? source.fontSize ?? source.labelFontSize, base.size ?? DEFAULT_FONT_SETTINGS.size),
     family:normalizeFontFamily(source.family ?? source.fontFamily, base.family ?? DEFAULT_FONT_SETTINGS.family),
     bold:toBooleanFontValue(source.bold ?? source.fontWeight, base.bold ?? DEFAULT_FONT_SETTINGS.bold),
+    titleBold:toBooleanFontValue(source.titleBold, base.titleBold ?? true),
     italic:toBooleanFontValue(source.italic ?? source.fontStyle, base.italic ?? DEFAULT_FONT_SETTINGS.italic),
     underline:toBooleanFontValue(source.underline ?? source.textDecoration ?? source.textDecorationLine, base.underline ?? DEFAULT_FONT_SETTINGS.underline),
     classSize:normalizeOptionalFontSize(source.classSize ?? source.classFontSize, base.classSize ?? null),
@@ -279,6 +281,7 @@ export function getFontSettingsForTextType(fontSettings={},textType='class'){
   const typeSize=base[key];
   return {
     ...base,
+    bold: (textType === 'class' || textType === 'hyperclass') ? base.titleBold : base.bold,
     size:typeSize ?? base.size
   };
 }
@@ -671,8 +674,8 @@ function fitBoxForContext(context) {
     if (!attribute && !link) return;
     const rendering = object.parent?.userData?.linkData?.rendering || {};
     const width = attribute ? (object.userData.maxWorldWidth ?? 2.25)
-      : Math.max(rendering.labelCollisionWidth || 0, String(object.userData?.text || '').length * 0.18 + 0.35);
-    const height = attribute ? Math.max(0.16, object.userData.gapY * 0.9 || 0.16) : 0.5;
+      : (object.userData.collisionSize?.width ?? Math.max(rendering.labelCollisionWidth || 0, String(object.userData?.text || '').length * 0.18 + 0.35));
+    const height = attribute ? Math.max(0.16, object.userData.gapY * 0.9 || 0.16) : (object.userData.collisionSize?.height ?? 0.6);
     const labelBox = new THREE.Box3(
       new THREE.Vector3(attribute ? 0 : -width / 2, -height / 2, 0),
       new THREE.Vector3(attribute ? width : width / 2, height / 2, 0)

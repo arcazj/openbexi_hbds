@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { findOrthogonalPath } from './hbds_routing.js';
+import { fitTextSize, linkLabelSize } from './hbds_text_metrics.js';
 
 const linkLabels = [];
 const activeLinks = [];
@@ -20,7 +21,6 @@ const DEFAULT_LINK_FONT_SETTINGS = {
   underline: false
 };
 const MAX_LINK_FONT_SIZE = 72;
-const MIN_READABLE_LINK_FONT_SIZE = 14;
 const DEFAULT_ARROW_TYPE = 'triangle';
 const DEFAULT_ARROW_DIRECTION = 'source-to-target';
 export const LINK_ARROW_TYPES = [
@@ -88,14 +88,18 @@ function applyLinkLabelFontSettings(element, fontSettings = DEFAULT_LINK_FONT_SE
     family: normalizeFontFamily(fontSettings.family, DEFAULT_LINK_FONT_SETTINGS.family)
   };
   element.__hbdsFontSettings = font;
+  // The configured size has a 1px minimum; overview rendering may be smaller.
+  if (Number(fontSettings.size)>0) font.size=Math.min(font.size,Number(fontSettings.size));
   element.style.fontSize = `${font.size}px`;
   element.style.fontFamily = font.family;
   element.style.fontWeight = font.bold ? '700' : '400';
   element.style.fontStyle = font.italic ? 'italic' : 'normal';
   element.style.textDecoration = font.underline ? 'underline' : 'none';
-  const paddingY = THREE.MathUtils.clamp(font.size * 0.12, 0.2, 2);
-  const paddingX = THREE.MathUtils.clamp(font.size * 0.42, 0.8, 8);
+  const paddingY = font.size * 0.12;
+  const paddingX = font.size * 0.42;
   element.style.padding = `${paddingY.toFixed(1)}px ${paddingX.toFixed(1)}px`;
+  element.style.lineHeight = '1.12';
+  element.style.boxShadow = `inset 0 0 0 ${Math.min(1, font.size * 0.07)}px rgba(55,65,81,0.45)`;
   element.style.borderRadius = `${Math.max(2, font.size * 1.2).toFixed(1)}px`;
 }
 
@@ -105,6 +109,7 @@ export function createLinkBetweenClass(linkData, classById, options = {}) {
   if (!sourceClass || !targetClass) return null;
 
   const rendering = linkData.rendering ?? {};
+  const labelText = rendering.labelText ?? linkData.name ?? 'relates to';
   const lineStyle = normalizeLineStyle(rendering.lineStyle);
   const isDashed = lineStyle === 'dashed' || lineStyle === 'dotted';
   const Material = isDashed ? THREE.LineDashedMaterial : THREE.LineBasicMaterial;
@@ -132,19 +137,20 @@ export function createLinkBetweenClass(linkData, classById, options = {}) {
 
   const labelDiv = document.createElement('div');
   labelDiv.className = 'label link-label';
-  labelDiv.textContent = rendering.labelText ?? '';
+  labelDiv.textContent = labelText;
   applyLinkLabelFontSettings(labelDiv, labelFont);
   labelDiv.style.color = rendering.labelColor ?? rendering.textColor ?? '#111111';
   labelDiv.style.background = rendering.labelBackgroundColor ?? 'rgba(255,255,255,0.9)';
   labelDiv.style.borderRadius = '999px';
-  labelDiv.style.border = '1px solid rgba(55,65,81,0.45)';
+  labelDiv.style.border = '0';
   labelDiv.style.whiteSpace = 'nowrap';
   labelDiv.style.textAlign = 'center';
   const labelObj = new CSS2DObject(labelDiv);
   labelObj.userData = {
     labelKind: 'link',
-    text: rendering.labelText ?? '',
-    fontSettings: labelFont
+    text: labelText,
+    fontSettings: labelFont,
+    collisionSize: linkLabelSize(labelText, labelFont, rendering)
   };
   linkLabels.push(labelObj);
 
@@ -165,6 +171,7 @@ export function recalculateAllLinks() {
   const occupiedLabels = [];
   const occupiedLabelParents = new WeakSet();
   const obstacleBoxesByParent = new WeakMap();
+  const routes = [];
   for (const link of activeLinks) {
     const key = [String(link.linkData.sourceClassId), String(link.linkData.targetClassId)].sort().join(':');
     if (!pairBuckets.has(key)) pairBuckets.set(key, []);
@@ -182,7 +189,7 @@ export function recalculateAllLinks() {
       }
       const obstacleBoxes = getCachedObstacleBoxes(obstacleBoxesByParent, parent, link.sourceClass, link.targetClass);
       const lane = laneDescriptors.get(link);
-      const portPair = chooseRelationshipPortPair(link, parent, lane, obstacleBoxes);
+      const portPair = chooseRelationshipPortPair(link, parent, lane, obstacleBoxes, occupiedLanes);
       const route = buildOrthogonalRoute({
         link,
         p0: portPair.source.point,
@@ -194,9 +201,11 @@ export function recalculateAllLinks() {
         occupiedLanes,
         obstacleBoxes,
         sourcePort: portPair.source,
-        targetPort: portPair.target
+        targetPort: portPair.target,
+        automaticPoints: portPair.points
       });
-      separateLinkLabel(route, occupiedLabels, link.linkData.rendering ?? {});
+      occupiedLanes.push(...getRouteLanes(route.basePoints));
+      routes.push({link,route});
 
       replaceLineGeometry(link.line, route.points);
       link.line.userData.baseRoutePoints = route.basePoints.map(point => point.clone());
@@ -217,6 +226,16 @@ export function recalculateAllLinks() {
         link.labelObj.element.style.transform = 'translate(-50%, -50%)';
       }
     });
+  }
+  // Labels avoid every route, including routes built later in the model.
+  for (const {route} of routes) for (let i=1; i<route.basePoints.length; i++) {
+    const a=route.basePoints[i-1], b=route.basePoints[i];
+    occupiedLabels.push({minX:Math.min(a.x,b.x)-0.025,maxX:Math.max(a.x,b.x)+0.025,
+      minY:Math.min(a.y,b.y)-0.025,maxY:Math.max(a.y,b.y)+0.025});
+  }
+  for (const {link,route} of routes) {
+    separateLinkLabel(route, occupiedLabels, link.linkData.rendering ?? {}, link.labelObj.userData.collisionSize);
+    link.labelObj.position.copy(route.labelPosition);
   }
 }
 
@@ -545,10 +564,37 @@ function updateRelationshipPort(marker, port, route) {
   marker.userData.routeEndpoint = route?.arrowPosition?.clone?.() ?? null;
 }
 
-function chooseRelationshipPortPair(link, parent, lane, obstacleBoxes = []) {
+function chooseRelationshipPortPair(link, parent, lane, obstacleBoxes = [], occupiedLanes = []) {
   const rendering = link.linkData.rendering ?? {};
-  const sourceCandidates = getRelationshipPortCandidates(link.sourceClass, parent, rendering.sourcePortSide ?? rendering.sourcePort);
-  const targetCandidates = getRelationshipPortCandidates(link.targetClass, parent, rendering.targetPortSide ?? rendering.targetPort);
+  const sourceCandidates = getRelationshipPortCandidates(link.sourceClass, parent, rendering.sourcePortSide ?? rendering.sourcePort, link.targetClass);
+  const targetCandidates = getRelationshipPortCandidates(link.targetClass, parent, rendering.targetPortSide ?? rendering.targetPort, link.sourceClass);
+  if (!rendering.routePoints?.length) {
+    const pairs=[];
+    for (const source of sourceCandidates) for (const target of targetCandidates) {
+      if (link.sourceClass===link.targetClass && source.side===target.side) continue;
+      const lowerBound=Math.abs(source.point.x-target.point.x)+Math.abs(source.point.y-target.point.y);
+      pairs.push({source,target,lowerBound});
+    }
+    pairs.sort((a,b)=>a.lowerBound-b.lowerBound);
+    let shortest=null;
+    const boxes=obstacleBoxes.map(box=>({minX:box.min.x,maxX:box.max.x,minY:box.min.y,maxY:box.max.y}));
+    for (const simpleOnly of [true,false]) {
+      for (const pair of pairs) {
+        if (shortest && pair.lowerBound>shortest.score) continue;
+        const start=getPortStubPoint(pair.source.point,pair.source,rendering);
+        const end=getPortStubPoint(pair.target.point,pair.target,rendering);
+        const path=findOrthogonalPath(start,end,boxes,0.18,simpleOnly);
+        if (!path) continue;
+        const points=compactPoints([pair.source.point,...path.map(p=>new THREE.Vector3(p.x,p.y,start.z)),pair.target.point]);
+        if (countRouteObstacleIntersections(points,obstacleBoxes)) continue;
+        const shared=getRouteLanes(points).reduce((sum,l)=>sum+occupiedLanes.filter(o=>routeLanesCollide(l,o)).length,0);
+        const score=getRouteLength(points)+Math.max(0,points.length-2)*0.35+shared*0.7;
+        if (!shortest || score<shortest.score) shortest={...pair,points,score};
+        if (!simpleOnly && shortest) break;
+      }
+      if (shortest) return shortest;
+    }
+  }
   let best = null;
 
   for (const source of sourceCandidates) {
@@ -576,7 +622,7 @@ function chooseRelationshipPortPair(link, parent, lane, obstacleBoxes = []) {
   };
 }
 
-function getRelationshipPortCandidates(node, parent, requestedSide) {
+function getRelationshipPortCandidates(node, parent, requestedSide, peer) {
   const requested = normalizePortSide(requestedSide);
   const sides = requested ? [requested] : PORT_SIDES;
   return sides.map(side => {
@@ -587,7 +633,7 @@ function getRelationshipPortCandidates(node, parent, requestedSide) {
       node,
       side,
       point,
-      normal: getPortNormal(side),
+      normal: getPortNormal(side).multiplyScalar(node!==peer && isAncestorObject(node,peer) ? -1 : 1),
       radius: RELATIONSHIP_PORT_RADIUS,
       explicit: Boolean(requested)
     };
@@ -667,11 +713,13 @@ function getRouteLength(points) {
   return length;
 }
 
-function buildOrthogonalRoute({ link, p0, p1, parent, index, count, lane, occupiedLanes, obstacleBoxes, sourcePort, targetPort }) {
+function buildOrthogonalRoute({ link, p0, p1, parent, index, count, lane, occupiedLanes, obstacleBoxes, sourcePort, targetPort, automaticPoints }) {
   const rendering = link.linkData.rendering ?? {};
-  let points = buildBaseRoutePoints({ link, p0, p1, parent, rendering, lane, sourcePort, targetPort });
-  points = separateSharedRouteLane(points, rendering, occupiedLanes);
-  points = avoidObstacleIntersections(points, obstacleBoxes, rendering);
+  let points = automaticPoints || buildBaseRoutePoints({ link, p0, p1, parent, rendering, lane, sourcePort, targetPort });
+  if (!automaticPoints) {
+    points = separateSharedRouteLane(points, rendering, occupiedLanes);
+    points = avoidObstacleIntersections(points, obstacleBoxes, rendering);
+  }
   if (countRouteObstacleIntersections(points, obstacleBoxes) > 0 && !rendering.routePoints?.length) {
     const start = getPortStubPoint(p0, sourcePort, rendering);
     const end = getPortStubPoint(p1, targetPort, rendering);
@@ -732,15 +780,35 @@ function getObstacleBoxes(parent, sourceNode, targetNode) {
   const boxes = [];
   parent.traverse(object => {
     if (!object.userData?.isClassLike) return;
-    if (isRelatedObject(object, sourceNode) || isRelatedObject(object, targetNode)) return;
-    boxes.push(expandBox(getNodeLocalBox(object, parent, object.position || new THREE.Vector3()), 0.12));
+    if (object.visible === false) return;
+    const containsEndpoint = (object!==sourceNode && isAncestorObject(object,sourceNode)) ||
+      (object!==targetNode && isAncestorObject(object,targetNode));
+    if (containsEndpoint) {
+      // A containing panel is traversable; its title is still an obstacle.
+      const title=object.children.find(child=>child.isCSS2DObject && child.userData?.labelKind==='title');
+      if (title) {
+        const p=parent.worldToLocal(title.getWorldPosition(new THREE.Vector3()));
+        const width=title.userData.nodeSize?.width || 4;
+        boxes.push(new THREE.Box3(new THREE.Vector3(p.x-width/2,p.y-0.35,-1),new THREE.Vector3(p.x+width/2,p.y+0.35,1)));
+      }
+      const attributes = new THREE.Box3();
+      for (const label of object.children.filter(child=>child.isCSS2DObject && child.userData?.labelKind==='attribute')) {
+        const p=parent.worldToLocal(label.getWorldPosition(new THREE.Vector3()));
+        const halfHeight=Math.max(0.08,(label.userData.gapY || 0.16)/2);
+        attributes.expandByPoint(new THREE.Vector3(p.x-0.25,p.y-halfHeight,-1));
+        attributes.expandByPoint(new THREE.Vector3(p.x+(label.userData.maxWorldWidth || 2.25),p.y+halfHeight,1));
+      }
+      if (!attributes.isEmpty()) boxes.push(expandBox(attributes,0.12));
+      return;
+    }
+    const box=getNodeLocalBox(object,parent,object.position || new THREE.Vector3());
+    // Endpoint boxes include attributes. A right-hand port hidden by attributes
+    // is rejected in favor of a clear side. Other boxes keep a border margin.
+    // Geometry bounds use Float32 coordinates; do not reject a port because its
+    // mathematically exact boundary differs from that bound by a few ulps.
+    boxes.push(object===sourceNode || object===targetNode ? expandBox(box,-0.001) : expandBox(box,0.12));
   });
   return boxes.filter(box => !box.isEmpty());
-}
-
-function isRelatedObject(candidate, node) {
-  if (!candidate || !node) return false;
-  return candidate === node || isAncestorObject(candidate, node) || isAncestorObject(node, candidate);
 }
 
 function isAncestorObject(ancestor, object) {
@@ -1011,7 +1079,6 @@ function separateSharedRouteLane(points, rendering, occupiedLanes = []) {
     attempts += 1;
   }
 
-  occupiedLanes.push(...getRouteLanes(next));
   return next;
 }
 
@@ -1214,9 +1281,9 @@ function getLabelPlacement(points, rendering, lane) {
   return best;
 }
 
-function separateLinkLabel(route, occupiedLabels, rendering) {
+function separateLinkLabel(route, occupiedLabels, rendering, measuredSize) {
   const labelText = String(rendering.labelText ?? '');
-  const boundsSize = {
+  const boundsSize = measuredSize || {
     width: Math.max(rendering.labelCollisionWidth || 0, 0.85, labelText.length * 0.22 + 0.5),
     height: Math.max(rendering.labelCollisionHeight || 0, 0.6)
   };
@@ -1227,6 +1294,17 @@ function separateLinkLabel(route, occupiedLabels, rendering) {
   tangent.normalize();
   const normal = getNormal(tangent);
   const candidates = [basePosition.clone()];
+
+  for (let i=1; i<route.basePoints.length; i++) {
+    const a=route.basePoints[i-1], b=route.basePoints[i];
+    const horizontal=almostEqual(a.y,b.y);
+    for (const fraction of [0.5,0.25,0.75]) for (const side of [1,-1]) {
+      const point=a.clone().lerp(b,fraction);
+      if (horizontal) point.y+=side*(boundsSize.height/2+0.12);
+      else point.x+=side*(boundsSize.width/2+0.12);
+      candidates.push(point);
+    }
+  }
 
   for (let step = 1; step <= 20; step += 1) {
     const along = tangent.clone().multiplyScalar(0.34 * step);
@@ -1241,6 +1319,14 @@ function separateLinkLabel(route, occupiedLabels, rendering) {
     candidates.push(basePosition.clone().sub(along).sub(away));
   }
 
+  // There is always space outside the finite occupied region. Never fall back
+  // to an overlapping label when a dense model exhausts nearby candidates.
+  if (occupiedLabels.length) {
+    const left=Math.min(...occupiedLabels.map(b=>b.minX))-boundsSize.width/2-margin-0.1;
+    const right=Math.max(...occupiedLabels.map(b=>b.maxX))+boundsSize.width/2+margin+0.1;
+    candidates.push(new THREE.Vector3(left,basePosition.y,basePosition.z),new THREE.Vector3(right,basePosition.y,basePosition.z));
+  }
+  candidates.sort((a,b)=>a.distanceToSquared(basePosition)-b.distanceToSquared(basePosition));
   let selectedBounds = null;
   for (const candidate of candidates) {
     const bounds = getLabelBounds(candidate, boundsSize);
@@ -1374,11 +1460,6 @@ function getPixelsPerWorldUnit(camera, distance, viewportHeight) {
   return 80;
 }
 
-function getFontSizeForTextWidth(text, availableWidthPx, extraPx = 0) {
-  const estimatedEm = Math.max(1, String(text || '').length * 0.58);
-  return Math.max(1, availableWidthPx - extraPx) / estimatedEm;
-}
-
 export function updateLinkFontSizes(camera, renderer) {
   const p = new THREE.Vector3();
   const c = new THREE.Vector3();
@@ -1390,15 +1471,10 @@ export function updateLinkFontSizes(camera, renderer) {
     const font = label.userData?.fontSettings || DEFAULT_LINK_FONT_SETTINGS;
     const preferredSize = clampLinkFontSize(font.size, DEFAULT_LINK_FONT_SETTINGS.size);
     const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, d, viewportHeight);
-    const rendering = label.parent?.userData?.linkData?.rendering || {};
-    const collisionWidthWorld = rendering.labelCollisionWidth ?? Math.max(0.85, String(label.userData?.text || label.element.textContent || '').length * 0.12);
-    const availableWidthPx = Math.max(42, collisionWidthWorld * pixelsPerWorldUnit);
-    const minSize = Math.min(preferredSize, Math.max(MIN_READABLE_LINK_FONT_SIZE, preferredSize * 0.68), Math.max(1, 0.28 * pixelsPerWorldUnit));
-    const preferredScale = Math.max(1, preferredSize / DEFAULT_LINK_FONT_SETTINGS.size);
-    const distanceSize = THREE.MathUtils.clamp((120 * preferredScale) / d, minSize, Math.max(18, preferredSize));
-    const fitSize = getFontSizeForTextWidth(label.userData?.text || label.element.textContent || '', availableWidthPx, 2);
-    const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize), minSize, Math.max(18, preferredSize));
-    const size = Math.max(minSize, Math.min(preferredSize, dynamicSize));
+    const bounds=label.userData.collisionSize || linkLabelSize(label.userData.text,font);
+    const availableWidthPx=Math.max(0.1,(bounds.width-0.08)*pixelsPerWorldUnit);
+    const size=fitTextSize(label.userData.text,font,availableWidthPx,bounds.height*pixelsPerWorldUnit*0.7,
+      Math.min(preferredSize,0.28*pixelsPerWorldUnit),0.98);
     applyLinkLabelFontSettings(label.element, { ...font, size });
   }
 }
@@ -1437,9 +1513,9 @@ export function normalizeLinkData(linkData = {}) {
     ...linkData,
     allowSelfLink: linkData.allowSelfLink ?? true,
     rendering: {
-      labelText: rendering.labelText ?? linkData.id ?? '',
       orthogonalStyle: rendering.orthogonalStyle ?? 'auto',
       ...rendering,
+      labelText: rendering.labelText ?? linkData.name ?? 'relates to',
       arrowType,
       arrowDirection
     }

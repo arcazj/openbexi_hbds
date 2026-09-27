@@ -2,7 +2,7 @@
   "metadata": {
     "name": "OpenShift Cloud Network",
     "purpose": "Reference HBDS model for an OpenShift cluster running in a cloud network.",
-    "preserveLayout": true,
+    "preserveLayout": false,
     "regressionTags": [
       "model",
       "openshift",

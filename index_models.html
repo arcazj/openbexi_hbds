@@ -9,6 +9,7 @@
 <body>
 <div id="container">
     <div id="canvas-model-title" aria-live="polite"></div>
+    <div id="diagram-viewport" aria-label="HBDS diagram"></div>
     <div id="canvas-load-progress" class="canvas-load-progress" role="status" aria-live="polite" hidden>
         <span class="canvas-load-progress-label" data-load-progress-text>Loading model...</span>
         <span class="canvas-load-progress-track" aria-hidden="true">
@@ -47,11 +48,11 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {updateLabelFontSizes} from './js/hbds_class.js?v=layout-20260926a';
-    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=layout-20260926a';
-    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=layout-20260926a';
-    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=layout-20260926a';
-    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=layout-20260926a';
+    import {updateLabelFontSizes} from './js/hbds_class.js?v=layout-20260926b';
+    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=layout-20260926b';
+    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=layout-20260926b';
+    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=layout-20260926b';
+    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=layout-20260926b';
     import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260718a';
 
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {
@@ -204,7 +205,7 @@
         camera = new THREE.PerspectiveCamera(50, initialSize.width / initialSize.height, 0.1, 1000);
         camera.position.set(0, 0, 10);
 
-        const container = document.getElementById('container');
+        const container = document.getElementById('diagram-viewport');
         renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setSize(initialSize.width, initialSize.height);
         container.appendChild(renderer.domElement);
@@ -470,7 +471,9 @@
                         updateCanvasModelTitle();
                     }
                     progress.update(78, `Fitting ${label}`);
-                    if (!hasFitMetadata(model)) {
+                    const optimize = !model.metadata?.preserveLayout && !model.hypergraph?.metadata?.preserveLayout && getLayoutSettings().algorithm !== 'none';
+                    if (optimize) await optimizeAndRefreshLayout(getModelContext(), { algorithm: getLayoutSettings().algorithm });
+                    if (optimize || !hasFitMetadata(model)) {
                         fitModelToCanvas(getModelContext(), { padding: 1.08, updateOverview: true });
                     }
                     progress.update(94, `Finishing ${label}`);
@@ -1432,7 +1435,7 @@
 
     /* ---------- Utility functions ---------- */
     function getCanvasSize() {
-        const rect = document.getElementById('container')?.getBoundingClientRect();
+        const rect = document.getElementById('diagram-viewport')?.getBoundingClientRect();
         return {
             width: Math.max(1, Math.floor(rect?.width || window.innerWidth)),
             height: Math.max(1, Math.floor(rect?.height || window.innerHeight))

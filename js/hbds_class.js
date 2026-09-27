@@ -1,5 +1,6 @@
 /* ─────────────────────────────── Imports ─────────────────────────────── */
 import * as THREE from 'three';
+import { fitTextSize } from './hbds_text_metrics.js';
 import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
 const DEFAULT_EMPTY_ICON_PATH = './icons/empty.png';
@@ -53,7 +54,6 @@ export const DEFAULT_LABEL_FONT_SETTINGS = Object.freeze({
     underline: false
 });
 export const MAX_LABEL_FONT_SIZE = 72;
-const MIN_READABLE_TITLE_FONT_SIZE = 6;
 const MIN_READABLE_ATTRIBUTE_FONT_SIZE = 9;
 
 export function normalizeLabelFontSettings(font = {}, fallback = DEFAULT_LABEL_FONT_SETTINGS) {
@@ -75,6 +75,7 @@ export function resolveLabelFontSettings(individualFont = {}, modelFont = {}, fa
 export function applyLabelFontSettings(element, fontSettings = DEFAULT_LABEL_FONT_SETTINGS) {
     if (!element) return;
     const font = normalizeLabelFontSettings(fontSettings);
+    if (Number(fontSettings.size) > 0) font.size = Math.min(font.size, Number(fontSettings.size));
     element.__hbdsFontSettings = font;
     element.style.fontSize = `${font.size}px`;
     element.style.fontFamily = font.family;
@@ -243,7 +244,7 @@ export function createClass(classData, lifecycle = {}) {
     const titleObj = createIconTitleLabel(classData, {
         className: 'label class-label',
         isHyperclass: false,
-        textColor: cfg.textColor,
+        textColor: classData.rendering?.titleColor ?? cfg.textColor,
         font: classData.rendering?.font,
         modelFont: classData.modelTitleFont ?? classData.modelFont,
         legacyFont: 'bold 16px Arial',
@@ -984,7 +985,8 @@ export function createIconTitleLabel(classData, options = {}) {
     const width = classData?.size?.width ?? (options.isHyperclass ? 4 : 1.2);
     const estimatedTitleWidth = Math.max(130, name.length * 14 + (options.iconSize ? options.iconSize * 20 : 38));
     const maxTextWidth = options.titleMaxWidth ?? Math.max(estimatedTitleWidth, Math.min(420, width * 120));
-    const fontSettings = resolveLabelFontSettings(options.font ?? classData?.rendering?.font, options.modelFont ?? classData?.modelFont);
+    const fontSettings = resolveLabelFontSettings(options.font ?? classData?.rendering?.font,
+        { bold: true, ...(options.modelFont ?? classData?.modelFont) });
     label.className = options.className ?? 'label class-label';
     label.setAttribute('data-class', name);
     label.setAttribute('data-hyperclass', options.isHyperclass ? 'true' : 'false');
@@ -1448,23 +1450,20 @@ export function updateLabelFontSizes(camera, renderer) {
             const nodeHeight = nodeSize.height ?? 1.6;
             const availableWidthPx = Math.max(1, (nodeWidth - 0.22) * pixelsPerWorldUnit);
             const text = label.userData?.text || label.element.textContent || '';
-            const fitSize = getFontSizeForTextWidth(text, availableWidthPx, label.element.classList.contains('hbds-icon-title') ? 1.25 : 0);
             const configuredSize = getConfiguredLabelSize(label, DEFAULT_LABEL_FONT_SETTINGS.size);
-            const minSize = Math.min(configuredSize, MIN_READABLE_TITLE_FONT_SIZE, Math.max(1, nodeHeight * pixelsPerWorldUnit * 0.38));
-            const distanceSize = getDistanceScaledFontSize(132, distance, configuredSize, minSize);
-            const verticalCap = Math.max(minSize, nodeHeight * pixelsPerWorldUnit * 0.38);
-            const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, fitSize, verticalCap), minSize, configuredSize);
-            const fontSize = THREE.MathUtils.clamp(dynamicSize, minSize, configuredSize);
+            const fontSize = fitTextSize(text, label.userData.fontSettings, availableWidthPx,
+                Math.min(0.78, nodeHeight * 0.38) * pixelsPerWorldUnit, configuredSize,
+                label.element.classList.contains('hbds-icon-title') ? 1.45 : 0);
             applyTitleLabelSizing(label.element, availableWidthPx, fontSize);
         } else {
             const maxWorldWidth = label.userData?.maxWorldWidth ?? 1.75;
-            const availableWidthPx = Math.max(1, maxWorldWidth * pixelsPerWorldUnit);
+            const availableWidthPx = Math.max(0.1, maxWorldWidth * pixelsPerWorldUnit);
             const gapY = label.userData?.gapY ?? 0.17;
             const configuredSize = getConfiguredLabelSize(label, DEFAULT_LABEL_FONT_SETTINGS.size);
             // At overview zoom the row pitch is the hard limit; a fixed pixel
             // minimum makes adjacent attribute rows paint over one another.
-            const rowBudget = Math.max(1, gapY * pixelsPerWorldUnit * 0.9);
-            const minSize = Math.min(configuredSize, MIN_READABLE_ATTRIBUTE_FONT_SIZE, rowBudget, Math.max(1, 0.17 * pixelsPerWorldUnit));
+            const rowBudget = Math.max(0.1, gapY * pixelsPerWorldUnit * 0.85);
+            const minSize = Math.min(configuredSize, MIN_READABLE_ATTRIBUTE_FONT_SIZE, rowBudget, Math.max(0.1, 0.17 * pixelsPerWorldUnit));
             const distanceSize = getDistanceScaledFontSize(110, distance, configuredSize, minSize);
             const verticalCap = Math.max(minSize, gapY * pixelsPerWorldUnit * 1.45, configuredSize * 0.62);
             const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, verticalCap), minSize, configuredSize);
@@ -1483,11 +1482,6 @@ function getPixelsPerWorldUnit(camera, distance, viewportHeight) {
         return viewportHeight / Math.max(1e-6, camera.top - camera.bottom);
     }
     return 80;
-}
-
-function getFontSizeForTextWidth(text, availableWidthPx, extraEm = 0) {
-    const estimatedEm = Math.max(1, String(text || '').length * 0.62 + extraEm);
-    return availableWidthPx / estimatedEm;
 }
 
 function clampLabelFontSize(value, fallback = DEFAULT_LABEL_FONT_SETTINGS.size) {
@@ -1520,7 +1514,7 @@ function applyTitleLabelSizing(element, availableWidthPx, fontSize) {
     if (title) {
         const icon = row?.querySelector?.('img');
         const iconWidth = icon ? icon.getBoundingClientRect().width + fontSize * 0.45 : 0;
-        title.style.maxWidth = `${Math.max(24, Math.round(availableWidthPx - iconWidth))}px`;
+        title.style.maxWidth = `${Math.max(0, Math.floor(availableWidthPx - iconWidth))}px`;
         title.style.overflow = 'hidden';
         title.style.textOverflow = 'ellipsis';
         title.style.whiteSpace = 'nowrap';

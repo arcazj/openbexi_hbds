@@ -63,7 +63,8 @@
       "hyperclassSize": 42,
       "attributeSize": 30,
       "linkSize": null
-    }
+    },
+    "preserveLayout": false
   },
   "hypergraph": {
     "class": [

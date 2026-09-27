@@ -62,7 +62,8 @@
       "bold": false,
       "italic": false,
       "underline": false
-    }
+    },
+    "preserveLayout": false
   },
   "hypergraph": {
     "class": [
@@ -1374,7 +1375,7 @@
         "sourceClassId": "complex_hyperclass_mail_carrier_with_links_3",
         "targetClassId": "complex_hyperclass_mail_carrier_with_links_2",
         "rendering": {
-          "labelText": "received by",
+          "labelText": "is received by",
           "orthogonalStyle": "auto",
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -1471,7 +1472,7 @@
         "sourceClassId": "complex_hyperclass_mail_carrier_with_links_1",
         "targetClassId": "complex_hyperclass_mail_carrier_with_links_9",
         "rendering": {
-          "labelText": "assigned to",
+          "labelText": "is assigned to",
           "orthogonalStyle": "auto",
           "lineColor": "#6a1b9a",
           "lineWidth": 2,
@@ -1582,7 +1583,7 @@
         "sourceClassId": "complex_hyperclass_mail_carrier_with_links_18",
         "targetClassId": "complex_hyperclass_mail_carrier_with_links_1",
         "rendering": {
-          "labelText": "used by",
+          "labelText": "is used by",
           "orthogonalStyle": "auto",
           "lineColor": "#ef6c00",
           "lineWidth": 2,
@@ -1618,7 +1619,7 @@
         "sourceClassId": "complex_hyperclass_mail_carrier_with_links_19",
         "targetClassId": "complex_hyperclass_mail_carrier_with_links_18",
         "rendering": {
-          "labelText": "assigns vehicle",
+          "labelText": "assigns",
           "orthogonalStyle": "auto",
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -1643,7 +1644,7 @@
         "sourceClassId": "complex_hyperclass_mail_carrier_with_links_19",
         "targetClassId": "complex_hyperclass_mail_carrier_with_links_9",
         "rendering": {
-          "labelText": "assigns route",
+          "labelText": "assigns",
           "orthogonalStyle": "auto",
           "lineColor": "#000000",
           "lineWidth": 2,
@@ -1837,7 +1838,7 @@
         "sourceClassId": "complex_hyperclass_mail_carrier_with_links_16",
         "targetClassId": "complex_hyperclass_mail_carrier_with_links_2",
         "rendering": {
-          "labelText": "used by",
+          "labelText": "is used by",
           "orthogonalStyle": "auto",
           "lineColor": "#6a1b9a",
           "lineWidth": 2,

@@ -18,7 +18,7 @@
       "metadata-audit",
       "source-conflicts"
     ],
-    "preserveLayout": true,
+    "preserveLayout": false,
     "layout": {
       "algorithm": "grid",
       "mode": "grid"
@@ -1308,7 +1308,8 @@
             "metalness": 0.15,
             "roughness": 0.65
           },
-          "textColor": "#172033"
+          "textColor": "#172033",
+          "titleColor": "#991b1b"
         },
         "sourceSelection": {
           "decayed": "all records",
@@ -1450,7 +1451,7 @@
         "id": "satellite_world_simple_structure_link_space_object_lifecycle",
         "sourceClassId": "satellite_world_simple_structure_space_object",
         "targetClassId": "satellite_world_simple_structure_lifecycle",
-        "name": "has launch record",
+        "name": "has",
         "description": "Observed NORAD joins: each feed has at most one row per ID in this snapshot; 50 launch-date sidecar values conflict with the tracked date. Across source revisions, retain multiple assertions.",
         "rendering": {
           "lineColor": "#475569",
@@ -1468,7 +1469,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "has launch record"
+          "labelText": "has"
         },
         "sourceEvidence": {
           "kind": "NORAD join",
@@ -1486,7 +1487,7 @@
         "id": "satellite_world_simple_structure_link_space_object_tracking",
         "sourceClassId": "satellite_world_simple_structure_space_object",
         "targetClassId": "satellite_world_simple_structure_tracking",
-        "name": "has tracking state",
+        "name": "has",
         "description": "Identity and status fields coexist in tracked records; statuses are independent dimensions.",
         "rendering": {
           "lineColor": "#475569",
@@ -1504,7 +1505,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "has tracking state"
+          "labelText": "has"
         },
         "sourceEvidence": {
           "kind": "record projection",
@@ -1522,7 +1523,7 @@
         "id": "satellite_world_simple_structure_link_space_object_elements",
         "sourceClassId": "satellite_world_simple_structure_space_object",
         "targetClassId": "satellite_world_simple_structure_elements",
-        "name": "has elements",
+        "name": "has",
         "description": "Join NORAD ID only where elements exist. Catalog membership alone does not imply an available orbit.",
         "rendering": {
           "lineColor": "#475569",
@@ -1540,7 +1541,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "has elements"
+          "labelText": "has"
         },
         "sourceEvidence": {
           "kind": "optional NORAD join",
@@ -1558,7 +1559,7 @@
         "id": "satellite_world_simple_structure_link_elements_orbit_summary",
         "sourceClassId": "satellite_world_simple_structure_elements",
         "targetClassId": "satellite_world_simple_structure_orbit_summary",
-        "name": "describes orbit",
+        "name": "describes",
         "description": "GP/TLE source records contain both element fields and derived orbital summaries.",
         "rendering": {
           "lineColor": "#475569",
@@ -1576,7 +1577,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "describes orbit"
+          "labelText": "describes"
         },
         "sourceEvidence": {
           "kind": "record projection",
@@ -1594,7 +1595,7 @@
         "id": "satellite_world_simple_structure_link_space_object_orbit_summary",
         "sourceClassId": "satellite_world_simple_structure_space_object",
         "targetClassId": "satellite_world_simple_structure_orbit_summary",
-        "name": "has summary",
+        "name": "has",
         "description": "Tracked records can retain SATCAT summaries without current propagatable elements.",
         "rendering": {
           "lineColor": "#475569",
@@ -1612,7 +1613,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "has summary",
+          "labelText": "has",
           "labelOffsetFromPath": 0.65,
           "labelCollisionHeight": 0.7
         },
@@ -1667,7 +1668,7 @@
         "id": "satellite_world_simple_structure_link_snapshot_elements",
         "sourceClassId": "satellite_world_simple_structure_snapshot",
         "targetClassId": "satellite_world_simple_structure_elements",
-        "name": "records source",
+        "name": "records",
         "description": "GP/TLE sidecars describe refresh status and source revisions.",
         "rendering": {
           "lineColor": "#475569",
@@ -1685,7 +1686,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "records source"
+          "labelText": "records"
         },
         "sourceEvidence": {
           "kind": "dataset provenance",
@@ -1704,7 +1705,7 @@
         "id": "satellite_world_simple_structure_link_tracking_snapshot",
         "sourceClassId": "satellite_world_simple_structure_tracking",
         "targetClassId": "satellite_world_simple_structure_snapshot",
-        "name": "snapshot scope",
+        "name": "uses scope of",
         "description": "Manifest scope distinguishes current and historical chunks.",
         "rendering": {
           "lineColor": "#475569",
@@ -1722,7 +1723,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "snapshot scope",
+          "labelText": "uses scope of",
           "labelPlacement": "path",
           "labelPositionAlongPath": 0.15,
           "labelOffsetFromPath": 0.5
@@ -1743,7 +1744,7 @@
         "id": "satellite_world_simple_structure_link_profile_space_object",
         "sourceClassId": "satellite_world_simple_structure_profile",
         "targetClassId": "satellite_world_simple_structure_space_object",
-        "name": "unverified identity",
+        "name": "may identify",
         "description": "Unverified references: the OneWeb profile ID 44072 resolves to PRISMA, and OneWeb / Starlink V1 launch dates conflict with catalog dates. Matching a numeric ID alone is insufficient.",
         "rendering": {
           "lineColor": "#475569",
@@ -1761,7 +1762,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "unverified identity"
+          "labelText": "may identify"
         },
         "sourceEvidence": {
           "kind": "unverified cross-file reference",
@@ -1780,7 +1781,7 @@
         "id": "satellite_world_simple_structure_link_profile_payload",
         "sourceClassId": "satellite_world_simple_structure_profile",
         "targetClassId": "satellite_world_simple_structure_payload",
-        "name": "contains payload",
+        "name": "contains",
         "description": "Nested profiles:payload object; profile/template values may be incomplete.",
         "rendering": {
           "lineColor": "#475569",
@@ -1798,7 +1799,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "contains payload"
+          "labelText": "contains"
         },
         "sourceEvidence": {
           "kind": "nested object",
@@ -1814,7 +1815,7 @@
         "id": "satellite_world_simple_structure_link_profile_display",
         "sourceClassId": "satellite_world_simple_structure_profile",
         "targetClassId": "satellite_world_simple_structure_display",
-        "name": "can use asset",
+        "name": "use",
         "description": "Conceptual display association by curated profile/asset identity; no foreign-key field is supplied by the data.",
         "rendering": {
           "lineColor": "#475569",
@@ -1832,7 +1833,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "can use asset"
+          "labelText": "use"
         },
         "sourceEvidence": {
           "kind": "inferred presentation association",
@@ -1850,7 +1851,7 @@
         "id": "satellite_world_simple_structure_link_space_object_decay",
         "sourceClassId": "satellite_world_simple_structure_space_object",
         "targetClassId": "satellite_world_simple_structure_decay",
-        "name": "recorded decay",
+        "name": "has",
         "description": "Per snapshot: one object has zero or one recorded decay date; one record refers to one NORAD identity. The same assertion may appear in several sources; do not count them as repeated physical decay events.",
         "rendering": {
           "lineColor": "#475569",
@@ -1868,7 +1869,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "recorded decay"
+          "labelText": "has"
         },
         "sourceEvidence": {
           "kind": "NORAD join with date filter",
@@ -1889,7 +1890,7 @@
         "id": "satellite_world_simple_structure_link_decay_snapshot",
         "sourceClassId": "satellite_world_simple_structure_decay",
         "targetClassId": "satellite_world_simple_structure_snapshot",
-        "name": "reported in",
+        "name": "is reported in",
         "description": "A decay assertion belongs to a source snapshot. Decayed feed: 7,636 payloads; tracked history: 35,570 objects. Preserve source-specific provenance.",
         "rendering": {
           "lineColor": "#475569",
@@ -1907,7 +1908,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "reported in"
+          "labelText": "is reported in"
         },
         "sourceEvidence": {
           "kind": "containing-file provenance",
@@ -1925,7 +1926,7 @@
         "id": "satellite_world_simple_structure_link_snapshot_refresh",
         "sourceClassId": "satellite_world_simple_structure_snapshot",
         "targetClassId": "satellite_world_simple_structure_refresh",
-        "name": "has refresh status",
+        "name": "has",
         "description": "Each supplied dataset sidecar describes its latest attempt/result; there is no array of previous refresh events.",
         "rendering": {
           "lineColor": "#475569",
@@ -1943,7 +1944,7 @@
           "orthogonalStyle": "auto",
           "parallelRouteGap": 0.36,
           "obstacleRouteGap": 0.5,
-          "labelText": "has refresh status"
+          "labelText": "has"
         },
         "sourceEvidence": {
           "kind": "dataset sidecar convention",
