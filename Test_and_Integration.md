@@ -155,7 +155,7 @@ Expected debug output:
 
 Validate:
 
-* The shell menu shows app version `v1.1`.
+* The shell menu shows app version `v1.2`.
 * The connection indicator turns green/connected.
 * Stopping the server turns the indicator red/not connected after polling catches up.
 * Restarting the server reconnects the UI.
@@ -1124,7 +1124,7 @@ This opens real headless Edge/Chrome clients. Rendering checks run with debug di
 Automated collaboration coverage:
 
 * the Models viewer defaults to the new simple satellite model; both satellite models render, and temporary copies preserve edits through save and reload
-* shell menu displays app version `v1.1`
+* shell menu displays app version `v1.2`
 * the temporary same-origin server remains available during concurrent asset loading, event streaming, and draft polling without fallback connection errors
 * Help includes the comprehensive user guide with AI, model delete, rollback, collaboration, and Edit/Tests save-location guidance
 * AI Support panel collapsed by default, pink section styling, provider-dependent credential UI, provider-specific model combo, custom model fallback, reasoning effort payload, and ChatGPT / Manual no-key workflow

@@ -2022,7 +2022,7 @@ return (() => {
             timeout=10,
             interval=0.25,
         )
-        if not isinstance(version_state, dict) or version_state.get("text") != "v1.1" or version_state.get("visible") is not True:
+        if not isinstance(version_state, dict) or version_state.get("text") != "v1.2" or version_state.get("visible") is not True:
             raise BrowserRegressionError(f"Shell app version display invalid: {version_state}")
         help_state = wait_for(
             page,
