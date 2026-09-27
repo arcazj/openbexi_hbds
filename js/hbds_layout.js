@@ -1,14 +1,15 @@
 // Layout operates on complete visual groups. All persisted positions are world
 // coordinates; descendants are placed only after their parent's final position.
-const PADDING = { left: 0.65, right: 0.75, top: 0.9, bottom: 0.55 };
+const PADDING = { left: 0.85, right: 0.85, top: 1.2, bottom: 0.85 };
 const compare = (a, b) => String(a.name).localeCompare(String(b.name)) || String(a.id).localeCompare(String(b.id));
 const positive = (value, fallback) => Number.isFinite(Number(value)) && Number(value) > 0 ? Number(value) : fallback;
 
 export function getLayoutVisualMetrics(node) {
   const hyperclass = node.type === 'hyperclass';
   const count = node.attributes?.length || 0;
+  const titleWidth = Math.min(8, String(node.rendering?.iconTitleText ?? node.name ?? '').length * 0.18 + 1);
   const body = {
-    width: Math.max(positive(node.size?.width, 0), hyperclass ? 4 : 1.35),
+    width: Math.max(positive(node.size?.width, 0), hyperclass ? 4 : 1.35, titleWidth),
     height: Math.max(positive(node.size?.height, 0), hyperclass ? 3.2 : 1.75,
       (hyperclass ? 0.75 : 0.45) + Math.max(0, count - 1) * (hyperclass ? 0.16 : 0.17))
   };
@@ -163,7 +164,9 @@ export function optimizeModelLayout(model, algorithm = 'grid') {
   const roots = children.get(null) || [];
   function arrange(siblings, root = false) {
     const items = siblings.map(node => ({ id: node.id, name: node.name, ...metrics.get(node.id) }));
-    const gapX = root ? 2.6 : 1.15, gapY = root ? 2.2 : 0.78;
+    // Keep room for the route and its label between rows. Closely packed
+    // cards otherwise force a label far away from the relationship it names.
+    const gapX = root ? 2.8 : 1.6, gapY = root ? 2.4 : 1.8;
     if (algorithm === 'radial') return radial(items, gapX, gapY);
     if (algorithm === 'hierarchy') {
       const representative = new Map();

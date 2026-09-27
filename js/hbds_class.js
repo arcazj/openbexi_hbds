@@ -1,6 +1,6 @@
 /* ─────────────────────────────── Imports ─────────────────────────────── */
 import * as THREE from 'three';
-import { fitTextSize } from './hbds_text_metrics.js';
+import { fitTextSize } from './hbds_text_metrics.js?v=readability-20260927';
 import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
 const DEFAULT_EMPTY_ICON_PATH = './icons/empty.png';
@@ -1449,12 +1449,9 @@ export function updateLabelFontSizes(camera, renderer) {
             const nodeWidth = nodeSize.width ?? 1.2;
             const nodeHeight = nodeSize.height ?? 1.6;
             const availableWidthPx = Math.max(1, (nodeWidth - 0.22) * pixelsPerWorldUnit);
-            const text = label.userData?.text || label.element.textContent || '';
             const configuredSize = getConfiguredLabelSize(label, DEFAULT_LABEL_FONT_SETTINGS.size);
-            const fontSize = fitTextSize(text, label.userData.fontSettings, availableWidthPx,
-                Math.min(0.78, nodeHeight * 0.38) * pixelsPerWorldUnit, configuredSize,
-                label.element.classList.contains('hbds-icon-title') ? 1.45 : 0);
-            applyTitleLabelSizing(label.element, availableWidthPx, fontSize);
+            fitTitleLabel(label.element, label.userData.fontSettings, availableWidthPx,
+                Math.min(0.78, nodeHeight * 0.38) * pixelsPerWorldUnit, configuredSize);
         } else {
             const maxWorldWidth = label.userData?.maxWorldWidth ?? 1.75;
             const availableWidthPx = Math.max(0.1, maxWorldWidth * pixelsPerWorldUnit);
@@ -1497,26 +1494,31 @@ function getDistanceScaledFontSize(baseSize, distance, configuredSize, minSize) 
     return THREE.MathUtils.clamp((baseSize * configuredScale) / Math.max(distance, 1e-6), minSize, configuredSize);
 }
 
-function applyTitleLabelSizing(element, availableWidthPx, fontSize) {
-    element.style.padding = '0';
-    element.style.fontSize = `${fontSize.toFixed(1)}px`;
-    if (element.__hbdsFontSettings) applyLabelFontSettings(element, {...element.__hbdsFontSettings, size: fontSize});
-    element.style.maxWidth = `${Math.round(availableWidthPx)}px`;
-    element.style.overflow = 'hidden';
-    element.style.textOverflow = 'ellipsis';
-    element.style.whiteSpace = 'nowrap';
+export function fitTitleLabel(element, font, availableWidthPx, availableHeightPx, maximum) {
     const row = element.querySelector?.('.hbds-icon-title-row');
-    const title = row?.querySelector?.('span') || row?.lastElementChild;
+    const title = row?.querySelector?.('span') || element;
+    const icon = row?.querySelector?.('img');
+    const iconWidth = icon ? Number.parseFloat(icon.style.width) || 1.7 : 0;
+    const iconHeight = icon ? Number.parseFloat(icon.style.height) || 1.7 : 0;
+    const gap = icon ? Number.parseFloat(row.style.gap) || 0.34 : 0;
+    // Icons use em units. Include their actual width, gap and height before
+    // fitting the full name; the old fixed allowance was smaller than the icon.
+    const fontSize = fitTextSize(title.textContent || '', font,
+        Math.max(0.1, availableWidthPx - 1.5), availableHeightPx,
+        Math.min(maximum, availableHeightPx / Math.max(1.12, iconHeight)), iconWidth + gap);
+    element.style.padding = '0';
+    applyLabelFontSettings(element, {...font, size: fontSize});
+    element.style.maxWidth = `${availableWidthPx}px`;
+    element.style.overflow = 'visible';
+    element.style.textOverflow = 'clip';
+    element.style.whiteSpace = 'nowrap';
     if (row) {
-        row.style.maxWidth = `${Math.round(availableWidthPx)}px`;
-        row.style.overflow = 'hidden';
-    }
-    if (title) {
-        const icon = row?.querySelector?.('img');
-        const iconWidth = icon ? icon.getBoundingClientRect().width + fontSize * 0.45 : 0;
-        title.style.maxWidth = `${Math.max(0, Math.floor(availableWidthPx - iconWidth))}px`;
-        title.style.overflow = 'hidden';
-        title.style.textOverflow = 'ellipsis';
+        row.style.maxWidth = 'none';
+        row.style.overflow = 'visible';
+        title.style.flex = '0 0 auto';
+        title.style.maxWidth = 'none';
+        title.style.overflow = 'visible';
+        title.style.textOverflow = 'clip';
         title.style.whiteSpace = 'nowrap';
     }
 }

@@ -2,7 +2,7 @@
 
 The Models and Edit workspaces include two satellite models:
 
-- `models/satellite_world_simple_structure.json`: the default, derived from the local files in `data/space/json/` inspected on 26 September 2026.
+- `models/satellite_world_simple_structure.json`: the default, derived from the local files in `data/space/json/`, rechecked on 27 September 2026.
 - `models/satellite_world_complete_structure2.json`: the existing complete domain model, preserved without changes.
 
 The other existing models remain available. Only `satellite_world_complete_structure.json` and `satellite_world_simple_structure_v2.json` were removed.
@@ -10,6 +10,16 @@ The other existing models remain available. Only `satellite_world_complete_struc
 The simple model describes data structures with 11 classes, 3 visual hyperclasses, and 14 links. A deeper audit of all 32 source files added explicit **Decay Record** and **Refresh Status** classes. The [audit findings and complete file coverage](SPACE_DATA_AUDIT.md) explain the redesign, conflicts, join rules, metadata semantics and deliberate omissions. Individual catalog records stay in the source datasets. The diagram loads without those datasets; it does not import them or propagate satellite orbits.
 
 ## Source Mapping
+
+The September 27 review read all 32 files, including all six metadata sidecars.
+The source hashes and audit results were unchanged, so the existing 11 classes,
+3 hyperclasses, 84 attributes, and 14 relationships still describe this snapshot.
+The update improves the saved hierarchy, labels, and arrow visibility while
+preserving identifiers, relationship directions, cardinalities, and source mappings.
+The profile-to-payload verb **owns** means containment of the nested `payload`
+object. **May use** retains the conditional profile-to-display association;
+**is recorded in** identifies a historical decay record. These labels do not
+assert legal ownership, verified profile identity, or future decay predictions.
 
 Each attribute carries `sourceFields`. The prefix identifies an entry in `metadata.sourceDatasets`; the remaining path is relative to that dataset's record selector. `tracked:@manifest` addresses the tracked manifest; `tracked:@chunk` addresses chunk wrapper metadata; `display:@document` addresses asset-document metadata. Other paths address selected records. Grouped attributes retain related source fields and nested containers for a compact diagram. Every link has `sourceEvidence` describing its fields, relationship kind, join rule and observed cardinality. These extensions document provenance; they do not implement database joins.
 

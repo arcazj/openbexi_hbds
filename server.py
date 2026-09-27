@@ -3076,6 +3076,8 @@ def openapi_spec(host: str) -> dict:
                         "arrowheadSize": {"type": "number"},
                         "arrowheadScale": {"type": "number"},
                         "maxArrowheadSize": {"type": "number"},
+                        "arrowheadMinPixels": {"type": "number", "minimum": 0, "default": 10},
+                        "arrowheadMaxPixels": {"type": "number", "exclusiveMinimum": True, "minimum": 0, "default": 22},
                         "labelFontSize": {"type": "number"},
                         "labelColor": {"type": "string"},
                         "labelBackgroundColor": {"type": "string"},

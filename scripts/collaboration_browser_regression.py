@@ -933,6 +933,54 @@ return !state.controlsInteracting && !state.frameScheduled ? state : null;
         page.close()
 
 
+def run_readability_ui_regression(base_url: str, debug_port: int) -> None:
+    cases = [
+        ("Models", f"{base_url}/index_models.html"),
+        ("Edit", dynamic_layout_url(base_url, "satellite_world_simple_structure.json", debug=False)),
+        ("Tests", dynamic_layout_url(base_url, "layout_007_nested_hyperclasses.json", models_path="test_models/", debug=False)),
+    ]
+    for mode, url in cases:
+        page = BrowserPage(create_target(debug_port))
+        try:
+            page.navigate(url)
+            wait_for(page, "return (window.__hbdsDynamicTest || window.__hbdsModelsTest)?.getData()?.hypergraph?.class?.length > 0;", f"{mode} readability load", timeout=35)
+            for width, height in ((1600, 1000), (390, 844), (1600, 1000)):
+                page.cdp.send("Emulation.setDeviceMetricsOverride", {"width": width, "height": height, "deviceScaleFactor": 1, "mobile": False})
+                page.evaluate("document.querySelector('#fit-model-button').click()")
+                page.evaluate("new Promise(resolve => setTimeout(resolve, 300))")
+                result = page.evaluate("""(() => {
+                  const title=document.querySelector('#canvas-model-title'), rect=title.getBoundingClientRect();
+                  const style=getComputedStyle(title), viewport=document.querySelector('#diagram-viewport').getBoundingClientRect();
+                  const overview=document.querySelector('#model-overview').getBoundingClientRect();
+                  const labels=[...document.querySelectorAll('.class-label')];
+                  const truncated=labels.filter(label=>{
+                    const text=label.querySelector('.hbds-icon-title-row span')||label;
+                    return text.scrollWidth>text.clientWidth+1;
+                  }).map(label=>label.textContent);
+                  return {truncated, border:parseFloat(style.borderTopWidth), titleFont:parseFloat(style.fontSize),
+                    classFont:Math.max(...labels.map(label=>parseFloat(getComputedStyle(label).fontSize))),
+                    titleClipped:title.scrollWidth>title.clientWidth+1, titleVisible:rect.width>0 && rect.height>0,
+                    titleClearance:viewport.top-rect.bottom, overviewClearance:overview.top-rect.bottom};
+                })()""")
+                if (result["truncated"] or result["border"] or result["titleClipped"] or not result["titleVisible"]
+                        or result["titleClearance"] < 8 or result["overviewClearance"] < 8
+                        or result["titleFont"] <= result["classFont"]):
+                    raise BrowserRegressionError(f"{mode} readability at {width}px: {result}")
+            if mode != "Models":
+                page.evaluate("const view=document.querySelector('#view-toggle'); view.checked=true; view.dispatchEvent(new Event('change',{bubbles:true}));")
+                page.cdp.send("Input.dispatchMouseEvent", {"type":"mousePressed", "x":650, "y":420, "button":"left", "clickCount":1})
+                page.cdp.send("Input.dispatchMouseEvent", {"type":"mouseMoved", "x":780, "y":485, "button":"left", "buttons":1})
+                page.cdp.send("Input.dispatchMouseEvent", {"type":"mouseReleased", "x":780, "y":485, "button":"left", "clickCount":1})
+                page.evaluate("new Promise(resolve => setTimeout(resolve, 400))")
+                arrows = page.evaluate("window.__hbdsDynamicTest.getLinkHubMetrics()")
+                if any(not arrow["arrowOptional"] and arrow["arrowLengthPixels"] < arrow["arrowMinimumPixels"] - 0.5 for arrow in arrows):
+                    raise BrowserRegressionError(f"{mode}: tilted 3-D arrows became too small")
+            assert_browser_has_no_significant_errors(page, f"{mode} readability")
+            print(f"PASS {mode} full titles, frameless heading, mobile resize, and arrow visibility")
+        finally:
+            page.close()
+
+
 def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
     page = BrowserPage(create_target(debug_port))
     try:
@@ -1000,6 +1048,19 @@ def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
     if (metrics.overlapPairs) errors.push(`${algorithm}: ${metrics.overlapPairs} unrelated nodes overlap ${JSON.stringify(metrics.overlapDetails)}`);
     if (metrics.linkObstacleIntersections) errors.push(`${algorithm}: links cross unrelated nodes ${JSON.stringify(metrics.linkObstacleDetails)}`);
     const labels = hook.getLabelMetrics().filter(l => l.visible);
+    const title = document.querySelector('#canvas-model-title');
+    if (parseFloat(getComputedStyle(title).borderTopWidth)>0) errors.push('Model title has a frame');
+    for (const label of document.querySelectorAll('.class-label')) {
+      const text=label.querySelector('.hbds-icon-title-row span') || label;
+      if (text.scrollWidth>text.clientWidth+1) errors.push(`${algorithm}: truncated class name ${text.textContent}`);
+    }
+    for (const link of hook.getLinkHubMetrics()) {
+      if (!link.valid || !link.touchesBoundary) errors.push(`${algorithm}: detached relationship endpoint ${link.id}`);
+      if (!link.arrowOptional && link.arrowLengthPixels<link.arrowMinimumPixels-0.5)
+        errors.push(`${algorithm}: arrowhead too small ${link.id}`);
+      if (model.metadata.id==='satellite_world_simple_structure' && link.labelGapPixels>12)
+        errors.push(`${algorithm}: label detached from its link ${link.id}: ${link.labelGapPixels}px`);
+    }
     const overlaps = [];
     for (let i=0; i<labels.length; i++) for (let j=i+1; j<labels.length; j++) {
       const a=labels[i], b=labels[j];
@@ -3234,7 +3295,7 @@ def terminate_process(process: subprocess.Popen | None, name: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--suite", choices=("all", "ai", "interaction", "satellite", "layout"), default="all")
+    parser.add_argument("--suite", choices=("all", "ai", "interaction", "satellite", "layout", "readability"), default="all")
     args = parser.parse_args()
     server_process: subprocess.Popen | None = None
     browser_process: subprocess.Popen | None = None
@@ -3250,6 +3311,9 @@ def main() -> int:
 
         browser_process = launch_browser(debug_port)
         wait_for_browser(debug_port, browser_process)
+        if args.suite == "readability":
+            run_readability_ui_regression(base_url, debug_port)
+            return 0
         if args.suite in ("ai", "interaction"):
             run_ai_support_ui_regression(base_url, debug_port, TEMP_MODEL_NAME)
             run_ai_review_regression(base_url, debug_port)
@@ -3259,6 +3323,7 @@ def main() -> int:
                 run_regression(base_url, debug_port, loaded_model)
             return 0
         run_satellite_model_regression(base_url, debug_port)
+        run_readability_ui_regression(base_url, debug_port)
         if args.suite == "satellite":
             run_builtin_visual_regressions(base_url, debug_port)
             return 0

@@ -1,17 +1,18 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { findOrthogonalPath } from './hbds_routing.js';
-import { fitTextSize, linkLabelSize } from './hbds_text_metrics.js';
+import { fitTextSize, linkLabelSize } from './hbds_text_metrics.js?v=readability-20260927';
 
 const linkLabels = [];
 const activeLinks = [];
 const ORTHOGONAL_CLEARANCE = 0.55;
 const PARALLEL_ROUTE_GAP = 0.28;
 const MIN_LABEL_SEGMENT = 0.65;
-const LANE_COLLISION_EPSILON = 0.18;
+// Allow a label's half-height and clearance between parallel routes.
+const LANE_COLLISION_EPSILON = 0.38;
 const LANE_OVERLAP_MIN = 0.2;
 const RELATIONSHIP_PORT_RADIUS = 0.065;
-const RELATIONSHIP_PORT_STUB = 0.24;
+const RELATIONSHIP_PORT_STUB = 0.48;
 const PORT_SIDES = ['top', 'right', 'bottom', 'left'];
 const DEFAULT_LINK_FONT_SETTINGS = {
   size: 12,
@@ -137,10 +138,11 @@ export function createLinkBetweenClass(linkData, classById, options = {}) {
 
   const labelDiv = document.createElement('div');
   labelDiv.className = 'label link-label';
+  labelDiv.dataset.linkId = String(linkData.id ?? '');
   labelDiv.textContent = labelText;
   applyLinkLabelFontSettings(labelDiv, labelFont);
   labelDiv.style.color = rendering.labelColor ?? rendering.textColor ?? '#111111';
-  labelDiv.style.background = rendering.labelBackgroundColor ?? 'rgba(255,255,255,0.9)';
+  labelDiv.style.background = rendering.labelBackgroundColor ?? '#ffffff';
   labelDiv.style.borderRadius = '999px';
   labelDiv.style.border = '0';
   labelDiv.style.whiteSpace = 'nowrap';
@@ -172,6 +174,7 @@ export function recalculateAllLinks() {
   const occupiedLabelParents = new WeakSet();
   const obstacleBoxesByParent = new WeakMap();
   const routes = [];
+  const portOffsets = getRelationshipPortOffsets();
   for (const link of activeLinks) {
     const key = [String(link.linkData.sourceClassId), String(link.linkData.targetClassId)].sort().join(':');
     if (!pairBuckets.has(key)) pairBuckets.set(key, []);
@@ -189,7 +192,7 @@ export function recalculateAllLinks() {
       }
       const obstacleBoxes = getCachedObstacleBoxes(obstacleBoxesByParent, parent, link.sourceClass, link.targetClass);
       const lane = laneDescriptors.get(link);
-      const portPair = chooseRelationshipPortPair(link, parent, lane, obstacleBoxes, occupiedLanes);
+      const portPair = chooseRelationshipPortPair(link, parent, lane, obstacleBoxes, occupiedLanes, portOffsets);
       const route = buildOrthogonalRoute({
         link,
         p0: portPair.source.point,
@@ -231,7 +234,7 @@ export function recalculateAllLinks() {
   for (const {route} of routes) for (let i=1; i<route.basePoints.length; i++) {
     const a=route.basePoints[i-1], b=route.basePoints[i];
     occupiedLabels.push({minX:Math.min(a.x,b.x)-0.025,maxX:Math.max(a.x,b.x)+0.025,
-      minY:Math.min(a.y,b.y)-0.025,maxY:Math.max(a.y,b.y)+0.025});
+      minY:Math.min(a.y,b.y)-0.025,maxY:Math.max(a.y,b.y)+0.025, route});
   }
   for (const {link,route} of routes) {
     separateLinkLabel(route, occupiedLabels, link.linkData.rendering ?? {}, link.labelObj.userData.collisionSize);
@@ -343,6 +346,7 @@ function createLinkArrowMarkerGroup(rendering = {}) {
   group.userData.relationshipArrow = true;
   group.userData.arrowType = style.type;
   group.userData.arrowDirection = style.direction;
+  group.userData.baseSize = style.size;
   if (!group.visible) return group;
 
   if (style.direction === 'source-to-target' || style.direction === 'bidirectional') {
@@ -372,6 +376,7 @@ function updateLinkArrowMarkerGroup(group, route, rendering = {}) {
       ? route.sourceTangent.clone().multiplyScalar(-1)
       : route.targetTangent;
     marker.position.copy(position);
+    marker.userData.routeTangent = tangent.clone();
     marker.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
   }
 }
@@ -564,10 +569,10 @@ function updateRelationshipPort(marker, port, route) {
   marker.userData.routeEndpoint = route?.arrowPosition?.clone?.() ?? null;
 }
 
-function chooseRelationshipPortPair(link, parent, lane, obstacleBoxes = [], occupiedLanes = []) {
+function chooseRelationshipPortPair(link, parent, lane, obstacleBoxes = [], occupiedLanes = [], portOffsets) {
   const rendering = link.linkData.rendering ?? {};
-  const sourceCandidates = getRelationshipPortCandidates(link.sourceClass, parent, rendering.sourcePortSide ?? rendering.sourcePort, link.targetClass);
-  const targetCandidates = getRelationshipPortCandidates(link.targetClass, parent, rendering.targetPortSide ?? rendering.targetPort, link.sourceClass);
+  const sourceCandidates = getRelationshipPortCandidates(link.sourceClass, parent, rendering.sourcePortSide ?? rendering.sourcePort, link.targetClass, portOffsets?.get(link)?.source);
+  const targetCandidates = getRelationshipPortCandidates(link.targetClass, parent, rendering.targetPortSide ?? rendering.targetPort, link.sourceClass, portOffsets?.get(link)?.target);
   if (!rendering.routePoints?.length) {
     const pairs=[];
     for (const source of sourceCandidates) for (const target of targetCandidates) {
@@ -588,7 +593,7 @@ function chooseRelationshipPortPair(link, parent, lane, obstacleBoxes = [], occu
         const points=compactPoints([pair.source.point,...path.map(p=>new THREE.Vector3(p.x,p.y,start.z)),pair.target.point]);
         if (countRouteObstacleIntersections(points,obstacleBoxes)) continue;
         const shared=getRouteLanes(points).reduce((sum,l)=>sum+occupiedLanes.filter(o=>routeLanesCollide(l,o)).length,0);
-        const score=getRouteLength(points)+Math.max(0,points.length-2)*0.35+shared*0.7;
+        const score=getRouteLength(points)+Math.max(0,points.length-2)*0.35+shared*2;
         if (!shortest || score<shortest.score) shortest={...pair,points,score};
         if (!simpleOnly && shortest) break;
       }
@@ -622,11 +627,39 @@ function chooseRelationshipPortPair(link, parent, lane, obstacleBoxes = [], occu
   };
 }
 
-function getRelationshipPortCandidates(node, parent, requestedSide, peer) {
+function getRelationshipPortOffsets() {
+  const nodes = new Map(), offsets = new Map();
+  for (const link of activeLinks) {
+    offsets.set(link, {source: {}, target: {}});
+    for (const endpoint of ['source', 'target']) {
+      const node = endpoint === 'source' ? link.sourceClass : link.targetClass;
+      const peer = endpoint === 'source' ? link.targetClass : link.sourceClass;
+      if (!nodes.has(node)) nodes.set(node, []);
+      nodes.get(node).push({link, endpoint, peer: peer.getWorldPosition(new THREE.Vector3())});
+    }
+  }
+  for (const [node, entries] of nodes) {
+    const size = getRelationshipNodeSize(node);
+    for (const side of PORT_SIDES) {
+      const horizontal = side === 'top' || side === 'bottom';
+      const axis = horizontal ? 'x' : 'y';
+      const ordered = [...entries].sort((a,b) => a.peer[axis]-b.peer[axis] ||
+        String(a.link.linkData.id).localeCompare(String(b.link.linkData.id)) || a.endpoint.localeCompare(b.endpoint));
+      const span = Math.min(Math.max(0, (horizontal ? size.width : size.height)-0.6), (entries.length-1)*0.42);
+      ordered.forEach((entry,index) => {
+        offsets.get(entry.link)[entry.endpoint][side] = entries.length > 1 ? span*(index/(entries.length-1)-0.5) : 0;
+      });
+    }
+  }
+  return offsets;
+}
+
+function getRelationshipPortCandidates(node, parent, requestedSide, peer, offsets = {}) {
   const requested = normalizePortSide(requestedSide);
   const sides = requested ? [requested] : PORT_SIDES;
   return sides.map(side => {
     const localPoint = getPortLocalPosition(node, side);
+    localPoint[side === 'top' || side === 'bottom' ? 'x' : 'y'] += offsets[side] || 0;
     const worldPoint = node.localToWorld(localPoint.clone());
     const point = parent ? parent.worldToLocal(worldPoint.clone()) : worldPoint.clone();
     return {
@@ -716,6 +749,12 @@ function getRouteLength(points) {
 function buildOrthogonalRoute({ link, p0, p1, parent, index, count, lane, occupiedLanes, obstacleBoxes, sourcePort, targetPort, automaticPoints }) {
   const rendering = link.linkData.rendering ?? {};
   let points = automaticPoints || buildBaseRoutePoints({ link, p0, p1, parent, rendering, lane, sourcePort, targetPort });
+  if (automaticPoints && findSharedRouteLaneCollision(points, occupiedLanes)) {
+    const separated = separateSharedRouteLane(points, rendering, occupiedLanes);
+    if (separated[0].distanceTo(p0) < 1e-6 && separated[separated.length-1].distanceTo(p1) < 1e-6 &&
+        !countRouteObstacleIntersections(separated, obstacleBoxes) &&
+        !findSharedRouteLaneCollision(separated, occupiedLanes)) points = separated;
+  }
   if (!automaticPoints) {
     points = separateSharedRouteLane(points, rendering, occupiedLanes);
     points = avoidObstacleIntersections(points, obstacleBoxes, rendering);
@@ -1274,7 +1313,7 @@ function getLabelPlacement(points, rendering, lane) {
   best = best || fallback || { position: points[0].clone(), tangent: new THREE.Vector3(1, 0, 0), length: 0 };
   const offset = typeof rendering.labelOffsetFromPath === 'number'
     ? rendering.labelOffsetFromPath
-    : ((lane?.sideSign ?? 1) * 0.1);
+    : 0;
   if (offset) {
     best.position.add(getNormal(best.tangent).multiplyScalar(offset));
   }
@@ -1285,7 +1324,7 @@ function separateLinkLabel(route, occupiedLabels, rendering, measuredSize) {
   const labelText = String(rendering.labelText ?? '');
   const boundsSize = measuredSize || {
     width: Math.max(rendering.labelCollisionWidth || 0, 0.85, labelText.length * 0.22 + 0.5),
-    height: Math.max(rendering.labelCollisionHeight || 0, 0.6)
+    height: Math.max(rendering.labelCollisionHeight || 0, 0.56)
   };
   const margin = rendering.labelCollisionMargin ?? 0.06;
   const basePosition = route.labelPosition.clone();
@@ -1298,11 +1337,34 @@ function separateLinkLabel(route, occupiedLabels, rendering, measuredSize) {
   for (let i=1; i<route.basePoints.length; i++) {
     const a=route.basePoints[i-1], b=route.basePoints[i];
     const horizontal=almostEqual(a.y,b.y);
-    for (const fraction of [0.5,0.25,0.75]) for (const side of [1,-1]) {
-      const point=a.clone().lerp(b,fraction);
-      if (horizontal) point.y+=side*(boundsSize.height/2+0.12);
-      else point.x+=side*(boundsSize.width/2+0.12);
-      candidates.push(point);
+    for (const fraction of [0.5,0.25,0.75,0.12,0.88]) {
+      candidates.push(a.clone().lerp(b,fraction));
+      for (const side of [1,-1]) {
+        const point=a.clone().lerp(b,fraction);
+        if (horizontal) point.y+=side*(boundsSize.height/2+0.12);
+        else point.x+=side*(boundsSize.width/2+0.12);
+        candidates.push(point);
+      }
+    }
+    // Candidate positions at obstacle edges find short free intervals that
+    // fixed fractions miss, especially among several parallel relationships.
+    const axis = horizontal ? 'x' : 'y', across = horizontal ? 'y' : 'x';
+    const halfAlong = (horizontal ? boundsSize.width : boundsSize.height)/2;
+    const halfAcross = (horizontal ? boundsSize.height : boundsSize.width)/2;
+    for (const offset of [0,halfAcross+0.12,-halfAcross-0.12]) {
+      const point=a.clone().lerp(b,0.5); point[across]+=offset;
+      for (const occupied of occupiedLabels) {
+        if (occupied.route === route) continue;
+        const crossMin=horizontal ? occupied.minY : occupied.minX;
+        const crossMax=horizontal ? occupied.maxY : occupied.maxX;
+        if (point[across]+halfAcross+margin<crossMin || point[across]-halfAcross-margin>crossMax) continue;
+        const low=horizontal ? occupied.minX : occupied.minY;
+        const high=horizontal ? occupied.maxX : occupied.maxY;
+        for (const coordinate of [low-halfAlong-margin-0.02,high+halfAlong+margin+0.02]) {
+          if (coordinate<Math.min(a[axis],b[axis]) || coordinate>Math.max(a[axis],b[axis])) continue;
+          const candidate=point.clone(); candidate[axis]=coordinate; candidates.push(candidate);
+        }
+      }
     }
   }
 
@@ -1326,11 +1388,25 @@ function separateLinkLabel(route, occupiedLabels, rendering, measuredSize) {
     const right=Math.max(...occupiedLabels.map(b=>b.maxX))+boundsSize.width/2+margin+0.1;
     candidates.push(new THREE.Vector3(left,basePosition.y,basePosition.z),new THREE.Vector3(right,basePosition.y,basePosition.z));
   }
-  candidates.sort((a,b)=>a.distanceToSquared(basePosition)-b.distanceToSquared(basePosition));
+  // Favor a clear position alongside any part of this route, instead of
+  // staying near the original midpoint after that area becomes crowded.
+  const ownSegments = occupiedLabels.filter(bounds => bounds.route === route);
+  const otherSegments = occupiedLabels.filter(bounds => bounds.route && bounds.route !== route);
+  const distance = (a,b) => Math.hypot(Math.max(0,a.minX-b.maxX,b.minX-a.maxX), Math.max(0,a.minY-b.maxY,b.minY-a.maxY));
+  const score = candidate => {
+    const bounds = getLabelBounds(candidate, boundsSize);
+    const ownDistance = Math.min(...ownSegments.map(segment => distance(bounds,segment)));
+    const otherDistance = Math.min(...otherSegments.map(segment => distance(bounds,segment)));
+    return ownDistance*30 + Math.max(0,ownDistance-otherDistance)*60 + candidate.distanceTo(basePosition)*0.05;
+  };
+  const scored = new Map(candidates.map(candidate => [candidate,score(candidate)]));
+  candidates.sort((a,b)=>scored.get(a)-scored.get(b));
+  const background = String(rendering.labelBackgroundColor ?? '#ffffff').replaceAll(' ', '');
+  const inline = background !== 'transparent' && !/rgba\([^)]*,0(?:\.0+)?\)$/.test(background);
   let selectedBounds = null;
   for (const candidate of candidates) {
     const bounds = getLabelBounds(candidate, boundsSize);
-    if (!occupiedLabels.some(occupied => labelBoundsCollide(bounds, occupied, margin))) {
+    if (!occupiedLabels.some(occupied => (occupied.route !== route || !inline) && labelBoundsCollide(bounds, occupied, margin))) {
       route.labelPosition.copy(candidate);
       selectedBounds = bounds;
       break;
@@ -1465,6 +1541,29 @@ export function updateLinkFontSizes(camera, renderer) {
   const c = new THREE.Vector3();
   camera.getWorldPosition(c);
   const viewportHeight = Math.max(1, renderer?.domElement?.clientHeight ?? globalThis.innerHeight ?? 800);
+  const viewportWidth = Math.max(1, renderer?.domElement?.clientWidth ?? globalThis.innerWidth ?? 800);
+  for (const link of activeLinks) {
+    const baseSize = link.arrow.userData.baseSize;
+    if (!baseSize || !link.arrow.visible) continue;
+    const rendering = link.linkData.rendering || {};
+    const configuredMinimum = Number(rendering.arrowheadMinPixels ?? 10);
+    const minimum = Number.isFinite(configuredMinimum) ? Math.max(0,configuredMinimum) : 10;
+    const maximum = Math.max(minimum,toPositiveNumber(rendering.arrowheadMaxPixels,22));
+    for (const marker of link.arrow.children) {
+      const worldTip = marker.getWorldPosition(new THREE.Vector3());
+      const tip = worldTip.clone().project(camera);
+      const tail = marker.parent.localToWorld(marker.position.clone().addScaledVector(marker.userData.routeTangent,-baseSize)).project(camera);
+      const angle = Math.atan2((tip.y-tail.y)*viewportHeight,(tip.x-tail.x)*viewportWidth)-Math.PI/2;
+      // Face the camera while pointing along the projected route. Flat arrows
+      // remain visible when the user tilts the diagram in 3-D mode.
+      marker.quaternion.copy(marker.parent.getWorldQuaternion(new THREE.Quaternion()).invert()
+        .multiply(camera.getWorldQuaternion(new THREE.Quaternion()))
+        .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),angle)));
+      const depth = Math.max(0.001,-worldTip.clone().applyMatrix4(camera.matrixWorldInverse).z);
+      const pixels = baseSize*getPixelsPerWorldUnit(camera,depth,viewportHeight);
+      marker.scale.setScalar(THREE.MathUtils.clamp(pixels,minimum,maximum)/Math.max(0.001,pixels));
+    }
+  }
   for (const label of linkLabels) {
     label.getWorldPosition(p);
     const d = Math.max(1, p.distanceTo(c));
@@ -1473,8 +1572,9 @@ export function updateLinkFontSizes(camera, renderer) {
     const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, d, viewportHeight);
     const bounds=label.userData.collisionSize || linkLabelSize(label.userData.text,font);
     const availableWidthPx=Math.max(0.1,(bounds.width-0.08)*pixelsPerWorldUnit);
-    const size=fitTextSize(label.userData.text,font,availableWidthPx,bounds.height*pixelsPerWorldUnit*0.7,
-      Math.min(preferredSize,0.28*pixelsPerWorldUnit),0.98);
+    // Keep relationship text prominent without dwarfing dense attribute rows.
+    const size=fitTextSize(label.userData.text,font,availableWidthPx,(bounds.height-0.04)*pixelsPerWorldUnit*1.12/1.36,
+      Math.min(preferredSize,0.30*pixelsPerWorldUnit),0.98);
     applyLinkLabelFontSettings(label.element, { ...font, size });
   }
 }

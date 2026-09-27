@@ -4,7 +4,7 @@
     <title>HDBS Graphic Simulator</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=readability-20260927">
 </head>
 <body>
 <div id="container">
@@ -48,11 +48,11 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {updateLabelFontSizes} from './js/hbds_class.js?v=layout-20260926b';
-    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=layout-20260926b';
-    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=layout-20260926b';
-    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=layout-20260926b';
-    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=layout-20260926b';
+    import {updateLabelFontSizes} from './js/hbds_class.js?v=readability-20260927';
+    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=readability-20260927';
+    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=readability-20260927';
+    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=readability-20260927';
+    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=readability-20260927';
     import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260718a';
 
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {
@@ -972,6 +972,7 @@
         const text = titleText ?? selectedOption?.textContent?.trim() ?? '';
         title.textContent = text;
         document.body.classList.toggle('has-model', Boolean(text));
+        if (renderer && camera) onResize();
     }
 
     function toggleHelpOverlay(show) {
@@ -1435,7 +1436,13 @@
 
     /* ---------- Utility functions ---------- */
     function getCanvasSize() {
-        const rect = document.getElementById('diagram-viewport')?.getBoundingClientRect();
+        const viewport = document.getElementById('diagram-viewport');
+        const title = document.getElementById('canvas-model-title').getBoundingClientRect();
+        const top = document.getElementById('container').getBoundingClientRect().top;
+        const titleSpace = `${Math.max(68, Math.ceil(title.bottom - top + 12))}px`;
+        viewport.style.top = titleSpace;
+        document.body.style.setProperty('--hbds-diagram-top', titleSpace);
+        const rect = viewport.getBoundingClientRect();
         return {
             width: Math.max(1, Math.floor(rect?.width || window.innerWidth)),
             height: Math.max(1, Math.floor(rect?.height || window.innerHeight))
@@ -1445,6 +1452,7 @@
     function onResize() {
         const size = getCanvasSize();
         camera.aspect = size.width / size.height;
+        camera.updateProjectionMatrix();
         renderer.setSize(size.width, size.height);
         css2DRenderer.setSize(size.width, size.height);
         updateLabelFontSizes(camera, renderer);
@@ -1453,7 +1461,6 @@
         updateHyperClassLinkFontSizes(camera, renderer);
         recalculateAllLinks();
         renderOnce();
-        camera.updateProjectionMatrix();
         updateModelOverview(getModelContext());
     }
 

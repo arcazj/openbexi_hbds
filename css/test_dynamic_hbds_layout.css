@@ -183,31 +183,6 @@ body.model-tree-collapsed #container {
   display: block;
 }
 
-#canvas-model-title {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  z-index: 18;
-  max-width: calc(100% - 32px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 20px;
-  font-weight: 780;
-  color: #333;
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid #ddd;
-  border-radius: 7px;
-  padding: 6px 12px;
-  backdrop-filter: blur(3px);
-  display: none;
-  transform: translateX(-50%);
-}
-
-body.has-model #canvas-model-title {
-  display: inline-block;
-}
-
 .canvas-collaboration-status {
   position: absolute;
   top: 50%;
@@ -332,7 +307,7 @@ body.has-model #canvas-model-title {
 
 #model-overview {
   position: fixed;
-  top: 16px;
+  top: calc(var(--hbds-diagram-top, 68px) + 12px);
   left: calc(var(--tree-width) + 16px);
   z-index: 20;
   width: 224px;
@@ -2533,11 +2508,7 @@ details.control-group > summary .section-title {
   }
 
   #canvas-model-title {
-    right: 16px;
-    left: 200px;
-    max-width: none;
-    font-size: 16px;
-    transform: none;
+    font-size: 24px;
   }
 
   #toast {

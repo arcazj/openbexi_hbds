@@ -68,18 +68,17 @@ body.embedded-shell-menu.has-collaboration-split #container {
   top: 14px;
   left: 50%;
   z-index: 18;
-  max-width: calc(100% - 340px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 20px;
+  max-width: calc(100% - 112px);
+  overflow-wrap: anywhere;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.15;
+  font-size: clamp(24px, 2.5vw, 34px);
   font-weight: 780;
   color: #333;
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid #ddd;
-  border-radius: 7px;
-  padding: 6px 12px;
-  backdrop-filter: blur(3px);
+  background: transparent;
+  border: 0;
+  padding: 0;
   display: none;
   transform: translateX(-50%);
 }
@@ -649,7 +648,7 @@ select {
 }
 #model-overview {
   position: absolute;
-  top: 12px;
+  top: calc(var(--hbds-diagram-top, 68px) + 12px);
   left: 12px;
   width: 220px;
   height: 160px;

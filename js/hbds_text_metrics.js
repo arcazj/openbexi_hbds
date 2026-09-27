@@ -20,7 +20,7 @@ export function fitTextSize(text, font, width, height, maximum, iconEm = 0) {
 
 export function linkLabelSize(text, font, rendering = {}) {
   return {
-    width: Math.max(Number(rendering.labelCollisionWidth) || 0, 0.85, (textWidthEm(text, font) + 0.84) * 0.28 + 0.08),
-    height: Math.max(Number(rendering.labelCollisionHeight) || 0, 0.6)
+    width: Math.max(Number(rendering.labelCollisionWidth) || 0, 0.85, (textWidthEm(text, font) + 0.84) * 0.36 + 0.08),
+    height: Math.max(Number(rendering.labelCollisionHeight) || 0, 0.56)
   };
 }

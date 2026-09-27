@@ -931,6 +931,19 @@ preservation, and links crossing labels or unrelated nodes.
 At overview zoom, label sizes must respect the available row spacing; a fixed
 pixel minimum must not cause labels to overlap. Zooming in restores detail.
 
+For focused readability checks in Models, Edit, and Tests:
+
+```powershell
+py -3.9 -B scripts/check_project.py --browser-only --browser-suite readability
+```
+
+This checks complete class and hyperclass names, a larger frameless model title,
+title wrapping and clearance from the diagram and overview at desktop and mobile
+sizes, and arrowhead visibility after tilting the diagram in 3-D. The layout suite
+also checks that simple-satellite link labels stay within 12 pixels of their own
+routes in Grid, Radial, and Hierarchy. Labels with backgrounds may cover their
+own line; they must remain clear of other relationships and model elements.
+
 ## 22. Model Validation And JSON Editing
 
 Manual validation:

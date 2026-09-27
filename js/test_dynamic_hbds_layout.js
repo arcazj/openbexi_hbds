@@ -39,8 +39,8 @@ import {
   normalizeFontSettings,
   getFontSettingsForTextType,
   getFitQualityMetrics
-} from './hbds_model.js?v=layout-20260926b';
-import { recalculateAllLinks } from './hbds_class_link.js?v=layout-20260926b';
+} from './hbds_model.js?v=readability-20260927';
+import { recalculateAllLinks } from './hbds_class_link.js?v=readability-20260927';
 import {
   applyAiModel,
   applyServerModelOperations,
@@ -691,7 +691,13 @@ function continueOrbitAnimation() {
 }
 
 function getCanvasSize() {
-  const rect = $('diagram-viewport').getBoundingClientRect();
+  const viewport = $('diagram-viewport');
+  const title = $('canvas-model-title').getBoundingClientRect();
+  const top = $('container').getBoundingClientRect().top;
+  const titleSpace = `${Math.max(68, Math.ceil(title.bottom - top + 12))}px`;
+  viewport.style.top = titleSpace;
+  document.body.style.setProperty('--hbds-diagram-top', titleSpace);
+  const rect = viewport.getBoundingClientRect();
   return {
     width: Math.max(1, Math.floor(rect.width)),
     height: Math.max(1, Math.floor(rect.height))
@@ -2505,6 +2511,7 @@ function updateCanvasTitle() {
   if (canvasTitleOverride) {
     title.textContent = canvasTitleOverride;
     document.body.classList.add('has-model');
+    resizeRenderers();
     return;
   }
   const selectedOption = $('test-model-select')?.selectedOptions?.[0];
@@ -2514,6 +2521,7 @@ function updateCanvasTitle() {
     return;
   }
   title.textContent = selectedText && selectedText !== 'Blank workspace' ? selectedText : 'Untitled Model';
+  resizeRenderers();
 }
 
 function setCanvasTitleOverride(text) {
@@ -3778,6 +3786,22 @@ function drawSnapshotElement(canvasContext, element, containerRect) {
   canvasContext.fillStyle = style.color || '#111827';
   canvasContext.textAlign = textAlign;
   canvasContext.textBaseline = 'middle';
+  if (element.id === 'canvas-model-title' && element.firstChild?.nodeType === Node.TEXT_NODE) {
+    // Use the browser's actual line breaks for wrapped titles in PNG previews.
+    const node = element.firstChild, range = document.createRange(), lines = [];
+    let offset = 0;
+    for (const character of node.textContent) {
+      range.setStart(node,offset); offset += character.length; range.setEnd(node,offset);
+      const glyph = range.getBoundingClientRect();
+      if (!glyph.width || !glyph.height) continue;
+      let line = lines.find(item => Math.abs(item.top-glyph.top)<1);
+      if (!line) { line={top:glyph.top,bottom:glyph.bottom,left:glyph.left,text:''}; lines.push(line); }
+      line.text += character;
+    }
+    canvasContext.textAlign = 'left';
+    for (const line of lines) canvasContext.fillText(line.text,line.left-containerRect.left,(line.top+line.bottom)/2-containerRect.top);
+    return;
+  }
   canvasContext.fillText(text, textX, y + height / 2);
 }
 
@@ -8592,6 +8616,25 @@ function collectLinkHubMetrics() {
     const arrowWorld = arrow ? arrow.getWorldPosition(new THREE.Vector3()) : portWorld.clone();
     const portRadius = getHubWorldRadius(endpoint === 'source' ? sourcePort : targetPort);
     const distance = portWorld.distanceTo(arrowWorld);
+    const viewport = renderer.domElement.getBoundingClientRect();
+    const project = point => {
+      const p = point.clone().project(camera);
+      return {x:viewport.left+(p.x+1)*viewport.width/2, y:viewport.top+(1-p.y)*viewport.height/2};
+    };
+    const tip = project(arrowWorld);
+    const baseSize = arrow?.parent?.userData?.baseSize || 0;
+    const tail = arrow ? project(arrow.localToWorld(new THREE.Vector3(0,-baseSize,0))) : tip;
+    const arrowLengthPixels = Math.hypot(tip.x-tail.x,tip.y-tail.y);
+    const label = object.children.find(child => child.isCSS2DObject && child.userData?.labelKind === 'link');
+    const rect = label?.element.getBoundingClientRect();
+    const routePoints = getLineWorldPoints(object.getObjectByName('link-route')).map(project);
+    let labelGapPixels = Infinity;
+    if (rect) for (let i=1;i<routePoints.length;i++) {
+      const a=routePoints[i-1], b=routePoints[i];
+      labelGapPixels=Math.min(labelGapPixels, Math.hypot(
+        Math.max(0,Math.min(a.x,b.x)-rect.right,rect.left-Math.max(a.x,b.x)),
+        Math.max(0,Math.min(a.y,b.y)-rect.bottom,rect.top-Math.max(a.y,b.y))));
+    }
     metrics.push({
       id: linkData.id || object.uuid,
       sourceClassId: sourceId,
@@ -8602,6 +8645,10 @@ function collectLinkHubMetrics() {
       arrowEndpoint: arrow?.userData?.arrowEndpoint || null,
       arrowType,
       arrowDirection,
+      arrowLengthPixels,
+      labelGapPixels,
+      arrowMinimumPixels: Number(rendering.arrowheadMinPixels ?? 10),
+      arrowOptional,
       sourceTargetDistance: Number(sourceWorld.distanceTo(targetWorld).toFixed(5)),
       distance: Number(distance.toFixed(5)),
       hubRadius: Number(portRadius.toFixed(5)),
@@ -8620,6 +8667,7 @@ function collectLabelMetrics() {
     const style = getComputedStyle(element);
     return {
       text: element.textContent || '',
+      linkId: element.dataset.linkId || null,
       classes: [...element.classList],
       left: Number(rect.left.toFixed(2)),
       top: Number(rect.top.toFixed(2)),
@@ -8788,6 +8836,8 @@ function collectViewportLayoutMetrics() {
     for (let i=1;i<points.length;i++) {
       const a=points[i-1],b=points[i];
       for (const label of labels) {
+        // An inline label masks its own route; other routes must stay clear.
+        if (label.linkId === String(object.userData.linkData.id)) continue;
         const left=label.left+0.25,right=label.right-0.25,top=label.top+0.25,bottom=label.bottom-0.25;
         if (right<=left || bottom<=top) continue;
         const hit=Math.abs(a.y-b.y)<0.1

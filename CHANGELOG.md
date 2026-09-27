@@ -1,5 +1,12 @@
 # Release notes
 
+## Unreleased
+
+* Recheck all 32 local space source files and preserve the simple satellite model's structure and provenance. Clarify relationship verbs, save a clearer hierarchy, and enlarge target arrows.
+* Show complete class and hyperclass names, keep link labels close to their routes, and separate shared ports and route lanes where space permits.
+* Use a larger frameless title that wraps above the diagram and overview on narrow screens. Keep arrowheads visible in 2-D and 3-D across Models, Edit, and Tests.
+* Add desktop, mobile, and 3-D readability checks alongside the full model layout regression suite.
+
 ## 1.2 - 2026-09-27
 
 ### Diagram layout and readability
@@ -12,7 +19,7 @@
 
 ### Satellite models and AI support
 
-* Rebuild the simple satellite model from the local space JSON sources, including decay records, decay predictions, refresh status, and documented source evidence.
+* Rebuild the simple satellite model from the local space JSON sources, including historical decay records, refresh status, and documented source evidence. Decay predictions are not present in the inspected source snapshot.
 * Retain the complete satellite structure 2 model and the other example models.
 * Improve AI modeling prompts, validation, selective change previews, save, rollback, and provider support.
 

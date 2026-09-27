@@ -50,8 +50,8 @@ def validate(path):
         assert r['sourceClassId'] in by, f"Missing source {r['id']}"
         assert r['targetClassId'] in by, f"Missing target {r['id']}"
     layout=d.get('metadata',{}).get('layout',{})
-    layout_mode=layout.get('mode',layout.get('algorithm'))
-    assert str(layout_mode).lower() in {'grid','radial'}, 'Layout mode must be grid or radial'
+    layout_mode=layout.get('algorithm',layout.get('mode'))
+    assert str(layout_mode).lower() in {'grid','radial','hierarchy'}, 'Layout must be grid, radial, or hierarchy'
     print(f'OK: {path}')
 
 if __name__=='__main__':

@@ -1,7 +1,6 @@
 ﻿import * as THREE from 'three';
-import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, applyLabelFontSettings, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=layout-20260926b';
+import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, fitTitleLabel, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=readability-20260927';
 
-import { fitTextSize } from './hbds_text_metrics.js';
 const hyperclassLabels = [];
 let lastSizingCamera = null;
 let lastSizingRenderer = null;
@@ -169,12 +168,9 @@ export function updateLabelFontSizes(camera, renderer, options = {}) {
     const nodeWidth = label.userData?.nodeSize?.width ?? label.parent?.userData?.modelData?.size?.width ?? 4;
     const pixelsPerWorldUnit = getPixelsPerWorldUnit(camera, dist, viewportHeight);
     const availableWidthPx = Math.max(1, (nodeWidth - 0.36) * pixelsPerWorldUnit);
-    const text = label.userData?.text || label.element.textContent || '';
     const configuredSize = clampHyperclassFontSize(label.userData?.fontSettings?.size);
-    const size = fitTextSize(text, label.userData.fontSettings, availableWidthPx,
-      0.6 * pixelsPerWorldUnit, configuredSize,
-      label.element.classList.contains('hbds-icon-title') ? 1.45 : 0);
-    applyHyperclassTitleSizing(label.element, availableWidthPx, size);
+    fitTitleLabel(label.element, label.userData.fontSettings, availableWidthPx,
+      0.6 * pixelsPerWorldUnit, configuredSize);
   });
 }
 
@@ -191,30 +187,6 @@ function getPixelsPerWorldUnit(camera, distance, viewportHeight) {
   }
   if (camera?.isOrthographicCamera) return viewportHeight / Math.max(1e-6, camera.top - camera.bottom);
   return 80;
-}
-
-function applyHyperclassTitleSizing(element, availableWidthPx, fontSize) {
-  element.style.padding = '0';
-  element.style.fontSize = `${fontSize.toFixed(1)}px`;
-  if (element.__hbdsFontSettings) applyLabelFontSettings(element, { ...element.__hbdsFontSettings, size: fontSize });
-  element.style.maxWidth = `${Math.round(availableWidthPx)}px`;
-  element.style.overflow = 'hidden';
-  element.style.textOverflow = 'ellipsis';
-  element.style.whiteSpace = 'nowrap';
-  const row = element.querySelector?.('.hbds-icon-title-row');
-  const title = row?.querySelector?.('span') || row?.lastElementChild;
-  if (row) {
-    row.style.maxWidth = `${Math.round(availableWidthPx)}px`;
-    row.style.overflow = 'hidden';
-  }
-  if (title) {
-    const icon = row?.querySelector?.('img');
-    const iconWidth = icon ? icon.getBoundingClientRect().width + fontSize * 0.45 : 0;
-    title.style.maxWidth = `${Math.max(0, Math.floor(availableWidthPx - iconWidth))}px`;
-    title.style.overflow = 'hidden';
-    title.style.textOverflow = 'ellipsis';
-    title.style.whiteSpace = 'nowrap';
-  }
 }
 
 function roundedRect(w, h, r) {

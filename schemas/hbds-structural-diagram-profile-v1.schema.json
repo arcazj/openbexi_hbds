@@ -277,6 +277,8 @@
         "arrowheadSize": {"type": "number", "exclusiveMinimum": 0},
         "arrowheadScale": {"type": "number", "exclusiveMinimum": 0},
         "maxArrowheadSize": {"type": "number", "exclusiveMinimum": 0},
+        "arrowheadMinPixels": {"type": "number", "minimum": 0, "description": "Minimum projected arrowhead length; defaults to 10 pixels. Zero disables the lower limit."},
+        "arrowheadMaxPixels": {"type": "number", "exclusiveMinimum": 0, "description": "Maximum projected arrowhead length; defaults to 22 pixels."},
         "labelColor": {"type": "string"},
         "labelBackgroundColor": {"type": "string"},
         "labelPositionAlongPath": {"type": "number", "minimum": 0, "maximum": 1},

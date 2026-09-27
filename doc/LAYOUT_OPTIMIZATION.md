@@ -37,24 +37,38 @@ within its allocated area. Large diagrams provide an overview when fitted to
 the window; zoom in to read individual attributes.
 
 Class and hyperclass names use bold text by default. Their font size uses the
-actual font's measured width and the available title area, up to the configured
-size. **Bold class and hyperclass names** controls the default independently of
+actual font's measured width, icon dimensions, and available title area, up to
+the configured size. Names stay complete instead of ending in an ellipsis.
+Automatic layout allows more body width for longer titles.
+**Bold class and hyperclass names** controls the default independently of
 attribute and link styles; individual font overrides remain available.
 `rendering.titleColor` colors a title independently of its attributes. Decay
 classes use dark red to distinguish lifecycle information.
 
 Link labels reserve space around class bodies, attributes, group titles, and
-other link labels and paths. Automatic routes compare clear, short paths between
-ports, then search around obstacles when necessary. They avoid endpoint bodies,
+other link labels and paths. Placement searches for free intervals along the
+label's own route, favoring nearby positions. A label with a background can sit
+on its own line; its background keeps the text readable. Automatic routes
+compare clear, short paths between ports, then search around obstacles when
+necessary. They avoid endpoint bodies,
 unrelated nodes, attribute areas, and group titles. Links between a group and
-its children attach inward. Saved manual waypoints are regenerated when the
-layout is optimized. Link crossings and shared port segments can still occur in dense
-graphs; avoiding nodes does not make every graph planar.
+its children attach inward. Multiple relationships use separated ports and
+prefer distinct lanes when space permits. Saved manual waypoints are regenerated
+when the layout is optimized. Link crossings and shared port segments can still
+occur in dense graphs; avoiding nodes does not make every graph planar.
 
 Fit View includes attribute areas, relationship routes, and label space. The
-model title has a separate area above both renderers. Panning and zooming clip
-the diagram at that area's boundary. PNG/SVG exports and collaboration previews
+model title is larger, frameless, and has a separate area above both renderers.
+It wraps on narrow screens, and the diagram and overview move below it. Panning
+and zooming clip the diagram at that area's boundary. PNG/SVG exports and collaboration previews
 retain the same title spacing.
+
+Arrowheads face the camera in 3-D and retain a visible size when zoomed out.
+Their default projected length is between 10 and 22 pixels; the simple satellite
+model uses an 11-pixel minimum. Optional `rendering.arrowheadMinPixels` and
+`rendering.arrowheadMaxPixels` override these limits. Set the minimum to `0` to
+disable the lower limit. Existing arrow types and directions remain available.
+These shared rendering rules apply in Models, Edit, and Tests.
 
 Shipped relationship labels use verbs or short verb phrases. Redundant target
 names are removed, while meaningful qualifiers remain (for example, **may
@@ -82,3 +96,11 @@ layout switching, zoom, resizing, Fit View, and save/reload. They check rendered
 group containment, node and label overlap, title clearance, snapshot geometry,
 manual layout preservation, and links crossing unrelated nodes.
 Pure geometry checks also cover all supplied model fixtures and cyclic graphs.
+The layout suite also checks that satellite link labels stay close to their
+routes in all three layouts. Focused readability checks cover full class names,
+title wrapping and clearance on desktop and mobile, and visible arrowheads after
+a 3-D rotation. Run them separately:
+
+```powershell
+py -3.9 -B scripts/check_project.py --browser-only --browser-suite readability
+```
