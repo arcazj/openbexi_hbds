@@ -51,3 +51,4 @@ __pycache__/
 # Local reference material and working datasets are not release artifacts.
 /doc/*.pdf
 /satellite_database/
+/data/space/json/

@@ -21,12 +21,15 @@ This README is the main entry point for setup, features, server mode, API endpoi
 * [HBDS source and documentation catalog](doc/README.md) - historical PDF inventory, provenance and license status, duplicate/missing chapter notes, glossary, tutorial, support matrix, and profile documentation.
 * [HBDS Structural Diagram Profile v1](doc/HBDS_STRUCTURAL_DIAGRAM_PROFILE_V1.md) - normative current diagram contract, with [v1 and additive v2 JSON Schemas](schemas/README.md) and validated examples.
 * [Layout and optimization](doc/LAYOUT_OPTIMIZATION.md) - Grid, Radial, Hierarchy, group containment, label spacing, routing, and regression checks.
+* [Proposed functor navigation API](openapi_docs/README.md) - imported API design, semantic notes, and contract files; includes a list of missing companion materials and validation limits.
 
 ## Recent Updates
 
 ### Satellite Model Collection
 
 The satellite examples are `satellite_world_simple_structure.json` (the default, rebuilt from `data/space/json/`) and the preserved `satellite_world_complete_structure2.json`. The other existing models remain available; only the legacy complete satellite model and simple v2 model were removed. The [satellite source mapping](doc/SATELLITE_MODEL_SOURCES.md) explains the new model's classes, relationships, source coverage, and limitations. Regression fixtures remain available in Tests.
+
+Raw snapshots in `data/space/json/` are local inputs for rebuilding and auditing the satellite models. Git ignores that folder; the models and source audit remain versioned.
 
 This week the project added a larger local-server workflow and collaboration surface:
 
