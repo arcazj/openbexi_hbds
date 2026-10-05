@@ -43,6 +43,7 @@ __pycache__/
 /.codex_server_*.log
 /.codex_previews/
 /.tmp-collab-browser-profile-*/
+/.tmp-edge-profile-*/
 /.tools/
 /AI_KEY/
 /models/.backups/

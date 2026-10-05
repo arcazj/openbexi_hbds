@@ -24,22 +24,22 @@
       ]
     },
     "layout": {
-      "algorithm": "hierarchy",
+      "algorithm": "grid",
       "fit": {
-        "padding": 1.18,
-        "fitHeightDistance": 7.2499,
-        "fitWidthDistance": 13.3566,
-        "distance": 14.3526,
-        "diagramWidth": 14.7725,
-        "diagramHeight": 5.73,
+        "padding": 1.08,
+        "fitHeightDistance": 11.2098,
+        "fitWidthDistance": 9.7828,
+        "distance": 14.7937,
+        "diagramWidth": 13.07,
+        "diagramHeight": 9.68,
         "diagramDepth": 0.08,
-        "radius": 7.9225,
+        "radius": 8.1322,
         "center": {
-          "x": -0.2862,
-          "y": 0,
+          "x": -2.4658,
+          "y": 0.118,
           "z": 0.04
         },
-        "cameraAspect": 1.3994,
+        "cameraAspect": 1.5472,
         "cameraFov": 50,
         "mode": "userView",
         "savedView": true,
@@ -85,8 +85,8 @@
           "Phone number"
         ],
         "position": {
-          "x": 0,
-          "y": 0,
+          "x": 3.9050000000000002,
+          "y": 1.9749999999999996,
           "z": 0
         },
         "size": {
@@ -133,8 +133,8 @@
           "Email"
         ],
         "position": {
-          "x": 5.04,
-          "y": 0,
+          "x": -4.444999999999999,
+          "y": -3.9650000000000007,
           "z": 0
         },
         "size": {
@@ -187,8 +187,8 @@
           "hyperclass_mail_carrier_with_links_5"
         ],
         "position": {
-          "x": -5.04,
-          "y": 0,
+          "x": -4.472499999999999,
+          "y": 1.9749999999999996,
           "z": 0
         },
         "size": {
@@ -237,8 +237,8 @@
         ],
         "parentClassId": "hyperclass_mail_carrier_with_links_3",
         "position": {
-          "x": -5.9725,
-          "y": 1.0900000000000003,
+          "x": -5.404999999999999,
+          "y": 3.065,
           "z": 0
         },
         "size": {
@@ -289,8 +289,8 @@
         ],
         "parentClassId": "hyperclass_mail_carrier_with_links_3",
         "position": {
-          "x": -5.8625,
-          "y": -1.44,
+          "x": -5.294999999999999,
+          "y": 0.5349999999999997,
           "z": 0
         },
         "size": {
