@@ -1,0 +1,79 @@
+OpenBEXI HBDS Individual Noncommercial License 1.0
+Effective for new project material first published under this license on or
+after 26 September 2026.
+
+Copyright (c) 2026 OpenBEXI HBDS contributors.
+
+1. Scope and existing rights
+
+"Software" means the project code and documentation to which the copyright
+holders apply this license. This license grants only rights those holders
+control. It does not replace third-party licenses or withdraw permissions
+already granted for earlier material under the MIT License. The earlier MIT
+notice is preserved in LICENSES/MIT-legacy.txt. Material obtained under that
+license remains usable under its terms, including commercially. This license
+does not make earlier MIT material subject to new restrictions.
+
+2. Free individual use
+
+An individual may use, copy, study, and modify the Software free of charge
+for their own noncommercial purposes. This includes personal projects,
+hobbies, individual study, coursework, and independent noncommercial research.
+Students and educators may use their own copies for individual learning or
+teaching preparation. No registration or payment is required for these uses.
+
+Individuals may share unmodified copies, or their noncommercial modifications,
+without a fee, under this same license, with this notice and all applicable
+third-party notices intact. Recipients must independently qualify for the
+free license or obtain a commercial license. This grant does not authorize
+offering the Software as a hosted service to an organization.
+
+3. Commercial and organizational use
+
+A separate paid commercial license from the relevant copyright holder or
+their authorized licensing representative is required BEFORE:
+
+  a. any use by or on behalf of a company, business, government department,
+     government agency, or other organization, including internal use,
+     evaluation, research, deployment, and services provided by contractors;
+  b. any use for commercial gain, paid services, or revenue-generating activity,
+     including use by an individual, consultant, or sole proprietor; or
+  c. institutional use by a school, university, nonprofit, or research institute,
+     including shared installations and organization-managed deployments.
+
+Individual coursework and personal learning permitted by section 2 do not
+grant an institution a deployment license. Employment or student status does
+not exempt work performed on behalf of a company or government. A separately
+signed agreement may grant educational, research, or nonprofit exceptions.
+
+Commercial fees, permitted deployments, users, support, and redistribution
+rights must be agreed in writing. Viewing this repository, downloading it,
+opening an inquiry, or receiving a price quote is not a commercial license.
+See COMMERCIAL_LICENSE.md for the contact route and request details.
+
+4. Notices and ownership
+
+Retain copyright, license, and third-party notices in copies and modifications.
+Mark substantive modifications. No trademark rights are granted. You retain
+rights you otherwise hold in your original models and data; this license does
+not claim ownership of your inputs or outputs. Third-party material and AI
+provider services remain subject to their own terms.
+
+5. Termination
+
+The rights granted by this license end if you materially breach its conditions.
+You must then stop uses that rely on this license. This does not terminate
+independent rights granted by an earlier MIT license or another agreement.
+
+6. No warranty; limitation of liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED
+"AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+THE COPYRIGHT HOLDERS AND CONTRIBUTORS WILL NOT BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE, WHETHER
+IN CONTRACT, TORT, OR OTHERWISE. MANDATORY RIGHTS UNDER APPLICABLE LAW REMAIN.
+
+This is a source-available license with use restrictions, not an OSI-approved
+open-source license. Rights not expressly granted are reserved, subject to
+the earlier and third-party licenses described in section 1.

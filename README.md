@@ -77,11 +77,12 @@ welcome through pull requests with relevant validation results.
 
 ## License
 
-**Individual noncommercial use is free**, including personal projects, student
-coursework, and independent research. **Companies, governments, other
-organizations, and individual commercial users require a paid commercial
-license.** Institutional educational use requires a license or written exception.
+**Personal noncommercial use, student and educator activities, academic and
+other noncommercial research, and qualifying charities and nonprofits are free.**
+Business use requires a paid commercial agreement unless it qualifies for an
+exemption under the **Commercial and Exempt Use License**.
 
 See [LICENSE.txt](LICENSE.txt) and [commercial licensing](COMMERCIAL_LICENSE.md).
+Licensing contact: [openbexi@gmail.com](mailto:openbexi@gmail.com).
 Earlier MIT permissions and third-party terms remain in effect for their
 respective material: [MIT notice](LICENSES/MIT-legacy.txt), [third-party notices](THIRD_PARTY_NOTICES.md).

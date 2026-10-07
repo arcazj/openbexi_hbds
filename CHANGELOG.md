@@ -1,5 +1,11 @@
 # Release notes
 
+## Unreleased - 2026-10-07
+
+* Align licensing with OpenBEXI Timeline's Commercial and Exempt Use License: free personal noncommercial use, student and educator activities, academic and other noncommercial research, and qualifying charities and nonprofits; paid agreements for business use unless exempt.
+* Use [openbexi@gmail.com](mailto:openbexi@gmail.com) for licensing inquiries in the license, commercial guide, order form, README, Help, and licensing page.
+* Preserve previous MIT and Individual Noncommercial grants and third-party notices. These terms apply to distributions expressly supplied with the updated license from October 7, 2026.
+
 ## 1.2.1 - 2026-09-27
 
 * Shorten the README, add fresh Satellite World Simple Structure and Transportation Links illustrations, and move server/AI setup details into a focused guide.
@@ -30,6 +36,6 @@
 ### Validation and licensing
 
 * Expand layout, visual, font, export, AI, and collaboration regression coverage across the 14 shipped models.
-* Individual noncommercial use, including eligible student use, is free under [LICENSE.txt](LICENSE.txt). Companies, government bodies, and other organizations require a commercial license for material covered by this license. Earlier MIT-licensed material and third-party components retain their existing terms.
+* At release 1.2, individual noncommercial use, including eligible student use, was free under the [Individual Noncommercial License](LICENSES/Individual-Noncommercial-1.0-legacy.txt). Companies, government bodies, and other organizations required a commercial license for material covered by that license. Earlier MIT-licensed material and third-party components retained their existing terms. See the current [LICENSE.txt](LICENSE.txt) for the expanded exemptions in later distributions.
 
 Dense diagrams may still contain crossing links; the layout does not guarantee a crossing-free graph.

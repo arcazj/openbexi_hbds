@@ -1352,7 +1352,7 @@ Run `py -3.9 -B scripts/check_project.py` to use an isolated copy without local 
 
 The browser suite also checks model discovery without changing the selected model, hidden reasoning controls for unknown models, selected-entity scope, selective save and rollback, cancellation without retries, late responses, and blocked application after local edits. The helper suite covers invalid partial approvals that would leave dangling references. Both Edit and Tests retain revision protection for save/apply/rollback.
 
-For release review, verify Help links to `license.html`, the individual noncommercial/commercial distinction matches `LICENSE.txt`, the earlier MIT notice remains present, and local PDFs, satellite working data, keys, backups, and browser profiles are excluded from Git.
+For release review, verify Help links to `license.html`, the commercial and exempt-use summaries match `LICENSE.txt`, and licensing links use `mailto:openbexi@gmail.com`. Confirm the personal, student/educator, noncommercial research, and qualifying nonprofit exemptions appear consistently in Help, the licensing page, and the commercial guide. Earlier MIT and Individual Noncommercial notices must remain present. Local PDFs, satellite working data, keys, backups, and browser profiles must remain excluded from Git.
 
 ## 27. Release Checklist
 

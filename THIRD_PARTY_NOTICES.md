@@ -3,6 +3,7 @@
 The current project license covers only material its licensors have authority to license. It does not replace these independent rights:
 
 - **Earlier OpenBEXI HBDS material:** the MIT notice remains in [LICENSES/MIT-legacy.txt](LICENSES/MIT-legacy.txt). Earlier MIT permissions, including commercial use, remain available for the material they cover.
+- **Earlier Individual Noncommercial distributions:** the previous license remains in [LICENSES/Individual-Noncommercial-1.0-legacy.txt](LICENSES/Individual-Noncommercial-1.0-legacy.txt). Copies received under it retain those permissions; the current Commercial and Exempt Use License does not retroactively replace them.
 - **Three.js and its addons:** the browser loads Three.js 0.176.0 from unpkg. Three.js is licensed under MIT; retain its [upstream license](https://github.com/mrdoob/three.js/blob/r176/LICENSE) when distributing a copy.
 - **Swagger UI:** the API documentation loads Swagger UI from jsDelivr. Its [upstream Apache 2.0 license](https://github.com/swagger-api/swagger-ui/blob/master/LICENSE) applies to that component.
 - **Historical PDFs:** the local inventory in [doc/README.md](doc/README.md) records unresolved authorship and redistribution rights. These local PDFs are excluded from this publication. The project license grants no rights to them.

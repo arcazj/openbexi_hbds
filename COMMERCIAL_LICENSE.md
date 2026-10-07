@@ -1,15 +1,63 @@
-# Commercial licensing
+# Commercial licensing and free exemptions
 
-Companies and government bodies need a **separate paid commercial license** to use the material covered by the current [license](LICENSE.txt), including for internal work, evaluation, research, or deployment. Contractors using it on their behalf also need coverage. Universities, nonprofits, and other institutions need an agreement for organizational use.
+OpenBEXI HBDS is distributed under the
+[Commercial and Exempt Use License](LICENSE.txt). Business use requires a paid
+agreement unless it qualifies for a free-use exemption. The source is available
+for inspection and permitted modification; commercial-use restrictions mean
+this is source available, rather than an OSI open-source license.
 
-Individual noncommercial learning, coursework, hobbies, and independent research are free. Institutional exceptions can be agreed in writing. The full terms in `LICENSE.txt` control; this page is a summary.
+The license text controls. This guide explains eligibility and how to obtain a
+commercial agreement.
 
-## Request a license
+## Licensor
 
-Contact the project maintainer through the [OpenBEXI HBDS repository](https://github.com/arcazj/openbexi_hbds). You can open a [licensing inquiry](https://github.com/arcazj/openbexi_hbds/issues/new?title=Commercial%20licensing%20inquiry) to arrange a suitable contact channel. GitHub issues are public, so keep confidential procurement details out of the initial inquiry.
+Jean-Christophe Arcaz, individual owner, Maryland, United States.
+Contact [openbexi@gmail.com](mailto:openbexi@gmail.com) for licensing inquiries.
 
-Include the organization type, intended use, estimated users/deployments, whether you plan to host or redistribute the software, and any support needs. Pricing and rights are agreed in a separate written agreement; this repository does not supply a commercial license key or an automatic commercial grant.
+## Free use
+
+| Category | Covered use |
+| --- | --- |
+| Personal | Noncommercial learning, experimentation and personal projects. |
+| Students and educators | Study, coursework and educational projects. |
+| Researchers | Academic and other noncommercial research; a grant or salary alone does not make research commercial. Commercial product development and paid business services require a commercial agreement. |
+| Charities and nonprofit organizations | Their operations and mission activities, including ordinary fundraising, membership fees and cost recovery. The organization must be legally established or recognized as nonprofit in its home jurisdiction and must not distribute profits to private owners or shareholders. |
+
+An organization's exemption covers people acting solely for it; it does not
+extend to independent for-profit subsidiaries or customers. You may rely on the
+free grant while eligible. The licensor may request reasonable evidence, and
+may grant other exemptions in writing. No registration or purchase is required
+by the free-use license itself. An exemption does not grant access to another
+person's models, data, infrastructure or AI-provider account.
+
+## Commercial agreements
+
+Email the licensor with your organization, intended use, number of users and
+deployment scope. Internal business use, hosted services, commercial integration
+and commercial redistribution require an agreement unless exempt above.
+
+Use the [commercial order form](COMMERCIAL_ORDER_FORM.md) to record the covered
+version, scope, fees, duration, renewal, upgrade rights and any support commitments.
+It becomes an agreement only when completed and accepted by both parties.
+There is no published price, automatic renewal, trial duration or promised
+support level. Those terms are agreed with each customer. AI-provider fees are
+separate unless the commercial agreement expressly includes them.
+
+Free redistribution must include the license and applicable notices, identify
+modifications, and preserve the restrictions on the licensor's covered code.
+Recipients need their own qualifying exemption or commercial permission.
 
 ## Earlier releases and third-party material
 
-Permissions already granted under the [earlier MIT license](LICENSES/MIT-legacy.txt) continue for the material covered by that license, including commercial permissions. The new terms do not retroactively restrict those releases or third-party components. See [third-party notices](THIRD_PARTY_NOTICES.md).
+These terms apply to distributions expressly supplied with this license on or
+after October 7, 2026. Copies previously received under the
+[earlier MIT license](LICENSES/MIT-legacy.txt), the
+[Individual Noncommercial License](LICENSES/Individual-Noncommercial-1.0-legacy.txt)
+or another valid license retain their existing rights. Earlier MIT permissions,
+including commercial use, remain valid for the material they cover; preserving
+that notice does not make newly licensed material an alternative MIT edition.
+
+Third-party code and assets retain their own terms; see
+[third-party notices](THIRD_PARTY_NOTICES.md). The project license grants no
+additional rights in historical PDFs, datasets, images or icons, and claims no
+ownership of user models, data or AI inputs and outputs.

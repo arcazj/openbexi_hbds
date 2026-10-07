@@ -1,79 +1,124 @@
-OpenBEXI HBDS Individual Noncommercial License 1.0
-Effective for new project material first published under this license on or
-after 26 September 2026.
+OpenBEXI HBDS Commercial and Exempt Use License
+Version 1.0 -- October 7, 2026
 
+Copyright (c) 2026 Jean-Christophe Arcaz.
 Copyright (c) 2026 OpenBEXI HBDS contributors.
+Licensor: Jean-Christophe Arcaz, individual owner, Maryland, United States.
+Licensing contact: openbexi@gmail.com
 
 1. Scope and existing rights
 
-"Software" means the project code and documentation to which the copyright
-holders apply this license. This license grants only rights those holders
-control. It does not replace third-party licenses or withdraw permissions
-already granted for earlier material under the MIT License. The earlier MIT
-notice is preserved in LICENSES/MIT-legacy.txt. Material obtained under that
-license remains usable under its terms, including commercially. This license
-does not make earlier MIT material subject to new restrictions.
+This license applies to OpenBEXI HBDS distributions expressly supplied with
+this license on or after October 7, 2026. "Software" means the first-party
+program code, model templates and accompanying documentation that the Licensor
+has authority to license and supplies under these terms.
 
-2. Free individual use
+Third-party code, libraries, datasets, images and other assets retain their own
+licenses. Their notices take precedence for those materials; this license grants
+no additional rights in them. See THIRD_PARTY_NOTICES.md. It does not assert
+ownership of your HBDS data, models, documents or AI inputs and outputs.
 
-An individual may use, copy, study, and modify the Software free of charge
-for their own noncommercial purposes. This includes personal projects,
-hobbies, individual study, coursework, and independent noncommercial research.
-Students and educators may use their own copies for individual learning or
-teaching preparation. No registration or payment is required for these uses.
+Copies previously received under the MIT License, the Individual Noncommercial
+License or another valid license retain the rights granted by that license.
+This license does not withdraw or restrict those grants. Earlier MIT permissions,
+including commercial use, remain valid for the material they cover. Historical
+texts are in LICENSES/MIT-legacy.txt and
+LICENSES/Individual-Noncommercial-1.0-legacy.txt; their inclusion does not offer
+new material in this distribution as an alternative MIT edition.
 
-Individuals may share unmodified copies, or their noncommercial modifications,
-without a fee, under this same license, with this notice and all applicable
-third-party notices intact. Recipients must independently qualify for the
-free license or obtain a commercial license. This grant does not authorize
-offering the Software as a hosted service to an organization.
+2. No-fee use
 
-3. Commercial and organizational use
+Subject to these terms, the Licensor grants you a worldwide, nonexclusive,
+royalty-free right to install, run, copy and modify the Software for:
 
-A separate paid commercial license from the relevant copyright holder or
-their authorized licensing representative is required BEFORE:
+(a) Personal learning, experimentation and other personal noncommercial use.
+(b) Students' study, coursework and educational projects, including educators
+    supporting those activities.
+(c) Academic and other noncommercial research. Grants, scholarships or salaries
+    alone do not make research commercial; use to develop a commercial product
+    or deliver a paid business service requires a commercial agreement.
+(d) The operations and mission activities of charitable and other nonprofit
+    organizations legally established or recognized as such in their home
+    jurisdiction, whose profits are not distributed to private owners or
+    shareholders. Mission-related fundraising, membership fees and cost recovery
+    do not alone remove this exemption. It covers employees, volunteers and
+    contractors acting solely for the eligible organization, but does not
+    extend to independent for-profit subsidiaries or customers.
 
-  a. any use by or on behalf of a company, business, government department,
-     government agency, or other organization, including internal use,
-     evaluation, research, deployment, and services provided by contractors;
-  b. any use for commercial gain, paid services, or revenue-generating activity,
-     including use by an individual, consultant, or sole proprietor; or
-  c. institutional use by a school, university, nonprofit, or research institute,
-     including shared installations and organization-managed deployments.
+You may rely on these exemptions while you meet their conditions. The Licensor
+may request reasonable evidence of eligibility. Other exceptions may be granted
+in writing by the Licensor. An exemption does not grant access to another
+person's models, data, infrastructure or AI-provider account.
 
-Individual coursework and personal learning permitted by section 2 do not
-grant an institution a deployment license. Employment or student status does
-not exempt work performed on behalf of a company or government. A separately
-signed agreement may grant educational, research, or nonprofit exceptions.
+3. Commercial use
 
-Commercial fees, permitted deployments, users, support, and redistribution
-rights must be agreed in writing. Viewing this repository, downloading it,
-opening an inquiry, or receiving a price quote is not a commercial license.
-See COMMERCIAL_LICENSE.md for the contact route and request details.
+Except for the uses permitted in section 2, using the Software to support a
+business, provide paid services, operate a hosted offering, integrate it into
+a commercial product, or distribute it commercially requires a separate paid
+commercial license from the Licensor before that use.
 
-4. Notices and ownership
+Contact openbexi@gmail.com to agree the customer, covered version, permitted
+deployments and users, internal/hosted/OEM scope, fees, duration, renewal and
+upgrade rights. Commercial permission starts only when an agreement is accepted
+by both parties and its applicable conditions are met. A written commercial
+agreement controls its covered use where it differs from these terms.
+Support, hosting, updates and service commitments are supplied only if agreed
+in writing. No price, automatic renewal or trial period is imposed by this file.
 
-Retain copyright, license, and third-party notices in copies and modifications.
-Mark substantive modifications. No trademark rights are granted. You retain
-rights you otherwise hold in your original models and data; this license does
-not claim ownership of your inputs or outputs. Third-party material and AI
-provider services remain subject to their own terms.
+4. Redistribution and modifications
 
-5. Termination
+You may share source or binary copies without charging for the Software,
+including your modifications, provided that you include this complete license,
+retain applicable copyright and third-party notices, and clearly identify
+modified versions. The Licensor's covered code remains subject to these terms;
+you may not grant broader rights in it. Recipients obtain permission for that
+code directly from the Licensor and must qualify under section 2 or obtain
+commercial permission under section 3 for their own use.
 
-The rights granted by this license end if you materially breach its conditions.
-You must then stop uses that rely on this license. This does not terminate
-independent rights granted by an earlier MIT license or another agreement.
+Commercial redistribution and commercial hosted access require the agreement
+described in section 3. This license grants no trademark rights or permission
+to imply the Licensor's endorsement. Independently licensed third-party
+materials and prior license grants remain governed by section 1.
 
-6. No warranty; limitation of liability
+5. User content and optional services
 
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED
-"AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
-THE COPYRIGHT HOLDERS AND CONTRIBUTORS WILL NOT BE LIABLE FOR ANY CLAIM,
-DAMAGES, OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE, WHETHER
-IN CONTRACT, TORT, OR OTHERWISE. MANDATORY RIGHTS UNDER APPLICABLE LAW REMAIN.
+You remain responsible for having permission to use and share your content.
+AI and other external services have their own terms, fees and availability.
+A workspace entitlement, role, feature flag or successful application login is
+an access-control setting; it is not a purchase, license certificate or waiver
+of these terms. The Software does not collect payment or verify purchases.
 
-This is a source-available license with use restrictions, not an OSI-approved
-open-source license. Rights not expressly granted are reserved, subject to
-the earlier and third-party licenses described in section 1.
+6. Duration and termination
+
+These permissions continue while you meet their conditions. If you cease to
+qualify for an exemption, stop the affected use or obtain a commercial license.
+For a curable material breach of these terms, the Licensor may terminate this
+grant if you do not cure the breach within 30 days after written notice. After
+termination, stop exercising the terminated permissions. Termination does not
+remove rights you hold independently under section 1 or rights required by law.
+
+7. Warranty and liability
+
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED "AS IS"
+AND "AS AVAILABLE", WITHOUT IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR
+A PARTICULAR PURPOSE OR NON-INFRINGEMENT. NO UNINTERRUPTED OR ERROR-FREE SERVICE
+IS PROMISED. EXPRESS COMMITMENTS IN A SEPARATE WRITTEN AGREEMENT STILL APPLY.
+
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR IS NOT LIABLE FOR
+INDIRECT, INCIDENTAL, SPECIAL OR CONSEQUENTIAL LOSS, INCLUDING LOST PROFITS OR
+LOST DATA, ARISING FROM THE SOFTWARE. THESE EXCLUSIONS DO NOT LIMIT WARRANTIES,
+REMEDIES OR LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED, INCLUDING APPLICABLE
+CONSUMER PROTECTIONS AND LIABILITY FOR FRAUD, WILLFUL MISCONDUCT, GROSS NEGLIGENCE
+OR PERSONAL INJURY WHERE SUCH LIABILITY CANNOT BE LIMITED.
+
+8. General
+
+Maryland law and applicable United States federal law govern these terms,
+subject to mandatory protections that apply in your jurisdiction. If a term
+cannot be enforced, the remaining terms continue to the extent permitted by
+law. These terms do not limit statutory rights that cannot be waived.
+
+Changes to this license govern future distributions that expressly include
+them; they do not retroactively replace the license received with an existing
+copy. Questions and requests for commercial or exempt use may be sent to
+openbexi@gmail.com.
