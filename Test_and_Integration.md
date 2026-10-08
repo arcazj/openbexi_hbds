@@ -155,7 +155,7 @@ Expected debug output:
 
 Validate:
 
-* The shell menu shows app version `v1.2.1`.
+* The shell menu shows app version `v2.6.2`.
 * The connection indicator turns green/connected.
 * Stopping the server turns the indicator red/not connected after polling catches up.
 * Restarting the server reconnects the UI.
@@ -923,9 +923,18 @@ Run the [layout regression checks](doc/LAYOUT_OPTIMIZATION.md) in an isolated co
 py -3.9 -B scripts/check_project.py --browser-only --browser-suite layout
 ```
 
+The dense layout suite can take several minutes. To run the remaining browser
+checks separately, use `--browser-only --browser-suite ui`. Together, `layout`
+and `ui` cover the same browser checks as `all`; `ui` includes readability,
+separation, saving, rendering, built-in scenarios, AI review, and collaboration.
+Browser and server diagnostics go to temporary files so long runs cannot block
+on unread subprocess output pipes; failures include the diagnostic tail.
+For a focused rerun, append `--browser-model satellite_world_simple_structure.json`
+to the layout command. The filename must identify one of that suite's fixtures.
+
 These checks cover full visual footprints, nested group containment, repeated
 optimization, automatic layout selection, zoom, resizing, and save/reload for
-all 14 shipped models and two stress/containment fixtures. They also check
+all 15 shipped models and two stress/containment fixtures. They also check
 default bold names, the protected title area, snapshot geometry, manual layout
 preservation, and links crossing labels or unrelated nodes.
 At overview zoom, label sizes must respect the available row spacing; a fixed
@@ -943,6 +952,25 @@ sizes, and arrowhead visibility after tilting the diagram in 3-D. The layout sui
 also checks that simple-satellite link labels stay within 12 pixels of their own
 routes in Grid, Radial, and Hierarchy. Labels with backgrounds may cover their
 own line; they must remain clear of other relationships and model elements.
+
+For focused link separation and attribute-column checks:
+
+```powershell
+py -B scripts/check_project.py --browser-only --browser-suite separation
+```
+
+Validate that **Separates links** follows Algorithm, defaults to checked, and
+restores its saved preference. Check Grid, Radial, Hierarchy, and None; None
+must preserve node positions. Each class and hyperclass must have one horizontal
+connector to ATT1, aligned square markers, and no connectors to later rows.
+The **Attribute spacing** slider and number control in the 2D attribute
+inspector must preview the owner's row gap, reset to 0.02, support undo/redo,
+disable in read-only mode, and survive save/reload. Attribute fonts default to
+twice the overall size; explicit overrides remain effective.
+
+The README and [Timeline model guide](doc/OPENBEXI_TIMELINE_MODEL.md) use fresh
+Models-view screenshots for release 2.6.2. Confirm that the Timeline image shows
+Record inside Source, Namespace inside Model, and one Model-to-Render link.
 
 ## 22. Model Validation And JSON Editing
 
@@ -1137,7 +1165,7 @@ This opens real headless Edge/Chrome clients. Rendering checks run with debug di
 Automated collaboration coverage:
 
 * the Models viewer defaults to the new simple satellite model; both satellite models render, and temporary copies preserve edits through save and reload
-* shell menu displays app version `v1.2.1`
+* shell menu displays app version `v2.6.2`
 * the temporary same-origin server remains available during concurrent asset loading, event streaming, and draft polling without fallback connection errors
 * Help includes the comprehensive user guide with AI, model delete, rollback, collaboration, and Edit/Tests save-location guidance
 * AI Support panel collapsed by default, pink section styling, provider-dependent credential UI, provider-specific model combo, custom model fallback, reasoning effort payload, and ChatGPT / Manual no-key workflow

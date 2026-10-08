@@ -76,6 +76,11 @@ Common fields are:
 
 When `preserveLayout` is true, every visible class-like element SHOULD have an explicit numeric position and size.
 
+`metadata.layout.separateLinks` is a boolean presentation preference. Missing
+values default to `true`; `false` retains legacy spacing and routing. The
+**Separates links** checkbox saves this preference. It changes visual geometry
+without changing the model's classes or relationships.
+
 ### 5.2 Font Policy
 
 The model-level font object supports:
@@ -84,6 +89,9 @@ The model-level font object supports:
 - `classSize`, `hyperclassSize`, `attributeSize`, and `linkSize` category overrides.
 
 Element-level font fields MAY override category values. Producers SHOULD prefer `font.size`; legacy `fontSize` and `labelFontSize` paths remain compatibility inputs. Font sizes MUST be positive numbers when present.
+
+Without an explicit attribute override, attribute text defaults to twice the
+overall size, subject to the viewer's font limits and available display space.
 
 ### 5.3 Scene Settings
 
@@ -133,6 +141,13 @@ The preferred attribute form is:
 ```
 
 An attribute object MUST have a non-empty `id`. Its `name`, `value`, `description`, `type`, `font`, and `rendering` fields are optional. Legacy scalar attributes and null placeholders are accepted for compatibility and edge-case fixtures, but null placeholders SHOULD be removed and scalars SHOULD be migrated to objects before collaborative editing.
+
+The owner class or hyperclass MAY set `rendering.attributes.spacing` to a number
+from 0 to 1 (default 0.02). This is the clear vertical gap between attribute rows,
+in world units. It is a presentation property of the owner, separate from the
+attribute values. The viewer aligns ATT1 with the existing circular connection
+point and draws one horizontal connector to its square marker. Subsequent
+attributes form a uniform right-hand column without additional connectors.
 
 ## 7. Links
 

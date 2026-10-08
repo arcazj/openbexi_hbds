@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const source=readFileSync(new URL('../js/hbds_routing.js',import.meta.url),'utf8');
-const {findOrthogonalPath}=await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const {findOrthogonalPath,routeSeparationPenalty}=await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 
 const cases=[
   {start:{x:0,y:0},end:{x:10,y:0},boxes:[{minX:3,maxX:7,minY:-5,maxY:5}]},
@@ -32,3 +32,29 @@ assert.equal(length(findOrthogonalPath({x:0,y:0},{x:10,y:0},[{minX:3,maxX:7,minY
 const endpointBodies=[{minX:-2,maxX:0,minY:-1,maxY:1},{minX:10,maxX:12,minY:-1,maxY:1}];
 assert.equal(length(findOrthogonalPath({x:0.24,y:0},{x:9.76,y:0},endpointBodies)),9.52,'facing ports connect directly without detouring around endpoints');
 console.log('PASS orthogonal routing: wide barriers, staggered barriers, overlapping obstacles, endpoints and blocked paths');
+
+const occupied=[{orientation:'horizontal',coord:0,min:0,max:10}];
+const separated=findOrthogonalPath({x:0,y:0.2},{x:10,y:0.2},[],0.15,false,{lanes:occupied,laneGap:0.7});
+assert.equal(routeSeparationPenalty(separated,occupied,0.7),0,'parallel route has its own lane');
+assert.ok(length(separated)>10,'separation may take a longer route');
+assert.equal(length(findOrthogonalPath({x:0,y:0.2},{x:10,y:0.2},[])),10,'legacy mode remains direct');
+const border={orientation:'horizontal',coord:0,min:-5,max:15,crossable:true};
+const across=findOrthogonalPath({x:0,y:-2},{x:0,y:2},[],0.15,false,{borders:[border]});
+assert.equal(length(across),4,'links entering a container cross its border directly');
+const along=findOrthogonalPath({x:0,y:0.2},{x:10,y:0.2},[],0.15,false,{borders:[border]});
+assert.ok(along && length(along)>10,'links never hug a containing hyperclass border');
+assert.equal(findOrthogonalPath({x:0,y:-2},{x:0,y:2},[],0.15,false,{borders:[{...border,crossable:false}]}),null,'links within a common container cannot escape its border');
+for (const {start,end,boxes} of cases) {
+  const options={lanes:occupied,laneGap:0.7};
+  const path=findOrthogonalPath(start,end,boxes,0.15,false,options);
+  assert.ok(path,'separated routing finds a route around barriers');
+  assert.deepEqual(path,findOrthogonalPath(start,end,boxes,0.15,false,options),'separated routing is deterministic');
+  for(let i=1;i<path.length;i++) for(const box of boxes) {
+    const a=path[i-1],b=path[i];
+    const crosses=a.y===b.y
+      ? a.y>box.minY&&a.y<box.maxY&&Math.min(a.x,b.x)<box.maxX&&Math.max(a.x,b.x)>box.minX
+      : a.x>box.minX&&a.x<box.maxX&&Math.min(a.y,b.y)<box.maxY&&Math.max(a.y,b.y)>box.minY;
+    assert.equal(crosses,false,'cached edge checks must preserve obstacle avoidance');
+  }
+}
+console.log('PASS optional route separation and hyperclass border clearance');

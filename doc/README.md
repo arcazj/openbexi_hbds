@@ -5,7 +5,9 @@ This directory contains project-authored specifications. A locally supplied hist
 ## Project Documentation
 
 - [Server and AI setup](SERVER_AND_AI.md): local modes, saving, provider configuration, collaboration, and API access.
-
+- [Layout and optimization](LAYOUT_OPTIMIZATION.md): layout algorithms, link separation, attribute spacing, and font behavior.
+- [OpenBEXI Timeline model](OPENBEXI_TIMELINE_MODEL.md): conceptual classes, relationships, source coverage, and the current diagram.
+- [OpenBEXI Timeline recreation prompt](../prompts/openbexi_timeline_prompt.MD): application requirements and inspected contracts for rebuilding the companion Timeline app.
 - [HBDS Structural Diagram Profile v1](HBDS_STRUCTURAL_DIAGRAM_PROFILE_V1.md): normative current JSON/rendering contract.
 - [HBDS Support Matrix](HBDS_SUPPORT_MATRIX.md): implemented, opt-in semantic, and unsupported capabilities.
 - [HBDS Glossary](HBDS_GLOSSARY.md): terminology used by theory, schemas, and UI.

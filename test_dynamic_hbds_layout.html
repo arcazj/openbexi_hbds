@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Lab</title>
-  <link rel="stylesheet" href="css/style.css?v=release-1.2.1">
-  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=release-1.2.1">
+  <link rel="stylesheet" href="css/style.css?v=release-2.6.2">
+  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=release-2.6.2">
   <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -219,6 +219,7 @@
         <option value="hierarchy">Hierarchy</option>
         <option value="radial">Radial</option>
       </select>
+      <label class="toggle-row" for="separate-links-toggle"><span>Separates links</span><input type="checkbox" id="separate-links-toggle" checked></label>
       <div class="two-col">
         <label class="toggle-row" for="auto-optimize-toggle"><span>Auto Layout</span><input type="checkbox" id="auto-optimize-toggle" checked></label>
         <label class="toggle-row" for="auto-fit-toggle"><span>Auto Fit</span><input type="checkbox" id="auto-fit-toggle" checked></label>
@@ -278,7 +279,7 @@
       <div class="settings-subtitle">Type Font Size</div>
       <label class="range-field" for="model-class-font-size-input"><span>Class</span><span class="range-control"><input type="range" id="model-class-font-size-input" min="6" max="72" step="1" value="12"><output id="model-class-font-size-value" class="range-value" for="model-class-font-size-input">Overall</output></span></label>
       <label class="range-field" for="model-hyperclass-font-size-input"><span>Hyperclass</span><span class="range-control"><input type="range" id="model-hyperclass-font-size-input" min="6" max="72" step="1" value="12"><output id="model-hyperclass-font-size-value" class="range-value" for="model-hyperclass-font-size-input">Overall</output></span></label>
-      <label class="range-field" for="model-attribute-font-size-input"><span>Attribute</span><span class="range-control"><input type="range" id="model-attribute-font-size-input" min="6" max="72" step="1" value="12"><output id="model-attribute-font-size-value" class="range-value" for="model-attribute-font-size-input">Overall</output></span></label>
+      <label class="range-field" for="model-attribute-font-size-input"><span>Attribute</span><span class="range-control"><input type="range" id="model-attribute-font-size-input" min="6" max="72" step="1" value="24"><output id="model-attribute-font-size-value" class="range-value" for="model-attribute-font-size-input">Overall ×2</output></span></label>
       <label class="range-field" for="model-link-font-size-input"><span>Link</span><span class="range-control"><input type="range" id="model-link-font-size-input" min="6" max="72" step="1" value="12"><output id="model-link-font-size-value" class="range-value" for="model-link-font-size-input">Overall</output></span></label>
       <button id="reset-model-font-settings-button" type="button" class="quiet">Apply Overall Font To All</button>
       <div class="settings-subtitle">Lighting</div>
@@ -388,6 +389,6 @@
     </div>
   </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=release-1.2.1"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=release-2.6.2"></script>
 </body>
 </html>

@@ -51,6 +51,11 @@
       "description": "multimodal transportation diagram"
     },
     {
+      "value": "models/openbexi_timeline.json",
+      "label": "openbexi timeline",
+      "description": "openbexi timeline"
+    },
+    {
       "value": "models/openshift_cloud_network.json",
       "label": "openshift cloud network",
       "description": "openshift cloud network"

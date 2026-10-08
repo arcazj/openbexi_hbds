@@ -73,6 +73,7 @@
           "enum": ["none", "grid", "hierarchy", "radial", "Grid"],
           "description": "Grid is a preserved legacy spelling; new producers should emit grid."
         },
+        "separateLinks": {"type": "boolean", "default": true, "description": "Reserve extra layout space and separate relationship routes and labels by default. Set false for legacy spacing."},
         "fit": {"type": "object", "additionalProperties": true}
       },
       "additionalProperties": true
@@ -215,7 +216,13 @@
       "properties": {
         "class": {"$ref": "#/$defs/classBodyRendering"},
         "font": {"$ref": "#/$defs/fontSettings"},
-        "attributes": {"type": "object", "additionalProperties": true},
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "spacing": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.02, "description": "Clear vertical space between attribute rows in world units; applies to the owner's entire column."}
+          },
+          "additionalProperties": true
+        },
         "connections": {"type": "object", "additionalProperties": true},
         "textColor": {"type": "string"},
         "color": {"type": "string"},

@@ -3,9 +3,19 @@
 Build and explore **Hypergraph-Based Data Structures (HBDS)** in your browser.
 Model classes, nested hyperclasses, attributes, and relationships in 2-D or 3-D.
 
-**Version 1.2.1** · [Live demo](https://arcazj.github.io/openbexi_hbds/index.html) · [Release notes](CHANGELOG.md)
+**Version 2.6.2** · [Live demo](https://arcazj.github.io/openbexi_hbds/index.html) · [Release notes](CHANGELOG.md)
 
 ## Examples
+
+Screenshots show the Models view in version 2.6.2.
+
+### OpenBEXI Timeline
+
+The Timeline domain model connects users, filters, presentation models, sources,
+records, namespaces, and shared rendering. [Model and source mapping](doc/OPENBEXI_TIMELINE_MODEL.md)
+and [complete application recreation prompt](prompts/openbexi_timeline_prompt.MD).
+
+![OpenBEXI Timeline HBDS model with Record inside Source and shared Render outside both hyperclasses](pictures/openbexi_timeline.png)
 
 ### Satellite World Simple Structure
 
@@ -25,6 +35,8 @@ Classes and relationships in a transportation network.
 
 - **Models, Edit, and Tests:** browse examples, edit models, and run visual scenarios.
 - **Automatic layout:** Grid, Radial, and Hierarchy with nested groups, readable names, and routed links.
+- **Link separation:** **Separates links** is on by default; turn it off to use legacy spacing.
+- **Attribute columns:** one connector to the first attribute, larger text, and compact spacing adjustable in the 2D attribute inspector.
 - **Editing and export:** search the model tree, drag nodes, copy/paste, edit attributes, and export JSON or diagram images.
 - **AI support:** generate, validate, and improve models with reviewed changes, selective apply, and rollback. Includes a manual copy/paste workflow.
 - **Local collaboration:** share live drafts, review differences, and merge compatible edits through the Python server.
@@ -56,6 +68,7 @@ files directly does not reliably support its modules and model loading.
 
 - [Modeling tutorial](doc/HBDS_MODELING_TUTORIAL.md) and [HBDS glossary](doc/HBDS_GLOSSARY.md)
 - [Layout and optimization](doc/LAYOUT_OPTIMIZATION.md)
+- [OpenBEXI Timeline model](doc/OPENBEXI_TIMELINE_MODEL.md) and [recreation prompt](prompts/openbexi_timeline_prompt.MD)
 - [Diagram contract](doc/HBDS_STRUCTURAL_DIAGRAM_PROFILE_V1.md) and [JSON schemas](schemas/README.md)
 - [Documentation catalog](doc/README.md) and [proposed functor API](openapi_docs/README.md)
 - [Testing and integration](Test_and_Integration.md), [roadmap](Roadmap.md), and [open issues](https://github.com/arcazj/openbexi_hbds/issues)

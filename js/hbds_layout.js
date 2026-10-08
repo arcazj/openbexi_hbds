@@ -3,20 +3,47 @@
 const PADDING = { left: 0.85, right: 0.85, top: 1.2, bottom: 0.85 };
 const compare = (a, b) => String(a.name).localeCompare(String(b.name)) || String(a.id).localeCompare(String(b.id));
 const positive = (value, fallback) => Number.isFinite(Number(value)) && Number(value) > 0 ? Number(value) : fallback;
+export const DEFAULT_ATTRIBUTE_SPACING = 0.02;
+export const MAX_ATTRIBUTE_SPACING = 1;
+export function normalizeAttributeSpacing(value) {
+  if (value === undefined || value === null || value === '' || !Number.isFinite(Number(value))) return DEFAULT_ATTRIBUTE_SPACING;
+  return Math.max(0, Math.min(MAX_ATTRIBUTE_SPACING, Number(value)));
+}
+
+// Attributes form a compact list starting at the existing connection point.
+// The row gap is independent of the container height and attribute count.
+export function getAttributeColumnLayout(size, count, attributes = {}, connectionPoint = null) {
+  const markerWidth=positive(attributes?.size?.width,0.1);
+  const markerHeight=positive(attributes?.size?.height,markerWidth);
+  const padding=0.18, minimumGap=Math.max(0.36,markerHeight+0.16);
+  const borderGap=0.4, labelGap=0.12, labelWidth=2.25;
+  const textHeight=0.34, spacing=normalizeAttributeSpacing(attributes?.spacing);
+  const gapY=Math.max(textHeight,markerHeight)+spacing;
+  const borderX=positive(size.width,1.2)/2;
+  const markerX=borderX+borderGap+markerWidth/2;
+  const labelX=markerX+markerWidth/2+labelGap;
+  return {
+    borderX, markerX, markerWidth, markerHeight, labelX, gapY, textHeight, spacing,
+    startY:connectionPoint?.y ?? positive(size.height,1.6)*0.45,
+    minimumHeight:count ? padding*2+count*minimumGap : 0,
+    labelWidth,
+    rightWidth:count ? borderGap+markerWidth+labelGap+labelWidth+padding : 0,
+    z:connectionPoint?.z ?? 0.06
+  };
+}
 
 export function getLayoutVisualMetrics(node) {
   const hyperclass = node.type === 'hyperclass';
   const count = node.attributes?.length || 0;
+  const column = getAttributeColumnLayout(node.size || {},count,node.rendering?.attributes);
   const titleWidth = Math.min(8, String(node.rendering?.iconTitleText ?? node.name ?? '').length * 0.18 + 1);
   const body = {
     width: Math.max(positive(node.size?.width, 0), hyperclass ? 4 : 1.35, titleWidth),
-    height: Math.max(positive(node.size?.height, 0), hyperclass ? 3.2 : 1.75,
-      (hyperclass ? 0.75 : 0.45) + Math.max(0, count - 1) * (hyperclass ? 0.16 : 0.17))
+    height: Math.max(positive(node.size?.height, 0), hyperclass ? 3.2 : 1.75, column.minimumHeight)
   };
-  const markerWidth = positive(node.rendering?.attributes?.size?.width, 0.1);
   // Reserve the full CSS2D attribute label width, including markers and margins.
   // Text length alone underestimates wide fonts and individually styled labels.
-  const attributeRight = count ? (hyperclass ? 0.28 + markerWidth : 0.25 + markerWidth * 2) + 0.06 + 2.25 + 0.18 : 0;
+  const attributeRight = column.rightWidth;
   return { body, width: body.width + attributeRight, height: body.height, offsetX: attributeRight / 2, offsetY: 0 };
 }
 
@@ -152,6 +179,8 @@ function hierarchy(items, edges, gapX, gapY) {
 
 export function optimizeModelLayout(model, algorithm = 'grid') {
   if (algorithm === 'none') return;
+  const separateLinks = model.metadata?.layout?.separateLinks !== false;
+  const padding = separateLinks ? {left:3.2, right:3.2, top:2, bottom:1.7} : PADDING;
   const nodes = model.hypergraph?.class || [], links = model.hypergraph?.link || [];
   const byId = new Map(nodes.map(node => [node.id, node])), children = new Map(), metrics = new Map();
   for (const node of nodes) {
@@ -166,7 +195,29 @@ export function optimizeModelLayout(model, algorithm = 'grid') {
     const items = siblings.map(node => ({ id: node.id, name: node.name, ...metrics.get(node.id) }));
     // Keep room for the route and its label between rows. Closely packed
     // cards otherwise force a label far away from the relationship it names.
-    const gapX = root ? 2.8 : 1.6, gapY = root ? 2.4 : 1.8;
+    let extra = 0;
+    if (separateLinks) {
+      const representatives=new Map(), pairs=new Map(), traffic=new Map();
+      function include(node,id) {
+        representatives.set(node.id,id);
+        for (const child of children.get(node.id) || []) include(child,id);
+      }
+      for (const node of siblings) include(node,node.id);
+      for (const link of links) {
+        const a=representatives.get(link.sourceClassId), b=representatives.get(link.targetClassId);
+        if (a===b) continue;
+        if (a!==undefined) traffic.set(a,(traffic.get(a) || 0)+1);
+        if (b!==undefined) traffic.set(b,(traffic.get(b) || 0)+1);
+        if (a===undefined || b===undefined) continue;
+        const key=JSON.stringify([String(a),String(b)].sort());
+        pairs.set(key,(pairs.get(key) || 0)+1);
+      }
+      extra=0.8+(Math.max(1,...pairs.values())-1)*0.7;
+      // Links entering or leaving a group also occupy its child rows. Counting
+      // only pairs within the group can force their labels far from the route.
+      if (!root) extra=Math.max(extra,(Math.max(1,...traffic.values())-1)*0.65);
+    }
+    const gapX = (root ? 2.8 : 1.6)+extra, gapY = (root ? 2.4 : 1.8)+extra;
     if (algorithm === 'radial') return radial(items, gapX, gapY);
     if (algorithm === 'hierarchy') {
       const representative = new Map();
@@ -189,8 +240,8 @@ export function optimizeModelLayout(model, algorithm = 'grid') {
     kids.forEach(measure);
     const content = arrange(kids);
     if (kids.length) node.size = {
-      width: Math.max(4, content.width + PADDING.left + PADDING.right),
-      height: Math.max(3.2, content.height + PADDING.top + PADDING.bottom)
+      width: Math.max(4, content.width + padding.left + padding.right),
+      height: Math.max(3.2, content.height + padding.top + padding.bottom)
     };
     const metric = getLayoutVisualMetrics(node);
     node.size = metric.body;
@@ -202,8 +253,8 @@ export function optimizeModelLayout(model, algorithm = 'grid') {
   function place(node, x, y) {
     const metric = metrics.get(node.id);
     node.position = { x: x - metric.offsetX, y: y - metric.offsetY, z: 0 };
-    const contentX = node.position.x + (PADDING.left - PADDING.right) / 2;
-    const contentY = node.position.y + (PADDING.bottom - PADDING.top) / 2;
+    const contentX = node.position.x + (padding.left - padding.right) / 2;
+    const contentY = node.position.y + (padding.bottom - padding.top) / 2;
     for (const child of children.get(node.id) || []) {
       const p = metric.content.positions.get(child.id);
       place(child, contentX + p.x, contentY + p.y);

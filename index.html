@@ -382,7 +382,7 @@
     </header>
 
     <main class="frame-wrap">
-      <iframe id="view-frame" title="HBDS Models view" src="index_models.html?embeddedShell=1&appVersion=release-1.2.1"></iframe>
+      <iframe id="view-frame" title="HBDS Models view" src="index_models.html?embeddedShell=1&appVersion=release-2.6.2"></iframe>
     </main>
   </div>
 
@@ -479,21 +479,21 @@
     const appVersion = document.getElementById('app-version');
     const viewButtons = Array.from(document.querySelectorAll('.mode-button[data-view]'));
     const helpSections = Array.from(document.querySelectorAll('.help-section'));
-    const HBDS_APP_VERSION = '1.2.1';
+    const HBDS_APP_VERSION = '2.6.2';
     let activeView = 'models';
     let serverConnectionState = 'not_connected';
     let serverConnectionPollTimer = null;
     const views = {
       models: {
-        src: 'index_models.html?embeddedShell=1&appVersion=release-1.2.1',
+        src: 'index_models.html?embeddedShell=1&appVersion=release-2.6.2',
         title: 'HBDS Models view'
       },
       edit: {
-        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=models/&manifestPath=models/models_manifest.json&appVersion=release-1.2.1',
+        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=models/&manifestPath=models/models_manifest.json&appVersion=release-2.6.2',
         title: 'HBDS Edit view'
       },
       tests: {
-        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=test_models/&manifestPath=test_models/test_models_manifest.json&appVersion=release-1.2.1',
+        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=test_models/&manifestPath=test_models/test_models_manifest.json&appVersion=release-2.6.2',
         title: 'HBDS Tests view'
       }
     };

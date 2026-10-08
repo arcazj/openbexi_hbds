@@ -4,7 +4,7 @@
     <title>HDBS Graphic Simulator</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="stylesheet" href="css/style.css?v=release-1.2.1">
+    <link rel="stylesheet" href="css/style.css?v=release-2.6.2">
 </head>
 <body>
 <div id="container">
@@ -48,11 +48,11 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {updateLabelFontSizes} from './js/hbds_class.js?v=release-1.2.1';
-    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=release-1.2.1';
-    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=release-1.2.1';
-    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=release-1.2.1';
-    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=release-1.2.1';
+    import {updateLabelFontSizes} from './js/hbds_class.js?v=release-2.6.2';
+    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=release-2.6.2';
+    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=release-2.6.2';
+    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=release-2.6.2';
+    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=release-2.6.2';
     import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260718a';
 
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {
@@ -464,15 +464,14 @@
                         if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
                         progress.update(48, `Rendering ${label}`);
                         await yieldToBrowser();
-                        model = setData(result.data.model, { context: getModelContext(), refresh: true });
+                        model = setData(result.data.model, { context: getModelContext(), refresh: true, optimizeLayout: true });
                         updateCanvasModelTitle(result.data.metadata?.label || label);
                     } else {
-                        model = await loadAndRenderScene(modelPath, getModelContext(), { allowedBasePath: 'models/' });
+                        model = await loadAndRenderScene(modelPath, getModelContext(), { allowedBasePath: 'models/', optimizeLayout: true });
                         updateCanvasModelTitle();
                     }
                     progress.update(78, `Fitting ${label}`);
                     const optimize = !model.metadata?.preserveLayout && !model.hypergraph?.metadata?.preserveLayout && getLayoutSettings().algorithm !== 'none';
-                    if (optimize) await optimizeAndRefreshLayout(getModelContext(), { algorithm: getLayoutSettings().algorithm });
                     if (optimize || !hasFitMetadata(model)) {
                         fitModelToCanvas(getModelContext(), { padding: 1.08, updateOverview: true });
                     }

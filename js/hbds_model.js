@@ -1,9 +1,9 @@
 ﻿import * as THREE from 'three';
-import { optimizeModelLayout } from './hbds_layout.js?v=release-1.2.1';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=release-1.2.1';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=release-1.2.1';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=release-1.2.1';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=release-1.2.1';
+import { optimizeModelLayout } from './hbds_layout.js?v=release-2.6.2';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=release-2.6.2';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=release-2.6.2';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=release-2.6.2';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=release-2.6.2';
 import { initModelOverview as initModelOverviewPanel, updateModelOverview as updateModelOverviewPanel } from './hbds_model_overview.js?v=overview-module-20260530a';
 import {
   normalizeSemanticModel,
@@ -56,7 +56,8 @@ export const DEFAULT_SCENE_SETTINGS = {
 };
 
 export const DEFAULT_LAYOUT_SETTINGS = {
-  algorithm: 'grid'
+  algorithm: 'grid',
+  separateLinks: true
 };
 export const DEFAULT_FONT_SETTINGS = {
   size: 12,
@@ -244,11 +245,11 @@ export function normalizeSceneSettings(settings={}){
   };
 }
 export function normalizeLayoutSettings(layout={}){
-  if(typeof layout==='string') return { algorithm:normalizeLayoutAlgorithm(layout) };
+  if(typeof layout==='string') return { algorithm:normalizeLayoutAlgorithm(layout), separateLinks:true };
   const source=layout&&typeof layout==='object'?layout:{};
   const rootFitSource=hasFitMetricFields(source)?source:null;
   const fit=normalizeFitSettings(source.fit ?? source.fitMetrics ?? rootFitSource);
-  const normalized={ ...source, algorithm:normalizeLayoutAlgorithm(source.algorithm) };
+  const normalized={ ...source, algorithm:normalizeLayoutAlgorithm(source.algorithm), separateLinks:source.separateLinks!==false };
   delete normalized.fitMetrics;
   if(fit) normalized.fit=fit;
   else if('fit' in source) normalized.fit=null;
@@ -282,7 +283,7 @@ export function getFontSettingsForTextType(fontSettings={},textType='class'){
   return {
     ...base,
     bold: (textType === 'class' || textType === 'hyperclass') ? base.titleBold : base.bold,
-    size:typeSize ?? base.size
+    size:typeSize ?? Math.min(MAX_FONT_SIZE, base.size * (textType === 'attribute' ? 2 : 1))
   };
 }
 export function getSceneSettings(currentData=data){
@@ -529,7 +530,7 @@ export function refreshSceneFromData(context){ if(!context) return; const {scene
     }
     node.position.set(p.x||0,p.y||0,p.z||0);
   }
-  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const renderLinkData={...ld,modelFont:linkFont}; const linkOptions={recalculate:false}; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,renderLinkData,linkOptions):createLinkBetweenClass(renderLinkData,modelRuntime.classById,linkOptions); if(!r) continue; r.linkGroup.visible=ld.visible!==false&&ld.rendering?.visible!==false; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(renderLinkData),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);}
+  for(const ld of data.hypergraph.link){ const s=modelRuntime.classById.get(ld.sourceClassId), t=modelRuntime.classById.get(ld.targetClassId); if(!s||!t) continue; const renderLinkData={...ld,modelFont:linkFont}; const linkOptions={recalculate:false,separateLinks:getLayoutSettings().separateLinks}; const r=(s.userData.isHyperClass||t.userData.isHyperClass)?createLinkBetweenHyperClass(dg,s,t,renderLinkData,linkOptions):createLinkBetweenClass(renderLinkData,modelRuntime.classById,linkOptions); if(!r) continue; r.linkGroup.visible=ld.visible!==false&&ld.rendering?.visible!==false; r.linkGroup.userData={...r.linkGroup.userData,linkData:clone(renderLinkData),sourceClassId:ld.sourceClassId,targetClassId:ld.targetClassId,isHBDSLink:true,isHbdsLink:true}; dg.add(r.linkGroup); modelRuntime.linkGroups.push(r.linkGroup);}
   draggableObjects.length=0; for(const cd of data.hypergraph.class){ const o=modelRuntime.classById.get(cd.id); if(o&&o.visible!==false&&!o.userData?.isLocked) draggableObjects.push(o); }
   modelRuntime.draggableObjects=draggableObjects;
   context.setupDragControls?.(); recalculateAllLinks(); updateLabelFontSizes(context.camera, context.renderer); updateHyperClassLabelFontSizes(context.camera, context.renderer); updateLinkFontSizes(context.camera, context.renderer); updateHyperClassLinkFontSizes(context.camera, context.renderer); context.renderOnce?.(); }
@@ -675,7 +676,7 @@ function fitBoxForContext(context) {
     const rendering = object.parent?.userData?.linkData?.rendering || {};
     const width = attribute ? (object.userData.maxWorldWidth ?? 2.25)
       : (object.userData.collisionSize?.width ?? Math.max(rendering.labelCollisionWidth || 0, String(object.userData?.text || '').length * 0.18 + 0.35));
-    const height = attribute ? Math.max(0.16, object.userData.gapY * 0.9 || 0.16) : (object.userData.collisionSize?.height ?? 0.6);
+    const height = attribute ? Math.max(0.16, object.userData.textHeight ?? (object.userData.gapY * 0.9 || 0.16)) : (object.userData.collisionSize?.height ?? 0.6);
     const labelBox = new THREE.Box3(
       new THREE.Vector3(attribute ? 0 : -width / 2, -height / 2, 0),
       new THREE.Vector3(attribute ? width : width / 2, height / 2, 0)
@@ -895,7 +896,20 @@ function removeObjectLinksForClassLinkIds(model,classLinkIds){
   hg.objectLink=hg.objectLink.filter(item=>!ids.has(String(item?.classLinkId??item?.linkId)));
 }
 export function commitDataChange(operationName, updater, options={}){ const before=clone(data); const result=updater(data); data=normalizeData(data); const v=validateData(data); if(!v.valid && options.rollbackOnError!==false){ data=before; throw new Error(`Invalid data after ${operationName}: ${v.errors.join('; ')}`);} if(options.refresh!==false) refreshSceneFromData(options.context); if(options.optimizeLayout===true) updateLayoutFromData(options.context); return result; }
-export function setData(nextData, options={}){ data=normalizeData(nextData); const v=validateData(data); if(!v.valid) throw new Error(v.errors.join('; ')); if(options.refresh!==false) refreshSceneFromData(options.context); applyDataMetadataToContext(options.context); return getData(); }
+export function setData(nextData, options={}){
+  data=normalizeData(nextData);
+  const validation=validateData(data);
+  if(!validation.valid) throw new Error(validation.errors.join('; '));
+  // Arrange a newly loaded model before routing it. Routing obsolete saved
+  // positions first can dominate load time on a dense or overlapping diagram.
+  if(options.optimizeLayout===true && !data.metadata?.preserveLayout && !data.hypergraph?.metadata?.preserveLayout) {
+    const algorithm=getLayoutSettings().algorithm;
+    if(algorithm!=='none') optimizeModelLayout(data,algorithm);
+  }
+  if(options.refresh!==false) refreshSceneFromData(options.context);
+  applyDataMetadataToContext(options.context);
+  return getData();
+}
 export function resetData(options={}){ return setData({metadata:{layout:DEFAULT_LAYOUT_SETTINGS,sceneSettings:DEFAULT_SCENE_SETTINGS,font:DEFAULT_FONT_SETTINGS},hypergraph:{class:[],link:[]}},options); }
 export function readClass(id){return data.hypergraph.class.find(c=>c.id===id)||null;} export const readHyperclass=readClass;
 export function createClass(input,options={}){ return commitDataChange('createClass',d=>{ const c=createClassData(input); d.hypergraph.class.push(c); if(c.parentClassId) addChildToHyperclass(c.parentClassId,c.id,{...options,refresh:false,saveHistory:false}); return c;},options); }
@@ -1082,7 +1096,7 @@ export async function loadAndRenderScene(modelName, context, options={}){
   const isCurrent=typeof options.isCurrent==='function'?options.isCurrent:null;
   const raw=await loadModelData(modelName,options);
   if(isCurrent && !isCurrent()) return null;
-  setData(raw,{context,refresh:true});
+  setData(raw,{context,refresh:true,optimizeLayout:options.optimizeLayout});
   const loaded=getData();
   const layoutAlgorithm=loaded?.metadata?.layout?.algorithm || 'none';
   if(options.autoApplyLayout!==false && layoutAlgorithm!=='none' && modelNeedsLayoutPlacement(loaded)){
@@ -1114,6 +1128,8 @@ export async function optimizeAndRefreshLayout(context, options={}){
   }
   optimizeModelLayout(data,algorithm);
   refreshSceneFromData(context);
-  updateLayoutFromData(context,options);
+  // A refresh already calculates routes and label scales. Avoid performing
+  // the more expensive separated search twice for one user action.
+  if(!getLayoutSettings().separateLinks) updateLayoutFromData(context,options);
   return { algorithm };
 }

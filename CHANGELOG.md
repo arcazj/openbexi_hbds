@@ -1,6 +1,15 @@
 # Release notes
 
-## Unreleased - 2026-10-07
+## 2.6.2 - 2026-10-08
+
+* Add the OpenBEXI Timeline HBDS model and map all 14 inspected Timeline model files and the supplied user settings. Keep Record inside Source, Namespace inside Model, and one Model-to-Render relationship for shared rendering.
+* Add the complete Timeline application recreation prompt, a model guide, and current application screenshots in the README.
+* Enable **Separates links** by default, with distinct parallel routes, label clearance, and an option to restore legacy spacing. Save the preference with each model.
+* Arrange loaded models before rendering, reduce routing-grid duplication, and skip label scoring for blocked positions in dense diagrams.
+* Reserve room inside groups for incoming and outgoing links so their labels remain close to their routes, including the satellite model's Grid layout.
+* Keep one horizontal class-to-attribute connector to the first attribute and align all attributes in a compact right-hand column. Add the live **Attribute spacing** slider, reset, undo/redo, and persistence.
+* Double the default attribute text size and the Timeline model's explicit attribute size while preserving class containers, connection points, and square markers.
+* Expand browser and geometry checks for separation, attribute columns, editing, and save/reload. Synchronize the application, server, API, Maven, documentation, and browser cache versions at 2.6.2.
 
 * Align licensing with OpenBEXI Timeline's Commercial and Exempt Use License: free personal noncommercial use, student and educator activities, academic and other noncommercial research, and qualifying charities and nonprofits; paid agreements for business use unless exempt.
 * Use [openbexi@gmail.com](mailto:openbexi@gmail.com) for licensing inquiries in the license, commercial guide, order form, README, Help, and licensing page.

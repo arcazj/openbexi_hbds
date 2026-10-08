@@ -1,6 +1,7 @@
 /* ─────────────────────────────── Imports ─────────────────────────────── */
 import * as THREE from 'three';
-import { fitTextSize } from './hbds_text_metrics.js?v=release-1.2.1';
+import { fitTextSize } from './hbds_text_metrics.js?v=release-2.6.2';
+import { getAttributeColumnLayout } from './hbds_layout.js?v=release-2.6.2';
 import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
 const DEFAULT_EMPTY_ICON_PATH = './icons/empty.png';
@@ -54,7 +55,6 @@ export const DEFAULT_LABEL_FONT_SETTINGS = Object.freeze({
     underline: false
 });
 export const MAX_LABEL_FONT_SIZE = 72;
-const MIN_READABLE_ATTRIBUTE_FONT_SIZE = 9;
 
 export function normalizeLabelFontSettings(font = {}, fallback = DEFAULT_LABEL_FONT_SETTINGS) {
     const source = font && typeof font === 'object' ? font : {};
@@ -294,8 +294,6 @@ export function createClass(classData, lifecycle = {}) {
         connections: cfg.connections,
         textColor: cfg.textColor,
         modelFont: classData.modelAttributeFont ?? classData.modelFont,
-        hubPosition: hubPos,
-        z: Z_OVERLAY
     });
 
     return {classMesh};
@@ -916,15 +914,12 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
     const attrCfg = normalizeAttributeRenderingConfig(options.attributes);
     const connCfg = options.connections ?? {lineColor: "#000000", lineWidth: 0.01};
     const textColor = options.textColor ?? "#000000";
-    const modelFont = normalizeLabelFontSettings(options.modelFont);
+    const modelFont = normalizeLabelFontSettings(options.modelFont, {...DEFAULT_LABEL_FONT_SETTINGS, size: 24});
 
-    const cbW = attrCfg.size.width;
-    const cbH = attrCfg.size.height ?? cbW;
-    const gapY = options.gapY ?? Math.max(0.17, (size.height - 0.3) / Math.max(1, attributes.length - 1));
-    const startY = options.startY ?? (size.height / 2 - 0.1);
-    const colX = options.colX ?? (size.width / 2 + 0.25 + cbW);
-    const hubPos = options.hubPosition ?? new THREE.Vector3((size.width * 0.9) / 2, (size.height * 0.9) / 2, options.z ?? 0.06);
-    const z = options.z ?? 0.06;
+    const hub = classMesh.userData.linkHub;
+    const column = getAttributeColumnLayout(size, attributes.length, attrCfg, hub.position);
+    const {gapY, startY, markerX:colX, labelX, z} = column;
+    classMesh.userData.attributeLayout = column;
 
     attributes.forEach((attribute, idx) => {
         const attrName = getAttributeDisplayName(attribute, idx);
@@ -943,17 +938,25 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
         };
         classMesh.add(marker);
 
-        // connecting line
-        const line = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints([hubPos, marker.position.clone()]),
-            new THREE.LineBasicMaterial({
-                color: connCfg.lineColor,
-                linewidth: connCfg.lineWidth
-            })
-        );
-        line.raycast = () => {
-        };
-        classMesh.add(line);
+        // Only ATT1 connects to the existing circular point. Start at its
+        // right edge so the connector does not draw over the circle itself.
+        if (idx === 0) {
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(hub.position.x + hub.userData.hubRadius, startY, z),
+                    new THREE.Vector3(colX - attrCfg.size.width / 2, startY, z)
+                ]),
+                new THREE.LineBasicMaterial({
+                    color: connCfg.lineColor,
+                    linewidth: connCfg.lineWidth
+                })
+            );
+            line.name = 'attribute-connector';
+            line.userData.attributeIndex = idx;
+            line.userData.attributeName = attrName;
+            line.raycast = () => {};
+            classMesh.add(line);
+        }
 
         // attribute label
         const aDiv = document.createElement('div');
@@ -965,13 +968,15 @@ export function attachAttributesToMesh(classMesh, attributes, options = {}) {
         aDiv.style.whiteSpace = 'nowrap';
         aDiv.textContent = attrName;
         const aLbl = new CSS2DObject(aDiv);
-        aLbl.position.set(colX + cbW + 0.06, y, z);
+        aLbl.position.set(labelX, y, z);
         aLbl.center.set(0, 0.5);
         aLbl.userData = {
             labelKind: 'attribute',
             text: attrName,
+            attributeIndex: idx,
             gapY,
-            maxWorldWidth: options.attributeLabelMaxWidth ?? 2.25,
+            textHeight: column.textHeight,
+            maxWorldWidth: column.labelWidth,
             fontSettings
         };
         classMesh.add(aLbl);
@@ -1455,16 +1460,10 @@ export function updateLabelFontSizes(camera, renderer) {
         } else {
             const maxWorldWidth = label.userData?.maxWorldWidth ?? 1.75;
             const availableWidthPx = Math.max(0.1, maxWorldWidth * pixelsPerWorldUnit);
-            const gapY = label.userData?.gapY ?? 0.17;
             const configuredSize = getConfiguredLabelSize(label, DEFAULT_LABEL_FONT_SETTINGS.size);
-            // At overview zoom the row pitch is the hard limit; a fixed pixel
-            // minimum makes adjacent attribute rows paint over one another.
-            const rowBudget = Math.max(0.1, gapY * pixelsPerWorldUnit * 0.85);
-            const minSize = Math.min(configuredSize, MIN_READABLE_ATTRIBUTE_FONT_SIZE, rowBudget, Math.max(0.1, 0.17 * pixelsPerWorldUnit));
-            const distanceSize = getDistanceScaledFontSize(110, distance, configuredSize, minSize);
-            const verticalCap = Math.max(minSize, gapY * pixelsPerWorldUnit * 1.45, configuredSize * 0.62);
-            const dynamicSize = THREE.MathUtils.clamp(Math.min(distanceSize, verticalCap), minSize, configuredSize);
-            const fontSize = Math.min(rowBudget, THREE.MathUtils.clamp(dynamicSize, minSize, configuredSize));
+            // Twice the former 0.17-world-unit text height. Spacing is clear
+            // space between rows, so tightening it never shrinks the text.
+            const fontSize = Math.min(configuredSize, (label.userData?.textHeight ?? 0.34) * pixelsPerWorldUnit);
             applyAttributeLabelSizing(label.element, availableWidthPx, fontSize);
         }
     });
@@ -1487,11 +1486,6 @@ function clampLabelFontSize(value, fallback = DEFAULT_LABEL_FONT_SETTINGS.size) 
 
 function getConfiguredLabelSize(label, fallback = DEFAULT_LABEL_FONT_SETTINGS.size) {
     return clampLabelFontSize(label.userData?.fontSettings?.size, fallback);
-}
-
-function getDistanceScaledFontSize(baseSize, distance, configuredSize, minSize) {
-    const configuredScale = Math.max(1, configuredSize / DEFAULT_LABEL_FONT_SETTINGS.size);
-    return THREE.MathUtils.clamp((baseSize * configuredScale) / Math.max(distance, 1e-6), minSize, configuredSize);
 }
 
 export function fitTitleLabel(element, font, availableWidthPx, availableHeightPx, maximum) {

@@ -21,6 +21,7 @@ import socket
 import struct
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -51,6 +52,25 @@ SIGNIFICANT_ERROR_LIMIT = 12
 
 class BrowserRegressionError(AssertionError):
     """Raised when the browser collaboration regression fails."""
+
+
+class RegressionProcess(subprocess.Popen):
+    """Keep diagnostics without filling an unread subprocess pipe on long runs."""
+
+    def __init__(self, args: list[str]):
+        self.output_log = tempfile.TemporaryFile(mode="w+b")
+        try:
+            super().__init__(
+                args, cwd=str(ROOT_DIR), stdout=self.output_log, stderr=subprocess.STDOUT,
+            )
+        except Exception:
+            self.output_log.close()
+            raise
+
+    def diagnostics(self, limit: int = 4000) -> str:
+        size = os.fstat(self.output_log.fileno()).st_size
+        self.output_log.seek(max(0, size - limit))
+        return self.output_log.read(limit).decode("utf-8", errors="replace")
 
 
 def get_free_port() -> int:
@@ -86,8 +106,8 @@ def request_json(
     return json.loads(text) if text.strip() else {}
 
 
-def start_server(port: int) -> subprocess.Popen:
-    return subprocess.Popen(
+def start_server(port: int) -> RegressionProcess:
+    return RegressionProcess(
         [
             sys.executable,
             str(ROOT_DIR / "server.py"),
@@ -97,20 +117,15 @@ def start_server(port: int) -> subprocess.Popen:
             str(port),
             "--quiet",
         ],
-        cwd=str(ROOT_DIR),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
     )
 
 
-def wait_for_health(base_url: str, process: subprocess.Popen) -> None:
+def wait_for_health(base_url: str, process: RegressionProcess) -> None:
     last_error = None
     for _ in range(80):
         if process.poll() is not None:
-            stdout, stderr = process.communicate(timeout=1)
             raise BrowserRegressionError(
-                f"Server exited early with {process.returncode}\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}"
+                f"Server exited early with {process.returncode}\n{process.diagnostics()}"
             )
         try:
             health = request_json(base_url, "/api/health", timeout=1)
@@ -179,7 +194,7 @@ def browser_executable() -> Path:
     )
 
 
-def launch_browser(debug_port: int) -> subprocess.Popen:
+def launch_browser(debug_port: int) -> RegressionProcess:
     if TEMP_PROFILE_DIR.exists():
         shutil.rmtree(TEMP_PROFILE_DIR)
     TEMP_PROFILE_DIR.mkdir(parents=True, exist_ok=True)
@@ -204,23 +219,16 @@ def launch_browser(debug_port: int) -> subprocess.Popen:
         f"--user-data-dir={TEMP_PROFILE_DIR}",
         "about:blank",
     ]
-    return subprocess.Popen(
-        args,
-        cwd=str(ROOT_DIR),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
+    return RegressionProcess(args)
 
 
-def wait_for_browser(debug_port: int, process: subprocess.Popen) -> dict:
+def wait_for_browser(debug_port: int, process: RegressionProcess) -> dict:
     version_url = f"http://127.0.0.1:{debug_port}/json/version"
     last_error = None
     for _ in range(100):
         if process.poll() is not None:
-            stdout, stderr = process.communicate(timeout=1)
             raise BrowserRegressionError(
-                f"Browser exited early with {process.returncode}\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}"
+                f"Browser exited early with {process.returncode}\n{process.diagnostics()}"
             )
         try:
             with urllib.request.urlopen(version_url, timeout=1) as response:
@@ -525,6 +533,13 @@ class BrowserPage:
 
 def is_significant_browser_error(entry: str) -> bool:
     text = entry.lower()
+    # Discovery may probe the optional server on 8010 while this suite uses an
+    # isolated server on an ephemeral port. Refusal there is expected; errors
+    # for the actual test server and every non-health endpoint still fail.
+    if "net::err_connection_refused" in text and any(
+        text.endswith(f"http://{host}:8010/api/health") for host in ("127.0.0.1", "localhost")
+    ):
+        return False
     ignored_fragments = [
         "favicon.ico",
         "/icons/",
@@ -944,6 +959,8 @@ def run_readability_ui_regression(base_url: str, debug_port: int) -> None:
         try:
             page.navigate(url)
             wait_for(page, "return (window.__hbdsDynamicTest || window.__hbdsModelsTest)?.getData()?.hypergraph?.class?.length > 0;", f"{mode} readability load", timeout=35)
+            if mode != "Models":
+                wait_for_page_ready(page, f"{mode} readability server connection")
             if mode == "Models":
                 for model_name in ("transportation_links.json", "satellite_world_simple_structure.json"):
                     expected_ids = [node["id"] for node in json.loads((MODELS_DIR / model_name).read_text(encoding="utf-8-sig"))["hypergraph"]["class"]]
@@ -988,7 +1005,147 @@ def run_readability_ui_regression(base_url: str, debug_port: int) -> None:
             page.close()
 
 
-def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
+def run_link_separation_regression(base_url: str, debug_port: int) -> None:
+    page = BrowserPage(create_target(debug_port))
+    temporary_names = []
+    try:
+        for model_name in ("openbexi_timeline.json", "satellite_world_simple_structure.json"):
+            temporary_name = f"_link_separation_{os.getpid()}_{Path(model_name).stem}.json"
+            temporary_names.append(temporary_name)
+            endpoint = f"/api/models/{temporary_name}"
+            page.navigate(dynamic_layout_url(base_url, model_name, debug=False))
+            wait_for_page_ready(page, "link separation page")
+            wait_for_model_loaded(page, model_name, "link separation source")
+            page.bring_to_front()
+            result = page.evaluate("""
+(async () => {
+  const hook=window.__hbdsDynamicTest, toggle=document.getElementById('separate-links-toggle');
+  const select=document.getElementById('layout-algorithm-select'), errors=[];
+  const settle=()=>new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)));
+  const geometry=()=>JSON.stringify(hook.getData().hypergraph.class.map(n=>[n.id,n.position,n.size]));
+  const content=()=>JSON.stringify(hook.getData().hypergraph.class.map(({position,size,...node})=>node));
+  const change=(element,value)=>{element.type==='checkbox' ? element.checked=value : element.value=value; element.dispatchEvent(new Event('change',{bubbles:true}));};
+  if(!toggle.checked || !hook.getState().layout.separateLinks) errors.push('separation not enabled by default');
+  if(select.nextElementSibling.htmlFor!=='separate-links-toggle') errors.push('checkbox is not immediately after Algorithm');
+  const initial=geometry(), originalContent=content();
+  document.getElementById('auto-optimize-toggle').checked=false;
+  change(select,'none'); await settle();
+  change(toggle,false); await settle();
+  if(geometry()!==initial) errors.push('unchecked option moved legacy nodes');
+  for(const algorithm of ['grid','radial','hierarchy']) {
+    change(toggle,false); await settle(); change(select,algorithm);
+    change(toggle,true); await settle();
+    const metrics=hook.getLayoutMetrics(), links=hook.getLinkHubMetrics();
+    for(const column of hook.getAttributeLayoutMetrics()) {
+      const rows=column.attributes,layout=column.layout,close=(a,b)=>Math.abs(a-b)<0.0001;
+      const ratio=column.hyperclass ? 0.425 : 0.45;
+      if(!close(column.hub.x,column.size.width*ratio) || !close(column.hub.y,column.size.height*ratio) || !close(column.hubRadius,0.04)) errors.push('changed connection point '+column.id);
+      if(column.connectorCount!==(rows.length ? 1 : 0)) errors.push('expected only ATT1 connector '+column.id);
+      if(!close(layout.gapY,Math.max(layout.textHeight,layout.markerHeight)+layout.spacing)) errors.push(algorithm+': attribute spacing changed with height/count '+column.id);
+      for(let i=0;i<rows.length;i++) {
+        const row=rows[i], [start,end]=row.connector;
+        if(!row.label) {errors.push('incomplete attribute '+column.id);continue;}
+        if(!close(row.marker.x,layout.markerX) || !close(row.label.x,layout.labelX) || !close(row.marker.y,row.label.y)) errors.push('unaligned attribute '+column.id);
+        if(i && !close(rows[i-1].marker.y-row.marker.y,layout.gapY)) errors.push('uneven attribute rows '+column.id);
+        if(!close(row.marker.z,column.hub.z) || !close(row.label.z,column.hub.z)) errors.push('inconsistent attribute layer '+column.id);
+        if(i===0) {
+          if(!start || !end) {errors.push('missing ATT1 connector '+column.id);continue;}
+          if(!close(row.marker.y,column.hub.y) || !close(start.y,column.hub.y) || !close(end.y,column.hub.y) || !close(start.z,column.hub.z) || !close(end.z,column.hub.z) || !close(start.x,column.hub.x+column.hubRadius) || !close(end.x,row.marker.x-layout.markerWidth/2)) errors.push('ATT1 connector is not horizontal from circle to marker '+column.id);
+        } else if(row.connector.length) errors.push('extra attribute connector '+column.id);
+      }
+    }
+    if(!hook.getState().layout.separateLinks) errors.push('checkbox did not apply');
+    if(metrics.overlapPairs || metrics.linkObstacleIntersections) errors.push(algorithm+': '+JSON.stringify(metrics));
+    if(links.some(l=>!l.valid || !l.touchesBoundary)) errors.push(algorithm+': detached endpoint');
+    const labels=hook.getLabelMetrics().filter(l=>l.visible);
+    for(let i=0;i<labels.length;i++) for(const b of labels.slice(i+1)) {
+      const a=labels[i], area=Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+      if(area/Math.max(1,Math.min(a.width*a.height,b.width*b.height))>0.02) errors.push(algorithm+': overlapping labels '+a.text+' / '+b.text);
+    }
+    for(let i=0;i<links.length;i++) for(const other of links.slice(i+1)) {
+      const link=links[i], pair=l=>JSON.stringify([l.sourceClassId,l.targetClassId].sort());
+      if(pair(link)!==pair(other)) continue;
+      for(let j=1;j<link.worldRoutePoints.length;j++) for(let k=1;k<other.worldRoutePoints.length;k++) {
+        const a=link.worldRoutePoints[j-1],b=link.worldRoutePoints[j],c=other.worldRoutePoints[k-1],d=other.worldRoutePoints[k];
+        const horizontal=Math.abs(a.y-b.y)<1e-6;
+        if(horizontal!==(Math.abs(c.y-d.y)<1e-6)) continue;
+        const axis=horizontal?'x':'y', across=horizontal?'y':'x';
+        const overlap=Math.min(Math.max(a[axis],b[axis]),Math.max(c[axis],d[axis]))-Math.max(Math.min(a[axis],b[axis]),Math.min(c[axis],d[axis]));
+        if(overlap>1 && Math.abs(a[across]-c[across])<0.35) errors.push(algorithm+': indistinguishable parallel links '+link.id+' / '+other.id);
+      }
+    }
+    const before=geometry(); document.getElementById('optimize-layout-button').click(); await settle();
+    if(before!==geometry()) errors.push(algorithm+': layout drift');
+    if(content()!==originalContent) errors.push('separation changed domain classes');
+  }
+  change(select,'none'); await settle(); const beforeNone=geometry();
+  change(toggle,false); await settle(); change(toggle,true); await settle();
+  if(geometry()!==beforeNone) errors.push('None moved nodes');
+  const wait=async predicate=>{for(let i=0;i<120;i++){if(predicate())return;await new Promise(done=>setTimeout(done,25));}throw new Error('Attribute inspector did not update');};
+  const ownerIds=[false,true].map(hyper=>hook.getData().hypergraph.class.find(n=>(n.type==='hyperclass')===hyper && n.attributes?.length>1)?.id).filter(Boolean);
+  for(const id of ownerIds) {
+    const owner=()=>hook.getData().hypergraph.class.find(n=>n.id===id);
+    const beforeGeometry=geometry(),beforeAttributes=JSON.stringify(owner().attributes);
+    document.querySelector(`[data-model-tree-kind="attribute"][data-owner-id="${id}"]`).click();
+    const slider=document.getElementById('attribute-spacing-input');
+    if(!slider || Number(slider.value)!==0.02) throw new Error('Missing compact spacing default');
+    slider.focus(); slider.value='0.08'; slider.dispatchEvent(new Event('input',{bubbles:true}));
+    await wait(()=>owner().rendering?.attributes?.spacing===0.08);
+    await settle();
+    const column=hook.getAttributeLayoutMetrics().find(n=>n.id===id);
+    if(Math.abs(column.layout.gapY-Math.max(column.layout.textHeight,column.layout.markerHeight)-0.08)>0.0001) errors.push('slider did not immediately move attribute rows');
+    if(Number(document.getElementById('attribute-spacing-input-value').value)!==0.08) errors.push('spacing value not displayed');
+    if(geometry()!==beforeGeometry || JSON.stringify(owner().attributes)!==beforeAttributes) errors.push('spacing changed class geometry or attribute data');
+    if(column.connectorCount!==1 || column.attributes[0].marker.y!==column.hub.y) errors.push('spacing moved ATT1 or added connectors');
+    slider.dispatchEvent(new Event('change',{bubbles:true})); await settle();
+    [...document.querySelectorAll('[data-reset-property]')].find(button=>button.dataset.resetProperty==='["columnSpacing"]').click();
+    await wait(()=>owner().rendering?.attributes?.spacing===0.02);
+    document.querySelector('[data-inspector-action="undo"]').click();
+    await wait(()=>owner().rendering?.attributes?.spacing===0.08);
+    document.querySelector('[data-inspector-action="redo"]').click();
+    await wait(()=>owner().rendering?.attributes?.spacing===0.02);
+    document.querySelector('[data-inspector-action="undo"]').click();
+    await wait(()=>owner().rendering?.attributes?.spacing===0.08);
+    hook.setEditMode('readonly');
+    if(!document.getElementById('attribute-spacing-input')?.disabled) errors.push('spacing remained editable in readonly mode');
+    hook.setEditMode('full');
+  }
+  const fonts=await import('./js/hbds_model.js?v=release-2.6.2');
+  if(fonts.getFontSettingsForTextType({},'attribute').size!==24 || fonts.getFontSettingsForTextType({},'class').size!==12) errors.push('attribute default was not doubled independently');
+  return {errors, model:hook.getData()};
+})()
+""", timeout=60)
+            if result["errors"]:
+                raise BrowserRegressionError(f"Link separation {model_name}: {result['errors']}")
+            snapshot = result["model"]
+            snapshot["metadata"]["preserveLayout"] = True
+            request_json(base_url, endpoint, method="POST", payload=snapshot)
+            page.navigate(dynamic_layout_url(base_url, temporary_name, debug=False))
+            wait_for_model_loaded(page, temporary_name, "separated model reload")
+            if not page.evaluate("document.getElementById('separate-links-toggle').checked"):
+                raise BrowserRegressionError("Saved separation option was not restored")
+            reloaded = page.evaluate("window.__hbdsDynamicTest.getData()")
+            if reloaded["hypergraph"] != snapshot["hypergraph"]:
+                raise BrowserRegressionError("Separated geometry changed on reload")
+            reloaded["metadata"]["layout"]["separateLinks"] = False
+            request_json(base_url, endpoint, method="POST", payload=reloaded)
+            page.navigate(dynamic_layout_url(base_url, temporary_name, debug=False))
+            wait_for_model_loaded(page, temporary_name, "unchecked model reload")
+            if page.evaluate("document.getElementById('separate-links-toggle').checked || window.__hbdsDynamicTest.getState().layout.separateLinks"):
+                raise BrowserRegressionError("Explicit unchecked preference was lost on reload")
+            print(f"PASS link separation {model_name}: ATT1, attribute spacing slider/reset/undo/redo/readonly/reload, doubled default font, three layouts, labels and parallel links")
+        assert_browser_errors([page])
+    finally:
+        page.close()
+        # Keep each saved model available until its page and background draft
+        # requests have ended; deleting a still-open model races collaboration.
+        for temporary_name in temporary_names:
+            request_json(base_url, f"/api/models/{temporary_name}", method="DELETE", expected=(200,404))
+            for backup in (MODELS_DIR / ".backups").glob(f"{Path(temporary_name).stem}.*.bak.json"):
+                backup.unlink()
+
+
+def run_layout_optimization_regression(base_url: str, debug_port: int, model_filter: str | None = None) -> None:
     page = BrowserPage(create_target(debug_port))
     try:
         cases = [("models/", path.name) for path in sorted(MODELS_DIR.glob("*.json"))
@@ -996,10 +1153,15 @@ def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
             ("test_models/", "layout_007_nested_hyperclasses.json"),
             ("test_models/", "stress_022_large_performance.json"),
         ]
+        if model_filter:
+            cases = [case for case in cases if case[1] == model_filter]
+            if not cases:
+                raise BrowserRegressionError(f"Unknown layout model: {model_filter}")
         for directory, model_name in cases:
+            print(f"CHECK layout optimization {model_name}", flush=True)
             page.navigate(dynamic_layout_url(base_url, model_name, models_path=directory, debug=False))
             wait_for_page_ready(page, "layout optimization page")
-            wait_for_model_loaded(page, model_name, "layout source load")
+            wait_for_model_loaded(page, model_name, f"layout source load {model_name}")
             result = page.evaluate("""
 (async () => {
   const hook = window.__hbdsDynamicTest;
@@ -1085,7 +1247,7 @@ def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
   if (content()!==originalContent) errors.push('Optimization changed model content');
   return {errors, samples};
 })()
-""", timeout=120)
+""", timeout=360)
             if result["errors"]:
                 raise BrowserRegressionError(f"Layout regression {model_name}: {result['errors']}")
             # Resizing and Fit View must leave the saved layout geometry intact.
@@ -1146,12 +1308,12 @@ def run_layout_optimization_regression(base_url: str, debug_port: int) -> None:
                     wait_for_model_loaded(page, temporary_name, "manual model reload")
                     if page.evaluate("window.__hbdsDynamicTest.getData().hypergraph") != manual["hypergraph"]:
                         raise BrowserRegressionError("Manual layout was optimized despite the saved preference")
+                assert_browser_has_no_significant_errors(page, f"Layout regression {model_name}")
             finally:
+                page.close()
                 request_json(base_url, endpoint, method="DELETE", expected=(200,404))
                 for backup in (MODELS_DIR / ".backups").glob(f"{Path(temporary_name).stem}.*.bak.json"):
                     backup.unlink()
-            assert_browser_has_no_significant_errors(page, f"Layout regression {model_name}")
-            page.close()
             page = BrowserPage(create_target(debug_port))
             print(f"PASS layout optimization {model_name}")
     finally:
@@ -2090,7 +2252,7 @@ return (() => {
             timeout=10,
             interval=0.25,
         )
-        if not isinstance(version_state, dict) or version_state.get("text") != "v1.2.1" or version_state.get("visible") is not True:
+        if not isinstance(version_state, dict) or version_state.get("text") != "v2.6.2" or version_state.get("visible") is not True:
             raise BrowserRegressionError(f"Shell app version display invalid: {version_state}")
         help_state = wait_for(
             page,
@@ -2212,6 +2374,9 @@ def assert_model_tree_canvas_space(page: BrowserPage) -> None:
 
 
 def rename_first_class(page: BrowserPage, new_name: str) -> tuple[str, str]:
+    # Renaming can synchronously rebuild every route and label in a large
+    # diagram. This round-trip check allows a cold headless renderer to finish;
+    # interaction responsiveness has separate measured assertions.
     result = page.evaluate(
         f"""
 (() => {{
@@ -2227,7 +2392,7 @@ input.dispatchEvent(new Event('change', {{ bubbles: true }}));
 return {{ id: String(node.id), originalName: String(node.name || '') }};
 }})()
 """,
-        timeout=10,
+        timeout=30,
     )
     if not isinstance(result, dict) or not result.get("id"):
         raise BrowserRegressionError(f"Rename action did not return a class id: {result}")
@@ -3282,30 +3447,34 @@ def run_regression(base_url: str, debug_port: int, loaded_model: dict) -> None:
             page.close()
 
 
-def terminate_process(process: subprocess.Popen | None, name: str) -> None:
-    if not process or process.poll() is not None:
+def terminate_process(process: RegressionProcess | None, name: str, *, report_diagnostics: bool = False) -> None:
+    if not process:
         return
-    process.terminate()
     try:
-        process.wait(timeout=5)
-    except subprocess.TimeoutExpired:
-        process.kill()
-        process.wait(timeout=5)
-    if process.returncode not in (0, None):
-        try:
-            stderr = process.stderr.read() if process.stderr else ""
-        except Exception:
-            stderr = ""
-        if stderr.strip():
-            print(f"WARN {name} stderr:\n{stderr[-1200:]}", file=sys.stderr)
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
+        if report_diagnostics:
+            diagnostics = process.diagnostics(1200)
+            if diagnostics.strip():
+                print(f"WARN {name} diagnostics:\n{diagnostics}", file=sys.stderr)
+    finally:
+        process.output_log.close()
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--suite", choices=("all", "ai", "interaction", "satellite", "layout", "readability"), default="all")
+    parser.add_argument("--suite", choices=("all", "ui", "ai", "interaction", "satellite", "layout", "readability", "separation"), default="all")
+    parser.add_argument("--model", help="Run one model filename in the layout suite")
     args = parser.parse_args()
-    server_process: subprocess.Popen | None = None
-    browser_process: subprocess.Popen | None = None
+    if args.model and args.suite != "layout":
+        parser.error("--model requires --suite layout")
+    server_process: RegressionProcess | None = None
+    browser_process: RegressionProcess | None = None
     base_url = ""
     try:
         server_port = get_free_port()
@@ -3318,8 +3487,14 @@ def main() -> int:
 
         browser_process = launch_browser(debug_port)
         wait_for_browser(debug_port, browser_process)
+        if args.suite == "separation":
+            run_link_separation_regression(base_url, debug_port)
+            return 0
         if args.suite == "readability":
             run_readability_ui_regression(base_url, debug_port)
+            return 0
+        if args.suite == "layout":
+            run_layout_optimization_regression(base_url, debug_port, args.model)
             return 0
         if args.suite in ("ai", "interaction"):
             run_ai_support_ui_regression(base_url, debug_port, TEMP_MODEL_NAME)
@@ -3334,13 +3509,12 @@ def main() -> int:
         if args.suite == "satellite":
             run_builtin_visual_regressions(base_url, debug_port)
             return 0
-        if args.suite == "layout":
-            run_layout_optimization_regression(base_url, debug_port)
-            return 0
         run_shell_menu_version_regression(base_url, debug_port)
         run_save_safety_regression(base_url, debug_port)
         run_render_scheduler_regression(base_url, debug_port)
-        run_layout_optimization_regression(base_url, debug_port)
+        run_link_separation_regression(base_url, debug_port)
+        if args.suite != "ui":
+            run_layout_optimization_regression(base_url, debug_port)
         run_builtin_visual_regressions(base_url, debug_port)
         run_ai_support_ui_regression(base_url, debug_port, TEMP_MODEL_NAME)
         run_ai_review_regression(base_url, debug_port)
@@ -3349,8 +3523,9 @@ def main() -> int:
         run_regression(base_url, debug_port, loaded_model)
         return 0
     finally:
-        terminate_process(browser_process, "browser")
-        terminate_process(server_process, "server")
+        failed = sys.exc_info()[0] is not None
+        terminate_process(browser_process, "browser", report_diagnostics=failed)
+        terminate_process(server_process, "server", report_diagnostics=failed)
         cleanup_temp_model()
         if TEMP_PROFILE_DIR.exists():
             shutil.rmtree(TEMP_PROFILE_DIR, ignore_errors=True)

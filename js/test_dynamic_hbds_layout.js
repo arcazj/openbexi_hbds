@@ -39,8 +39,9 @@ import {
   normalizeFontSettings,
   getFontSettingsForTextType,
   getFitQualityMetrics
-} from './hbds_model.js?v=release-1.2.1';
-import { recalculateAllLinks } from './hbds_class_link.js?v=release-1.2.1';
+} from './hbds_model.js?v=release-2.6.2';
+import { recalculateAllLinks } from './hbds_class_link.js?v=release-2.6.2';
+import { DEFAULT_ATTRIBUTE_SPACING, MAX_ATTRIBUTE_SPACING, normalizeAttributeSpacing } from './hbds_layout.js?v=release-2.6.2';
 import {
   applyAiModel,
   applyServerModelOperations,
@@ -1029,6 +1030,8 @@ function applyModelLayoutSettings(settings) {
   const select = $('layout-algorithm-select');
   const algorithm = settings?.algorithm || getLayoutSettings().algorithm || 'none';
   if (select) select.value = [...select.options].some(option => option.value === algorithm) ? algorithm : 'none';
+  const separate = $('separate-links-toggle');
+  if (separate) separate.checked = (settings || getLayoutSettings()).separateLinks !== false;
 }
 
 function syncFontSettingsControls() {
@@ -1053,14 +1056,14 @@ function syncTypeFontSizeControl(control) {
   const output = $(control.outputId);
   const explicitSize = fontState[control.key];
   const inherited = explicitSize == null;
-  const value = inherited ? fontState.size : explicitSize;
+  const value = getFontSettingsForTextType(fontState, control.type).size;
   if (input) {
     input.value = String(value);
     input.dataset.inherited = inherited ? 'true' : 'false';
   }
   if (output) {
     const rounded = Math.round(value);
-    output.value = inherited ? `Overall (${rounded}px)` : `${rounded}px`;
+    output.value = inherited ? `Overall${control.type === 'attribute' ? ' ×2' : ''} (${rounded}px)` : `${rounded}px`;
     output.textContent = output.value;
   }
 }
@@ -1234,6 +1237,19 @@ async function handleLayoutSettingChange() {
   }
   updateJsonPreviewFromData();
   scheduleLocalDraftPublish('Changed layout setting');
+}
+
+async function handleSeparateLinksChange() {
+  const separateLinks = $('separate-links-toggle').checked;
+  setLayoutSettings({ ...getLayoutSettings(), separateLinks }, { applyContext: false });
+  if (separateLinks) {
+    for (const link of getData().hypergraph.link) if (link.rendering) delete link.rendering.routePoints;
+  }
+  // An explicit request to separate links applies immediately, even when Auto
+  // Layout is off. None keeps node positions and only recalculates the routes.
+  await refreshWorkspace(separateLinks ? 'Separated links' : 'Restored legacy link spacing', {
+    optimize: getLayoutAlgorithm() !== 'none', refresh: true
+  });
 }
 
 function compactControlSections() {
@@ -3228,6 +3244,7 @@ function setEditMode(nextMode = 'full') {
   if (editMode !== 'full') linkPickActive = false;
   updateLinkBuilderStatus();
   updateModeControls();
+  renderPropertyPanel();
   recordCollaborationPerformance('ui.edit_mode', startedAt, { mode: editMode });
 }
 
@@ -7293,6 +7310,20 @@ function renderAttribute2DInspector(panel, target) {
     font: target.value.font,
     fallback: getTypeFontFallback('attribute')
   });
+  appendSliderNumberControl(appearance.body, {
+    id: 'attribute-spacing-input',
+    label: 'Attribute spacing',
+    path: ['columnSpacing'],
+    value: normalizeAttributeSpacing(target.owner.rendering?.attributes?.spacing),
+    min: 0,
+    max: MAX_ATTRIBUTE_SPACING,
+    step: 0.01,
+    defaultValue: DEFAULT_ATTRIBUTE_SPACING
+  });
+  const spacingHint = document.createElement('p');
+  spacingHint.className = 'property-empty';
+  spacingHint.textContent = 'Space between rows in this class’s attribute list.';
+  appearance.body.appendChild(spacingHint);
   panel.appendChild(appearance.section);
 }
 
@@ -7355,6 +7386,8 @@ function appendSliderNumberControl(container, config) {
 
   const slider = document.createElement('input');
   slider.type = 'range';
+  if (config.id) slider.id = config.id;
+  slider.setAttribute('aria-label', config.label);
   slider.min = String(config.min);
   slider.max = String(config.max);
   slider.step = String(config.step);
@@ -7364,6 +7397,8 @@ function appendSliderNumberControl(container, config) {
 
   const input = document.createElement('input');
   input.type = 'number';
+  if (config.id) input.id = `${config.id}-value`;
+  input.setAttribute('aria-label', `${config.label} value`);
   input.inputMode = 'decimal';
   input.min = String(config.min);
   input.max = String(config.max);
@@ -7783,8 +7818,14 @@ function applyClassMaterialPreset(node, value) {
 }
 
 async function updateSelectedProperty(path, value, options = {}) {
-  const target = getSelectedPropertyTarget();
+  let target = getSelectedPropertyTarget();
   if (!target) return;
+  if (target.kind === 'attribute' && path.join('.') === 'columnSpacing') {
+    const owner = target.owner;
+    target = {kind: owner.type === 'hyperclass' ? 'hyperclass' : 'class', node: owner, value: cloneValue(owner)};
+    path = ['rendering', 'attributes', 'spacing'];
+    value = normalizeAttributeSpacing(value);
+  }
 
   const before = options.history === false ? null : cloneValue(getData());
   if (target.kind === 'multi-class') {
@@ -8530,6 +8571,7 @@ function installDebugHooks() {
     getLinkHubMetrics: collectLinkHubMetrics,
     getLabelMetrics: collectLabelMetrics,
     getLayoutMetrics: collectLayoutMetrics,
+    getAttributeLayoutMetrics: collectAttributeLayoutMetrics,
     getViewportLayoutMetrics: collectViewportLayoutMetrics,
     getSnapshotMetrics: getLiveSnapshotMetrics,
     getSnapshotSvg: () => buildLiveSnapshotSvgText().text,
@@ -8647,6 +8689,9 @@ function collectLinkHubMetrics() {
       arrowDirection,
       arrowLengthPixels,
       labelGapPixels,
+      routePoints,
+      worldRoutePoints: getLineWorldPoints(object.getObjectByName('link-route')).map(p => ({x:p.x,y:p.y,z:p.z})),
+      labelBounds: rect ? {left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom} : null,
       arrowMinimumPixels: Number(rendering.arrowheadMinPixels ?? 10),
       arrowOptional,
       sourceTargetDistance: Number(sourceWorld.distanceTo(targetWorld).toFixed(5)),
@@ -8848,6 +8893,29 @@ function collectViewportLayoutMetrics() {
     }
   });
   return {containmentErrors, overlapErrors, titleErrors, titleClearance, routeLabelErrors};
+}
+
+function collectAttributeLayoutMetrics() {
+  const columns=[];
+  diagramGroup?.traverse(object=>{
+    if(!object.userData?.isClassLike) return;
+    const markers=object.children.filter(child=>child.name==='attribute-marker');
+    const point=p=>({x:p.x,y:p.y,z:p.z});
+    const hub=object.userData.linkHub;
+    columns.push({id:object.userData.hbdsId,hyperclass:!!object.userData.isHyperClass,
+      size:object.userData.modelData.size,layout:object.userData.attributeLayout,
+      hub:point(hub.position),hubRadius:hub.userData.hubRadius,
+      connectorCount:object.children.filter(child=>child.name==='attribute-connector').length,
+      attributes:markers.map(marker=>{
+        const index=marker.userData.attributeIndex;
+        const label=object.children.find(child=>child.userData?.labelKind==='attribute' && child.userData.attributeIndex===index);
+        const connector=object.children.find(child=>child.name==='attribute-connector' && child.userData.attributeIndex===index);
+        const positions=connector?.geometry?.attributes?.position;
+        return {name:marker.userData.attributeName,marker:point(marker.position),label:label ? point(label.position) : null,
+          connector:positions ? Array.from({length:positions.count},(_,i)=>point(new THREE.Vector3().fromBufferAttribute(positions,i))) : []};
+      })});
+  });
+  return columns;
 }
 
 function collectLayoutMetrics() {
@@ -10020,11 +10088,12 @@ async function handleLoadModel(options = {}) {
       if (!result.ok) throw new Error(result.error?.message || 'Server load failed');
       progress.update(48, `Rendering ${selectedLabel}`);
       await yieldToBrowser({ timeoutMs: 16 });
-      model = setData(result.data.model, { context: ctx(), refresh: true });
+      model = setData(result.data.model, { context: ctx(), refresh: true, optimizeLayout: $('auto-optimize-toggle').checked });
     } else {
       model = await loadAndRenderScene(value, ctx(), {
         allowedBasePath: TEST_MODEL_ROOT,
         defaultBasePath: TEST_MODEL_ROOT,
+        optimizeLayout: $('auto-optimize-toggle').checked,
         isCurrent: () => isCurrentModelLoad(requestId, value)
       });
       if (!model || !isCurrentModelLoad(requestId, value)) return null;
@@ -10046,7 +10115,7 @@ async function handleLoadModel(options = {}) {
     collaborationBaseModel = cloneValue(model || getData());
     await refreshWorkspace(`Loaded ${selectedLabel}${isServerModelValue(value) ? ' from server' : ''}`, {
       refresh: false,
-      optimize,
+      optimize: false,
       fit: optimize || !hasSavedFit,
       publishDraft: false,
       deferHeavyPanels: largeModelLoad
@@ -10786,6 +10855,7 @@ function bindUi() {
   ].forEach(id => $(id)?.addEventListener('input', handleFontSettingInput));
 
   $('layout-algorithm-select')?.addEventListener('change', () => runAction(handleLayoutSettingChange, 'layout.change'));
+  $('separate-links-toggle')?.addEventListener('change', () => runAction(handleSeparateLinksChange, 'layout.separateLinks'));
   $('preserve-layout-toggle')?.addEventListener('change', event => {
     const model = getData();
     model.metadata = { ...model.metadata, preserveLayout: event.target.checked };

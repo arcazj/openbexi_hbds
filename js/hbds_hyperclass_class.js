@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three';
-import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, fitTitleLabel, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=release-1.2.1';
+import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, fitTitleLabel, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=release-2.6.2';
 
 const hyperclassLabels = [];
 let lastSizingCamera = null;
@@ -142,12 +142,7 @@ export function createHyperClass(scene, hyperClassData, options = {}) {
       lineWidth: hyperClassData.rendering?.connections?.lineWidth ?? 0.01
     },
     textColor,
-    modelFont: hyperClassData.modelAttributeFont ?? hyperClassData.modelFont,
-    startY: sz.height / 2 - 0.45,
-    gapY: 0.16,
-    colX: sz.width / 2 + 0.28,
-    hubPosition: hub.position.clone(),
-    z: 0.08
+    modelFont: hyperClassData.modelAttributeFont ?? hyperClassData.modelFont
   });
 
 

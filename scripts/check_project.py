@@ -18,8 +18,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-browser", action="store_true", help="Run all checks except the real-browser suite")
     parser.add_argument("--browser-only", action="store_true", help="Run only the real-browser suite")
-    parser.add_argument("--browser-suite", choices=("all", "ai", "interaction", "satellite", "layout", "readability"), default="all")
+    parser.add_argument("--browser-suite", choices=("all", "ui", "ai", "interaction", "satellite", "layout", "readability", "separation"), default="all")
+    parser.add_argument("--browser-model", help="Run one model filename with --browser-suite layout")
     args = parser.parse_args()
+    if args.browser_model and args.browser_suite != "layout":
+        parser.error("--browser-model requires --browser-suite layout")
     env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONUNBUFFERED": "1", "HBDS_AI_ENABLED": "0"}
     for key in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "HBDS_AI_CUSTOM_API_KEY"):
         env.pop(key, None)
@@ -47,7 +50,12 @@ def main() -> int:
             run([sys.executable, "-B", "models/validate_satellite_models.py"])
             run([sys.executable, "-B", "scripts/smoke_server.py"], timeout=300)
         if not args.skip_browser:
-            run([sys.executable, "-B", "scripts/collaboration_browser_regression.py", "--suite", args.browser_suite], timeout=900)
+            # The full suite repeats layouts for dense diagrams with separated
+            # routes, as well as editing, save/reload and collaboration checks.
+            browser_command = [sys.executable, "-B", "scripts/collaboration_browser_regression.py", "--suite", args.browser_suite]
+            if args.browser_model:
+                browser_command += ["--model", args.browser_model]
+            run(browser_command, timeout=1800)
     print("Project checks passed; temporary workspace removed.", flush=True)
     return 0
 
