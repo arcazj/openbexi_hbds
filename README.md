@@ -7,15 +7,14 @@ Model classes, nested hyperclasses, attributes, and relationships in 2-D or 3-D.
 
 ## Examples
 
-Screenshots show the Models view in version 2.6.2.
+Screenshots show the current diagrams in version 2.6.2, with compact attribute
+columns and separated links. Viewer controls are hidden for clarity.
 
 ### OpenBEXI Timeline
 
 The Timeline domain model connects users, filters, presentation models, sources,
 records, namespaces, and shared rendering. [Model and source mapping](doc/OPENBEXI_TIMELINE_MODEL.md)
 and [complete application recreation prompt](prompts/openbexi_timeline_prompt.MD).
-
-![OpenBEXI Timeline HBDS model with Record inside Source and shared Render outside both hyperclasses](pictures/openbexi_timeline.png)
 
 ### Satellite World Simple Structure
 
