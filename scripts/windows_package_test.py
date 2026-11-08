@@ -26,6 +26,12 @@ def wait(predicate, label, timeout=45):
 
 def read_json(path): return json.loads(path.read_text(encoding='utf-8'))
 
+def remove_finished_uninstaller(path):
+    # ARM emulation and antivirus scanning can briefly retain the executable
+    # after the process has exited. Retry only this known temporary test file.
+    path.unlink(missing_ok=True)
+    return True
+
 def browser_check(base):
     import collaboration_browser_regression as browser
     port=browser.get_free_port()
@@ -116,7 +122,6 @@ def main():
             assert not python.exists(),'Uninstaller left the runtime behind'
             assert read_json(modified)['metadata']['packageTest']=='Keep user changes'
             assert backup.read_text()=='user backup'
-            print(f'PASS {args.arch}: native bundled runtime, install, launch, occupied port, repeat launch, upgrade, deleted-example preservation and uninstall/data preservation',flush=True)
         finally:
             if process and process.poll() is None:
                 try:
@@ -127,5 +132,7 @@ def main():
             if (install/'runtime/python.exe').exists() and (install/'Uninstall.exe').exists():
                 subprocess.run([str(install/'Uninstall.exe'),'/S','_?='+str(install)],env=env,timeout=180)
             blocker.close()
+            wait(lambda:remove_finished_uninstaller(install/'Uninstall.exe'),'temporary uninstaller release',timeout=15)
+    print(f'PASS {args.arch}: native bundled runtime, install, launch, occupied port, repeat launch, upgrade, deleted-example preservation and uninstall/data preservation',flush=True)
 
 if __name__=='__main__':main()
