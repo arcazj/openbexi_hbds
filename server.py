@@ -72,15 +72,17 @@ def connected_bind_requires_remote_acknowledgement(
 
 
 ROOT_DIR = Path(__file__).resolve().parent
-MODELS_DIR = (ROOT_DIR / "models").resolve()
-TEST_MODELS_DIR = (ROOT_DIR / "test_models").resolve()
+APP_VERSION = (ROOT_DIR / "VERSION").read_text(encoding="utf-8").strip()
+DATA_DIR = Path(os.environ.get("HBDS_DATA_DIR", str(ROOT_DIR))).expanduser().resolve()
+MODELS_DIR = (DATA_DIR / "models").resolve()
+TEST_MODELS_DIR = (DATA_DIR / "test_models").resolve()
 MODELS_MANIFEST_PATH = MODELS_DIR / "models_manifest.json"
 TEST_MODELS_MANIFEST_PATH = TEST_MODELS_DIR / "test_models_manifest.json"
 BACKUP_DIR = MODELS_DIR / ".backups"
-DEBUG_LOG_DIR = ROOT_DIR / "debug_logs"
-SERVER_STDOUT_LOG_PATH = ROOT_DIR / ".codex_server_out.log"
-SERVER_STDERR_LOG_PATH = ROOT_DIR / ".codex_server_err.log"
-SERVER_ACCESS_LOG_PATH = ROOT_DIR / ".codex_server_access.log"
+DEBUG_LOG_DIR = DATA_DIR / "debug_logs"
+SERVER_STDOUT_LOG_PATH = DATA_DIR / ".codex_server_out.log"
+SERVER_STDERR_LOG_PATH = DATA_DIR / ".codex_server_err.log"
+SERVER_ACCESS_LOG_PATH = DATA_DIR / ".codex_server_access.log"
 MAX_JSON_BYTES = 5 * 1024 * 1024
 MAX_AI_REQUEST_BYTES = env_int("HBDS_AI_REQUEST_MAX_BYTES", 512 * 1024)
 MAX_AI_RESPONSE_BYTES = env_int("HBDS_AI_RESPONSE_MAX_BYTES", 8 * 1024 * 1024)
@@ -121,7 +123,7 @@ PUBLIC_ROOT_FILES = {
 }
 PUBLIC_STATIC_EXTENSIONS = {
     "css": {".css"},
-    "js": {".js", ".json"},
+    "js": {".js", ".json", ".css", ".wasm"},
     "icons": {".json", ".png", ".svg"},
     "images": {".avif", ".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"},
     "pictures": {".avif", ".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"},
@@ -333,14 +335,15 @@ def public_static_request_path(path: str) -> str | None:
             return None
         public_base = ROOT_DIR
     else:
-        public_base = (ROOT_DIR / parts[0]).resolve()
+        public_base = ((DATA_DIR if parts[0] in {"models", "test_models"} else ROOT_DIR) / parts[0]).resolve()
         allowed_extensions = PUBLIC_STATIC_EXTENSIONS.get(parts[0])
         if not allowed_extensions or Path(parts[-1]).suffix.lower() not in allowed_extensions:
             return None
 
     try:
-        public_base.relative_to(ROOT_DIR)
-        requested = (ROOT_DIR.joinpath(*parts)).resolve()
+        request_root = DATA_DIR if parts[0] in {"models", "test_models"} else ROOT_DIR
+        public_base.relative_to(request_root)
+        requested = (request_root.joinpath(*parts)).resolve()
         requested.relative_to(public_base)
     except (OSError, ValueError):
         return None
@@ -2293,7 +2296,7 @@ def openapi_spec(host: str) -> dict:
         "openapi": "3.0.3",
         "info": {
             "title": "HBDS Graphic Simulator API",
-            "version": "2.6.2",
+            "version": APP_VERSION,
             "description": "Local API for HBDS model listing, loading, and saving.",
         },
         "servers": [{"url": server_url}],
@@ -3489,10 +3492,16 @@ class HBDSLocalServer(ThreadingHTTPServer):
 
 
 class HBDSRequestHandler(SimpleHTTPRequestHandler):
-    server_version = "HBDSLocalServer/2.6.2"
+    server_version = "HBDSLocalServer/" + APP_VERSION
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT_DIR), **kwargs)
+
+    def translate_path(self, path: str) -> str:
+        public_path = public_static_request_path(path)
+        if public_path and public_path.split("/")[1] in {"models", "test_models"}:
+            return str(DATA_DIR.joinpath(*public_path.lstrip("/").split("/")))
+        return super().translate_path(path)
 
     def handle(self) -> None:
         try:
@@ -4684,7 +4693,7 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HBDS API Documentation</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+  <link rel="stylesheet" href="/js/vendor/swagger-ui-dist/swagger-ui.css">
   <style>
     html,
     body {
@@ -4796,7 +4805,7 @@ class HBDSRequestHandler(SimpleHTTPRequestHandler):
 <body>
   <div id="swagger-ui"></div>
   <main id="fallback"></main>
-  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="/js/vendor/swagger-ui-dist/swagger-ui-bundle.js"></script>
   <script>
     const specUrl = '/api/openapi.json';
     const fallback = document.getElementById('fallback');

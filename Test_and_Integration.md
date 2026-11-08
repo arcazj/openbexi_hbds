@@ -2,7 +2,7 @@
 
 This guide describes end-to-end testing for the HBDS Graphic Simulator, from first setup through deep UI, API, server, collaboration, and release validation.
 
-The examples use Windows PowerShell because the current development environment is Windows. Equivalent commands can be run from other shells with the same Python and Maven tools.
+The examples use Windows PowerShell because the current development environment is Windows. Equivalent commands can be run from other shells with the same Python and Node.js tools.
 
 ## 1. Test Scope
 
@@ -29,7 +29,7 @@ Use this guide to validate:
 * shell menu app version display
 * collaboration panel and conflict-resolution choices
 * immediate class, hyperclass, and attribute label rendering after model load
-* smoke tests, manifest validation, naming lint, AI helper tests, productivity helper tests, browser collaboration regression, and Maven tests through the repo-local wrapper
+* smoke tests, manifest validation, naming lint, AI helper tests, productivity helper tests, and browser collaboration regression
 
 ## 2. Investigation Issue Ledger
 
@@ -43,7 +43,6 @@ Resolved or mitigated issues:
 * Empty or missing class icon paths could leave label rendering in a fragile state during model load.
 * Dynamic module imports could keep stale label-rendering code in the browser cache when cache-bust query strings were not updated together.
 * Model refresh could leave previous class or hyperclass label registry state active if registries were not cleared before re-rendering.
-* Java regression tests could not run because `mvn` was not available on the machine PATH; the repo now provides `mvn.cmd`, `mvn.ps1`, and `scripts/bootstrap_maven.ps1`.
 * `rg` was not available in the environment; the repo now provides `rg.cmd`, `rg.ps1`, and `scripts/bootstrap_ripgrep.ps1`.
 * `it_infrastructure_world_complete_structure.json` was removed from the model set and must not remain in manifests, tests, or large-model special-case references.
 * The satellite models use distinct entity ID namespaces to avoid cross-model collisions.
@@ -56,7 +55,6 @@ Regression coverage required for these issues:
 * Repeat label checks after zoom in, zoom out, pan, fit, overview drag, element selection, and switching between 2-D and 3-D.
 * Load a satellite model and verify label font sizes remain readable at near, default, and far zoom distances.
 * Restart the server and validate both manifests after removing or adding model files.
-* Run Maven through the repo-local wrapper so Java checks are never skipped because global Maven is missing.
 * Keep AI keys out of model JSON, exports, collaboration drafts, diagnostics, and debug logs.
 * Run `py tools\validate_models.py` and require all model IDs to be globally unique.
 
@@ -78,20 +76,13 @@ python3 --version
 
 On Windows, `py` is usually the most reliable command. If `python` or `python3` is not available, use `py` in the commands below.
 
-Check Maven if Java tests are required:
+Check Node.js for JavaScript helper tests and syntax checks:
 
 ```powershell
-.\mvn.cmd -v
-.\mvn.ps1 -v
+node --version
 ```
 
-If repo-local Maven is missing, bootstrap it:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\bootstrap_maven.ps1
-```
-
-The wrapper uses an installed JDK 17 when `JAVA_HOME` is not already set. In PowerShell, prefer `.\mvn.cmd test` or `.\mvn.ps1 test`. In `cmd.exe`, `mvn test` works from the repository root because `mvn.cmd` is in the current directory.
+Install Edge or Chrome to run the browser regression suite.
 
 ## 4. Static Mode Smoke Test
 
@@ -112,7 +103,7 @@ http://127.0.0.1:8000/index.html
 Validate:
 
 * The shell loads.
-* The menu shows `Models`, `Edit`, `Tests`, `Help`, and connection status.
+* The menu shows `Models`, `Edit`, `Tests`, `Query`, and `Help`, in that order. Connection status is immediately left of the square tree toggle at the upper left.
 * The connection indicator shows not connected.
 * Models can be viewed if JSON assets are served.
 * Browser console has no fatal module-loading errors.
@@ -155,7 +146,7 @@ Expected debug output:
 
 Validate:
 
-* The shell menu shows app version `v2.6.2`.
+* The shell menu shows app version `v2.7`.
 * The connection indicator turns green/connected.
 * Stopping the server turns the indicator red/not connected after polling catches up.
 * Restarting the server reconnects the UI.
@@ -1065,9 +1056,40 @@ Known limitations:
 
 ## 24. Automated Regression Commands
 
+Run the structural Query checks in an isolated workspace:
+
+```powershell
+py -B scripts/check_project.py --skip-browser
+py -B scripts/check_project.py --browser-only --browser-suite query
+```
+
+The helper suite validates complete typed pipelines, empty selections, unsupported
+operations, directed COUPLE parameters and parallel identities, mixed-link exclusion,
+legacy attributes, direct versus transitive class/hyperclass inclusion, explicit
+membership precedence (including empty layers), deep/shared nesting, real cycles,
+immutable source snapshots, and
+all shipped model/test fixtures. It also checks the generated 141-name catalog
+against the OpenAPI proposal. Browser checks cover navigation placement, equal
+connection/tree dimensions, tree state, unsaved edits, preserved selection and
+property undo history, automatic live refresh, rejection of old source tickets,
+the compact 400-pixel Query sidebar beside the visible diagram, single-line model
+selector and functor/element selectors, visible legacy functor descriptions,
+grouped Models/Tests choices, synchronized read-only previews, restoration of the
+unsaved source, stale-load rejection, load-error recovery, shared panel control
+styles and soft section-header colors, three result columns and
+name tooltips, fluorescent yellow text and link highlights, unchanged camera/zoom,
+filtered Locate all across result pages, highlight clearing and editor-panel
+restoration, dynamic typed selectors, keyboard search versus committed inputs,
+canonical names and source pages, COUPLE targets in initial and added steps,
+CONT/CONTN/HCONT and inverse results, compatible chains, empty results, all three source
+views, full-result counts and pagination, Help above Query, vertically stacked
+mobile diagram/Query layout and return
+to the editor, legacy examples, and active-model queries on a static-only server. The
+`all` and `ui` browser suites include these Query checks.
+
 Execution order:
 
-1. Run automated compile, unit/helper, manifest, model, Maven, and smoke checks.
+1. Run automated compile, unit/helper, manifest, model, and smoke checks.
 2. Run browser regressions.
 3. Run manual or interactive collaboration checks only for behavior not already covered by automation.
 4. If a test fails, fix the related code or test data, update this guide if expected behavior changed, and rerun the affected checks plus any broader regression that could be impacted.
@@ -1165,7 +1187,7 @@ This opens real headless Edge/Chrome clients. Rendering checks run with debug di
 Automated collaboration coverage:
 
 * the Models viewer defaults to the new simple satellite model; both satellite models render, and temporary copies preserve edits through save and reload
-* shell menu displays app version `v2.6.2`
+* shell menu displays app version `v2.7`
 * the temporary same-origin server remains available during concurrent asset loading, event streaming, and draft polling without fallback connection errors
 * Help includes the comprehensive user guide with AI, model delete, rollback, collaboration, and Edit/Tests save-location guidance
 * AI Support panel collapsed by default, pink section styling, provider-dependent credential UI, provider-specific model combo, custom model fallback, reasoning effort payload, and ChatGPT / Manual no-key workflow
@@ -1201,12 +1223,6 @@ Expected:
 * `.codex_server_err.log` is empty.
 * `.codex_server_access.log` has no unexpected `4xx` or `5xx` responses.
 * debug JSONL files include `client.function-timing`, `server.function-timing`, and stream events are logged as `server.stream-timing` rather than ordinary slow request timings.
-
-Run Java/Maven tests if Maven is installed:
-
-```powershell
-.\mvn.cmd test
-```
 
 Run JavaScript syntax checks for all JavaScript modules:
 
@@ -1334,19 +1350,13 @@ Server disconnected icon:
 * open `http://127.0.0.1:8010/api/health`
 * verify the UI is using the same port as the server
 
-Maven not installed:
+Node.js not installed:
 
 ```powershell
-.\mvn.cmd -v
+node --version
 ```
 
-If local Maven is missing, run:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\bootstrap_maven.ps1
-```
-
-Then run `.\mvn.cmd test` from PowerShell. If this still fails, verify JDK 17 is installed or set `JAVA_HOME` to a JDK 17 directory.
+If the command is unavailable, install Node.js, reopen the terminal so PATH updates take effect, and rerun the helper tests.
 
 Python command differences:
 
@@ -1403,7 +1413,6 @@ Before release:
 * run `py scripts\collaboration_browser_regression.py`
 * run JavaScript syntax checks for all `js/*.js` modules
 * run immediate label load and satellite font zoom browser regressions
-* run `.\mvn.cmd test`
 * run `git diff --check`
 * start `py server.py --port 8010`
 * verify Models, Edit, Tests, and Help manually
@@ -1422,6 +1431,28 @@ Before release:
 * verify no temporary smoke files remain
 * review `git status --short`
 * update README or this guide if behavior changed
+
+## Windows v2.7 Package Validation
+
+Run `py -B scripts/check_project.py --browser-suite ui` in the source checkout for
+the model validators, helper tests, server/API smoke tests and browser UI suite.
+Build unsigned packages with `py -B scripts/build_windows.py --arch all`.
+
+On a clean Windows user without an existing HBDS installation, run
+`py -B scripts/windows_package_test.py --arch x64` on x64, or use `--arch arm64` on
+ARM64. The test uses temporary installation and data folders. It checks native
+runtime architecture, offline editor/Query rendering, API save/reload to the separate
+workspace, occupied-port fallback, repeated launch, upgrade while running, preservation
+of edited/deleted examples and backups, and uninstallation without data loss.
+Do not use `--skip-browser` for release acceptance.
+
+The GitHub Windows release workflow runs this check for both architectures. Windows 10
+remains a compatibility target requiring separate desktop acceptance; Windows 11 and
+Windows Server hosted checks alone do not establish Windows 10 certification.
+Before publishing, confirm `BUILD-INFO.json` names the tagged source commit, compare
+the four Windows assets against `SHA256SUMS.txt`, and verify the release's source ZIP,
+tar.gz, notes, license links and download links. A public source archive is not an
+open-source license grant; keep the Commercial and Exempt Use License intact.
 
 ## 28. Expected Clean-Up
 

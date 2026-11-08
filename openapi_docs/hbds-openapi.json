@@ -8112,7 +8112,7 @@
         ],
         "operationId": "hbdsRunHCONT",
         "summary": "HCONT — Return directly contained hyperclasses, not classes.",
-        "description": "Return directly contained hyperclasses, not classes.\n\nInput: hyperclass. Output: hyperclass. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice. traversal.mode=closure is an HTTP extension. Direct means one step. Closure returns all positive-depth reachable components, excludes prefix seeds, and uses the completeness/cycle rules in SEMANTICS.md.\n\nSource: CH10.4 pages 9 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Return directly contained hyperclasses, not classes.\n\nInput: hyperclass. Output: hyperclass. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice. traversal.mode=closure is an HTTP extension. Direct means one step. Closure returns all positive-depth reachable components, excludes prefix seeds, and uses the completeness/cycle rules in SEMANTICS.md.\n\nSource: CH10.4 pages 9 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "homogeneous",
         "x-hbds-source": [
           {
@@ -8276,7 +8276,7 @@
         ],
         "operationId": "hbdsRunHCONTOF",
         "summary": "HCONTOF — Return hyperclasses directly containing the input hyperclasses.",
-        "description": "Return hyperclasses directly containing the input hyperclasses.\n\nInput: hyperclass. Output: hyperclass. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 9 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Return hyperclasses directly containing the input hyperclasses.\n\nInput: hyperclass. Output: hyperclass. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 9 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "homogeneous",
         "x-hbds-source": [
           {
@@ -8440,7 +8440,7 @@
         ],
         "operationId": "hbdsRunHINTERS",
         "summary": "HINTERS — Return other hyperclasses having a nonempty semantic intersection with the prefix hyperclasses.",
-        "description": "Return other hyperclasses having a nonempty semantic intersection with the prefix hyperclasses.\n\nInput: hyperclass. Output: hyperclass. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 9 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Return other hyperclasses having a nonempty semantic intersection with the prefix hyperclasses.\n\nInput: hyperclass. Output: hyperclass. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 9 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "homogeneous",
         "x-hbds-source": [
           {
@@ -9434,7 +9434,7 @@
         ],
         "operationId": "hbdsRunCONT",
         "summary": "CONT — Return only classes directly contained in the input hyperclasses.",
-        "description": "Return only classes directly contained in the input hyperclasses.\n\nInput: hyperclass. Output: class. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 11,12 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Return only classes directly contained in the input hyperclasses.\n\nInput: hyperclass. Output: class. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 11,12 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "direct",
         "x-hbds-source": [
           {
@@ -9599,7 +9599,7 @@
         ],
         "operationId": "hbdsRunCONTN",
         "summary": "CONTN — Return classes contained at any nesting depth in the input hyperclasses.",
-        "description": "Return classes contained at any nesting depth in the input hyperclasses.\n\nInput: hyperclass. Output: class. Prefix policy: referencesOrNames.\n\nPreconditions: Full transitive containment is required; depth or resource limits must produce an error, never a success with truncated descendants.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 11,12 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Return classes contained at any nesting depth in the input hyperclasses.\n\nInput: hyperclass. Output: class. Prefix policy: referencesOrNames.\n\nPreconditions: Full transitive containment is required; depth or resource limits must produce an error, never a success with truncated descendants.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 11,12 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "direct",
         "x-hbds-source": [
           {
@@ -9764,7 +9764,7 @@
         ],
         "operationId": "hbdsRunINTERS",
         "summary": "INTERS — Return member classes lying in an intersection of a prefix hyperclass with other hyperclasses.",
-        "description": "Return member classes lying in an intersection of a prefix hyperclass with other hyperclasses.\n\nInput: hyperclass. Output: class. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 11,12 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Return member classes lying in an intersection of a prefix hyperclass with other hyperclasses.\n\nInput: hyperclass. Output: class. Prefix policy: referencesOrNames.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 11,12 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "direct",
         "x-hbds-source": [
           {
@@ -10261,7 +10261,7 @@
         ],
         "operationId": "hbdsRunCONTOF",
         "summary": "CONTOF — Return hyperclasses directly containing the input classes.",
-        "description": "Return hyperclasses directly containing the input classes.\n\nInput: class. Output: hyperclass. Prefix policy: referencesOnly.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 11,12 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Return hyperclasses directly containing the input classes.\n\nInput: class. Output: hyperclass. Prefix policy: referencesOnly.\n\nSource/API notes: Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 11,12 (text).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "inverse",
         "x-hbds-source": [
           {
@@ -13556,7 +13556,7 @@
         ],
         "operationId": "hbdsRunEHCONT",
         "summary": "EHCONT — Embryon counterpart of HCONT: Return directly contained hyperclasses, not classes.",
-        "description": "Embryon counterpart of HCONT: Return directly contained hyperclasses, not classes.\n\nInput: hyperclassEmbryon. Output: hyperclassEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice. traversal.mode=closure is an HTTP extension. Direct means one step. Closure returns all positive-depth reachable components, excludes prefix seeds, and uses the completeness/cycle rules in SEMANTICS.md.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Embryon counterpart of HCONT: Return directly contained hyperclasses, not classes.\n\nInput: hyperclassEmbryon. Output: hyperclassEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice. traversal.mode=closure is an HTTP extension. Direct means one step. Closure returns all positive-depth reachable components, excludes prefix seeds, and uses the completeness/cycle rules in SEMANTICS.md.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "homogeneous",
         "x-hbds-source": [
           {
@@ -13720,7 +13720,7 @@
         ],
         "operationId": "hbdsRunEHCONTOF",
         "summary": "EHCONTOF — Embryon counterpart of HCONTOF: Return hyperclasses directly containing the input hyperclasses.",
-        "description": "Embryon counterpart of HCONTOF: Return hyperclasses directly containing the input hyperclasses.\n\nInput: hyperclassEmbryon. Output: hyperclassEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Embryon counterpart of HCONTOF: Return hyperclasses directly containing the input hyperclasses.\n\nInput: hyperclassEmbryon. Output: hyperclassEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "homogeneous",
         "x-hbds-source": [
           {
@@ -13884,7 +13884,7 @@
         ],
         "operationId": "hbdsRunEHINTERS",
         "summary": "EHINTERS — Embryon counterpart of HINTERS: Return other hyperclasses having a nonempty semantic intersection with the prefix hyperclasses.",
-        "description": "Embryon counterpart of HINTERS: Return other hyperclasses having a nonempty semantic intersection with the prefix hyperclasses.\n\nInput: hyperclassEmbryon. Output: hyperclassEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Embryon counterpart of HINTERS: Return other hyperclasses having a nonempty semantic intersection with the prefix hyperclasses.\n\nInput: hyperclassEmbryon. Output: hyperclassEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "homogeneous",
         "x-hbds-source": [
           {
@@ -14876,7 +14876,7 @@
         ],
         "operationId": "hbdsRunECONT",
         "summary": "ECONT — Embryon counterpart of CONT: Return only classes directly contained in the input hyperclasses.",
-        "description": "Embryon counterpart of CONT: Return only classes directly contained in the input hyperclasses.\n\nInput: hyperclassEmbryon. Output: classEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Embryon counterpart of CONT: Return only classes directly contained in the input hyperclasses.\n\nInput: hyperclassEmbryon. Output: classEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "direct",
         "x-hbds-source": [
           {
@@ -15040,7 +15040,7 @@
         ],
         "operationId": "hbdsRunECONTN",
         "summary": "ECONTN — Embryon counterpart of CONTN: Return classes contained at any nesting depth in the input hyperclasses.",
-        "description": "Embryon counterpart of CONTN: Return classes contained at any nesting depth in the input hyperclasses.\n\nInput: hyperclassEmbryon. Output: classEmbryon. Prefix policy: referencesOrNames.\n\nPreconditions: Full transitive containment is required; depth or resource limits must produce an error, never a success with truncated descendants.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Embryon counterpart of CONTN: Return classes contained at any nesting depth in the input hyperclasses.\n\nInput: hyperclassEmbryon. Output: classEmbryon. Prefix policy: referencesOrNames.\n\nPreconditions: Full transitive containment is required; depth or resource limits must produce an error, never a success with truncated descendants.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "direct",
         "x-hbds-source": [
           {
@@ -15204,7 +15204,7 @@
         ],
         "operationId": "hbdsRunEINTERS",
         "summary": "EINTERS — Embryon counterpart of INTERS: Return member classes lying in an intersection of a prefix hyperclass with other hyperclasses.",
-        "description": "Embryon counterpart of INTERS: Return member classes lying in an intersection of a prefix hyperclass with other hyperclasses.\n\nInput: hyperclassEmbryon. Output: classEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Embryon counterpart of INTERS: Return member classes lying in an intersection of a prefix hyperclass with other hyperclasses.\n\nInput: hyperclassEmbryon. Output: classEmbryon. Prefix policy: referencesOrNames.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "direct",
         "x-hbds-source": [
           {
@@ -15698,7 +15698,7 @@
         ],
         "operationId": "hbdsRunECONTOF",
         "summary": "ECONTOF — Embryon counterpart of CONTOF: Return hyperclasses directly containing the input classes.",
-        "description": "Embryon counterpart of CONTOF: Return hyperclasses directly containing the input classes.\n\nInput: classEmbryon. Output: hyperclassEmbryon. Prefix policy: referencesOnly.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
+        "description": "Embryon counterpart of CONTOF: Return hyperclasses directly containing the input classes.\n\nInput: classEmbryon. Output: hyperclassEmbryon. Prefix policy: referencesOnly.\n\nSource/API notes: Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints. Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.\n\nSource: CH10.4 pages 13 (diagram_and_documented_analogy).\n\nThis is a proposed read-only HTTP operation. It does not create model elements, rewrite JSON, publish drafts, broadcast update events, or call an AI provider. Validate authorization, snapshot, all identities, input type and parameters before evaluation. Evaluate completely before paging.",
         "x-hbds-category": "inverse",
         "x-hbds-source": [
           {
@@ -25001,7 +25001,7 @@
                         }
                       ],
                       "semanticNotes": [
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.",
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.",
                         "traversal.mode=closure is an HTTP extension. Direct means one step. Closure returns all positive-depth reachable components, excludes prefix seeds, and uses the completeness/cycle rules in SEMANTICS.md."
                       ],
                       "sourceAliases": [],
@@ -25032,7 +25032,7 @@
                         }
                       ],
                       "semanticNotes": [
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],
@@ -25062,7 +25062,7 @@
                         }
                       ],
                       "semanticNotes": [
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],
@@ -25239,7 +25239,7 @@
                         }
                       ],
                       "semanticNotes": [
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],
@@ -25270,7 +25270,7 @@
                         }
                       ],
                       "semanticNotes": [
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [
@@ -25303,7 +25303,7 @@
                         }
                       ],
                       "semanticNotes": [
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],
@@ -25392,7 +25392,7 @@
                         }
                       ],
                       "semanticNotes": [
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],
@@ -26002,7 +26002,7 @@
                       ],
                       "semanticNotes": [
                         "Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints.",
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice.",
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice.",
                         "traversal.mode=closure is an HTTP extension. Direct means one step. Closure returns all positive-depth reachable components, excludes prefix seeds, and uses the completeness/cycle rules in SEMANTICS.md."
                       ],
                       "sourceAliases": [],
@@ -26034,7 +26034,7 @@
                       ],
                       "semanticNotes": [
                         "Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints.",
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],
@@ -26065,7 +26065,7 @@
                       ],
                       "semanticNotes": [
                         "Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints.",
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],
@@ -26249,7 +26249,7 @@
                       ],
                       "semanticNotes": [
                         "Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints.",
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],
@@ -26280,7 +26280,7 @@
                       ],
                       "semanticNotes": [
                         "Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints.",
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [
@@ -26313,7 +26313,7 @@
                       ],
                       "semanticNotes": [
                         "Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints.",
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],
@@ -26404,7 +26404,7 @@
                       ],
                       "semanticNotes": [
                         "Chapter 10.4 states that the embryon functors mirror the preceding functors; the page 13 diagram supplies this token and its endpoints.",
-                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 page 11 has imprecise wording about nested classes; this HTTP profile follows the hyperclass nesting diagrams and explicitly records that choice."
+                        "Containment/intersection is semantic membership, never rectangle overlap or screen geometry. Class membership is kept separate from nested hyperclass membership. CH10.4 pp.9-12 distinguish direct class inclusion, all-depth class inclusion, and direct hyperclass inclusion. CONTN follows intermediate classes as well as hyperclasses; storage representation is an adapter choice."
                       ],
                       "sourceAliases": [],
                       "preconditions": [],

@@ -13,7 +13,7 @@ https://openbexi.local/hbds/model/v2
 
 These identifiers match the `$schema` values used by model instances. They are logical schema identifiers, not a promise that `openbexi.local` resolves over the network.
 
-The v2 schema file describes the locked semantic contract version 1. The runtime opt-in is `metadata.semanticVersion: 1`; `$schema` is documentation/tooling metadata and is not the runtime feature switch. `parentClassId` and `children` remain visual containment fields; semantic membership and inheritance use their dedicated v2 arrays.
+The v2 schema file describes the locked semantic contract version 1. New documents opt in with `metadata.semanticVersion: 1`; `$schema` is documentation/tooling metadata and is not the runtime feature switch. In semantic models, `parentClassId` and `children` remain presentation fields; membership and inheritance use their dedicated v2 arrays. Without a semantic layer, the read-only legacy Query adapter uses declared parent/child containment for inclusion functors. See the [source review and mapping](../doc/HBDS_SUPPORT_MATRIX.md#legacy-source-review-and-containment-mapping).
 
 Optional units, temporal, geospatial, fuzzy, and prototype validators are enabled separately through `metadata.semanticProfiles`. Profile annotations normally live inside `attributeValues.value`; the v2 object schema also names the prototype fields `isPrototype`, `prototypeId`, and `overrides`.
 

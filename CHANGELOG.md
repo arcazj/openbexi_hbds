@@ -1,5 +1,20 @@
 # Release notes
 
+## 2.7 - 2026-11-08
+
+* Add unsigned Windows x64 and ARM64 installers and portable packages targeting Windows 10 and Windows 11, with a bundled Python runtime, Start menu launch/stop shortcuts, native-architecture checks, and an uninstaller that preserves user data.
+* Keep writable models, backups and logs in a separate desktop data folder. Preserve edited and intentionally deleted examples during upgrades, reuse the running local session, and handle occupied ports.
+* Bundle pinned Three.js and Swagger UI dependencies so core modeling, query and API documentation work offline. Include upstream notices and verified runtime checksums.
+* Retain the Commercial and Exempt Use License, free-use exemptions and earlier/third-party grants. Add Windows installation, upgrade and distribution instructions.
+* Restore visible descriptions for selected query functors and added steps. Add a searchable model selector with Current session, Models and Tests groups; saved-model previews preserve the original editing session and undo history. Keep diagram/results synchronized, reject stale loads, and recover from load failures. Share compact panel controls, typography, spacing, and soft section headers across Models, Edit, Tests, Query and Help.
+* Display compact Query in a 400-pixel sidebar beside the live diagram and stack it below the diagram on small screens. Use a single-line model heading, inline functor/element selectors, and soft section colors. Reduce Results to Type, Name, and Locate, with identifiers and paths in name tooltips. Add filtered Locate all across every result page and fluorescent yellow text/link highlights that preserve the current camera, model, editing selection and undo history. Omit redundant expression and highlight-count messages.
+* Make Query use the active diagram automatically. Replace the source sidebar and Run/Try controls with a functor-first row of searchable typed selectors, immediate results, optional compatible steps, automatic live-model refresh, 25/50/100-row pagination, keyboard input, and source-generation checks.
+* Add the Query navigation view with whole-model snapshots, typed pipelines, result inspection and location, and a searchable 141-functor reference with legacy source pages. Implement 21 canonical functors, including directed COUPLE with source/target selectors and parameterized steps. Keep only original functor names in the builder. Support static-only hosting and preserve editor state and undo history while Query is open.
+* Align containment with the legacy chapters: CONT returns direct classes, CONTN classes at every nesting depth, HCONT direct hyperclasses, and CONTOF/HCONTOF their direct containing hyperclasses. Map legacy parent/child declarations to inclusion; use explicit memberships exclusively when the semantic layer is present. Reject containment cycles, preserve shared members, and document the recorded-definition subset and its limits.
+* Move connection status beside the square tree icon, retain accessible state and keyboard controls, and add model/query helper tests and desktop/mobile browser regressions.
+* Recompute editor title clearance when responsive side-panel transitions finish, keeping wrapped headings above the diagram.
+* Remove the unused Java starter, Maven build file, wrappers, and bootstrap script. Update development and test instructions for the Python server and JavaScript browser app.
+
 ## 2.6.2 - 2026-10-08
 
 * Add the OpenBEXI Timeline HBDS model and map all 14 inspected Timeline model files and the supplied user settings. Keep Record inside Source, Namespace inside Model, and one Model-to-Render relationship for shared rendering.

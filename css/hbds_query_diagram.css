@@ -1,0 +1,10 @@
+/* Query owns the sidebar; the source keeps its existing model and editor state. */
+body.hbds-query-diagram #container { inset: 0 !important; transition: none; }
+body.hbds-query-diagram :is(#dynamic-test-panel, #controls-panel, #model-tree-sidebar, #model-overview, #collaboration-split, .models-collaboration-split) { display: none !important; }
+body.hbds-query-diagram #canvas-model-title { max-width: calc(100% - 32px); }
+body.hbds-query-diagram #toast { max-width: calc(100% - 32px); bottom: 12px; }
+#hbds-query-highlights { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; z-index: 24; pointer-events: none; }
+#hbds-query-highlights .query-outline { fill: #eeff0010; stroke: #cadb00; stroke-width: 2; vector-effect: non-scaling-stroke; }
+#hbds-query-highlights .query-route { fill: none; stroke: #eeff00; stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 1px #677000); }
+#hbds-query-highlights text { fill: #273000; stroke: #eeff00; stroke-width: 3; paint-order: stroke; font: 600 12px system-ui, sans-serif; }
+.hbds-query-highlight { outline: 2px solid #eeff00 !important; outline-offset: 2px; background: #eeff00 !important; color: #1b2200 !important; text-shadow: none !important; border-radius: 3px; }

@@ -4,9 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBDS Lab</title>
-  <link rel="stylesheet" href="css/style.css?v=release-2.6.2">
-  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=release-2.6.2">
-  <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.176.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.176.0/examples/jsm/"}}</script>
+  <link rel="stylesheet" href="css/style.css?v=release-2.7">
+  <link rel="stylesheet" href="css/test_dynamic_hbds_layout.css?v=release-2.7-query1">
+  <link rel="stylesheet" href="css/hbds_query_diagram.css?v=query-panel-v2">
+  <link rel="stylesheet" href="css/hbds_panels.css?v=panels-v1">
+  <script type="importmap">{"imports":{"three":"./js/vendor/three/build/three.module.js","three/addons/":"./js/vendor/three/examples/jsm/"}}</script>
 </head>
 <body>
   <main id="container">
@@ -35,7 +37,7 @@
         <div class="eyebrow">Model Tree</div>
         <h2>Structure</h2>
       </div>
-      <button id="model-tree-toggle" type="button" title="Collapse model tree">Tree</button>
+      <button id="model-tree-toggle" type="button" title="Show model tree" aria-label="Model tree" aria-expanded="false" aria-controls="model-tree-list"><img src="icons/tree.svg" width="28" height="28" alt=""></button>
     </div>
     <label class="model-tree-search" for="model-tree-search-input">
       <span>Search</span>
@@ -389,6 +391,6 @@
     </div>
   </div>
 
-<script type="module" src="./js/test_dynamic_hbds_layout.js?v=release-2.6.2"></script>
+<script type="module" src="./js/test_dynamic_hbds_layout.js?v=release-2.7-query-panel2"></script>
 </body>
 </html>

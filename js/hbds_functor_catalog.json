@@ -1,0 +1,2884 @@
+{
+  "contractVersion": "1.0.0",
+  "functors": [
+    {
+      "name": "ACOMP",
+      "group": "Base functors",
+      "category": "homogeneous",
+      "description": "Return immediate component class attributes of grouped attributes.",
+      "inputTypes": [
+        "classAttribute"
+      ],
+      "outputType": "classAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            30
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "ACOMPOF",
+      "group": "Base functors",
+      "category": "homogeneous",
+      "description": "Return parent grouped class attributes containing the input attributes.",
+      "inputTypes": [
+        "classAttribute"
+      ],
+      "outputType": "classAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            30
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "APROP",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return class attribute TADs associated with the prefix property concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "property"
+      ],
+      "outputType": "classAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            20,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "ATT",
+      "group": "Base functors",
+      "category": "direct",
+      "description": "Return all class-attribute TADs belonging to the input classes.",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "classAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            8,
+            9,
+            10
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "ATTOF",
+      "group": "Base functors",
+      "category": "inverse",
+      "description": "Return the classes owning the input class attributes.",
+      "inputTypes": [
+        "classAttribute"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            25,
+            27
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "CARD",
+      "group": "Values and aggregates",
+      "category": "aggregate",
+      "description": "Count the elements of a complete homogeneous TAD/concept selection or value list.",
+      "inputTypes": [
+        "*"
+      ],
+      "outputType": "scalar",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            49,
+            50
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "CENS",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return class TADs associated with the prefix set concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "set"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            21,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "CONT",
+      "group": "Hypercomponent bridges",
+      "category": "direct",
+      "description": "Return only classes directly contained in the input hyperclasses.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            11,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "CONTN",
+      "group": "Hypercomponent bridges",
+      "category": "direct",
+      "description": "Return classes contained at any nesting depth in the input hyperclasses.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            11,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "CONTOF",
+      "group": "Hypercomponent bridges",
+      "category": "inverse",
+      "description": "Return hyperclasses directly containing the input classes.",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            11,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "COUPLE",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return class links directed from the prefix classes to targetClass; intersection of PSC(prefix) and NSC(targetClass).",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            33
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "EACOMP",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of ACOMP: Return immediate component class attributes of grouped attributes.",
+      "inputTypes": [
+        "attributeEmbryon"
+      ],
+      "outputType": "attributeEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EACOMPOF",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of ACOMPOF: Return parent grouped class attributes containing the input attributes.",
+      "inputTypes": [
+        "attributeEmbryon"
+      ],
+      "outputType": "attributeEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EAG",
+      "group": "Embryon provenance",
+      "category": "direct",
+      "description": "Return already constructed class attribute TADs originating from the prefix embryons; never construct or mutate them.",
+      "inputTypes": [
+        "attributeEmbryon"
+      ],
+      "outputType": "classAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EAGOF",
+      "group": "Embryon provenance",
+      "category": "inverse",
+      "description": "Return the recorded source embryons of the input class attribute TADs, when any.",
+      "inputTypes": [
+        "classAttribute"
+      ],
+      "outputType": "attributeEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EAPROP",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return attribute embryon TADs associated with the prefix property concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "property"
+      ],
+      "outputType": "attributeEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            20,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EATT",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of ATT: Return all class-attribute TADs belonging to the input classes.",
+      "inputTypes": [
+        "classEmbryon"
+      ],
+      "outputType": "attributeEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EATTOF",
+      "group": "Embryon functors",
+      "category": "inverse",
+      "description": "Embryon counterpart of ATTOF: Return the classes owning the input class attributes.",
+      "inputTypes": [
+        "attributeEmbryon"
+      ],
+      "outputType": "classEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "ECENS",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return class embryon TADs associated with the prefix set concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "set"
+      ],
+      "outputType": "classEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            21,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "ECG",
+      "group": "Embryon provenance",
+      "category": "direct",
+      "description": "Return already constructed class TADs originating from the prefix embryons; never construct or mutate them.",
+      "inputTypes": [
+        "classEmbryon"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "ECGOF",
+      "group": "Embryon provenance",
+      "category": "inverse",
+      "description": "Return the recorded source embryons of the input class TADs, when any.",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "classEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "ECONT",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of CONT: Return only classes directly contained in the input hyperclasses.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "classEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "ECONTN",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of CONTN: Return classes contained at any nesting depth in the input hyperclasses.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "classEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "ECONTOF",
+      "group": "Embryon functors",
+      "category": "inverse",
+      "description": "Embryon counterpart of CONTOF: Return hyperclasses directly containing the input classes.",
+      "inputTypes": [
+        "classEmbryon"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EFF",
+      "group": "Base functors",
+      "category": "direct",
+      "description": "Return object links realizing the input class links.",
+      "inputTypes": [
+        "classLink"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            17,
+            18
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "EFFOF",
+      "group": "Base functors",
+      "category": "inverse",
+      "description": "Return the class links realized by the input object links.",
+      "inputTypes": [
+        "objectLink"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            25,
+            27
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "EFIN",
+      "group": "Embryon functors",
+      "category": "inverse",
+      "description": "Embryon counterpart of FIN: Return target classes of the oriented input class links.",
+      "inputTypes": [
+        "linkEmbryon"
+      ],
+      "outputType": "classEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHACOMP",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of HACOMP: Return immediate components of grouped hyperattributes.",
+      "inputTypes": [
+        "hyperattributeEmbryon"
+      ],
+      "outputType": "hyperattributeEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHACOMPOF",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of HACOMPOF: Return grouped hyperattributes containing the input hyperattributes.",
+      "inputTypes": [
+        "hyperattributeEmbryon"
+      ],
+      "outputType": "hyperattributeEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHAG",
+      "group": "Embryon provenance",
+      "category": "direct",
+      "description": "Return already constructed hyperattribute TADs originating from the prefix embryons; never construct or mutate them.",
+      "inputTypes": [
+        "hyperattributeEmbryon"
+      ],
+      "outputType": "hyperattribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EHAGOF",
+      "group": "Embryon provenance",
+      "category": "inverse",
+      "description": "Return the recorded source embryons of the input hyperattribute TADs, when any.",
+      "inputTypes": [
+        "hyperattribute"
+      ],
+      "outputType": "hyperattributeEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EHAPROP",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return hyperattribute embryon TADs associated with the prefix property concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "property"
+      ],
+      "outputType": "hyperattributeEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            20,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EHATT",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of HATT: Return hyperattributes of the input hyperclasses.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "hyperattributeEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHATTOF",
+      "group": "Embryon functors",
+      "category": "inverse",
+      "description": "Embryon counterpart of HATTOF: Return hyperclasses owning the input hyperattributes.",
+      "inputTypes": [
+        "hyperattributeEmbryon"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHCENS",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return hyperclass embryon TADs associated with the prefix set concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "set"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            21,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EHCG",
+      "group": "Embryon provenance",
+      "category": "direct",
+      "description": "Return already constructed hyperclass TADs originating from the prefix embryons; never construct or mutate them.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EHCGOF",
+      "group": "Embryon provenance",
+      "category": "inverse",
+      "description": "Return the recorded source embryons of the input hyperclass TADs, when any.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EHCONT",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of HCONT: Return directly contained hyperclasses, not classes.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHCONTOF",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of HCONTOF: Return hyperclasses directly containing the input hyperclasses.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHFIN",
+      "group": "Embryon functors",
+      "category": "inverse",
+      "description": "Embryon counterpart of HFIN: Return target hyperclasses of the oriented hyperlinks.",
+      "inputTypes": [
+        "hyperlinkEmbryon"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHINI",
+      "group": "Embryon functors",
+      "category": "inverse",
+      "description": "Embryon counterpart of HINI: Return source hyperclasses of the oriented hyperlinks.",
+      "inputTypes": [
+        "hyperlinkEmbryon"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHINTERS",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of HINTERS: Return other hyperclasses having a nonempty semantic intersection with the prefix hyperclasses.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHINV",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of HINV: Return inverse orientations of the input hyperlinks.",
+      "inputTypes": [
+        "hyperlinkEmbryon"
+      ],
+      "outputType": "hyperlinkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHLG",
+      "group": "Embryon provenance",
+      "category": "direct",
+      "description": "Return already constructed hyperlink TADs originating from the prefix embryons; never construct or mutate them.",
+      "inputTypes": [
+        "hyperlinkEmbryon"
+      ],
+      "outputType": "hyperlink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EHLGOF",
+      "group": "Embryon provenance",
+      "category": "inverse",
+      "description": "Return the recorded source embryons of the input hyperlink TADs, when any.",
+      "inputTypes": [
+        "hyperlink"
+      ],
+      "outputType": "hyperlinkEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EHLREL",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return hyperlink embryon TADs associated with the prefix relation concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "relation"
+      ],
+      "outputType": "hyperlinkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            19,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EHMLCOMP",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of HMLCOMP: Return component hyperlinks of hypermultilinks.",
+      "inputTypes": [
+        "hyperlinkEmbryon"
+      ],
+      "outputType": "hyperlinkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHMLCOMPOF",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of HMLCOMPOF: Return hypermultilinks containing the input hyperlinks.",
+      "inputTypes": [
+        "hyperlinkEmbryon"
+      ],
+      "outputType": "hyperlinkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHNSC",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of HNSC: Return incoming hyperlinks of the input hyperclasses.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "hyperlinkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EHPSC",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of HPSC: Return outgoing hyperlinks of the input hyperclasses.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "hyperlinkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EIATT",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of IATT: Return class attributes corresponding to input hyperattributes.",
+      "inputTypes": [
+        "hyperattributeEmbryon"
+      ],
+      "outputType": "attributeEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EIATTOF",
+      "group": "Embryon functors",
+      "category": "inverse",
+      "description": "Embryon counterpart of IATTOF: Return hyperattributes corresponding to the input class attributes.",
+      "inputTypes": [
+        "attributeEmbryon"
+      ],
+      "outputType": "hyperattributeEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EILINK",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of ILINK: Return class links corresponding to input hyperlinks.",
+      "inputTypes": [
+        "hyperlinkEmbryon"
+      ],
+      "outputType": "linkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EILINKOF",
+      "group": "Embryon functors",
+      "category": "inverse",
+      "description": "Embryon counterpart of ILINKOF: Return hyperlinks corresponding to the input class links.",
+      "inputTypes": [
+        "linkEmbryon"
+      ],
+      "outputType": "hyperlinkEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EINI",
+      "group": "Embryon functors",
+      "category": "inverse",
+      "description": "Embryon counterpart of INI: Return source classes of the oriented input class links.",
+      "inputTypes": [
+        "linkEmbryon"
+      ],
+      "outputType": "classEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EINTERS",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of INTERS: Return member classes lying in an intersection of a prefix hyperclass with other hyperclasses.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "classEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EINV",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of INV: Return inverse orientations of the input class links.",
+      "inputTypes": [
+        "linkEmbryon"
+      ],
+      "outputType": "linkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "ELG",
+      "group": "Embryon provenance",
+      "category": "direct",
+      "description": "Return already constructed class link TADs originating from the prefix embryons; never construct or mutate them.",
+      "inputTypes": [
+        "linkEmbryon"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "ELGOF",
+      "group": "Embryon provenance",
+      "category": "inverse",
+      "description": "Return the recorded source embryons of the input class link TADs, when any.",
+      "inputTypes": [
+        "classLink"
+      ],
+      "outputType": "linkEmbryon",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            14,
+            15
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "ELREL",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return link embryon TADs associated with the prefix relation concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "relation"
+      ],
+      "outputType": "linkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            19,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "EMLCOMP",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of MLCOMP: Return class links composing the input multilinks.",
+      "inputTypes": [
+        "linkEmbryon"
+      ],
+      "outputType": "linkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EMLCOMPOF",
+      "group": "Embryon functors",
+      "category": "homogeneous",
+      "description": "Embryon counterpart of MLCOMPOF: Return multilinks containing the input class links, when any.",
+      "inputTypes": [
+        "linkEmbryon"
+      ],
+      "outputType": "linkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "ENSC",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of NSC: Return incoming class links, not their source classes.",
+      "inputTypes": [
+        "classEmbryon"
+      ],
+      "outputType": "linkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "EPSC",
+      "group": "Embryon functors",
+      "category": "direct",
+      "description": "Embryon counterpart of PSC: Return outgoing class links, not their target classes.",
+      "inputTypes": [
+        "classEmbryon"
+      ],
+      "outputType": "linkEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            13
+          ],
+          "evidence": "diagram_and_documented_analogy"
+        }
+      ]
+    },
+    {
+      "name": "FIN",
+      "group": "Base functors",
+      "category": "inverse",
+      "description": "Return target classes of the oriented input class links.",
+      "inputTypes": [
+        "classLink"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            27,
+            28
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HACOMP",
+      "group": "Hypercomponent functors",
+      "category": "homogeneous",
+      "description": "Return immediate components of grouped hyperattributes.",
+      "inputTypes": [
+        "hyperattribute"
+      ],
+      "outputType": "hyperattribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            9
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HACOMPOF",
+      "group": "Hypercomponent functors",
+      "category": "homogeneous",
+      "description": "Return grouped hyperattributes containing the input hyperattributes.",
+      "inputTypes": [
+        "hyperattribute"
+      ],
+      "outputType": "hyperattribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            9
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HAPROP",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return hyperattribute TADs associated with the prefix property concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "property"
+      ],
+      "outputType": "hyperattribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            20,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "HATT",
+      "group": "Hypercomponent functors",
+      "category": "direct",
+      "description": "Return hyperattributes of the input hyperclasses.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "hyperattribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            8,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HATTOF",
+      "group": "Hypercomponent functors",
+      "category": "inverse",
+      "description": "Return hyperclasses owning the input hyperattributes.",
+      "inputTypes": [
+        "hyperattribute"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            8,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HCENS",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return hyperclass TADs associated with the prefix set concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "set"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            21,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "HCONT",
+      "group": "Hypercomponent functors",
+      "category": "homogeneous",
+      "description": "Return directly contained hyperclasses, not classes.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            9
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HCONTOF",
+      "group": "Hypercomponent functors",
+      "category": "homogeneous",
+      "description": "Return hyperclasses directly containing the input hyperclasses.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            9
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HFIN",
+      "group": "Hypercomponent functors",
+      "category": "inverse",
+      "description": "Return target hyperclasses of the oriented hyperlinks.",
+      "inputTypes": [
+        "hyperlink"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            8,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HINI",
+      "group": "Hypercomponent functors",
+      "category": "inverse",
+      "description": "Return source hyperclasses of the oriented hyperlinks.",
+      "inputTypes": [
+        "hyperlink"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            8,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HINTERS",
+      "group": "Hypercomponent functors",
+      "category": "homogeneous",
+      "description": "Return other hyperclasses having a nonempty semantic intersection with the prefix hyperclasses.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            9
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HINV",
+      "group": "Hypercomponent functors",
+      "category": "homogeneous",
+      "description": "Return inverse orientations of the input hyperlinks.",
+      "inputTypes": [
+        "hyperlink"
+      ],
+      "outputType": "hyperlink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            12
+          ],
+          "evidence": "diagram"
+        }
+      ]
+    },
+    {
+      "name": "HLREL",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return hyperlink TADs associated with the prefix relation concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "relation"
+      ],
+      "outputType": "hyperlink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            19,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "HMLCOMP",
+      "group": "Hypercomponent functors",
+      "category": "homogeneous",
+      "description": "Return component hyperlinks of hypermultilinks.",
+      "inputTypes": [
+        "hyperlink"
+      ],
+      "outputType": "hyperlink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            9
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HMLCOMPOF",
+      "group": "Hypercomponent functors",
+      "category": "homogeneous",
+      "description": "Return hypermultilinks containing the input hyperlinks.",
+      "inputTypes": [
+        "hyperlink"
+      ],
+      "outputType": "hyperlink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            9
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HNSC",
+      "group": "Hypercomponent functors",
+      "category": "direct",
+      "description": "Return incoming hyperlinks of the input hyperclasses.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "hyperlink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            8,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "HPSC",
+      "group": "Hypercomponent functors",
+      "category": "direct",
+      "description": "Return outgoing hyperlinks of the input hyperclasses.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "hyperlink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            8,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "IATT",
+      "group": "Hypercomponent bridges",
+      "category": "direct",
+      "description": "Return class attributes corresponding to input hyperattributes.",
+      "inputTypes": [
+        "hyperattribute"
+      ],
+      "outputType": "classAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            11,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "IATTOF",
+      "group": "Hypercomponent bridges",
+      "category": "inverse",
+      "description": "Return hyperattributes corresponding to the input class attributes.",
+      "inputTypes": [
+        "classAttribute"
+      ],
+      "outputType": "hyperattribute",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            11,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "ILINK",
+      "group": "Hypercomponent bridges",
+      "category": "direct",
+      "description": "Return class links corresponding to input hyperlinks.",
+      "inputTypes": [
+        "hyperlink"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            11,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "ILINKOF",
+      "group": "Hypercomponent bridges",
+      "category": "inverse",
+      "description": "Return hyperlinks corresponding to the input class links.",
+      "inputTypes": [
+        "classLink"
+      ],
+      "outputType": "hyperlink",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            11,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "INI",
+      "group": "Base functors",
+      "category": "inverse",
+      "description": "Return source classes of the oriented input class links.",
+      "inputTypes": [
+        "classLink"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            27,
+            28
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "INTERS",
+      "group": "Hypercomponent bridges",
+      "category": "direct",
+      "description": "Return member classes lying in an intersection of a prefix hyperclass with other hyperclasses.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            11,
+            12
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "INV",
+      "group": "Base functors",
+      "category": "homogeneous",
+      "description": "Return inverse orientations of the input class links.",
+      "inputTypes": [
+        "classLink"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            29
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "LREL",
+      "group": "General functors",
+      "category": "general",
+      "description": "Return class link TADs associated with the prefix relation concept. No inverse is defined in the supplied chapter.",
+      "inputTypes": [
+        "relation"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            19,
+            22
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "MLCOMP",
+      "group": "Base functors",
+      "category": "homogeneous",
+      "description": "Return class links composing the input multilinks.",
+      "inputTypes": [
+        "classLink"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            29
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "MLCOMPOF",
+      "group": "Base functors",
+      "category": "homogeneous",
+      "description": "Return multilinks containing the input class links, when any.",
+      "inputTypes": [
+        "classLink"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            29
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "NSC",
+      "group": "Base functors",
+      "category": "direct",
+      "description": "Return incoming class links, not their source classes.",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            12,
+            33
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "NSCR",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return incoming class links selected by relation.",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            34
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OACOMP",
+      "group": "Base functors",
+      "category": "homogeneous",
+      "description": "Return immediate component object attributes of grouped object attributes.",
+      "inputTypes": [
+        "objectAttribute"
+      ],
+      "outputType": "objectAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            30
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OACOMPOF",
+      "group": "Base functors",
+      "category": "homogeneous",
+      "description": "Return parent grouped object attributes containing the input object attributes.",
+      "inputTypes": [
+        "objectAttribute"
+      ],
+      "outputType": "objectAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            30
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OATT",
+      "group": "Base functors",
+      "category": "direct",
+      "description": "Return all object-attribute TADs of the input objects, including attributes without a value.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            19,
+            20,
+            21
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OATTN",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return the object attributes corresponding to one classAttribute for only the prefix objects.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            38,
+            39
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OATTOF",
+      "group": "Base functors",
+      "category": "inverse",
+      "description": "Return the objects owning the input object attributes.",
+      "inputTypes": [
+        "objectAttribute"
+      ],
+      "outputType": "object",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            25,
+            27
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OBJ",
+      "group": "Base functors",
+      "category": "direct",
+      "description": "Return all member objects of the input classes without filtering.",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "object",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            13,
+            14
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OBJOF",
+      "group": "Base functors",
+      "category": "inverse",
+      "description": "Return the classes to which the input objects belong.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            25,
+            27
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OCOUPLE",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return object links directed from the prefix objects to targetObject.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            33
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OFIN",
+      "group": "Base functors",
+      "category": "inverse",
+      "description": "Return target objects of the oriented input object links.",
+      "inputTypes": [
+        "objectLink"
+      ],
+      "outputType": "object",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            25,
+            27
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OINI",
+      "group": "Base functors",
+      "category": "inverse",
+      "description": "Return source objects of the oriented input object links.",
+      "inputTypes": [
+        "objectLink"
+      ],
+      "outputType": "object",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            25,
+            27
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OINV",
+      "group": "Base functors",
+      "category": "homogeneous",
+      "description": "Return inverse orientations of the input object links.",
+      "inputTypes": [
+        "objectLink"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            29
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "ONSC",
+      "group": "Base functors",
+      "category": "direct",
+      "description": "Return incoming object links without filtering relation or endpoint class.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            24
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "ONSCC",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return incoming object links whose source objects belong to sourceClass, regardless of relation.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            36
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "ONSCR",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return incoming object links selected by relation, regardless of source class.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            35
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "ONSCRC",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return incoming object links selected by relation and sourceClass.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            37
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OPSC",
+      "group": "Base functors",
+      "category": "direct",
+      "description": "Return outgoing object links without filtering relation or endpoint class.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            22,
+            23
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OPSCC",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return outgoing object links whose target objects belong to targetClass, regardless of relation.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            36
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OPSCR",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return outgoing object links selected by relation, regardless of target class.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            35
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OPSCRC",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return outgoing object links selected by relation and targetClass.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "objectLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            37
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "OSCOMP",
+      "group": "O-structure functors",
+      "category": "homogeneous",
+      "description": "Return immediate component O-structures.",
+      "inputTypes": [
+        "oStructure"
+      ],
+      "outputType": "oStructure",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            18
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "OSCOMPOBJ",
+      "group": "O-structure functors",
+      "category": "direct",
+      "description": "Return non-kernel component objects of the prefix O-structures.",
+      "inputTypes": [
+        "oStructure"
+      ],
+      "outputType": "object",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            18
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "OSCOMPOBJOF",
+      "group": "O-structure functors",
+      "category": "inverse",
+      "description": "Return O-structures containing the prefix objects as non-kernel components.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "oStructure",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            18
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "OSCOMPOF",
+      "group": "O-structure functors",
+      "category": "homogeneous",
+      "description": "Return O-structures containing the prefix O-structures.",
+      "inputTypes": [
+        "oStructure"
+      ],
+      "outputType": "oStructure",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            18
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "OSKER",
+      "group": "O-structure functors",
+      "category": "direct",
+      "description": "Return the kernel object of each prefix O-structure.",
+      "inputTypes": [
+        "oStructure"
+      ],
+      "outputType": "object",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            18
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "OSKEROF",
+      "group": "O-structure functors",
+      "category": "inverse",
+      "description": "Return O-structures for which the prefix objects are kernels.",
+      "inputTypes": [
+        "object"
+      ],
+      "outputType": "oStructure",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            18
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "OSTRUCT",
+      "group": "O-structure functors",
+      "category": "direct",
+      "description": "Return existing O-structures originating from the prefix structures.",
+      "inputTypes": [
+        "structure"
+      ],
+      "outputType": "oStructure",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            18
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "OSTRUCTOF",
+      "group": "O-structure functors",
+      "category": "inverse",
+      "description": "Return source structures of the prefix O-structures.",
+      "inputTypes": [
+        "oStructure"
+      ],
+      "outputType": "structure",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            18
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "PCOMP",
+      "group": "Prototype functors",
+      "category": "homogeneous",
+      "description": "Return immediate prototypes composing the prefix prototypes.",
+      "inputTypes": [
+        "prototype"
+      ],
+      "outputType": "prototype",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            16
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "PCOMPEC",
+      "group": "Prototype functors",
+      "category": "direct",
+      "description": "Return class embryons composing the prefix prototypes.",
+      "inputTypes": [
+        "prototype"
+      ],
+      "outputType": "classEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            16
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "PCOMPECOF",
+      "group": "Prototype functors",
+      "category": "inverse",
+      "description": "Return prototypes containing the prefix class embryons.",
+      "inputTypes": [
+        "classEmbryon"
+      ],
+      "outputType": "prototype",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            16
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "PCOMPEHC",
+      "group": "Prototype functors",
+      "category": "direct",
+      "description": "Return hyperclass embryons composing the prefix prototypes.",
+      "inputTypes": [
+        "prototype"
+      ],
+      "outputType": "hyperclassEmbryon",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            16
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "PCOMPEHCOF",
+      "group": "Prototype functors",
+      "category": "inverse",
+      "description": "Return prototypes containing the prefix hyperclass embryons.",
+      "inputTypes": [
+        "hyperclassEmbryon"
+      ],
+      "outputType": "prototype",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            16
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "PCOMPOF",
+      "group": "Prototype functors",
+      "category": "homogeneous",
+      "description": "Return prototypes containing the prefix prototypes.",
+      "inputTypes": [
+        "prototype"
+      ],
+      "outputType": "prototype",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            16
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "PROTO",
+      "group": "Structure functors",
+      "category": "inverse",
+      "description": "Return source prototypes of the prefix structures, when any.",
+      "inputTypes": [
+        "structure"
+      ],
+      "outputType": "prototype",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            17
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "PSC",
+      "group": "Base functors",
+      "category": "direct",
+      "description": "Return outgoing class links, not their target classes.",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            11
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "PSCR",
+      "group": "Base functors",
+      "category": "multifunctor",
+      "description": "Return outgoing class links selected by relation.",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "classLink",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            34
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "SCOMP",
+      "group": "Structure functors",
+      "category": "homogeneous",
+      "description": "Return immediate component structures.",
+      "inputTypes": [
+        "structure"
+      ],
+      "outputType": "structure",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            17
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "SCOMPC",
+      "group": "Structure functors",
+      "category": "direct",
+      "description": "Return classes composing the prefix structures.",
+      "inputTypes": [
+        "structure"
+      ],
+      "outputType": "class",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            17
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "SCOMPCOF",
+      "group": "Structure functors",
+      "category": "inverse",
+      "description": "Return structures containing the prefix classes.",
+      "inputTypes": [
+        "class"
+      ],
+      "outputType": "structure",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            17
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "SCOMPHC",
+      "group": "Structure functors",
+      "category": "direct",
+      "description": "Return hyperclasses composing the prefix structures.",
+      "inputTypes": [
+        "structure"
+      ],
+      "outputType": "hyperclass",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            17
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "SCOMPHCOF",
+      "group": "Structure functors",
+      "category": "inverse",
+      "description": "Return structures containing the prefix hyperclasses.",
+      "inputTypes": [
+        "hyperclass"
+      ],
+      "outputType": "structure",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            17
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "SCOMPOF",
+      "group": "Structure functors",
+      "category": "homogeneous",
+      "description": "Return structures containing the prefix structures.",
+      "inputTypes": [
+        "structure"
+      ],
+      "outputType": "structure",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            17
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "SIGMA",
+      "group": "Values and aggregates",
+      "category": "aggregate",
+      "description": "Sum a complete list of homogeneous numeric scalar values, counting each source attribute once, not each distinct number.",
+      "inputTypes": [
+        "values"
+      ],
+      "outputType": "scalar",
+      "prefixPolicy": "valuesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            45
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "STRUCT",
+      "group": "Structure functors",
+      "category": "direct",
+      "description": "Return existing structures originating from the prefix prototypes.",
+      "inputTypes": [
+        "prototype"
+      ],
+      "outputType": "structure",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.4",
+          "pages": [
+            17
+          ],
+          "evidence": "text_and_diagram"
+        }
+      ]
+    },
+    {
+      "name": "VAL",
+      "group": "Values and aggregates",
+      "category": "value",
+      "description": "Extract values from object-attribute references, retaining source identity and missing-value state.",
+      "inputTypes": [
+        "objectAttribute"
+      ],
+      "outputType": "values",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            16,
+            45
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "VATT",
+      "group": "Base functors",
+      "category": "direct",
+      "description": "Return object-attribute TADs corresponding to the input class attributes; not their values.",
+      "inputTypes": [
+        "classAttribute"
+      ],
+      "outputType": "objectAttribute",
+      "prefixPolicy": "referencesOrNames",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            15,
+            16
+          ],
+          "evidence": "text"
+        }
+      ]
+    },
+    {
+      "name": "VATTOF",
+      "group": "Base functors",
+      "category": "inverse",
+      "description": "Return the class attributes corresponding to the input object attributes.",
+      "inputTypes": [
+        "objectAttribute"
+      ],
+      "outputType": "classAttribute",
+      "prefixPolicy": "referencesOnly",
+      "sources": [
+        {
+          "document": "CH10.2",
+          "pages": [
+            25,
+            27
+          ],
+          "evidence": "text"
+        }
+      ]
+    }
+  ]
+}

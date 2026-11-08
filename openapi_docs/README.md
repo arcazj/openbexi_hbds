@@ -8,6 +8,13 @@ This is an **additive API design**, not a deployed service, a backend implementa
 
 ## Start here
 
+The simulator's **Query** workspace now implements a separate browser-side
+structural subset of 21 canonical functors with a searchable reference to all 141
+names and their legacy source pages. It uses existing
+model JSON, works in static mode, and exposes supported capabilities explicitly.
+See [the structural adapter mapping](../doc/HBDS_SUPPORT_MATRIX.md#structural-query-workspace).
+The HTTP operations described below remain proposed endpoints.
+
 | File | Purpose |
 |---|---|
 | [hbds-openapi.yaml](hbds-openapi.yaml) | Main, standalone OpenAPI description; internal references only. |

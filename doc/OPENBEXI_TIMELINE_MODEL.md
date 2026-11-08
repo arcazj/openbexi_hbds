@@ -1,6 +1,6 @@
 # OpenBEXI Timeline HBDS model
 
-HBDS **2.6.2** includes [openbexi_timeline.json](../models/openbexi_timeline.json),
+HBDS **2.7** includes [openbexi_timeline.json](../models/openbexi_timeline.json),
 a conceptual model of Timeline presentation, users, filters, sources, and records.
 Choose **openbexi timeline** in the **Models** selector to explore it.
 
@@ -47,7 +47,7 @@ paths and 43 settings paths, with no unmapped paths in that inspected inventory.
 The [complete recreation prompt](../prompts/openbexi_timeline_prompt.MD) describes
 the Timeline application from its inspected **2.6.1** baseline, including data
 contracts, rendering, APIs, model editing, deployment, and acceptance checks.
-That source version is independent of this **HBDS 2.6.2** release. The prompt
+That source version is independent of this **HBDS 2.7** release. The prompt
 distinguishes existing behavior, HBDS companion requirements, and proposed
 extensions.
 

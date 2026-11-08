@@ -390,13 +390,13 @@ body.model-tree-collapsed #model-tree-sidebar {
 
 #model-tree-toggle {
   flex: 0 0 auto;
-  width: auto;
-  min-width: 42px;
-  min-height: 30px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   border-color: #c8d9ee;
   color: #315a82;
   background: #f5faff;
-  padding: 4px 8px;
+  padding: 5px;
   font-size: 12px;
   font-weight: 750;
 }
@@ -412,9 +412,9 @@ body.model-tree-collapsed #model-tree-toggle {
   top: 14px;
   left: 14px;
   z-index: 34;
-  min-width: 34px;
-  width: auto;
-  padding: 5px 9px;
+  min-width: 40px;
+  width: 40px;
+  padding: 5px;
   pointer-events: auto;
   writing-mode: horizontal-tb;
   text-orientation: mixed;
@@ -427,6 +427,9 @@ body.model-tree-collapsed #model-tree-toggle {
   font-size: 12px;
   font-weight: 700;
 }
+
+body.embedded-shell-menu #model-tree-toggle { display: none; }
+body.embedded-shell-menu:not(.model-tree-collapsed) #model-tree-sidebar { padding-top: 66px; }
 
 .model-tree-search input {
   min-height: 32px;

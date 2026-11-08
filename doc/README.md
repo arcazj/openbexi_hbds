@@ -4,6 +4,8 @@ This directory contains project-authored specifications. A locally supplied hist
 
 ## Project Documentation
 
+- [Windows installation](WINDOWS_INSTALLATION.md): x64/ARM64 downloads, offline startup, upgrades, user data, and package checks.
+- [Version 2.7 release notes](releases/v2.7.md): changes, downloads, licensing, and validation scope.
 - [Server and AI setup](SERVER_AND_AI.md): local modes, saving, provider configuration, collaboration, and API access.
 - [Layout and optimization](LAYOUT_OPTIMIZATION.md): layout algorithms, link separation, attribute spacing, and font behavior.
 - [OpenBEXI Timeline model](OPENBEXI_TIMELINE_MODEL.md): conceptual classes, relationships, source coverage, and the current diagram.

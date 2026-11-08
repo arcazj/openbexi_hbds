@@ -3,11 +3,11 @@
 Build and explore **Hypergraph-Based Data Structures (HBDS)** in your browser.
 Model classes, nested hyperclasses, attributes, and relationships in 2-D or 3-D.
 
-**Version 2.6.2** · [Live demo](https://arcazj.github.io/openbexi_hbds/index.html) · [Release notes](CHANGELOG.md)
+**Version 2.7** · [Downloads and release notes](https://github.com/arcazj/openbexi_hbds/releases/tag/v2.7) · [Live demo](https://arcazj.github.io/openbexi_hbds/index.html)
 
 ## Examples
 
-Screenshots show the current diagrams in version 2.6.2, with compact attribute
+Screenshots recorded in version 2.6.2 show compact attribute
 columns and separated links. Viewer controls are hidden for clarity.
 
 ### OpenBEXI Timeline
@@ -32,7 +32,8 @@ Classes and relationships in a transportation network.
 
 ## Features
 
-- **Models, Edit, and Tests:** browse examples, edit models, and run visual scenarios.
+- **Models, Edit, Tests, and Query:** browse examples, edit models, run visual scenarios, and query the entire current model.
+- **Structural queries:** use 21 canonical legacy functors over classes, hyperclasses, attributes, containment, and links. Browse the full 141-functor reference with source pages and availability. See the [query workflow and mapping](doc/HBDS_SUPPORT_MATRIX.md#structural-query-workspace).
 - **Automatic layout:** Grid, Radial, and Hierarchy with nested groups, readable names, and routed links.
 - **Link separation:** **Separates links** is on by default; turn it off to use legacy spacing.
 - **Attribute columns:** one connector to the first attribute, larger text, and compact spacing adjustable in the 2D attribute inspector.
@@ -42,6 +43,14 @@ Classes and relationships in a transportation network.
 - **Optional semantics:** object instances, inheritance, memberships, and functor queries.
 
 ## Quick start
+
+**Windows 10 / 11:** download the [x64 installer](https://github.com/arcazj/openbexi_hbds/releases/download/v2.7/openbexi-hbds-2.7-windows-x64-setup.exe)
+or [ARM64 installer](https://github.com/arcazj/openbexi_hbds/releases/download/v2.7/openbexi-hbds-2.7-windows-arm64-setup.exe).
+Python and browser libraries are included. The installers are unsigned.
+See [installation, data storage, upgrades and removal](doc/WINDOWS_INSTALLATION.md).
+Commercial use requires an agreement unless a documented free-use exemption applies.
+
+**Run from source:**
 
 Requires Python 3.9+ and a modern browser. On Windows, use `py` in place of `python3`.
 
@@ -54,6 +63,26 @@ python3 server.py --port 8010
 Open **http://127.0.0.1:8010/**. Choose **Models** to browse, **Edit** to work with
 `models/`, or **Tests** for `test_models/`. Use **Fit Model**, the mouse wheel to
 zoom, and right-click drag to pan. **Help** contains the full user guide.
+
+**Query**, between Tests and Help, uses the selected diagram, including unsaved
+edits. Choose a functor and its dynamic inputs; results update automatically.
+Use **CONT** for a hyperclass's direct classes, **CONTN** for classes at every nesting
+depth, **HCONT** for its direct hyperclasses, and **COUPLE** for directed links between
+two classes. Use **Add step** to compose
+compatible functors. Query opens in a compact 400-pixel sidebar beside the diagram,
+or below it on small screens. The searchable model selector beside **Query** lists
+the current session, Models, and Tests. Choosing another model opens a separate
+diagram preview; returning to Edit or Tests restores the original session and its
+unsaved edits. Compatible functors are retained, model-specific inputs reset, and
+results refresh when the inputs are complete. Functor descriptions remain visible
+below the selectors as well as in tooltips. Shared compact controls and soft section
+colors keep Models, Edit, Tests, Query, and Help consistent. Results show Type, Name, and Locate,
+with 25/50/100-row pages.
+**Locate** and **Locate all** apply fluorescent yellow text and link highlights
+without moving or zooming the diagram. Locate all follows the Results filter
+across every page; name tooltips provide identifiers and paths.
+Model changes refresh results automatically; Query preserves the editor and its undo history. The connection
+indicator and square tree toggle sit together at the upper left.
 
 The server saves models with revision checks and timestamped backups. It binds
 to localhost and is intended for a trusted workstation. For viewing and local
@@ -82,10 +111,10 @@ Edge or Chrome installed:
 python3 -B scripts/check_project.py
 ```
 
-Use `--skip-browser` for helper/server checks. Browser checks require access to
-the Three.js CDN; AI provider tests use mocks. See the [testing guide](Test_and_Integration.md)
-for individual suites and the optional Java/Maven scaffold. Contributions are
-welcome through pull requests with relevant validation results.
+Use `--skip-browser` for helper/server checks. Browser dependencies are bundled
+locally; AI provider tests use mocks. See the [testing guide](Test_and_Integration.md)
+for individual suites. Contributions are welcome through pull requests with
+relevant validation results.
 
 ## License
 

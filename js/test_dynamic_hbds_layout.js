@@ -1,5 +1,6 @@
 ﻿import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { installQuerySource, announceQuerySource } from './hbds_query_bridge.js?v=query-panel-v2';
 import { DragControls } from 'three/addons/controls/DragControls.js';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 import {
@@ -39,9 +40,9 @@ import {
   normalizeFontSettings,
   getFontSettingsForTextType,
   getFitQualityMetrics
-} from './hbds_model.js?v=release-2.6.2';
-import { recalculateAllLinks } from './hbds_class_link.js?v=release-2.6.2';
-import { DEFAULT_ATTRIBUTE_SPACING, MAX_ATTRIBUTE_SPACING, normalizeAttributeSpacing } from './hbds_layout.js?v=release-2.6.2';
+} from './hbds_model.js?v=release-2.7';
+import { recalculateAllLinks } from './hbds_class_link.js?v=release-2.7';
+import { DEFAULT_ATTRIBUTE_SPACING, MAX_ATTRIBUTE_SPACING, normalizeAttributeSpacing } from './hbds_layout.js?v=release-2.7';
 import {
   applyAiModel,
   applyServerModelOperations,
@@ -667,6 +668,7 @@ function renderNow() {
   if (!renderer || !scene || !camera || !labelRenderer) return;
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
+  window.HBDSQuerySource?.refreshHighlights();
   completedRenderCount += 1;
 }
 
@@ -3171,8 +3173,8 @@ function setModelTreeCollapsed(collapsed) {
   }
   const button = $('model-tree-toggle');
   if (button) {
-    button.textContent = collapsed ? 'Show Tree' : 'Hide';
     button.title = collapsed ? 'Show model tree' : 'Hide model tree';
+    button.setAttribute('aria-expanded', String(!collapsed));
   }
   try {
     localStorage.setItem(MODEL_TREE_COLLAPSED_STORAGE_KEY, collapsed ? '1' : '0');
@@ -3180,6 +3182,7 @@ function setModelTreeCollapsed(collapsed) {
     // Local persistence is optional.
   }
   resizeRenderersAfterLayoutChange();
+  announceQuerySource();
 }
 
 function restoreModelTreeState() {
@@ -8552,6 +8555,7 @@ function installDebugHooks() {
         position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
         target: orbitControls ? { x: orbitControls.target.x, y: orbitControls.target.y, z: orbitControls.target.z } : null,
         fov: camera.fov,
+        zoom: camera.zoom,
         aspect: camera.aspect
       } : null,
       render: {
@@ -10939,6 +10943,11 @@ async function init() {
   bindDiagramPicking();
   installDebugHooks();
   window.addEventListener('resize', resizeRenderers);
+  // Responsive side panels animate after the window resize event. Measure the
+  // final title height too, so a wrapped heading keeps its space above the canvas.
+  $('container').addEventListener('transitionend', event => {
+    if (event.target === $('container') && ['right', 'bottom'].includes(event.propertyName)) resizeRenderers();
+  });
 
   applyModelLayoutSettings({ algorithm: 'grid' });
   setLayoutSettings({ ...getLayoutSettings(), algorithm: 'grid' }, { applyContext: false });
@@ -10960,6 +10969,15 @@ async function init() {
       markSavedState();
     }
   }
+  installQuerySource({
+    read: () => ({ model: getData(), name: selectedModelFileName('Unsaved model'), scope: MODEL_SOURCE_CONFIG.root.replace(/\/$/, ''), source: 'Editor state (includes unsaved changes)',
+      selection: { nodeId: selectedElementId, linkId: selectedLinkId, ownerId: selectedAttributeOwnerId, attributeKey: selectedAttributeKey } }),
+    tree: {
+      expanded: () => !document.body.classList.contains('model-tree-collapsed'),
+      toggle: () => setModelTreeCollapsed(!document.body.classList.contains('model-tree-collapsed'))
+    },
+    diagram: () => ({ THREE, diagramGroup, camera, controls: orbitControls, render: renderNow, resize: resizeRenderers })
+  });
   addLog('Ready');
   const params = new URLSearchParams(window.location.search);
   if (!HIDE_SCENARIO_SUITE && params.has('runScenarioSuite')) {

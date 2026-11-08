@@ -188,12 +188,40 @@
       position: fixed;
     }
 
-    #view-frame {
+    #view-frame, #query-frame, #query-preview-frame {
       background: #eef4fb;
       border: 0;
       display: block;
       height: 100vh;
       width: 100%;
+    }
+
+    #query-frame { position: absolute; top: var(--shell-menu-height); right: 0; bottom: 0; width: var(--shell-menu-width); height: calc(100% - var(--shell-menu-height)); border-left: 1px solid var(--shell-border); box-shadow: -18px 0 48px rgba(40, 54, 72, .1); z-index: 36; }
+    #query-frame[hidden] { display: none; }
+    #query-preview-frame { position: absolute; inset: 0; width: calc(100% - var(--shell-menu-width)); }
+    #query-preview-frame[hidden] { display: none; }
+    .query-preview #view-frame { visibility: hidden; }
+    .query-open #view-frame { width: calc(100% - var(--shell-menu-width)); }
+    @media (max-width: 900px) {
+      .query-open #view-frame, .query-open #query-preview-frame { position: absolute; top: var(--shell-menu-height); width: 100%; height: calc((100% - var(--shell-menu-height)) * .44); }
+      .query-open #query-frame { top: calc(var(--shell-menu-height) + (100% - var(--shell-menu-height)) * .44); width: 100%; height: calc((100% - var(--shell-menu-height)) * .56); border-left: 0; border-top: 1px solid var(--shell-border); }
+    }
+    .shell-utilities { position: fixed; top: 14px; left: 14px; z-index: 45; display: flex; align-items: center; gap: 6px; }
+    .shell-utilities .connection-status, #shell-tree-toggle { display: grid; place-items: center; width: 40px; height: 40px; min-width: 40px; padding: 5px; border: 1px solid #c8d9ee; border-radius: 8px; background: #f5faff; }
+    #shell-tree-toggle { cursor: pointer; }
+    #shell-tree-toggle:disabled { opacity: .45; cursor: default; }
+    #shell-tree-toggle[aria-expanded="true"] { background: #dceaff; }
+    #shell-tree-toggle:focus-visible, .connection-status:focus-visible { outline: 2px solid #2f60bd; outline-offset: 2px; }
+    .shell-utilities .connection-copy { position: absolute; left: 0; top: 46px; width: max-content; max-width: 220px; padding: 7px 10px; background: white; border: 1px solid #d8dfe8; border-radius: 6px; display: none; }
+    .shell-utilities .connection-status:hover .connection-copy, .shell-utilities .connection-status:focus .connection-copy { display: flex; }
+    .shell-utilities .app-version { position: absolute; top: 43px; left: 0; }
+    .shell-header, .mode-bar { width: min(var(--shell-menu-width), calc(100% - 112px)); }
+    .shell-header .mode-bar { width: 100%; }
+    #shell-help { z-index: 42; }
+    @media (max-width: 560px) {
+      .shell-utilities { left: 8px; top: 12px; }
+      .shell-header, .mode-bar { width: calc(100% - 104px); }
+      .mode-label { font-size: 10px; }
     }
 
     .shell-help-panel {
@@ -349,6 +377,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="css/hbds_panels.css?v=panels-v1">
 </head>
 <body>
   <div class="app-shell">
@@ -366,23 +395,32 @@
           <img class="mode-icon" src="icons/tests.png" alt="">
           <span class="mode-label">Tests</span>
         </button>
+        <button class="mode-button" type="button" data-view="query" aria-pressed="false">
+          <img class="mode-icon" src="icons/query.svg" alt="">
+          <span class="mode-label">Query</span>
+        </button>
         <button class="mode-button" type="button" data-view="help" aria-pressed="false">
           <img class="mode-icon" src="icons/help.png" alt="">
           <span class="mode-label">Help</span>
         </button>
-        <div id="connection-status" class="connection-status" role="status" aria-live="polite" aria-label="Connection status: not connected">
+      </nav>
+    </header>
+    <div class="shell-utilities" aria-label="Model utilities">
+        <div id="connection-status" class="connection-status" tabindex="0" role="status" aria-live="polite" aria-label="Connection status: not connected">
           <img id="connection-icon" class="power-icon" src="icons/power_red.png" alt="">
           <span class="connection-copy">
             <span class="connection-label">Connection</span>
             <span id="connection-value" class="connection-value">Not connected</span>
-            <span id="app-version" class="app-version" aria-label="HBDS app version"></span>
           </span>
         </div>
-      </nav>
-    </header>
+        <button id="shell-tree-toggle" type="button" aria-label="Model tree" aria-controls="view-frame" aria-expanded="false" title="Model tree is available in Edit and Tests" disabled><img src="icons/tree.svg" width="28" height="28" alt=""></button>
+        <span id="app-version" class="app-version" aria-label="HBDS app version"></span>
+    </div>
 
     <main class="frame-wrap">
-      <iframe id="view-frame" title="HBDS Models view" src="index_models.html?embeddedShell=1&appVersion=release-2.6.2"></iframe>
+      <iframe id="view-frame" title="HBDS Models view" src="index_models.html?embeddedShell=1&appVersion=release-2.7"></iframe>
+      <iframe id="query-preview-frame" title="Query model diagram" hidden></iframe>
+      <iframe id="query-frame" title="HBDS Query workspace" hidden></iframe>
     </main>
   </div>
 
@@ -412,6 +450,19 @@
               <li>Use the selected link property panel to choose arrow type, arrow direction, line style, line width, line color, arrow color, and label size. Supported arrows include filled, outline, chevrons, dotted, bar-arrow, cone, diamond, bidirectional, and plain association styles.</li>
               <li>Use Settings > Font for the overall model font size, then override class, hyperclass, attribute, or link label sizes separately. Apply Overall Font To All clears category and element font-size overrides.</li>
               <li>Use Save to persist the current model, or Delete Model to remove the selected saved file after confirmation. Deleted models are backed up under the matching <code>.backups</code> directory.</li>
+            </ul>
+            <h3>Query the Model</h3>
+            <ul>
+              <li>Open Query between Tests and Help to capture the entire current diagram, including unsaved edits, nested nodes, and hidden elements. The editor stays open with its selection and undo history.</li>
+              <li>Query initially uses the model already selected in Models, Edit, or Tests. The searchable model selector beside Query groups the current session, Models, and Tests. Selecting a saved model opens a separate diagram preview. Selecting the current session or leaving Query restores the original model, unsaved edits, selection, and undo history.</li>
+              <li>Choose a functor, then fill its searchable inputs on the same row. Its description stays visible below the selectors and in its tooltip. ATT asks for a class; HATT asks for a hyperclass. Valid selections update results immediately. Typing in a dropdown filters its choices; selecting an option commits it.</li>
+              <li>COUPLE asks for source and target classes and returns links directed from source to target. PSC returns outgoing links; FIN returns their target classes. Add step offers compatible continuations, such as PSC then FIN then ATT, and collects any required parameters. CARD counts the complete result.</li>
+              <li>CONT returns a hyperclass's directly included classes; CONTN includes classes at every nesting depth; HCONT returns directly included hyperclasses. CONTOF and HCONTOF return direct containing hyperclasses. Queries use explicit memberships when a semantic layer exists, otherwise the model's declared parent/child containment.</li>
+              <li>Query opens in a 400-pixel sidebar beside the diagram; on narrow screens, the diagram appears above it. Results show only Type, Name, and Locate. Name tooltips show identifiers and paths; selecting a name opens its stored data.</li>
+              <li>Locate highlights the result text and link route in fluorescent yellow. Locate all highlights all results matching the Results filter across every page. Both preserve the diagram's position and zoom, the editing selection, and undo history. Highlights clear when the query, filter, or source changes, or when Query closes.</li>
+              <li>Switching models retains compatible functors, clears model-specific selections and filters, and returns results to page one. The new preview is fitted once when loaded; Locate keeps its camera unchanged. Source changes refresh results automatically while preserving valid inputs. Results use 25 rows per page by default, with 50 and 100 also available. Read-only queries and model switching also work from the app in static mode.</li>
+              <li>The searchable reference lists all 141 documented functors with source pages and availability; 21 are implemented for recorded metamodel definitions. Selectors use only original functor names. Inherited definitions, object data, and mixed class/hyperclass links are outside this subset. Unavailable operations are identified explicitly.</li>
+              <li>The connection indicator is at the upper left, immediately before the square tree toggle. The tree control is available in Edit and Tests; hover or focus the connection indicator for its status.</li>
             </ul>
             <h3>Collaboration</h3>
             <ul>
@@ -470,139 +521,6 @@
     </div>
   </aside>
 
-  <script>
-    const frame = document.getElementById('view-frame');
-    const helpOverlay = document.getElementById('shell-help');
-    const connectionStatus = document.getElementById('connection-status');
-    const connectionIcon = document.getElementById('connection-icon');
-    const connectionValue = document.getElementById('connection-value');
-    const appVersion = document.getElementById('app-version');
-    const viewButtons = Array.from(document.querySelectorAll('.mode-button[data-view]'));
-    const helpSections = Array.from(document.querySelectorAll('.help-section'));
-    const HBDS_APP_VERSION = '2.6.2';
-    let activeView = 'models';
-    let serverConnectionState = 'not_connected';
-    let serverConnectionPollTimer = null;
-    const views = {
-      models: {
-        src: 'index_models.html?embeddedShell=1&appVersion=release-2.6.2',
-        title: 'HBDS Models view'
-      },
-      edit: {
-        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=models/&manifestPath=models/models_manifest.json&appVersion=release-2.6.2',
-        title: 'HBDS Edit view'
-      },
-      tests: {
-        src: 'test_dynamic_hbds_layout.html?embeddedShell=1&modelsPath=test_models/&manifestPath=test_models/test_models_manifest.json&appVersion=release-2.6.2',
-        title: 'HBDS Tests view'
-      }
-    };
-    appVersion.textContent = `v${HBDS_APP_VERSION}`;
-
-    function setServerConnectionState(state) {
-      serverConnectionState = state === 'connected' || state === 'connecting' ? state : 'not_connected';
-      const labels = {
-        not_connected: 'Not connected',
-        connecting: 'Connecting',
-        connected: 'Connected'
-      };
-      connectionStatus.classList.toggle('connected', serverConnectionState === 'connected');
-      connectionStatus.classList.toggle('connecting', serverConnectionState === 'connecting');
-      connectionStatus.setAttribute('aria-label', `Connection status: ${labels[serverConnectionState].toLowerCase()}`);
-      connectionValue.textContent = labels[serverConnectionState];
-      connectionIcon.src = serverConnectionState === 'connected' ? 'icons/power_green.png' : 'icons/power_red.png';
-      window.HBDS_SERVER_STATE = serverConnectionState;
-      broadcastServerConnectionState();
-    }
-
-    function broadcastServerConnectionState() {
-      if (!frame.contentWindow) return;
-      const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
-      frame.contentWindow.postMessage({
-        type: 'hbds-server-state',
-        state: serverConnectionState
-      }, targetOrigin);
-    }
-
-    async function refreshServerConnectionState(options = {}) {
-      if (options.showConnecting === true) setServerConnectionState('connecting');
-      try {
-        const api = await import('./js/hbds_server_api.js?v=server-api-20260718a');
-        const result = await api.checkServerConnection({ timeoutMs: 1600 });
-        setServerConnectionState(result.ok ? 'connected' : 'not_connected');
-      } catch {
-        setServerConnectionState('not_connected');
-      }
-    }
-
-    function startServerConnectionPolling() {
-      window.clearInterval(serverConnectionPollTimer);
-      serverConnectionPollTimer = window.setInterval(() => {
-        refreshServerConnectionState({ showConnecting: false });
-      }, 2500);
-    }
-
-    function selectView(name, options = {}) {
-      if (name === 'help') {
-        viewButtons.forEach(button => {
-          button.setAttribute('aria-pressed', String(button.dataset.view === 'help'));
-        });
-        setHelpOpen(true);
-        if (!options.skipHash) history.replaceState(null, '', '#help');
-        return;
-      }
-      const view = views[name] || views.models;
-      activeView = views[name] ? name : 'models';
-      setHelpOpen(false);
-      viewButtons.forEach(button => {
-        const active = button.dataset.view === name;
-        button.setAttribute('aria-pressed', String(active));
-      });
-      frame.title = view.title;
-      if (!frame.src.endsWith(view.src)) frame.src = view.src;
-      if (!options.skipHash) history.replaceState(null, '', `#${name}`);
-    }
-
-    function setHelpOpen(open) {
-      helpOverlay.hidden = !open;
-      document.querySelector('[data-view="help"]')?.setAttribute('aria-pressed', String(open));
-      if (open && !helpSections.some(section => section.open)) {
-        helpSections[0].open = true;
-      }
-    }
-
-    helpSections.forEach(section => {
-      section.addEventListener('toggle', () => {
-        if (!section.open) return;
-        helpSections.forEach(other => {
-          if (other !== section) other.open = false;
-        });
-      });
-    });
-
-    viewButtons.forEach(button => {
-      button.addEventListener('click', () => selectView(button.dataset.view));
-    });
-
-    frame.addEventListener('load', broadcastServerConnectionState);
-
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') {
-        setHelpOpen(false);
-        viewButtons.forEach(button => {
-          button.setAttribute('aria-pressed', String(button.dataset.view === activeView));
-        });
-      }
-    });
-
-    const initialView = window.location.hash.slice(1);
-    selectView(initialView === 'help' || views[initialView] ? initialView : 'models', { skipHash: !initialView });
-    refreshServerConnectionState({ showConnecting: true });
-    startServerConnectionPolling();
-    window.addEventListener('online', () => refreshServerConnectionState({ showConnecting: true }));
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') refreshServerConnectionState({ showConnecting: false });
-    });
-  </script>
+  <script type="module" src="js/hbds_shell.js?v=panels-v1"></script>
 </body>
 </html>

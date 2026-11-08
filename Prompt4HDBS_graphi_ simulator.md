@@ -495,7 +495,7 @@ Deliverables:
 Validation:
 
 - Run every command listed in `Test_and_Integration.md`.
-- Report unavailable tools separately, such as missing Maven or Node.
+- Report unavailable tools separately, such as missing Python or Node.js.
 
 ### Phase 11: Documentation and Developer Workflow
 
@@ -570,13 +570,7 @@ Get-Content -Raw js\hbds_floating_panel.js | node --input-type=module --check
 git diff --check
 ```
 
-Run Maven tests through the repo-local wrapper:
-
-```powershell
-.\mvn.cmd test
-```
-
-Use `.\scripts\bootstrap_maven.ps1` or `.\scripts\bootstrap_ripgrep.ps1` if the repo-local Maven or ripgrep wrappers are missing. If a command still cannot run because a tool is missing, report that explicitly and do not claim it passed.
+Use `.\scripts\bootstrap_ripgrep.ps1` if the ripgrep wrapper reports that the local tool is missing. If a command cannot run because a tool is missing, report that explicitly and do not claim it passed.
 
 ## Reporting Format for Each Phase
 

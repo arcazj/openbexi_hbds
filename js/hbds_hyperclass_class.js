@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three';
-import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, fitTitleLabel, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=release-2.6.2';
+import { attachAttributesToMesh, createClassSurfaceMaterial, createIconTitleLabel, fitTitleLabel, MAX_LABEL_FONT_SIZE } from './hbds_class.js?v=release-2.7';
 
 const hyperclassLabels = [];
 let lastSizingCamera = null;

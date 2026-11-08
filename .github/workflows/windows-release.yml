@@ -1,0 +1,46 @@
+name: Windows release packages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - VERSION
+      - launcher.py
+      - server.py
+      - packaging/**
+      - scripts/build_windows.py
+      - scripts/windows_package_test.py
+      - .github/workflows/windows-release.yml
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: windows-latest
+          - arch: arm64
+            runner: windows-11-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.14'
+          architecture: ${{ matrix.arch }}
+      - name: Build installer and portable package
+        run: python -B scripts/build_windows.py --arch ${{ matrix.arch }}
+      - name: Check native install, offline browser, upgrade and uninstall
+        run: python -B scripts/windows_package_test.py --arch ${{ matrix.arch }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30

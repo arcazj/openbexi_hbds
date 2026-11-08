@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { findOrthogonalPath, routeSeparationPenalty } from './hbds_routing.js?v=release-2.6.2';
-import { fitTextSize, linkLabelSize } from './hbds_text_metrics.js?v=release-2.6.2';
+import { findOrthogonalPath, routeSeparationPenalty } from './hbds_routing.js?v=release-2.7';
+import { fitTextSize, linkLabelSize } from './hbds_text_metrics.js?v=release-2.7';
 
 const linkLabels = [];
 const activeLinks = [];

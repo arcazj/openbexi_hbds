@@ -19,7 +19,7 @@ Every roadmap item should be treated as incomplete until:
 * OpenAPI/Swagger is updated when API behavior changes
 * regression tests are added or extended for the risk area
 * `Test_and_Integration.md` is updated and followed
-* validators, browser regressions, smoke tests, and Maven checks pass where applicable
+* validators, helper tests, browser regressions, and server smoke tests pass where applicable
 * secrets are not written into model JSON, exports, drafts, logs, or diagnostics
 
 ## Do Not Regress
@@ -51,6 +51,19 @@ Use these models when a roadmap item touches rendering, layout, font, links, AI,
 * `models/satellite_world_simple_structure.json`
 
 ## Recently Fixed, Keep Covered
+
+### Version 2.7 Release Baseline
+
+Keep the compact legacy Query workspace, shared panel styles and desktop packages
+covered. Query must preserve unsaved edits, undo history and diagram pan/zoom;
+`CONT` must retain its legacy meaning. Windows x64 and ARM64 packages must work with
+bundled browser dependencies, save to a separate user workspace, reuse the current
+session, and preserve edited/deleted examples and backups through upgrade/uninstall.
+See [Windows package validation](Test_and_Integration.md#windows-v27-package-validation).
+
+Future distribution work: obtain a publisher signing certificate, perform dedicated
+Windows 10 desktop acceptance tests, and add automated release publication only after
+the native package checks pass. Signing and automatic updates are not part of v2.7.
 
 ### Prompt: Protect Immediate Text Rendering After Model Load
 
@@ -444,7 +457,7 @@ Suggested tests: shell Help browser regression and manual guide review.
 
 Priority: Medium
 
-Expected benefit: Users can diagnose server disconnected, AI backend disabled, provider HTTP errors, Maven/ripgrep wrappers, and browser module loading issues.
+Expected benefit: Users can diagnose server disconnected, AI backend disabled, provider HTTP errors, missing Python/Node.js/ripgrep tools, and browser module loading issues.
 
 Affected files/modules: `README.md`, `Roadmap.md`, new `Troubleshooting.md` or Help section
 

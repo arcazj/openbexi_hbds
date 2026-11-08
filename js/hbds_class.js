@@ -1,7 +1,7 @@
 /* ─────────────────────────────── Imports ─────────────────────────────── */
 import * as THREE from 'three';
-import { fitTextSize } from './hbds_text_metrics.js?v=release-2.6.2';
-import { getAttributeColumnLayout } from './hbds_layout.js?v=release-2.6.2';
+import { fitTextSize } from './hbds_text_metrics.js?v=release-2.7';
+import { getAttributeColumnLayout } from './hbds_layout.js?v=release-2.7';
 import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
 const DEFAULT_EMPTY_ICON_PATH = './icons/empty.png';

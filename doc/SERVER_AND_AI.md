@@ -2,6 +2,12 @@
 
 [Back to the README](../README.md)
 
+Windows v2.7 packages include their runtime and a launcher; see
+[Windows installation](WINDOWS_INSTALLATION.md). The desktop workspace is separate
+from application files at `%LOCALAPPDATA%\OpenBEXI\HBDS`. Source launches retain the
+repository folders by default. Set `HBDS_DATA_DIR` to use a separate writable workspace;
+the desktop launcher seeds it and starts the server automatically.
+
 ## Server modes and saving
 
 Run `python3 server.py --port 8010` from the project root, then open

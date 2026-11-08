@@ -952,8 +952,12 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="css/hbds_query_workspace.css?v=panels-v1">
+  <link rel="stylesheet" href="css/hbds_panels.css?v=panels-v1">
 </head>
 <body>
+  <main id="metamodel-workspace" hidden></main>
+  <div id="legacy-query-workspace" hidden>
   <header class="topbar">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true">F()</span>
@@ -1093,10 +1097,14 @@
   </div>
 
   <div class="toast" id="toast" role="status" hidden></div>
+  </div>
+  <script type="module" src="js/hbds_query_workspace.js?v=panels-v1"></script>
 
   <script>
     (function () {
       "use strict";
+      if (new URLSearchParams(location.search).get('legacy') !== '1') return;
+      document.getElementById('legacy-query-workspace').hidden = false;
 
       var STRUCTURAL_OPERATIONS = [
         { id: "classes", label: "List classes", description: "Returns every class definition, including its type, parent, and attribute count." },

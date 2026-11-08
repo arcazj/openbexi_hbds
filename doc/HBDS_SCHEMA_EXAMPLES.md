@@ -35,13 +35,13 @@ The complete [v1 structural example](../schemas/examples/v1_structural_model.jso
 - optional `$schema` selection;
 - fixture metadata;
 - one hyperclass and two regular classes;
-- visual `children`/`parentClassId` containment;
+- declared `children`/`parentClassId` containment;
 - object-form attributes;
 - positions and sizes;
 - class styling and font policy;
 - one class-to-class link with route and arrow styling.
 
-The containment fields have no instance or inheritance meaning. They only tell the current diagram how nodes are visually grouped.
+The containment fields declare nesting and do not instantiate objects or materialize inherited definitions. Without a semantic layer, Query uses them for legacy inclusion functors such as CONT and HCONT. Explicit semantic memberships take precedence when that layer is present.
 
 ## v2: Additive Semantic Layer
 
@@ -97,7 +97,7 @@ A v2-aware validation path must check that:
 - every `attributeId` resolves to an attribute definition appropriate to that object's class;
 - every `classLinkId` resolves to `hypergraph.link`;
 - every `sourceObjectId` and `targetObjectId` resolves to `hypergraph.object`;
-- every membership `classId` resolves to a regular class and `hyperclassId` resolves to a hyperclass;
+- every membership `classId` resolves to a class or nested hyperclass and `hyperclassId` resolves to its containing hyperclass;
 - every inheritance `subClassId` and `superClassId` resolves to a regular class;
 - all IDs follow the chosen document/repository uniqueness policy.
 

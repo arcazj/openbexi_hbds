@@ -1,0 +1,12 @@
+{
+  "three": {
+    "version": "0.176.0",
+    "url": "https://registry.npmjs.org/three/-/three-0.176.0.tgz",
+    "integrity": "sha512-PWRKYWQo23ojf9oZSlRGH8K09q7nRSWx6LY/HF/UUrMdYgN9i1e2OwJYHoQjwc6HF/4lvvYLC5YC1X8UJL2ZpA=="
+  },
+  "swagger-ui-dist": {
+    "version": "5.31.0",
+    "url": "https://registry.npmjs.org/swagger-ui-dist/-/swagger-ui-dist-5.31.0.tgz",
+    "integrity": "sha512-zSUTIck02fSga6rc0RZP3b7J7wgHXwLea8ZjgLA3Vgnb8QeOl3Wou2/j5QkzSGeoz6HusP/coYuJl33aQxQZpg=="
+  }
+}

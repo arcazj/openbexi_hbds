@@ -1110,7 +1110,7 @@ def run_link_separation_regression(base_url: str, debug_port: int) -> None:
     if(!document.getElementById('attribute-spacing-input')?.disabled) errors.push('spacing remained editable in readonly mode');
     hook.setEditMode('full');
   }
-  const fonts=await import('./js/hbds_model.js?v=release-2.6.2');
+  const fonts=await import('./js/hbds_model.js?v=release-2.7');
   if(fonts.getFontSettingsForTextType({},'attribute').size!==24 || fonts.getFontSettingsForTextType({},'class').size!==12) errors.push('attribute default was not doubled independently');
   return {errors, model:hook.getData()};
 })()
@@ -2252,7 +2252,7 @@ return (() => {
             timeout=10,
             interval=0.25,
         )
-        if not isinstance(version_state, dict) or version_state.get("text") != "v2.6.2" or version_state.get("visible") is not True:
+        if not isinstance(version_state, dict) or version_state.get("text") != "v2.7" or version_state.get("visible") is not True:
             raise BrowserRegressionError(f"Shell app version display invalid: {version_state}")
         help_state = wait_for(
             page,
@@ -3468,7 +3468,7 @@ def terminate_process(process: RegressionProcess | None, name: str, *, report_di
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--suite", choices=("all", "ui", "ai", "interaction", "satellite", "layout", "readability", "separation"), default="all")
+    parser.add_argument("--suite", choices=("all", "ui", "ai", "interaction", "satellite", "layout", "readability", "separation", "query"), default="all")
     parser.add_argument("--model", help="Run one model filename in the layout suite")
     args = parser.parse_args()
     if args.model and args.suite != "layout":
@@ -3487,6 +3487,11 @@ def main() -> int:
 
         browser_process = launch_browser(debug_port)
         wait_for_browser(debug_port, browser_process)
+        if args.suite in ("all", "ui", "query"):
+            from query_browser_regression import run_query_regression
+            run_query_regression(base_url, debug_port)
+            if args.suite == "query":
+                return 0
         if args.suite == "separation":
             run_link_separation_regression(base_url, debug_port)
             return 0

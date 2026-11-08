@@ -18,7 +18,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-browser", action="store_true", help="Run all checks except the real-browser suite")
     parser.add_argument("--browser-only", action="store_true", help="Run only the real-browser suite")
-    parser.add_argument("--browser-suite", choices=("all", "ui", "ai", "interaction", "satellite", "layout", "readability", "separation"), default="all")
+    parser.add_argument("--browser-suite", choices=("all", "ui", "ai", "interaction", "satellite", "layout", "readability", "separation", "query"), default="all")
     parser.add_argument("--browser-model", help="Run one model filename with --browser-suite layout")
     args = parser.parse_args()
     if args.browser_model and args.browser_suite != "layout":
@@ -30,16 +30,19 @@ def main() -> int:
         workspace = Path(temporary).resolve()
         if workspace.parent != Path(tempfile.gettempdir()).resolve():
             raise RuntimeError("Unexpected temporary workspace location")
-        for name in ("server.py", "hbds_ai_contract.py", "index.html", "index_models.html", "test_dynamic_hbds_layout.html", "functor_queries.html", "license.html"):
+        for name in ("VERSION", "launcher.py", "server.py", "hbds_ai_contract.py", "index.html", "index_models.html", "test_dynamic_hbds_layout.html", "functor_queries.html", "license.html"):
             shutil.copy2(ROOT / name, workspace / name)
         for name in ("scripts", "tools", "js", "css", "models", "test_models", "schemas", "icons", "images", "pictures"):
             shutil.copytree(ROOT / name, workspace / name, ignore=shutil.ignore_patterns(".backups", "__pycache__"))
+        (workspace / "openapi_docs").mkdir()
+        shutil.copy2(ROOT / "openapi_docs/hbds-openapi.json", workspace / "openapi_docs/hbds-openapi.json")
 
         def run(command, timeout=180):
             print("CHECK " + " ".join(command), flush=True)
             subprocess.run(command, cwd=workspace, env=env, timeout=timeout, check=True)
 
         if not args.browser_only:
+            run([sys.executable, "-B", "scripts/generate_functor_catalog.py", "--check"])
             for script in sorted((workspace / "scripts").glob("*_test.mjs")):
                 run(["node", str(script.relative_to(workspace))])
             for script in sorted((workspace / "js").glob("*.js")):

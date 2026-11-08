@@ -111,19 +111,21 @@ Core fields:
 | `attributes` | MAY | Attribute records or legacy strings. Defaults to an empty array. |
 | `position` | MAY | Numeric `x`, `y`, and optional `z` diagram coordinates. |
 | `size` | MAY | Positive `width` and `height`, with optional positive `depth`. |
-| `parentClassId` | MAY | Visual containment reference only. |
-| `children` | MAY | Visual containment references only. |
+| `parentClassId` | MAY | Declared parent reference for nesting; also used by the legacy Query inclusion adapter when no semantic layer is present. |
+| `children` | MAY | Declared child references; same Query mapping as `parentClassId`. |
 | `rendering` | MAY | Visual style and label settings. |
 | `visible` | MAY | Visibility toggle. |
 | `locked` | MAY | Layout/direct-manipulation lock request. |
 
-### 6.1 Visual Containment
+### 6.1 Declared Containment
 
-`parentClassId` and `children` express diagram containment. They MUST NOT be interpreted as inheritance, type membership, instantiation, prototype derivation, set inclusion, or a formal HBDS functor.
+`parentClassId` and `children` declare diagram nesting. The read-only legacy Query adapter maps these declarations to inclusion for `CONT`, `CONTN`, `HCONT`, `CONTOF`, and `HCONTOF` when the model has no semantic layer. This is an explicit compatibility mapping, not geometric inference. It does not instantiate objects, materialize inherited definitions, or derive prototypes.
 
 Every referenced parent or child MUST identify an item in the same `hypergraph.class` array. Producers SHOULD keep the two directions consistent: if A lists B in `children`, B should use A as `parentClassId`.
 
-Semantic class-to-hyperclass membership belongs to the additive v2 `hypergraph.membership` array. Semantic inheritance belongs to v2 `hypergraph.inheritance`.
+The Query adapter unions and deduplicates both directions, permits shared descendants, rejects inclusion cycles, and follows intermediate classes as well as hyperclasses for `CONTN` (chapter 10.4, p.11). Only classes are returned by `CONT`/`CONTN`; `HCONT` returns only directly included hyperclasses.
+
+When the additive semantic layer is present, its `hypergraph.membership` records are authoritative for Query. A member may be a class or nested hyperclass; its container must be a hyperclass. An empty or omitted membership array means no members, regardless of presentation nesting. Semantic inheritance belongs to `hypergraph.inheritance`. See the [Query mapping and legacy source review](HBDS_SUPPORT_MATRIX.md#legacy-source-review-and-containment-mapping).
 
 ### 6.2 Attributes
 
@@ -209,9 +211,9 @@ AI-response normalization accepts several aliases, but server saves and reposito
 
 ## 11. Excluded Semantics
 
-V1 does not define executable semantics for TADs, functors, embryos, prototypes, inheritance, network superposition/intersection/nesting, associative mechanisms, quantities and units, fuzzy membership, constraints, or inference.
+The v1 storage schema does not define a complete HBDS execution engine. The browser's separate legacy Query adapter implements a documented subset over recorded definitions and inclusion. Embryos, prototypes, inherited correspondence TADs, network superposition/intersection/nesting, associative mechanisms, quantities and units, fuzzy membership, constraints, and inference remain outside that subset.
 
-Those concepts are documented in the [support matrix](HBDS_SUPPORT_MATRIX.md). The additive [v2 schema](../schemas/hbds-semantic-profile-v2.schema.json) is explicitly enabled with `metadata.semanticVersion: 1` and defines optional records for objects, object links, class-to-hyperclass membership, and class inheritance. V2 does not change the v1 meaning of visual containment.
+Those concepts are documented in the [support matrix](HBDS_SUPPORT_MATRIX.md). The additive [v2 schema](../schemas/hbds-semantic-profile-v2.schema.json) is explicitly enabled with `metadata.semanticVersion: 1` and defines optional records for objects, object links, membership in hyperclasses, and class inheritance. V2 retains diagram nesting for presentation and supplies explicit membership records in place of the legacy Query inclusion mapping.
 
 ## 12. Validation
 

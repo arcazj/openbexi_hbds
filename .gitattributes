@@ -1,0 +1,2 @@
+# Preserve upstream browser dependencies exactly, including their whitespace.
+js/vendor/** -text -whitespace linguist-vendored

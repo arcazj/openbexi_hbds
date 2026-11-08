@@ -1,9 +1,9 @@
 ﻿import * as THREE from 'three';
-import { optimizeModelLayout } from './hbds_layout.js?v=release-2.6.2';
-import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=release-2.6.2';
-import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=release-2.6.2';
-import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=release-2.6.2';
-import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=release-2.6.2';
+import { optimizeModelLayout } from './hbds_layout.js?v=release-2.7';
+import { Loader as ClassLoader, createClass as createClassMesh, updateLabelFontSizes, clearLabelRegistry as clearClassLabelRegistry, createClassData, updateClassData, normalizeClassData, validateClassData } from './hbds_class.js?v=release-2.7';
+import { Loader as HyperClassLoader, createHyperClass, updateLabelFontSizes as updateHyperClassLabelFontSizes, clearHyperclassLabelRegistry, createHyperclassData, updateHyperclassData, normalizeHyperclassData, validateHyperclassData, addChildData, removeChildData } from './hbds_hyperclass_class.js?v=release-2.7';
+import { createLinkBetweenClass, updateLinkFontSizes, recalculateAllLinks, clearLinkRegistry, createLinkData, updateLinkData, normalizeLinkData, validateLinkData } from './hbds_class_link.js?v=release-2.7';
+import { createLinkBetweenHyperClass, updateLinkFontSizes as updateHyperClassLinkFontSizes } from './hbds_hyperclass_link.js?v=release-2.7';
 import { initModelOverview as initModelOverviewPanel, updateModelOverview as updateModelOverviewPanel } from './hbds_model_overview.js?v=overview-module-20260530a';
 import {
   normalizeSemanticModel,

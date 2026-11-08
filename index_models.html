@@ -4,7 +4,9 @@
     <title>HDBS Graphic Simulator</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="stylesheet" href="css/style.css?v=release-2.6.2">
+    <link rel="stylesheet" href="css/style.css?v=release-2.7">
+    <link rel="stylesheet" href="css/hbds_query_diagram.css?v=query-panel-v2">
+    <link rel="stylesheet" href="css/hbds_panels.css?v=panels-v1">
 </head>
 <body>
 <div id="container">
@@ -23,12 +25,11 @@
 </div>
 <div id="controls-panel">
     <div class="control-group">
-        <label for="model-select">Select HBDS Model</label>
+        <div class="section-title">Model</div>
+        <label for="model-select" class="panel-sr-only">Select HBDS Model</label>
         <select id="model-select">
             <option value="">Loading models...</option>
         </select>
-    </div>
-    <div class="control-group">
         <button id="fit-model-button">Fit Model</button>
     </div>
 </div>
@@ -36,8 +37,8 @@
 <script type="importmap">
     {
       "imports": {
-        "three":         "https://unpkg.com/three@0.176.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.176.0/examples/jsm/"
+        "three":         "./js/vendor/three/build/three.module.js",
+        "three/addons/": "./js/vendor/three/examples/jsm/"
       }
     }
 
@@ -45,16 +46,20 @@
 <script type="module">
     /* ---------- Imports ---------- */
     import * as THREE from 'three';
+    import { installQuerySource } from './js/hbds_query_bridge.js?v=panels-v1';
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {DragControls} from 'three/addons/controls/DragControls.js';
     import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-    import {updateLabelFontSizes} from './js/hbds_class.js?v=release-2.6.2';
-    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=release-2.6.2';
-    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=release-2.6.2';
-    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=release-2.6.2';
-    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=release-2.6.2';
+    import {updateLabelFontSizes} from './js/hbds_class.js?v=release-2.7';
+    import {updateLabelFontSizes as updateHyperClassLabelFontSizes} from './js/hbds_hyperclass_class.js?v=release-2.7';
+    import { updateLinkFontSizes, recalculateAllLinks } from './js/hbds_class_link.js?v=release-2.7';
+    import { updateLinkFontSizes as updateHyperClassLinkFontSizes } from './js/hbds_hyperclass_link.js?v=release-2.7';
+    import { getData, setData, loadAndRenderScene, saveScene, prepareSceneSnapshot, optimizeAndRefreshLayout, fitModelToCanvas, initModelOverview, updateModelOverview, setupCanvasPanControls, listAvailableModels, getSceneSettings, setSceneSettings, normalizeSceneSettings, getLayoutSettings, setLayoutSettings, getFontSettings, normalizeFontSettings, getFitQualityMetrics } from './js/hbds_model.js?v=release-2.7';
     import { checkServerConnection, clearServerDraft, configureClientDebug, getServerClientId, listServerDrafts, listServerModels, loadServerModel, publishServerDraft, recordClientUserAction, saveServerModel, subscribeServerEvents, trackClientFunction, isServerModelValue, modelFileNameFromValue, modelNameFromValue, serverModelValue } from './js/hbds_server_api.js?v=server-api-20260718a';
 
+    const queryPreview = new URLSearchParams(location.search).get('queryPreview') === '1';
+    let previewSource = null;
+    if (queryPreview) document.body.classList.add('hbds-query-diagram');
     if (new URLSearchParams(window.location.search).get('embeddedShell') === '1') {
         document.body.classList.add('embedded-shell-menu');
     }
@@ -241,10 +246,10 @@
         window.addEventListener('resize', onResize);
         window.addEventListener('blur', handleWindowBlur);
         document.addEventListener('visibilitychange', handleDocumentVisibilityChange);
-        installDebugUserActionTracking();
+        if (!queryPreview) installDebugUserActionTracking();
         installModelDebugHooks();
         syncDebugControls();
-        if (debugModeEnabled) await setDebugMode(true, { silent: true });
+        if (debugModeEnabled && !queryPreview) await setDebugMode(true, { silent: true });
         const viewToggle = document.getElementById('view-toggle');
         viewToggle.checked = false;
         viewToggle.addEventListener('change', toggleView);
@@ -265,6 +270,7 @@
 
         setupCanvasPanControls(getModelContext());
         initModelOverview(getModelContext());
+        if (queryPreview) return;
         await refreshServerConnection();
         await populateModelSelect();
         const initialModel = document.getElementById('model-select').value;
@@ -997,6 +1003,7 @@
         if (!renderer || !css2DRenderer || !scene || !camera) return;
         renderer.render(scene, camera);
         css2DRenderer.render(scene, camera);
+        window.HBDSQuerySource?.refreshHighlights();
         completedRenderCount += 1;
     }
 
@@ -1092,6 +1099,7 @@
                     position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
                     target: orbitControls ? { x: orbitControls.target.x, y: orbitControls.target.y, z: orbitControls.target.z } : null,
                     fov: camera.fov,
+                    zoom: camera.zoom,
                     aspect: camera.aspect
                 } : null,
                 layout: getLayoutSettings()
@@ -1489,7 +1497,21 @@
     }
 
     /* ---------- START ---------- */
-    init().catch(error => console.error(error));
+    init().then(() => installQuerySource({
+        read: () => queryPreview ? (previewSource && { ...previewSource, model: getData() }) : ({ model: getData(), name: document.getElementById('model-select')?.selectedOptions[0]?.textContent || 'Current model', scope: 'models', source: 'Current Models view' }),
+        showModel: queryPreview ? (model, source) => {
+            window.HBDSQuerySource.clearHighlights();
+            onResize();
+            setData(structuredClone(model), { context: getModelContext(), refresh: true, optimizeLayout: true });
+            previewSource = source;
+            updateCanvasModelTitle(source.name);
+            // A different model gets its own initial view. Locate only adds
+            // highlights and never changes this camera afterward.
+            fitModelToCanvas(getModelContext(), { padding: 1.08, updateOverview: true });
+            renderSceneNow();
+        } : null,
+        diagram: () => ({ THREE, diagramGroup, camera, controls: orbitControls, render: renderSceneNow, resize: onResize })
+    })).catch(error => console.error(error));
 </script>
 </body>
 </html>

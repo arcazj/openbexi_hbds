@@ -248,13 +248,13 @@
             {"$ref": "#/$defs/identifier"},
             {"type": "null"}
           ],
-          "description": "Visual containment only; not inheritance, membership, typing, or prototype derivation."
+          "description": "Declared parent for diagram nesting. The read-only legacy Query adapter uses declared containment when no semantic layer is present; explicit semantic memberships take precedence. Does not imply inheritance, instantiation, or prototype derivation."
         },
         "children": {
           "type": "array",
           "items": {"$ref": "#/$defs/identifier"},
           "uniqueItems": true,
-          "description": "Visual containment only."
+          "description": "Declared children for diagram nesting and legacy Query inclusion when no semantic layer is present; explicit semantic memberships take precedence."
         },
         "rendering": {"$ref": "#/$defs/classRendering"},
         "visible": {"type": "boolean"},

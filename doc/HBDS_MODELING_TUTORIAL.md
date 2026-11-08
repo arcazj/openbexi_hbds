@@ -61,7 +61,7 @@ Repository fixtures need non-empty `metadata.name`, `metadata.purpose`, and `met
 }
 ```
 
-The `children` array controls visual containment. It does not state that Parcel or Route inherits from, is an instance of, or is semantically a member of the domain.
+The `children` array declares nesting. In this legacy structural model, selecting CONT and the domain hyperclass returns Parcel and Route; CONTN also follows deeper nesting. This Query mapping does not instantiate objects or materialize inherited definitions.
 
 ## 4. Add Classes And Attributes
 
@@ -157,14 +157,14 @@ Verify initial labels, fit, pan, zoom, 2-D/3-D switching, overview navigation, a
 
 ## 7. Add Semantics Only When They Are Explicit
 
-Do not repurpose `parentClassId` for semantic membership or inheritance. To opt into the additive semantic contract, set `metadata.semanticVersion` to `1` and use the v2 arrays described in [Schema And Instance Examples](HBDS_SCHEMA_EXAMPLES.md):
+To move from the legacy containment mapping to explicit semantic records, set `metadata.semanticVersion` to `1` and use the v2 arrays described in [Schema And Instance Examples](HBDS_SCHEMA_EXAMPLES.md). In that layer, `parentClassId` remains a presentation field and does not supply membership or inheritance:
 
 - `hypergraph.object` for objects classified by `classId`, with values tied to class attributes by `attributeId`;
 - `hypergraph.objectLink` for object relationships conforming to a structural `classLinkId`;
-- `hypergraph.membership` for explicit class-to-hyperclass membership;
+- `hypergraph.membership` for explicit inclusion of classes or nested hyperclasses in hyperclasses;
 - `hypergraph.inheritance` for explicit subclass-to-superclass relationships.
 
-These semantic records are optional and do not change v1 link or visual-containment behavior. Validate every referenced class, hyperclass, class link, object, and attribute definition.
+These semantic records are optional and preserve diagram rendering. Once the layer is present, Query uses only its membership records for inclusion; an empty or omitted membership array means no members. Validate every referenced class, hyperclass, class link, object, and attribute definition.
 
 Use `metadata.semanticProfiles` only for value domains that the model actually annotates. The current optional validators cover units, temporal ranges, geospatial values, fuzzy degrees/shapes, and prototype references. Use the semantic workbench to run direct, inverse, or homogeneous object-link queries; use `executeFunctorQuery()` for composed queries.
 
@@ -173,6 +173,6 @@ Use `metadata.semanticProfiles` only for value domains that the model actually a
 - Does every structural element have a stable, model-prefixed ID?
 - Do all link and containment references resolve?
 - Are class/hyperclass/attribute names visible immediately after load?
-- Is visual containment being mistaken for semantics anywhere in the model or documentation?
+- Does the intended inclusion come from legacy parent/child declarations or explicit semantic memberships, and does Query use the intended source?
 - Does every `type` string have a documented meaning, or is it clearly descriptive only?
 - If a value includes a unit or fuzzy degree, is its provenance and interpretation documented outside v1?

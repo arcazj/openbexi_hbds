@@ -1,0 +1,122 @@
+/* Shared panel surfaces and controls. Diagram styling stays in its own files. */
+:root {
+  --hbds-panel-font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --hbds-panel-bg: #f3f6fa;
+  --hbds-panel-ink: #24354a;
+  --hbds-panel-border: #d8e2ef;
+  --hbds-panel-radius: 6px;
+  --hbds-panel-gap: 8px;
+  --hbds-panel-padding: 10px;
+  --hbds-section-blue: #eaf1fb;
+  --hbds-section-green: #eaf5ef;
+  --hbds-section-lavender: #f0edf9;
+  --hbds-section-peach: #fbefe5;
+  --hbds-section-gold: #faf4df;
+}
+
+:is(#dynamic-test-panel, #controls-panel, #shell-help, #metamodel-workspace) {
+  color: var(--hbds-panel-ink);
+  font: 12px/1.4 var(--hbds-panel-font);
+  padding: var(--hbds-panel-padding);
+  background: var(--hbds-panel-bg);
+}
+body.embedded-shell-menu #controls-panel { background: var(--hbds-panel-bg); }
+:is(#dynamic-test-panel, #controls-panel, #shell-help, #metamodel-workspace) :is(button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #3263ac;
+  outline-offset: 2px;
+}
+:is(#dynamic-test-panel, #controls-panel, #shell-help, #metamodel-workspace) :is(input[type="text"], input[type="password"], input[type="search"], input[type="number"], select, textarea) {
+  min-width: 0;
+  min-height: 30px;
+  border: 1px solid #cbd7e7;
+  border-radius: 4px;
+  padding: 5px 7px;
+  color: #293e56;
+  background: #fff;
+  font: 12px/1.4 var(--hbds-panel-font);
+}
+:is(#dynamic-test-panel, #controls-panel, #shell-help) button {
+  min-height: 28px;
+  border: 1px solid #cbd7e7;
+  border-radius: 4px;
+  padding: 4px 7px;
+  color: #31557d;
+  background: #f7faff;
+  font: 650 11px/1.4 var(--hbds-panel-font);
+  cursor: pointer;
+}
+:is(#dynamic-test-panel, #controls-panel, #shell-help) button:hover:enabled { background: var(--hbds-section-blue); border-color: #9cb9df; }
+#dynamic-test-panel button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+#dynamic-test-panel button.primary:hover:enabled { background: var(--accent-strong); }
+#dynamic-test-panel button.danger { background: #fff1f1; color: #963e3e; border-color: #e0b7b7; }
+:is(#dynamic-test-panel, #controls-panel) label { font-size: 11px; line-height: 15px; color: #435971; gap: 4px; }
+:is(#dynamic-test-panel, #controls-panel) .control-group {
+  --hbds-section-bg: var(--hbds-section-blue);
+  min-width: 0;
+  margin: 0 0 var(--hbds-panel-gap);
+  border: 1px solid var(--hbds-panel-border);
+  border-radius: var(--hbds-panel-radius);
+  padding: var(--hbds-panel-padding);
+  gap: 6px;
+  background: #fff;
+}
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="scenario-suite"],
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="ai-support"],
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="json"] { --hbds-section-bg: var(--hbds-section-lavender); }
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="semantic-layer"],
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="layout-view"],
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="share"] { --hbds-section-bg: var(--hbds-section-green); }
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="model-builder"],
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="session"] { --hbds-section-bg: var(--hbds-section-peach); }
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="settings"],
+:is(#dynamic-test-panel, #controls-panel) .control-group[data-section="validation"] { --hbds-section-bg: var(--hbds-section-gold); }
+#dynamic-test-panel details.control-group { padding: 0; }
+#dynamic-test-panel details.control-group > summary,
+:is(#dynamic-test-panel, #controls-panel) .control-group:not(details) > .section-title {
+  min-height: 30px;
+  padding: 6px 10px;
+  color: #263e5d;
+  font: 650 13px/18px var(--hbds-panel-font);
+  background: var(--hbds-section-bg);
+  box-shadow: none;
+}
+:is(#dynamic-test-panel, #controls-panel) .control-group:not(details) > .section-title { margin: -10px -10px 0; border-radius: 5px 5px 0 0; border-bottom: 1px solid var(--hbds-panel-border); }
+#dynamic-test-panel details.control-group > summary .section-title { color: inherit; font: inherit; }
+#dynamic-test-panel details.control-group > summary::after { background: transparent; color: #63748a; border-radius: 0; font-size: 16px; }
+#dynamic-test-panel details.control-group > .details-body { padding: 10px; gap: 6px; background: #fff; border-color: var(--hbds-panel-border); }
+#dynamic-test-panel :is(.panel-header, .stats-grid) { margin-bottom: 8px; gap: 6px; }
+#dynamic-test-panel .stat { min-height: 42px; padding: 5px; border-radius: 4px; }
+#dynamic-test-panel .stat-value { font-size: 17px; }
+#dynamic-test-panel .stat-label { font-size: 10px; }
+#dynamic-test-panel :is(.section-meta, .inline-hint) { font-size: 11px; line-height: 1.45; }
+#dynamic-test-panel :is(.action-grid, .settings-grid, .property-grid) { gap: 6px; }
+#dynamic-test-panel :is(.inline-field, .compact-field, .toggle-row) { min-height: 30px; padding: 4px 7px; gap: 6px; border-radius: 4px; background: #f7faff; }
+#dynamic-test-panel .inline-field :is(input, select) { min-height: 26px; }
+#dynamic-test-panel .inspector-section { border-color: var(--hbds-panel-border); border-radius: 4px; background: #fff; }
+#dynamic-test-panel .inspector-section > summary { padding: 6px 8px; background: var(--hbds-section-blue); color: #263e5d; }
+#dynamic-test-panel .inspector-section-body { padding: 8px; gap: 6px; }
+#dynamic-test-panel textarea { min-height: 140px; font-family: ui-monospace, Consolas, monospace; }
+#dynamic-test-panel textarea.compact-textarea { min-height: 72px; }
+#controls-panel { gap: 0; }
+#controls-panel .control-group:last-child { margin-bottom: 0; }
+
+#shell-help .help-card h2 { font-size: 16px; line-height: 24px; margin: 0 0 9px; }
+#shell-help .help-accordion { gap: var(--hbds-panel-gap); }
+#shell-help .help-section { --hbds-section-bg: var(--hbds-section-blue); border: 1px solid var(--hbds-panel-border); border-radius: var(--hbds-panel-radius); background: #fff; }
+#shell-help .help-section:nth-child(3n + 2) { --hbds-section-bg: var(--hbds-section-green); }
+#shell-help .help-section:nth-child(3n) { --hbds-section-bg: var(--hbds-section-lavender); }
+#shell-help .help-section summary { padding: 6px 10px; font: 650 13px/18px var(--hbds-panel-font); color: #263e5d; background: var(--hbds-section-bg); }
+#shell-help .help-section[open] summary { border-color: var(--hbds-panel-border); }
+#shell-help .help-section summary::after { color: #63748a; font-size: 16px; }
+#shell-help .help-section-body { padding: 10px; gap: 7px; }
+#shell-help .help-section-body ul { gap: 6px; }
+#shell-help .help-section-body :is(p, li) { font-size: 12px; line-height: 1.5; }
+#shell-help .help-section-body h3 { margin: 3px 0 0; font-size: 12px; }
+
+.mq-card { border-color: var(--hbds-panel-border); border-radius: var(--hbds-panel-radius); }
+.mq-builder > .mq-section-heading { background: var(--hbds-section-blue); }
+.mq-results > .mq-section-heading { background: var(--hbds-section-green); }
+.mq-catalog > summary { background: var(--hbds-section-lavender); }
+#metamodel-workspace .mq-combo input { padding-right: 23px; }
+#metamodel-workspace .mq-pagination select { min-height: 27px; padding: 3px 4px; font-size: 10px; }
+.panel-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
